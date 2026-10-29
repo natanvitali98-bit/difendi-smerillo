@@ -4559,7 +4559,7 @@ function fineTurno(){
   if (online() && fineTurnoOnline()) return;
   uccisiT = 0; V = clona(S); sel = null; storia = []; coda = faseNemici(S); ev = null; evT = 0; prossimo(); render();
 }
-function tempoTurno(){ if (RUN || online() || MI < 2 || M.evento || !S) return 0; const base = 20 + 5*S.dif.length; return Math.round(S.difficile ? base*.75 : base); }
+function tempoTurno(){ if (RUN || online() || MI < 2 || M.evento || !S) return 0; const base = 10 + 4*S.dif.length; return Math.round(S.difficile ? base*.75 : base); }
 function nuovoTempo(){ tempoMax = tempoTurno(); tempoT = tempoMax; tempoUlt = -1; const f = el('tbFine'); if (f){ f.classList.toggle('tempo', !!tempoMax); f.classList.remove('poco'); f.style.setProperty('--t', 1); f.dataset.s = tempoMax ? tempoMax + ' s' : ''; } }
 function aggiornaTempo(dt){ const f = el('tbFine'); if (!f || !tempoMax){ if (f) f.classList.remove('tempo', 'poco'); return; }
   const corre = S && !S.esito && !ev && !V && (!ovAperto || inBottega) && !document.hidden && mioTurno();
