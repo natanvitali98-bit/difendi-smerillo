@@ -1062,6 +1062,7 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .cr-arena.entra .logo{animation:pgLogo .6s cubic-bezier(.2,.9,.3,1.3) both}
 @keyframes pgLogo{from{opacity:0;transform:translateY(-26px) scale(.85) rotate(-3deg)}to{opacity:1;transform:none}}
 .cr-top{animation:crTop .45s ease-out both}
+.cr.quieto .cr-top,.cr.quieto .cr-nav,.cr.quieto .cr-pg > *,.cr.quieto .logo{animation:none!important}
 .cr-nav{animation:crNav .45s cubic-bezier(.2,.9,.3,1.2) both}
 @keyframes crTop{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
 @keyframes crNav{from{transform:translateY(100%)}to{transform:none}}
@@ -3354,6 +3355,7 @@ function transizione(ev, fn){
     try { fn(); } catch(e){ console.error(e); }
     requestAnimationFrame(() => { v.animate([{clipPath:`circle(${r}px at 50% 50%)`}, {clipPath:'circle(0px at 50% 50%)'}], {duration:320, easing:'cubic-bezier(.5,0,.3,1)', fill:'forwards'}).onfinish = () => v.remove(); }); };
 }
+let RIENTRO = null; // dopo uno scrigno si torna dove eri, senza rifare le animazioni
 function mostraMenu(pannello){
   const t = $('#title'), c = $('#titleC'); t.classList.toggle('cr-on', !pannello || pannello === 'home'); try { SUONI.musica('menu'); } catch(e){} S = null; MOD = false;
   $('#cards').hidden = true; $('#end').hidden = true; $('#pausa').hidden = true; $('#menu').hidden = true;
@@ -3424,23 +3426,24 @@ function mostraMenu(pannello){
       const segna = k => { tabs.forEach(b => b.classList.toggle('on', b.dataset.tab === k)); const b = tabs.find(x => x.dataset.tab === k); if (!b) return;
         ind.style.width = b.offsetWidth + 'px'; ind.style.transform = `translateX(${b.offsetLeft}px)`; ind.classList.toggle('oro', k === 'gioca');
         const i = pgs.findIndex(s => s.dataset.tab === k), cv = document.getElementById('titleCv'); if (cv) cv.style.transform = innerWidth >= 900 && innerWidth > innerHeight ? `translateX(${(2 - i)*6}px) scale(1.02)` : `translateX(${(2 - i)*8}px) scale(1.12)`; // spostamento piccolo e zoom abbastanza grande: i bordi della mappa non si vedono mai
-        if (k !== ultima){ ultima = k; const pg = pgs[i]; if (pg){ pg.classList.remove('entra'); void pg.offsetWidth; [...pg.children].forEach((ch, j) => ch.style.setProperty('--i', j)); pg.classList.add('entra'); }
+        if (k !== ultima){ ultima = k; const pg = pgs[i]; if (pg && !quieto){ pg.classList.remove('entra'); void pg.offsetWidth; [...pg.children].forEach((ch, j) => ch.style.setProperty('--i', j)); pg.classList.add('entra'); }
           b.classList.remove('salta'); void b.offsetWidth; b.classList.add('salta'); } };
       tabs.forEach(b => b.onclick = () => { SUONI.suona && SUONI.suona('tocco'); vai(b.dataset.tab, true); });
       let tmr = 0; pag.addEventListener('scroll', () => { clearTimeout(tmr); tmr = setTimeout(() => { const i = Math.round(pag.scrollLeft / Math.max(1, pag.clientWidth)); const k = pgs[i] && pgs[i].dataset.tab; if (k){ segna(k); try { sessionStorage.setItem('ds-tab', k); } catch(e){} } }, 80); }, {passive:true});
-      let k0 = 'gioca'; try { k0 = sessionStorage.getItem('ds-tab') || 'gioca'; } catch(e){} requestAnimationFrame(() => vai(k0, false));
+      const R0 = RIENTRO; RIENTRO = null; let quieto = !!R0; if (R0){ const cr = c.querySelector('.cr'); if (cr) cr.classList.add('quieto'); }
+      let k0 = 'gioca'; try { k0 = sessionStorage.getItem('ds-tab') || 'gioca'; } catch(e){} requestAnimationFrame(() => { vai(R0 ? R0.tab : k0, false); if (R0){ const pg = pgs.find(s => s.dataset.tab === R0.tab); if (pg) pg.scrollTop = R0.top; requestAnimationFrame(() => { if (pg) pg.scrollTop = R0.top; quieto = false; setTimeout(() => { const cr = c.querySelector('.cr'); if (cr) cr.classList.remove('quieto'); }, 300); }); } });
       c.querySelectorAll('.cr-dif').forEach(b => { const im = TB.icona(b.dataset.dif, 3); if (b.classList.contains('no')) im.style.filter = 'brightness(0) opacity(.35)'; b.querySelector('.cr-di').append(im); b.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('collezione'); }); });
       { const W = c.querySelector('#prW'), go = c.querySelector('#prGira'), es = c.querySelector('#prEs');
         if (go) go.onclick = () => { const r = TB.giraRuota(); if (!r) return; go.disabled = true; go.textContent = '…'; const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
           const giri = 5*360 + (360 - (r.i + .5)*360/r.n) + (Math.random() - .5)*(300/r.n); try { SUONI.suona('carica1'); } catch(e){}
           W.style.transition = lento ? 'none' : 'transform 3.6s cubic-bezier(.12,.75,.12,1)'; requestAnimationFrame(() => { W.style.transform = `rotate(${giri}deg)`; });
           setTimeout(() => { es.innerHTML = r.msg; go.textContent = 'Domani'; c.querySelector('#prRuota').classList.remove('pronta'); try { SUONI.suona(r.x.k === 'fort' || r.x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(r.x.k === 'fort' || r.x.v === 'oro' ? 160 : 70); } catch(e){}
-            if (r.x.k === 'scr') setTimeout(() => TB.premiaSopra(r.x.v), 900); else setTimeout(() => { if (!t.hidden && document.body.contains(go)) mostraMenu('home'); }, 2200); }, lento ? 300 : 3700); };
+            if (r.x.k === 'scr') setTimeout(() => { const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 900); else setTimeout(() => { if (!t.hidden && document.body.contains(go)){ const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; mostraMenu('home'); } }, 2200); }, lento ? 300 : 3700); };
         const riga = (box, x) => { const d = document.createElement('div'); d.className = 'pr-q' + (x.stato === 'preso' ? ' ok' : '');
           d.innerHTML = `<span class="pr-qt">${x.stato === 'preso' ? TB.ico('ok', 2) : ''}${x.t}${x.max ? ' <small>' + '★'.repeat(x.stelle) + '☆'.repeat(x.max - x.stelle) + '</small>' : ''}</span><span class="pr-qr"><span class="pr-bar"><i style="width:${Math.min(100, x.v/x.n*100)}%"></i><em>${Math.min(x.v, x.n)}/${x.n}</em></span></span>`;
           const b = document.createElement('button'); b.type = 'button'; b.className = 'pr-rit ' + x.premio; b.disabled = x.stato !== 'pronto';
           b.innerHTML = x.stato === 'preso' ? '✓' : x.stato === 'pronto' ? 'Ritira!' : TB.SCRIGNI[x.premio].nome.replace('Scrigno ', '');
-          if (x.stato === 'pronto') b.onclick = () => TB.ritiraInc(x.k, x.id); d.querySelector('.pr-qr').append(b); box.append(d); };
+          if (x.stato === 'pronto') b.onclick = () => { const pg = b.closest('.cr-pg'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.ritiraInc(x.k, x.id); }; d.querySelector('.pr-qr').append(b); box.append(d); };
         const RI = TB.righeInc(), bg = c.querySelector('#prIncG'), bi = c.querySelector('#prIncI');
         if (bg) RI.oggi.forEach(x => riga(bg, x)); if (bi) RI.imp.forEach(x => riga(bi, x)); }
       { const sn = c.querySelector('#crSnd'); if (sn) sn.onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('menu'); sn.innerHTML = TB.ico(SUONI.muto ? 'muto' : 'suono', 2); }; }
