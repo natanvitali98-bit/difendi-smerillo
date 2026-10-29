@@ -208,6 +208,11 @@ details.regole{border:2px solid var(--line,#cfd5cb);border-radius:8px;padding:6p
 #tbBar .big{min-height:54px;font-size:17px;padding:8px}
 #tbBar .big:disabled{opacity:.45;cursor:default}
 #tbFine{min-height:54px}
+#tbFine.tempo{background:linear-gradient(90deg,#ffd03a calc(var(--t,1)*100%),#b8932a calc(var(--t,1)*100%))!important}
+#tbFine.tempo{position:relative;overflow:visible}
+#tbFine.tempo::after{content:attr(data-s);position:absolute;top:-13px;right:-4px;font:400 15px/1 var(--f-big);background:#141433;color:#fff;border:2px solid #fff;border-radius:999px;padding:3px 8px;min-width:2.4em;text-align:center;pointer-events:none}
+#tbFine.tempo.poco::after{background:#e04830}
+#tbFine.tempo.poco{background:linear-gradient(90deg,#ff7a5a calc(var(--t,1)*100%),#9c2f1e calc(var(--t,1)*100%))!important;animation:tbpulse .5s ease-in-out infinite}
 #tbFine.pronto{box-shadow:0 0 0 3px var(--gold),inset 0 -3px 0 rgba(0,0,0,.18)}
 #tbFine.guida{animation:tbpulse 1s ease-in-out infinite;box-shadow:0 0 0 4px var(--gold)}
 @keyframes tbpulse{50%{transform:scale(1.04)}}
@@ -3911,7 +3916,7 @@ const MISSIONI = [
   consiglio:'Le catapulte tirano da lontano: vai a prenderle con i Lancieri. Non lasciare libera la Salita verso la Chiesa.',
   start:[['lanciere','piazzale'],['arciere','chiesa'],['lanciere','cadutiM'],['carpentiere','lupia1'],['arciere','cortS']],
   arrivi:{0:[['fante','fessa'], ['fante','lupia2']], 1:[['fante','monte2']], 2:[['balestriere','fessa']], 3:[['cavaliere','lupia2']], 4:[['catapulta','monte2']], 5:[['corazzato','fessa']], 6:[['cavaliere','monte2'], ['corvo','lupia2']], 7:[['catapulta','lupia2']], 8:[['balestriere','fessa']], 9:[['cavaliere','fessa']]}},
- {...MAPPA_CENTRO, extra:[], num:8, titolo:'Il Municipio sotto assedio', livello:'Difficile', vite:6, legname:4,
+ {...MAPPA_CENTRO, extra:[], num:8, titolo:'Il Municipio sotto assedio', livello:'Difficile', vite:5, legname:4,
   intro:'Il Cavaliere Nero vuole il <b>Municipio</b>. I nemici entrano da <b>Via Cortellucci</b>, da <b>Via dei Caduti</b> e dal sud, tutti insieme. Arrivano anche i <b>Guastatori</b>: con un barile distruggono una barricata in un colpo.',
   consiglio:'Tutti passano da Via Roma: tienila, ma attento alle catapulte che colpiscono chi sta vicino.',
   start:[['lanciere','roma2'],['lanciere','spietro'],['arciere','piazza'],['carpentiere','roma3'],['arciere','roma1']],
@@ -3920,14 +3925,14 @@ const MISSIONI = [
   intro:'L’ultimo assalto: <b>due Cavalieri Neri</b>, catapulte, soldati e le <b>Spie</b>, che si nascondono: le colpisci solo con un tuo difensore accanto. Salgono dalla <b>valle</b> e da <b>Via dei Caduti</b>. Difendi <b>Piazza Indipendenza</b>.',
   consiglio:'Chiudi subito Via Marconi. Usa l’olio della Porta quando arrivano in tanti. Colpisci i Cavalieri Neri tutti insieme.',
   arrivi:{0:[['fante','caduti1'], ['fante','sudO']], 1:[['balestriere','caduti1']], 2:[['cavaliere','sudO'], ['spia','caduti1']], 3:[['catapulta','sudO']], 4:[['corazzato','caduti1']], 5:[['corvo','sudO']], 6:[['nero','sudO']], 7:[['spia','sudO']], 8:[['balestriere','sudO']], 9:[['nero','caduti1']]}},
- {...MAPPA_SM, extra:[], num:10, titolo:'San Martino al Faggio', livello:'Difficile', vite:8,
+ {...MAPPA_SM, extra:[], num:10, titolo:'San Martino al Faggio', livello:'Difficile', vite:7,
   arrivi:{0:[['fante','est']], 1:[['fante','campi2']], 2:[['corvo','est']], 3:[['balestriere','est']], 4:[['cavaliere','campi2']], 5:[['corazzato','est']], 6:[['catapulta','est']], 7:[['fante','campi2']], 8:[['cavaliere','est']], 9:[['nero','est']]}},
  {...MAPPA_SM, extra:[], num:11, titolo:'Dalla faggeta', livello:'Difficile', vite:6, legname:5,
   intro:'Ora i nemici arrivano anche dalla <b>faggeta</b>, per il sentiero nel bosco dietro la chiesetta, e dalla <b>Provinciale in alto</b>. Queste due strade sono corte: tieni qualcuno vicino alla <b>chiesetta</b>.',
   consiglio:'Dal bosco e dalla Provinciale in alto arrivano in pochi passi. Il sentiero nel bosco è ripido: i Lancieri possono buttarli giù.',
   start:[['lanciere','salita'],['lanciere','parch'],['arciere','chiesa'],['arciere','vic2'],['arciere','font'],['carpentiere','sotto']],
   arrivi:{0:[['fante','est']], 1:[['fante','bosco2']], 2:[['balestriere','campi2']], 3:[['cavaliere','est']], 4:[['corvo','bosco2'], ['fante','campi2']], 5:[['fante','ovest2']], 6:[['catapulta','campi2']], 7:[['cavaliere','bosco2']], 8:[['guastatore','est']], 9:[['spia','ovest2'], ['fante','ovest2']], 10:[['nero','est']]}},
- {...MAPPA_SM, extra:[], num:12, titolo:'La notte di San Martino', livello:'Difficilissima', vite:7, legname:5,
+ {...MAPPA_SM, extra:[], num:12, titolo:'La notte di San Martino', livello:'Difficilissima', vite:6, legname:5,
   intro:'L’ultimo assalto alla frazione: il <b>Cavaliere Nero</b> e il <b>Gatto Mammone</b>, catapulte e soldati da <b>tutte e quattro le strade</b>. Difendi la <b>chiesetta di San Vincenzo Ferrer</b>.',
   consiglio:'Il Gatto Mammone salta un turno sì e uno no: colpiscilo nei turni in cui resta a terra. Suona le campane quando arrivano in tanti.',
   start:[['lanciere','salita'],['lanciere','parch'],['arciere','chiesa'],['arciere','vic2'],['arciere','font'],['carpentiere','sotto']],
@@ -3939,7 +3944,7 @@ const MISSIONI = [
   consiglio:'La strada in alto è ripida: i Lancieri possono buttare giù i nemici. Il casale è lontano: hai tempo per prepararti.',
   start:[['lanciere','J'],['lanciere','piazza'],['arciere','chiesa'],['arciere','tor1'],['arciere','b1'],['carpentiere','curva']],
   arrivi:{0:[['fante','basso']], 1:[['fante','nordovest']], 2:[['balestriere','casale']], 3:[['cavaliere','basso']], 4:[['corvo','nordovest'], ['fante','vigna']], 6:[['catapulta','casale']], 7:[['cavaliere','nordovest']], 9:[['spia','casale'], ['fante','vigna']], 10:[['nero','basso']]}},
- {...MAPPA_CE, extra:[], num:15, titolo:'La notte di San Nicola', livello:'Difficilissima', vite:7, legname:5,
+ {...MAPPA_CE, extra:[], num:15, titolo:'La notte di San Nicola', livello:'Difficilissima', vite:6, legname:5,
   intro:'È la notte prima della <b>festa di San Nicola</b>, che a Ceresola si fa la seconda domenica di settembre. Il <b>Cavaliere Nero</b> e il <b>Gatto Mammone</b> arrivano di notte, da <b>tutte le strade</b>, anche dai <b>tornanti nel bosco</b>. Difendi la <b>Chiesa di San Nicola</b>.',
   consiglio:'Il Gatto Mammone salta un turno sì e uno no: colpiscilo quando resta a terra. Suona le campane di San Nicola quando arrivano in tanti.',
   start:[['lanciere','J'],['lanciere','piazza'],['arciere','chiesa'],['arciere','ovest'],['arciere','b1'],['carpentiere','tor1']],
@@ -4293,12 +4298,12 @@ function variante(S){
   // si cambia solo con nemici che questa missione ha già: niente sorprese mai spiegate, niente missioni allungate
   const noti = [...new Set(S.coda.map(c => c.tipo))].filter(t => t !== 'nero' && t !== 'mammone' && t !== 'fante'), ultimo = Math.max(1, ...S.coda.map(c => c.turno));
   for (const c of S.coda){ if (c.tipo === 'nero' || c.tipo === 'mammone') continue;
-    if (R() < .2 + .1*liv) c.adatta = true; // il comandante sceglie l'ingresso meno difeso
+    if (R() < .3 + .12*liv) c.adatta = true; // il comandante sceglie l'ingresso meno difeso
     if (ingressi.length > 1 && R() < .55){ const ok = ingressi.filter(n => ingressiPer(c.tipo).includes(n)); if (ok.length) c.nodo = ok[Math.floor(R()*ok.length)]; }
     if (c.turno > 1) c.turno = Math.min(ultimo, Math.max(1, c.turno + Math.floor(R()*3) - 1));
     if (c.tipo === 'fante' && noti.length && R() < .07*liv) c.tipo = noti[Math.floor(R()*noti.length)]; }
   // dalla missione 3 in poi, uno o due nemici in più, sempre di tipi già visti
-  const extra = Math.min(2, Math.floor(liv/2)), tipiExtra = ['fante', ...noti.filter(t => t !== 'catapulta')];
+  const extra = [0, 0, 1, 2, 2, 3][liv] || 0, tipiExtra = ['fante', ...noti.filter(t => t !== 'catapulta')];
   for (let k = 0; k < extra && ingressi.length; k++) S.coda.push({tipo: tipiExtra[Math.floor(R()*tipiExtra.length)], nodo: ingressi[Math.floor(R()*ingressi.length)], turno: 2 + Math.floor(R()*Math.max(1, ultimo - 2)), bonus:0});
 }
 function nuovo(){
@@ -4308,8 +4313,9 @@ function nuovo(){
   for (const [t, lista] of Object.entries(M.arrivi)) for (const [tipo, nodo, bonus] of lista) S.coda.push({tipo, nodo, turno:+t, bonus:bonus || 0});
   if (!RUN) for (const [t, tipo, nodo] of (M.extra || [])) S.coda.push({tipo, nodo, turno:t, bonus:0});
   if (!RUN && MI > 0 && !M.fisso) variante(S);
+  if (!RUN && MI >= 2) S.porta = S.portaMax = Math.max(4, M.vite - 1); // dalla missione 3 si fa sul serio
   if (DIFFICILE && !RUN && !SFIDA && !M.evento){ // Difficile: meno vite, due nemici in più, e tutti scelgono l'ingresso meno difeso
-    S.porta = S.portaMax = Math.max(3, M.vite - 2); S.difficile = true;
+    S.porta = S.portaMax = Math.max(3, M.vite - 3); S.difficile = true;
     const tipi = [...new Set(S.coda.map(c => c.tipo))].filter(t => t !== 'nero' && t !== 'mammone' && t !== 'catapulta'), ult = Math.max(2, ...S.coda.map(c => c.turno)), ing = [...ARRIVO];
     for (let k = 0; k < 2 && tipi.length && ing.length; k++) S.coda.push({tipo: tipi[(k*3 + MI) % tipi.length], nodo: ing[(k + MI) % ing.length], turno: 2 + ((k*5 + MI*3) % Math.max(1, ult - 1)), bonus:0});
     for (const c of S.coda) c.adatta = true; }
@@ -4450,6 +4456,7 @@ function attacca(S, d, x, evs){
 }
 
 /* ---------- stato dell'interfaccia ---------- */
+let tempoT = 0, tempoMax = 0, tempoUlt = -1, inBottega = false; // il tempo per pensare, dalla missione 3
 const POS = new Map(), COLP = new Map(); let FANT = [], ATT = null, uccisiT = 0, ritardoFx = 0; const adesso = () => performance.now()/1000; // animazioni dei colpi e dei passi del giocatore
 let ultimaScelta = '', scalaU = 1, scossa = 0, modoC = false, modoS = false, S = null, V = null, storia = [], sel = null, prev = [], coda = [], ev = null, evT = 0, fx = [], attivo = false, ovAperto = false;
 let SW = 1, SH = 1, dpr = 1, sc = 1, ox = 0, oy = 0, camX = 0, camY = 0, fitS = 1;
@@ -4549,9 +4556,16 @@ function fineTurno(){
   if (online() && fineTurnoOnline()) return;
   uccisiT = 0; V = clona(S); sel = null; storia = []; coda = faseNemici(S); ev = null; evT = 0; prossimo(); render();
 }
+function tempoTurno(){ if (RUN || online() || MI < 2 || M.evento || !S) return 0; const base = 20 + 5*S.dif.length; return Math.round(S.difficile ? base*.75 : base); }
+function nuovoTempo(){ tempoMax = tempoTurno(); tempoT = tempoMax; tempoUlt = -1; const f = el('tbFine'); if (f){ f.classList.toggle('tempo', !!tempoMax); f.classList.remove('poco'); f.style.setProperty('--t', 1); f.dataset.s = tempoMax ? tempoMax + ' s' : ''; } }
+function aggiornaTempo(dt){ const f = el('tbFine'); if (!f || !tempoMax){ if (f) f.classList.remove('tempo', 'poco'); return; }
+  const corre = S && !S.esito && !ev && !V && (!ovAperto || inBottega) && !document.hidden && mioTurno();
+  if (corre){ tempoT = Math.max(0, tempoT - dt); const s = Math.ceil(tempoT); if (s !== tempoUlt){ tempoUlt = s; if (s <= 5 && s > 0) SUONI.suona('tocco'); }
+    if (tempoT <= 0){ suggerisci('Tempo scaduto! Tocca ai nemici.'); if (inBottega){ inBottega = false; chiudiOv(); } fineTurno(); } }
+  const vis = !(S && S.esito) && !V; f.classList.toggle('tempo', vis); f.classList.toggle('poco', vis && tempoT <= 5); f.style.setProperty('--t', tempoT/tempoMax); const s = Math.ceil(tempoT) + ' s'; if (f.dataset.s !== s) f.dataset.s = s; }
 function prossimo(){
   ev = coda.shift() || null; evT = 0;
-  if (!ev){ V = null; aggiornaAnteprima(); render(); if (S.esito) setTimeout(fine, 500); }
+  if (!ev){ V = null; nuovoTempo(); aggiornaAnteprima(); render(); if (S.esito) setTimeout(fine, 500); }
 }
 const DUR = {masso:.45, boom:.3, passo:.34, colpo:.34, cade:.32, cura:.25, arriva:.3, aspetta:.12, bloccato:.3};
 function applica(e){ // aggiorna la copia che si vede durante l'animazione
@@ -4822,7 +4836,7 @@ function overlay(html){ document.querySelectorAll('.fx-ban').forEach(b => b.remo
       if (fin.length > 2 && d.scrollHeight > o.clientHeight){ // tanti bottoni e finestra lunga: in basso fisso resta solo il principale
         const f = document.createElement('div'); f.className = 'dlgfoot'; fin.slice(1).forEach(b => f.append(b)); const g = document.createElement('div'); g.className = 'dlgfoot fisso'; g.append(fin[0]); d.append(f, g); }
       else if (fin.length){ const f = document.createElement('div'); f.className = 'dlgfoot' + (fin.length <= 2 ? ' fisso' : ''); fin.forEach(b => f.append(b)); d.append(f); } } }); ovAperto = true; o.scrollTop = 0; requestAnimationFrame(() => requestAnimationFrame(() => { const d = o.querySelector('.dlg'); if (d) d.classList.toggle('lungo', d.offsetHeight > o.clientHeight - 10); })); return o; }
-function chiudiOv(){ el('tbOv').hidden = true; ovAperto = false; render(); }
+function chiudiOv(){ el('tbOv').hidden = true; ovAperto = false; inBottega = false; render(); }
 const sbloccata = i => i === 0 || !!leggiRec()['m' + i];
 const icona = (t, px = 3) => { const im = IMG[t], c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*px + 'px'; c.style.imageRendering = 'pixelated'; return c; };
 function carta(t, extra = ''){ const r = RARITA[rarDi(t)], d = document.createElement('div'); d.className = 'tbcarta'; d.style.setProperty('--rc', r.col);
@@ -5102,10 +5116,10 @@ function intro(){
     <div class="mis-top"><span class="mis-n">${SFIDA ? ico('calendario') + ' Sfida del giorno' : M.evento ? '🌰 Evento a tempo' : SFIDA_AMICO ? '⚔️ Sfida di ' + escH(SFIDA_AMICO.n || 'un amico') + ': ' + (+SFIDA_AMICO.p || 0) + ' punti' : 'Missione ' + M.num + ' di ' + MISSIONI.length}</span><span class="mis-d" aria-label="Difficoltà: ${M.livello}">${pallini}<em>${M.livello.split(':')[0]}</em></span></div>
     <h2 class="mis-t">${M.titolo}</h2>
     ${M.dlg && !RUN ? `<div class="mis-dlg"><span class="dlg-ic" id="dlgIc"></span><span class="dlg-tx"><b>${M.dlg[1]}</b>${M.dlg[2]}</span></div>` : ''}
-    <div class="mis-goal"><span class="mg-ic">${ico('stella', 3)}</span><span>Difendi <b>${M.metaNome}</b><small>${ico('cuore')} <span id="misVite">${S.portaMax}</span> vite${MI > 0 ? (SFIDA ? ' · oggi la stessa partita per tutti' : ' · nemici diversi ogni volta') : ''}</small></span></div>
+    <div class="mis-goal"><span class="mg-ic">${ico('stella', 3)}</span><span>Difendi <b>${M.metaNome}</b><small>${ico('cuore')} <span id="misVite">${S.portaMax}</span> vite<span id="misTempo">${tempoTurno() ? ' · ' + tempoTurno() + ' secondi per turno' : ''}</span>${MI > 0 ? (SFIDA ? ' · oggi la stessa partita per tutti' : ' · nemici diversi ogni volta') : ''}</small></span></div>
     <p class="mis-i">${M.intro}</p>
     ${RUN ? '' : `<div class="mis-obi"><span class="mis-h">Stelle</span>${obiettivi().map(o => `<span class="mo">${ico('stellaV')} ${o.t}</span>`).join('')}</div>`}
-    ${RUN || SFIDA || M.evento || MI === 0 ? '' : `<div class="mis-diff" role="group" aria-label="Difficoltà"><button type="button" data-d="0" aria-pressed="${!DIFFICILE}">Normale</button><button type="button" data-d="1" aria-pressed="${DIFFICILE}">Difficile <small>${Math.max(3, M.vite - 2)} vite · più nemici</small></button></div>`}
+    ${RUN || SFIDA || M.evento || MI === 0 ? '' : `<div class="mis-diff" role="group" aria-label="Difficoltà"><button type="button" data-d="0" aria-pressed="${!DIFFICILE}">Normale</button><button type="button" data-d="1" aria-pressed="${DIFFICILE}">Difficile <small>${Math.max(3, M.vite - 3)} vite · più nemici · meno tempo</small></button></div>`}
     <div class="mis-row"><span class="mis-h">Arrivano</span><div class="mis-icons" id="misNem"></div></div>
     <div class="mis-row"><span class="mis-h">La tua squadra</span><div class="mis-icons" id="misDif"></div></div>
     <p class="mis-tip" id="misTip">Tocca un personaggio per sapere cosa fa.</p>
@@ -5125,7 +5139,7 @@ function intro(){
       for (const k of ids){ const b = document.createElement('button'); b.type = 'button'; b.className = 'tal-chip'; b.setAttribute('aria-pressed', 'false'); b.innerHTML = `${ico(TAL[k].ic, 2)}<span><b>${TAL[k].n} ×${t[k]}</b><small>${TAL[k].d}</small></span>`;
         b.onclick = () => { const on = TAL_SCELTO !== k; TAL_SCELTO = on ? k : null; box.querySelectorAll('.tal-chip').forEach(x => x.setAttribute('aria-pressed', 'false')); b.setAttribute('aria-pressed', String(on)); SUONI.suona('tocco'); }; box.append(b); } } }
   o.querySelectorAll('.mis-diff button').forEach(b => b.onclick = () => { DIFFICILE = b.dataset.d === '1'; o.querySelectorAll('.mis-diff button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); SUONI.suona('tocco'); try { localStorage.setItem('difendi-smerillo-difficile', DIFFICILE ? '1' : ''); } catch(e){}
-    S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; aggiornaAnteprima(); render(); const mv = o.querySelector('#misVite'); if (mv) mv.textContent = S.portaMax; });
+    S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; aggiornaAnteprima(); render(); const mv = o.querySelector('#misVite'); if (mv) mv.textContent = S.portaMax; nuovoTempo(); const mt = o.querySelector('#misTempo'); if (mt) mt.textContent = tempoMax ? ' · ' + tempoMax + ' secondi per turno' : ''; });
   const tip = o.querySelector('#misTip');
   const riempi = (box, lista, nemici) => { for (const [t, n] of Object.entries(lista)){ const b = document.createElement('button'); b.type = 'button'; b.className = 'mis-pg' + (nemici ? ' nem' : '') + (nemici && !visti.has(t) ? ' nuovo' : '');
       b.setAttribute('aria-label', TIPI[t].nome); b.append(icona(t, 3)); if (n > 1){ const c = document.createElement('span'); c.className = 'mis-x'; c.textContent = '×' + n; b.append(c); }
@@ -5205,7 +5219,7 @@ const OFFERTE = [
   {id:'rinforzo', nome:'Rinforzi', desc:'Arriva un Lanciere vicino a ' + 'casa', costo:6, ok:S => !!postoRinforzo(S), fa:S => { const n = postoRinforzo(S), mx = vitaDi('lanciere'); S.dif.push({id:'d'+(S.nid++), tipo:'lanciere', nodo:n, hp:mx, max:mx, mosso:true, agito:true}); }},
 ];
 function postoRinforzo(S){ const ok = n => !occ(S, n) && !ARRIVO.has(n); if (ok(META)) return META; return ADJ[META].find(ok) || null; }
-function bottega(){
+function bottega(){ inBottega = true;
   const o = overlay(`<div class="dlg box"><h2>Bottega</h2><p>Hai <b>${ico('moneta', 2)} ${S.monete || 0} monete</b>. Ne guadagni abbattendo i nemici.</p><div class="tbcol" id="tbOff"></div><button class="big alt" id="tbOffNo">Indietro</button></div>`);
   const box = o.querySelector('#tbOff');
   for (const f of OFFERTE){ const b = document.createElement('button'); b.type = 'button'; b.className = 'tboff'; const puoi = (S.monete || 0) >= f.costo && f.ok(S); b.disabled = !puoi;
@@ -5222,7 +5236,7 @@ function menuPausa(){
   const ist = o.querySelector('#tbIst'); if (ist) ist.onclick = () => { chiudiOv(); guida = 0; try { localStorage.removeItem(GUIDAKEY); } catch(e){} avvia(false); };
   o.querySelector('#tbSc').onclick = () => { chiudiOv(); scelta(); }; o.querySelector('#tbEsci2').onclick = esci;
 }
-function avvia(conIntro = true){ SUONI.musica(M.evento ? 'festa' : M.luogo === 'sm' || M.luogo === 'ce' ? 'sm' : 'smerillo'); moneteViste = null; S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; fx = []; coda = []; ev = null; aggiornaAnteprima(); if (conIntro) intro(); render(); }
+function avvia(conIntro = true){ SUONI.musica(M.evento ? 'festa' : M.luogo === 'sm' || M.luogo === 'ce' ? 'sm' : 'smerillo'); moneteViste = null; S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; fx = []; coda = []; ev = null; nuovoTempo(); aggiornaAnteprima(); if (conIntro) intro(); render(); }
 function giocaSfida(){ const sf = sfidaDiOggi(); SFIDA = sf; SEME_FISSO = sf.giorno * 7919 + sf.mi; SQUADRA = squadraDi(sf.mi); caricaMissione(sf.mi); el('tbTit').textContent = `Sfida: ${M.titolo}`; fitCam(); avvia(true); }
 function prepara(i){ SFIDA = null; SEME_FISSO = null; if (i === 0 && !leggiRec().m1){ SQUADRA = null; gioca(0); } else { SQUADRA = squadraDi(i); gioca(i); } } // si gioca subito con l'ultima squadra: la cambi dall'intro
 function gioca(i){ caricaMissione(i); el('tbTit')._h = null; el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); avvia(true); }
@@ -5278,7 +5292,7 @@ new ResizeObserver(() => { if (attivo){ const s0 = sc/fitS; fitCam(); sc = fitS*
 function frame(T, dt){
   if (!attivo) return;
   if (ev){ evT += dt; if (evT >= (DUR[ev.k] || .2)){ applica(ev); prossimo(); } }
-  scossa = Math.max(0, scossa - dt*28);
+  scossa = Math.max(0, scossa - dt*28); aggiornaTempo(dt);
   for (const f of fx){ f.t += dt; if (f.t < 0) continue; if (f.k === 'p'){ f.x += f.dx*dt; f.y += f.dy*dt; f.dy += 160*dt; } else if (f.k === 'f'){ f.x += f.dx*dt; f.y += f.dy*dt; f.dx *= .92; f.dy *= .92; } }
   fx = fx.filter(f => f.t < (f.k === 't' ? 1.1 : f.k === 'g' ? .9 : f.k === 'proj' ? f.d : f.k === 'ring' ? .35 : .7)); if (fx.length > 400) fx.splice(0, fx.length - 400);
   _render(T); disegnaOnline(); disegnaPiazza(); if (ev || fx.length || Math.floor(T*2) !== Math.floor((T-dt)*2)) info();
