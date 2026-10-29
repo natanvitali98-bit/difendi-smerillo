@@ -470,6 +470,8 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .mis-d i.on{background:var(--rosso);box-shadow:0 0 0 2px var(--linea)}
 .mis-d em{font-style:normal;margin-left:4px}
 .mis-t{font-family:var(--f-big)!important;font-weight:400;font-size:36px!important;line-height:1!important;color:var(--testo);margin:0;letter-spacing:.3px}
+.mis-mem{display:flex;gap:10px;align-items:flex-start;background:#2a1a3a;color:#f3e8ff;border:3px solid var(--linea);border-radius:14px;padding:10px 12px;margin:8px 0;font-size:14px;line-height:1.35}
+.mis-mem b{color:#e9c2ff}
 .mis-obi{display:flex;flex-direction:column;gap:4px;margin:8px 0}
 .mis-obi .mo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;background:#f1f4fd;border-radius:10px;padding:6px 10px}
 .mis-diff{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
@@ -480,7 +482,8 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .mis-diff button[data-d="1"][aria-pressed="true"] small{color:#ffe0d8}
 .mis-goal{display:flex;gap:10px;align-items:center;background:var(--blu);color:#fff;padding:10px 14px;border-radius:16px}
 .mis-goal b{color:var(--giallo)}
-.mis-goal small{display:flex;align-items:center;gap:4px;color:#f0f4ff;font-size:13px;margin-top:2px}
+.mis-goal small{display:block;color:#f0f4ff;font-size:13px;margin-top:2px;line-height:1.4}
+.mis-goal small img,.mis-goal small canvas{vertical-align:-3px;margin-right:3px}
 .mis-goal > span:last-child{display:flex;flex-direction:column;font-size:16px;font-weight:700}
 .mis-i{font-size:15px;line-height:1.45;margin:0}
 .mis-row{display:flex;flex-direction:column;gap:6px}
@@ -4292,6 +4295,26 @@ const clona = o => JSON.parse(JSON.stringify(o));
 function occ(S, nodo){ let u = S.dif.find(x => x.nodo === nodo); if (u) return {k:'dif', u}; u = S.nem.find(x => x.nodo === nodo); if (u) return {k:'nem', u}; u = S.bar.find(x => x.nodo === nodo); if (u) return {k:'bar', u}; return null; }
 // ogni partita è diversa: i nemici cambiano strada, tempi e a volte tipo (ma l'anteprima del turno resta esatta)
 let SEME_FISSO = null;
+// ===== i nemici si ricordano come difendi: dove stai di solito, dove metti le barricate =====
+const MEMKEY = 'difendi-smerillo-memoria';
+const chiaveMappa = () => (M.luogo || 'smerillo') + ':' + META + ':' + Object.keys(NODI).length;
+function leggiMem(){ try { return JSON.parse(localStorage.getItem(MEMKEY)) || {}; } catch(e){ return {}; } }
+function memMappa(){ const m = leggiMem()[chiaveMappa()]; return m && m.partite >= 1 ? m : null; }
+const viaDi = n => { const p = []; let x = n, g = 0; while (x && x !== META && g++ < 40){ p.push(x); x = NEXT[x]; } return p; };
+function annotaTurno(S){ if (RUN || SFIDA || online() || M.evento) return; S.abit = S.abit || {dif:{}, bar:{}, turni:0}; S.abit.turni++;
+  for (const d of S.dif) S.abit.dif[d.nodo] = (S.abit.dif[d.nodo] || 0) + 1; for (const b of S.bar) S.abit.bar[b.nodo] = (S.abit.bar[b.nodo] || 0) + 1; }
+function salvaAbitudini(S){ if (!S.abit || !S.abit.turni) return; const tutto = leggiMem(), k = chiaveMappa(), m = tutto[k] || {dif:{}, bar:{}, partite:0};
+  for (const g of ['dif', 'bar']){ for (const n in m[g]) m[g][n] *= .6; for (const n in S.abit[g]) m[g][n] = (m[g][n] || 0) + S.abit[g][n]/S.abit.turni; } // le partite recenti contano di più
+  m.partite++; tutto[k] = m; try { localStorage.setItem(MEMKEY, JSON.stringify(tutto)); } catch(e){} }
+// quanto è "presidiata" di solito la strada da un ingresso alla meta
+function presidio(m, n){ return viaDi(n).reduce((a, x) => a + (m.dif[x] || 0) + (m.bar[x] || 0)*1.5, 0); }
+function ingressoSorpresa(m, tipo){ const ok = ingressiPer(tipo); if (ok.length < 2) return null; return ok.slice().sort((a, b) => presidio(m, a) - presidio(m, b))[0]; }
+function usaMemoria(S){ const m = memMappa(); if (!m) return; const R = () => { S.semeMem = ((S.semeMem || S.seme || 1) * 1664525 + 1013904223) % 4294967296; return S.semeMem / 4294967296; };
+  for (const c of S.coda){ if (c.tipo === 'nero' || c.tipo === 'mammone' || c.turno === 0) continue; if (R() < .4){ const n = ingressoSorpresa(m, c.tipo); if (n) c.nodo = n; } }
+  // chi costruisce sempre barricate trova più guastatori (solo se in questa missione ci sono già)
+  const barTot = Object.values(m.bar).reduce((a, v) => a + v, 0);
+  if (barTot > 1.5 && S.coda.some(c => c.tipo === 'guastatore')){ const f = S.coda.find(c => c.tipo === 'fante' && c.turno > 1); if (f){ f.tipo = 'guastatore'; S.memGuasta = true; } }
+  S.memoria = true; }
 function variante(S){
   let seed = SEME_FISSO != null ? SEME_FISSO : Math.floor(Math.random()*1e9); S.seme = seed;
   const R = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
@@ -4316,6 +4339,7 @@ function nuovo(){
   for (const [t, lista] of Object.entries(M.arrivi)) for (const [tipo, nodo, bonus] of lista) S.coda.push({tipo, nodo, turno:+t, bonus:bonus || 0});
   if (!RUN) for (const [t, tipo, nodo] of (M.extra || [])) S.coda.push({tipo, nodo, turno:t, bonus:0});
   if (!RUN && MI > 0 && !M.fisso) variante(S);
+  if (!RUN && !SFIDA && !M.evento && MI >= 1) usaMemoria(S);
   if (!RUN && MI >= 2) S.porta = S.portaMax = Math.max(4, M.vite - 1); // dalla missione 3 si fa sul serio
   if (DIFFICILE && !RUN && !SFIDA && !M.evento){ // Difficile: meno vite, due nemici in più, e tutti scelgono l'ingresso meno difeso
     S.porta = S.portaMax = Math.max(3, M.vite - 3); S.difficile = true;
@@ -4556,7 +4580,7 @@ function perche(d, nodo){ const T = TIPI[d.tipo], st = stat(d.tipo), nome = T.no
 function annulla(){ if (ev || !storia.length || !mioTurno()) return; POS.clear(); COLP.clear(); FANT = []; S = storia.pop(); sel = null; aggiornaAnteprima(); render(); if (online()) invia({t:'stato', S}); }
 function fineTurno(){
   if (!S || ev || S.esito || ovAperto) return; piazza = null;
-  if (online() && fineTurnoOnline()) return;
+  if (online() && fineTurnoOnline()) return; annotaTurno(S);
   uccisiT = 0; V = clona(S); sel = null; storia = []; coda = faseNemici(S); ev = null; evT = 0; prossimo(); render();
 }
 function tempoTurno(){ if (RUN || online() || MI < 2 || M.evento || !S) return 0; const base = 10 + 4*S.dif.length; return Math.round(S.difficile ? base*.75 : base); }
@@ -5121,6 +5145,9 @@ function intro(){
     ${M.dlg && !RUN ? `<div class="mis-dlg"><span class="dlg-ic" id="dlgIc"></span><span class="dlg-tx"><b>${M.dlg[1]}</b>${M.dlg[2]}</span></div>` : ''}
     <div class="mis-goal"><span class="mg-ic">${ico('stella', 3)}</span><span>Difendi <b>${M.metaNome}</b><small>${ico('cuore')} <span id="misVite">${S.portaMax}</span> vite<span id="misTempo">${tempoTurno() ? ' · ' + tempoTurno() + ' secondi per turno' : ''}</span>${MI > 0 ? (SFIDA ? ' · oggi la stessa partita per tutti' : ' · nemici diversi ogni volta') : ''}</small></span></div>
     <p class="mis-i">${M.intro}</p>
+    ${(() => { if (RUN || SFIDA || M.evento || MI < 1) return ''; const m = memMappa(); if (!m) return ''; const top = Object.entries(m.dif).filter(([n]) => n !== META && NODI[n]).sort((a, b) => b[1] - a[1])[0], ing = ingressoSorpresa(m, 'fante');
+      if (!top) return ''; const nb = Object.entries(m.bar).sort((a, b) => b[1] - a[1])[0];
+      return `<div class="mis-mem">${ico('teschio', 2)}<span><b>I nemici si ricordano di te.</b> L’ultima volta hai difeso soprattutto «${NODI[top[0]].nome}»${nb && nb[1] > .5 && NODI[nb[0]] ? `, con barricate a «${NODI[nb[0]].nome}»` : ''}. ${ing && NODI[ing] ? `Questa volta molti proveranno da «${NODI[ing].nome}».` : 'Questa volta cercheranno un’altra strada.'}</span></div>`; })()}
     ${RUN ? '' : `<div class="mis-obi"><span class="mis-h">Stelle</span>${obiettivi().map(o => `<span class="mo">${ico('stellaV')} ${o.t}</span>`).join('')}</div>`}
     ${RUN || SFIDA || M.evento || MI === 0 ? '' : `<div class="mis-diff" role="group" aria-label="Difficoltà"><button type="button" data-d="0" aria-pressed="${!DIFFICILE}">Normale</button><button type="button" data-d="1" aria-pressed="${DIFFICILE}">Difficile <small>${Math.max(3, M.vite - 3)} vite · più nemici · meno tempo</small></button></div>`}
     <div class="mis-row"><span class="mis-h">Arrivano</span><div class="mis-icons" id="misNem"></div></div>
@@ -5173,7 +5200,7 @@ function fine(){
   if (!S || ovAperto) return;
   if (!S.suonato){ S.suonato = true; SUONI.ferma(); SUONI.suona((S.fase ? esitoMio() : S.esito === 'vinto') ? 'vinto' : 'perso'); }
   if (S.fase){ fineOnline(); return; } // le partite online non contano per Incarichi e imprese
-  if (!S.registrato){ S.registrato = true; registraPartita(S); }
+  if (!S.registrato){ S.registrato = true; registraPartita(S); salvaAbitudini(S); }
   if (!S.bottinoFatto && !S.fase){ S.bottinoFatto = true; bottino(S.esito === 'vinto'); }
   if (RUN){ fineTappa(); return; } const vinto = S.esito === 'vinto', st = stelle(), n = vinto ? st.filter(Boolean).length : 0, turni = S.turno - 1, k = 'm' + M.num;
   if (vinto && SFIDA && !S.premiato){ S.premiato = true; let f = null; try { f = JSON.parse(localStorage.getItem(SFKEY)); } catch(e){}
