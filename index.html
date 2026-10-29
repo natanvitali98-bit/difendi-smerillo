@@ -465,6 +465,14 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .mis-d i.on{background:var(--rosso);box-shadow:0 0 0 2px var(--linea)}
 .mis-d em{font-style:normal;margin-left:4px}
 .mis-t{font-family:var(--f-big)!important;font-weight:400;font-size:36px!important;line-height:1!important;color:var(--testo);margin:0;letter-spacing:.3px}
+.mis-obi{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.mis-obi .mo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;background:#f1f4fd;border-radius:10px;padding:6px 10px}
+.mis-diff{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.mis-diff button{border:3px solid var(--linea);border-radius:12px;background:#fff;padding:8px 6px;font:400 16px var(--f-big);color:var(--testo);min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.mis-diff button small{font:700 11px var(--f-body);color:var(--grigio)}
+.mis-diff button[aria-pressed="true"]{background:#ffd03a;box-shadow:0 3px 0 var(--linea)}
+.mis-diff button[data-d="1"][aria-pressed="true"]{background:#e04830;color:#fff}
+.mis-diff button[data-d="1"][aria-pressed="true"] small{color:#ffe0d8}
 .mis-goal{display:flex;gap:10px;align-items:center;background:var(--blu);color:#fff;padding:10px 14px;border-radius:16px}
 .mis-goal b{color:var(--giallo)}
 .mis-goal small{display:flex;align-items:center;gap:4px;color:#f0f4ff;font-size:13px;margin-top:2px}
@@ -3894,7 +3902,7 @@ const MISSIONI = [
   arrivi:{0:[['fante','cortell']], 2:[['fante','sud']], 4:[['fante','caduti']], 6:[['balestriere','cortell']], 7:[['fante','caduti']], 8:[['fante','sud']], 10:[['cavaliere','caduti']], 11:[['balestriere','sud']]}},
  {...MAPPA_CENTRO, extra:[], num:4, titolo:'La piazza assediata', livello:'Media', vite:5, intro:'Ora i nemici arrivano anche in due alla volta, e arriva il <b>Fante corazzato</b>: l’armatura toglie 1 danno ai colpi leggeri. I <b>Lancieri</b> lo bucano. Difendi il <b>Municipio</b>.',
   arrivi:{0:[['fante','cortell']], 1:[['fante','sud']], 2:[['corazzato','cortell']], 3:[['fante','caduti']], 4:[['balestriere','cortell']], 5:[['fante','sud'], ['fante','caduti']], 6:[['cavaliere','cortell']], 7:[['corazzato','sud']], 8:[['balestriere','caduti']], 9:[['cavaliere','sud']]}},
- {...MAPPA_ROCCA, extra:[], num:5, titolo:'Verso la Rocca', livello:'Media', vite:8, intro:'I cavalieri salgono dalla <b>valle</b> per il sentiero sotto le mura, e arrivano da <b>Via dei Caduti</b> all’incrocio con Via Marconi. Difendi <b>Piazza Indipendenza</b>. Arriva il <b>Corvo della Rocca</b>: vola sopra tutti, lo colpiscono solo gli <b>Arcieri</b>.',
+ {...MAPPA_ROCCA, extra:[], num:5, titolo:'Verso la Rocca', livello:'Media', vite:7, intro:'I cavalieri salgono dalla <b>valle</b> per il sentiero sotto le mura, e arrivano da <b>Via dei Caduti</b> all’incrocio con Via Marconi. Difendi <b>Piazza Indipendenza</b>. Arriva il <b>Corvo della Rocca</b>: vola sopra tutti, lo colpiscono solo gli <b>Arcieri</b>.',
   arrivi:{0:[['fante','caduti1']], 1:[['fante','sudO']], 2:[['corvo','caduti1']], 3:[['balestriere','caduti1']], 4:[['cavaliere','sudO']], 5:[['corazzato','caduti1']], 6:[['fante','sudO'], ['corvo','sudO']], 7:[['cavaliere','caduti1']], 8:[['balestriere','sudO']], 9:[['cavaliere','sudO']]}},
  {...MAPPA_ROCCA, extra:[], num:6, titolo:'Il Cavaliere Nero', livello:'Difficile', vite:6,
   arrivi:{0:[['fante','caduti1']], 1:[['fante','sudO']], 2:[['balestriere','caduti1']], 3:[['cavaliere','sudO']], 4:[['corazzato','caduti1'], ['fante','sudO']], 5:[['corvo','sudO']], 6:[['cavaliere','caduti1']], 7:[['balestriere','sudO']], 8:[['nero','sudO']], 9:[['fante','caduti1'], ['corazzato','sudO']]}},
@@ -3912,7 +3920,7 @@ const MISSIONI = [
   intro:'L’ultimo assalto: <b>due Cavalieri Neri</b>, catapulte, soldati e le <b>Spie</b>, che si nascondono: le colpisci solo con un tuo difensore accanto. Salgono dalla <b>valle</b> e da <b>Via dei Caduti</b>. Difendi <b>Piazza Indipendenza</b>.',
   consiglio:'Chiudi subito Via Marconi. Usa l’olio della Porta quando arrivano in tanti. Colpisci i Cavalieri Neri tutti insieme.',
   arrivi:{0:[['fante','caduti1'], ['fante','sudO']], 1:[['balestriere','caduti1']], 2:[['cavaliere','sudO'], ['spia','caduti1']], 3:[['catapulta','sudO']], 4:[['corazzato','caduti1']], 5:[['corvo','sudO']], 6:[['nero','sudO']], 7:[['spia','sudO']], 8:[['balestriere','sudO']], 9:[['nero','caduti1']]}},
- {...MAPPA_SM, extra:[], num:10, titolo:'San Martino al Faggio', livello:'Difficile', vite:9,
+ {...MAPPA_SM, extra:[], num:10, titolo:'San Martino al Faggio', livello:'Difficile', vite:8,
   arrivi:{0:[['fante','est']], 1:[['fante','campi2']], 2:[['corvo','est']], 3:[['balestriere','est']], 4:[['cavaliere','campi2']], 5:[['corazzato','est']], 6:[['catapulta','est']], 7:[['fante','campi2']], 8:[['cavaliere','est']], 9:[['nero','est']]}},
  {...MAPPA_SM, extra:[], num:11, titolo:'Dalla faggeta', livello:'Difficile', vite:6, legname:5,
   intro:'Ora i nemici arrivano anche dalla <b>faggeta</b>, per il sentiero nel bosco dietro la chiesetta, e dalla <b>Provinciale in alto</b>. Queste due strade sono corte: tieni qualcuno vicino alla <b>chiesetta</b>.',
@@ -3924,7 +3932,7 @@ const MISSIONI = [
   consiglio:'Il Gatto Mammone salta un turno sì e uno no: colpiscilo nei turni in cui resta a terra. Suona le campane quando arrivano in tanti.',
   start:[['lanciere','salita'],['lanciere','parch'],['arciere','chiesa'],['arciere','vic2'],['arciere','font'],['carpentiere','sotto']],
   arrivi:{0:[['fante','est'], ['fante','bosco2']], 1:[['balestriere','campi2']], 2:[['cavaliere','ovest2'], ['corvo','bosco2']], 3:[['catapulta','est']], 4:[['cavaliere','campi2']], 5:[['guastatore','est']], 7:[['spia','campi2']], 8:[['nero','est']], 9:[['cavaliere','bosco2']], 10:[['mammone','campi2']]}},
- {...MAPPA_CE, extra:[], num:13, titolo:'Ceresola', livello:'Difficile', vite:8,
+ {...MAPPA_CE, extra:[], num:13, titolo:'Ceresola', livello:'Difficile', vite:7,
   arrivi:{0:[['fante','basso']], 1:[['fante','vigna']], 2:[['corvo','basso']], 3:[['balestriere','basso']], 4:[['cavaliere','vigna']], 5:[['corazzato','basso']], 6:[['catapulta','basso']], 7:[['fante','vigna']], 8:[['cavaliere','basso']], 9:[['nero','vigna']]}},
  {...MAPPA_CE, extra:[], num:14, titolo:'Dalle grotte', livello:'Difficile', vite:7, legname:5,
   intro:'Vicino a Ceresola ci sono <b>piccole grotte</b> dove una volta si tenevano gli attrezzi e il grano. Ora i nemici ci si nascondono e scendono anche dalla <b>strada per Smerillo</b> e dal <b>casale grande</b>. Difendi la <b>Chiesa di San Nicola</b>.',
@@ -4243,7 +4251,7 @@ function squadraDi(i){ let s = null; try { s = (JSON.parse(localStorage.getItem(
   const base = MISSIONI[i].start.map(x => x[0]); if (!s || s.length !== base.length) return base;
   const usati = new Set(); return s.map((t, k) => { if (!col[t] || (rarDi(t) > 0 && usati.has(t))) return base[k]; usati.add(t); return t; }); }
 function salvaSquadra(i, sq){ let all = {}; try { all = JSON.parse(localStorage.getItem(SQKEY)) || {}; } catch(e){} all['m' + MISSIONI[i].num] = sq; try { localStorage.setItem(SQKEY, JSON.stringify(all)); } catch(e){} }
-let SQUADRA = null, RUN = null;
+let SQUADRA = null, RUN = null, DIFFICILE = (() => { try { return localStorage.getItem('difendi-smerillo-difficile') === '1'; } catch(e){ return false; } })();
 // ===== ASSEDIO: tappe una dopo l'altra, ondate a caso, dopo ogni tappa scegli una carta. Chi cade è perso =====
 const RUNKEY = 'difendi-smerillo-assedio';
 const CARTE_RUN = [
@@ -4286,7 +4294,7 @@ function variante(S){
   const noti = [...new Set(S.coda.map(c => c.tipo))].filter(t => t !== 'nero' && t !== 'mammone' && t !== 'fante'), ultimo = Math.max(1, ...S.coda.map(c => c.turno));
   for (const c of S.coda){ if (c.tipo === 'nero' || c.tipo === 'mammone') continue;
     if (R() < .2 + .1*liv) c.adatta = true; // il comandante sceglie l'ingresso meno difeso
-    if (ingressi.length > 1 && R() < .55) c.nodo = ingressi[Math.floor(R()*ingressi.length)];
+    if (ingressi.length > 1 && R() < .55){ const ok = ingressi.filter(n => ingressiPer(c.tipo).includes(n)); if (ok.length) c.nodo = ok[Math.floor(R()*ok.length)]; }
     if (c.turno > 1) c.turno = Math.min(ultimo, Math.max(1, c.turno + Math.floor(R()*3) - 1));
     if (c.tipo === 'fante' && noti.length && R() < .07*liv) c.tipo = noti[Math.floor(R()*noti.length)]; }
   // dalla missione 3 in poi, uno o due nemici in più, sempre di tipi già visti
@@ -4300,7 +4308,13 @@ function nuovo(){
   for (const [t, lista] of Object.entries(M.arrivi)) for (const [tipo, nodo, bonus] of lista) S.coda.push({tipo, nodo, turno:+t, bonus:bonus || 0});
   if (!RUN) for (const [t, tipo, nodo] of (M.extra || [])) S.coda.push({tipo, nodo, turno:t, bonus:0});
   if (!RUN && MI > 0 && !M.fisso) variante(S);
-  for (const c of S.coda.filter(c => c.turno === 0)){ if (c.adatta){ const n = ingressoScoperto(S); if (n) c.nodo = n; } arriva(S, c, []); }
+  if (DIFFICILE && !RUN && !SFIDA && !M.evento){ // Difficile: meno vite, due nemici in più, e tutti scelgono l'ingresso meno difeso
+    S.porta = S.portaMax = Math.max(3, M.vite - 2); S.difficile = true;
+    const tipi = [...new Set(S.coda.map(c => c.tipo))].filter(t => t !== 'nero' && t !== 'mammone' && t !== 'catapulta'), ult = Math.max(2, ...S.coda.map(c => c.turno)), ing = [...ARRIVO];
+    for (let k = 0; k < 2 && tipi.length && ing.length; k++) S.coda.push({tipo: tipi[(k*3 + MI) % tipi.length], nodo: ing[(k + MI) % ing.length], turno: 2 + ((k*5 + MI*3) % Math.max(1, ult - 1)), bonus:0});
+    for (const c of S.coda) c.adatta = true; }
+  for (const c of S.coda){ const ok = ingressiPer(c.tipo); if (!ok.includes(c.nodo)) c.nodo = ok.slice().sort((a, b) => gdist(a, c.nodo) - gdist(b, c.nodo))[0]; } // l'ingresso più vicino tra quelli lontani dalla meta
+  for (const c of S.coda.filter(c => c.turno === 0)){ if (c.adatta){ const n = ingressoScoperto(S, c.tipo); if (n) c.nodo = n; } arriva(S, c, []); }
   S.coda = S.coda.filter(c => c.turno > 0);
   return S;
 }
@@ -4340,7 +4354,10 @@ function bersaglioMasso(S, x, g){ let best = null, bv = 0;
 // vicino da attaccare (difensore o barricata accanto), il più debole
 function vicinoDaColpire(S, x){ let best = null, bv = 1e9; for (const n of ADJ[x.nodo]){ const o = occ(S, n); if (!o || o.k === 'nem') continue; const v = (o.k === 'dif' ? 0 : 50) + o.u.hp; if (v < bv){ bv = v; best = o; } } return best; }
 // il comandante: manda i nemici dall'ingresso più lontano dai tuoi difensori
-function ingressoScoperto(S){ const ing = [...ARRIVO]; let best = null, bv = -1;
+// i nemici veloci (cavalli, corvi, il gatto) non entrano dagli ingressi vicinissimi al posto da difendere: arriverebbero senza darti il tempo di pensare
+const veloce = tipo => { const T = TIPI[tipo] || {}; return (T.passo || 1) >= 2 || !!T.vola || !!T.salta; };
+const ingressiPer = tipo => { const tutti = [...ARRIVO]; if (!veloce(tipo)) return tutti; const far = tutti.filter(n => gdist(n, META) >= 4); return far.length ? far : tutti; };
+function ingressoScoperto(S, tipo){ const ing = ingressiPer(tipo); let best = null, bv = -1;
   for (const n of ing){ if (occ(S, n)) continue; let v = 99; for (const d of S.dif) v = Math.min(v, gdist(n, d.nodo)); for (const b of S.bar) v = Math.min(v, gdist(n, b.nodo) + 1); if (v > bv){ bv = v; best = n; } }
   return best; }
 function faseNemici(S){
@@ -4376,9 +4393,10 @@ function faseNemici(S){
       colpisci(S, o, T.danno, evs, x.id); if (o.k === 'bar' && !VO && S.nem.includes(x)){ evs.push({k:'spine', nodo:x.nodo}); colpisci(S, {k:'nem', u:x}, 1, evs, null); } break;
     }
   }
-  if (S.porta > 0) for (const c of S.coda.filter(c => c.turno <= S.turno)){ if (c.adatta){ const n = ingressoScoperto(S); if (n) c.nodo = n; } const o = occ(S, c.nodo);
+  if (S.porta > 0) for (const c of S.coda.filter(c => c.turno <= S.turno)){ if (c.adatta){ const n = ingressoScoperto(S, c.tipo); if (n) c.nodo = n; } const o = occ(S, c.nodo);
     if (!o){ arriva(S, c, evs); S.coda = S.coda.filter(q => q !== c); }
     else { if (o.k !== 'nem') colpisci(S, o, 1, evs, null); c.turno = S.turno + 1; evs.push({k:'bloccato', nodo:c.nodo}); } }
+  { S.vis = S.vis || {}; for (const e of evs){ if (e.k === 'passo') S.vis[e.a] = 1; if (e.k === 'arriva') S.vis[e.x.nodo] = 1; } }
   S.turno++; for (const d of S.dif){ d.mosso = false; d.agito = false; }
   esito(S); return evs;
 }
@@ -5084,8 +5102,10 @@ function intro(){
     <div class="mis-top"><span class="mis-n">${SFIDA ? ico('calendario') + ' Sfida del giorno' : M.evento ? '🌰 Evento a tempo' : SFIDA_AMICO ? '⚔️ Sfida di ' + escH(SFIDA_AMICO.n || 'un amico') + ': ' + (+SFIDA_AMICO.p || 0) + ' punti' : 'Missione ' + M.num + ' di ' + MISSIONI.length}</span><span class="mis-d" aria-label="Difficoltà: ${M.livello}">${pallini}<em>${M.livello.split(':')[0]}</em></span></div>
     <h2 class="mis-t">${M.titolo}</h2>
     ${M.dlg && !RUN ? `<div class="mis-dlg"><span class="dlg-ic" id="dlgIc"></span><span class="dlg-tx"><b>${M.dlg[1]}</b>${M.dlg[2]}</span></div>` : ''}
-    <div class="mis-goal"><span class="mg-ic">${ico('stella', 3)}</span><span>Difendi <b>${M.metaNome}</b><small>${ico('cuore')} ${M.vite} vite${MI > 0 ? (SFIDA ? ' · oggi la stessa partita per tutti' : ' · nemici diversi ogni volta') : ''}</small></span></div>
+    <div class="mis-goal"><span class="mg-ic">${ico('stella', 3)}</span><span>Difendi <b>${M.metaNome}</b><small>${ico('cuore')} <span id="misVite">${S.portaMax}</span> vite${MI > 0 ? (SFIDA ? ' · oggi la stessa partita per tutti' : ' · nemici diversi ogni volta') : ''}</small></span></div>
     <p class="mis-i">${M.intro}</p>
+    ${RUN ? '' : `<div class="mis-obi"><span class="mis-h">Stelle</span>${obiettivi().map(o => `<span class="mo">${ico('stellaV')} ${o.t}</span>`).join('')}</div>`}
+    ${RUN || SFIDA || M.evento || MI === 0 ? '' : `<div class="mis-diff" role="group" aria-label="Difficoltà"><button type="button" data-d="0" aria-pressed="${!DIFFICILE}">Normale</button><button type="button" data-d="1" aria-pressed="${DIFFICILE}">Difficile <small>${Math.max(3, M.vite - 2)} vite · più nemici</small></button></div>`}
     <div class="mis-row"><span class="mis-h">Arrivano</span><div class="mis-icons" id="misNem"></div></div>
     <div class="mis-row"><span class="mis-h">La tua squadra</span><div class="mis-icons" id="misDif"></div></div>
     <p class="mis-tip" id="misTip">Tocca un personaggio per sapere cosa fa.</p>
@@ -5104,6 +5124,8 @@ function intro(){
       if (!ids.length) box.innerHTML = '<small class="tal-vuoto">Non hai talismani. Li trovi nella <b>Ruota della fortuna</b> e nel bottino delle vittorie.</small>';
       for (const k of ids){ const b = document.createElement('button'); b.type = 'button'; b.className = 'tal-chip'; b.setAttribute('aria-pressed', 'false'); b.innerHTML = `${ico(TAL[k].ic, 2)}<span><b>${TAL[k].n} ×${t[k]}</b><small>${TAL[k].d}</small></span>`;
         b.onclick = () => { const on = TAL_SCELTO !== k; TAL_SCELTO = on ? k : null; box.querySelectorAll('.tal-chip').forEach(x => x.setAttribute('aria-pressed', 'false')); b.setAttribute('aria-pressed', String(on)); SUONI.suona('tocco'); }; box.append(b); } } }
+  o.querySelectorAll('.mis-diff button').forEach(b => b.onclick = () => { DIFFICILE = b.dataset.d === '1'; o.querySelectorAll('.mis-diff button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); SUONI.suona('tocco'); try { localStorage.setItem('difendi-smerillo-difficile', DIFFICILE ? '1' : ''); } catch(e){}
+    S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; aggiornaAnteprima(); render(); const mv = o.querySelector('#misVite'); if (mv) mv.textContent = S.portaMax; });
   const tip = o.querySelector('#misTip');
   const riempi = (box, lista, nemici) => { for (const [t, n] of Object.entries(lista)){ const b = document.createElement('button'); b.type = 'button'; b.className = 'mis-pg' + (nemici ? ' nem' : '') + (nemici && !visti.has(t) ? ' nuovo' : '');
       b.setAttribute('aria-label', TIPI[t].nome); b.append(icona(t, 3)); if (n > 1){ const c = document.createElement('span'); c.className = 'mis-x'; c.textContent = '×' + n; b.append(c); }
@@ -5113,12 +5135,23 @@ function intro(){
   riempi(o.querySelector('#misNem'), nem, true); riempi(o.querySelector('#misDif'), dif, false);
   { const di = o.querySelector('#dlgIc'); if (di) di.append(icona(M.dlg[0], 3)); }
   // se c'è un nemico nuovo, lo presento subito
-  const nuovo = o.querySelector('.mis-pg.nuovo'); if (nuovo) nuovo.click();
+  const primoNuovo = o.querySelector('.mis-pg.nuovo'); if (primoNuovo) primoNuovo.click();
   o.querySelector('#tbVia').onclick = () => { chiudiOv(); usaTalismano(); if (!RUN){ SUONI.suona('banner'); EPICO.banner(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
   const bk = o.querySelector('#misBack'); if (bk) bk.onclick = () => { if (provenienza === 'missioni') scelta(M.evento ? undefined : (M.luogo || 'smerillo')); else esci(); };
   const bq = o.querySelector('#tbSqC'); if (bq) bq.onclick = () => { chiudiOv(); squadra(MI); };
 }
-function stelle(){ return [true, S.portaPersa === 0, S.persi === 0]; }
+// obiettivi per le stelle: ogni missione chiede due cose diverse, così non basta una sola tattica
+const OBI = {1:['rupe:1','persi'], 2:['intatto','veloce:13'], 3:['mai:piazza','nobar'], 4:['persi','veloce:13'], 5:['veloce:14','intatto'], 6:['intatto','persi'], 7:['mai:cadutiM','rupe:2'], 8:['mai:roma2','nobar'],
+  9:['mai:marconi','persi'], 10:['intatto','veloce:22'], 11:['rupe:1','persi'], 12:['intatto','rupe:1'], 13:['mai:J','nobar'], 14:['rupe:2','persi'], 15:['intatto','mai:piazza']};
+function obiettivo(spec){ const [k, v] = spec.split(':'), n = +v, st = k2 => (S && S.st && S.st[k2]) || 0;
+  if (k === 'rupe') return {t:`Butta giù ${n === 1 ? '1 nemico' : n + ' nemici'} dalla rupe`, ic:'rupe', ok:() => st('rupe') >= n};
+  if (k === 'nobar') return {t:'Vinci senza costruire barricate', ic:'martello', ok:() => !st('bar')};
+  if (k === 'veloce') return {t:`Vinci entro il turno ${n}`, ic:'clessidra', ok:() => S.turno - 1 <= n};
+  if (k === 'mai') return {t:`Nessun nemico in «${(NODI[v] || {}).nome || v}»`, ic:'scudo', ok:() => !(S.vis && S.vis[v])};
+  if (k === 'intatto') return {t:`${M.metaNome.charAt(0).toUpperCase() + M.metaNome.slice(1)} senza danni`, ic:'cuore', ok:() => S.portaPersa === 0};
+  return {t:'Nessun difensore cade', ic:'scudo', ok:() => S.persi === 0}; }
+function obiettivi(){ const L = (!SFIDA && !M.evento && !RUN && OBI[M.num]) || ['intatto', 'persi']; return L.map(obiettivo); }
+function stelle(){ return [true, ...obiettivi().map(o => o.ok())]; }
 function fine(){
   if (!S || ovAperto) return;
   if (!S.suonato){ S.suonato = true; SUONI.ferma(); SUONI.suona((S.fase ? esitoMio() : S.esito === 'vinto') ? 'vinto' : 'perso'); }
@@ -5143,7 +5176,7 @@ function fine(){
   const o = overlay(`<div class="dlg box ${vinto ? 'vittoria' : 'sconfitta'}">${vinto ? '<div class="fx-raggi" aria-hidden="true"></div>' : ''}<span class="kicker">Missione ${M.num} · ${M.titolo}</span>
     <h2 class="fx-tit">${vinto ? (M.evento ? 'Castagne salve!' : dopo ? 'Missione riuscita!' : 'Hai salvato il comune!') : M.caduta}</h2>
     ${vinto ? `<div class="stelle" aria-label="${n} stelle su 3">${stelleHTML(n, 5)}</div>` : ''}
-    <div class="tbobj"><span>${ico(vinto ? 'stella' : 'stellaV')} Difendi ${M.metaNome}</span><span>${ico(vinto && st[1] ? 'stella' : 'stellaV')} Nessuna vita persa</span><span>${ico(vinto && st[2] ? 'stella' : 'stellaV')} Nessun difensore cade</span></div>
+    <div class="tbobj"><span>${ico(vinto ? 'stella' : 'stellaV')} Difendi ${M.metaNome}${S.difficile ? ' <b>(Difficile)</b>' : ''}</span>${obiettivi().map((o, i) => `<span>${ico(vinto && st[i + 1] ? 'stella' : 'stellaV')} ${o.t}</span>`).join('')}</div>
     <p>${vinto ? `Hai vinto in ${turni} ${turni === 1 ? 'turno' : 'turni'} · <b>${pt} punti</b>` : 'Consiglio: ' + M.consiglio}</p>
     ${am ? `<p class="sfres ${vinto && pt > (+am.p || 0) ? 'ok' : ''}">${vinto && pt > (+am.p || 0) ? `⚔️ Hai battuto ${escH(am.n || 'il tuo amico')}! (${pt} contro ${+am.p || 0})` : `⚔️ ${escH(am.n || 'Il tuo amico')} ha fatto ${+am.p || 0} punti. Riprova a batterlo!`}</p>` : ''}
     ${S.trovata ? `<p class="incok fort">${ico('trifoglio')} Trovata fortunata: <b>${S.trovata}</b></p>` : ''}${S.serie >= 2 ? `<p class="incok serie">🔥 <b>${S.serie} vittorie di fila</b>: la fortuna cresce!</p>` : ''}
@@ -5183,7 +5216,7 @@ function bottega(){
 function menuPausa(){
   if (NET){ const o = overlay(`<div class="dlg box"><h2>Pausa</h2><p>Stai giocando con <b>${NET.amico}</b>.</p><button class="big" id="tbRip">Riprendi</button><button class="big alt" id="tbEsOn">Esci dalla partita</button></div>`); o.querySelector('#tbRip').onclick = chiudiOv; o.querySelector('#tbEsOn').onclick = () => { invia({t:'esci'}); chiudiNet(); chiudiOv(); esci(); }; return; }
   if (RUN){ const o = overlay(`<div class="dlg box"><h2>Pausa</h2><button class="big" id="tbRip">Riprendi</button><button class="big alt" id="tbArr">Arrenditi</button></div>`); o.querySelector('#tbRip').onclick = chiudiOv; o.querySelector('#tbArr').onclick = () => { chiudiOv(); S.esito = 'perso'; fine(); }; return; }
-  const o = overlay(`<div class="dlg box pausa"><h2>Pausa</h2><button type="button" class="tbaudio" id="tbAudio" aria-pressed="${!SUONI.muto}">${SUONI.muto ? '🔇 Suoni spenti' : '🔊 Suoni accesi'}</button><button class="big" id="tbRip">Riprendi</button><button class="big alt" id="tbRic">Ricomincia la missione</button>${MI === 0 ? '<button class="big alt" id="tbIst">Rifai la guida</button>' : ''}<button class="big alt" id="tbSc">Le missioni</button><button class="big alt" id="tbEsci2">Torna al menu</button></div>`);
+  const o = overlay(`<div class="dlg box pausa"><h2>Pausa</h2>${RUN || !S ? '' : `<div class="mis-obi"><span class="mis-h">Stelle</span>${obiettivi().map(ob => `<span class="mo">${ico(ob.ok() ? 'stella' : 'stellaV')} ${ob.t}</span>`).join('')}</div>`}<button type="button" class="tbaudio" id="tbAudio" aria-pressed="${!SUONI.muto}">${SUONI.muto ? '🔇 Suoni spenti' : '🔊 Suoni accesi'}</button><button class="big" id="tbRip">Riprendi</button><button class="big alt" id="tbRic">Ricomincia la missione</button>${MI === 0 ? '<button class="big alt" id="tbIst">Rifai la guida</button>' : ''}<button class="big alt" id="tbSc">Le missioni</button><button class="big alt" id="tbEsci2">Torna al menu</button></div>`);
   o.querySelector('#tbRip').onclick = chiudiOv; o.querySelector('#tbRic').onclick = () => { chiudiOv(); avvia(false); };
   o.querySelector('#tbAudio').onclick = (ev) => { SUONI.muto = !SUONI.muto; ev.currentTarget.setAttribute('aria-pressed', !SUONI.muto); ev.currentTarget.textContent = SUONI.muto ? '🔇 Suoni spenti' : '🔊 Suoni accesi'; SUONI.suona('tocco'); };
   const ist = o.querySelector('#tbIst'); if (ist) ist.onclick = () => { chiudiOv(); guida = 0; try { localStorage.removeItem(GUIDAKEY); } catch(e){} avvia(false); };
@@ -5404,7 +5437,7 @@ function sfidaDiOggi(){ const g = oggi(), r = leggiRec(); let max = 0; while (ma
 function riepilogo(){ const r = leggiRec(); return {missioni: MISSIONI.map(m => ({num:m.num, titolo:m.titolo, stelle:(r['m' + m.num] || {}).stelle || 0})), sfida: sfidaDiOggi()}; }
 const prossima = () => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + MISSIONI[i].num]) i++; return MISSIONI[i]; };
 const contaDif = () => { const c = leggiCol(); return DIFENSORI.filter(t => c[t]).length + ' di ' + DIFENSORI.length; };
-return {eventoAttivo, preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
+return {eventoAttivo, preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
 })();
 
 let last = performance.now(), T = 0;
