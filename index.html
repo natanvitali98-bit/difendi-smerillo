@@ -470,6 +470,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .mis-d i.on{background:var(--rosso);box-shadow:0 0 0 2px var(--linea)}
 .mis-d em{font-style:normal;margin-left:4px}
 .mis-t{font-family:var(--f-big)!important;font-weight:400;font-size:36px!important;line-height:1!important;color:var(--testo);margin:0;letter-spacing:.3px}
+#tbZp,#tbZm,#zIn,#zOut{display:none!important} /* si zooma con le dita (o la rotella sul PC) */
 .mis-mem{display:flex;gap:10px;align-items:flex-start;background:#2a1a3a;color:#f3e8ff;border:3px solid var(--linea);border-radius:14px;padding:10px 12px;margin:8px 0;font-size:14px;line-height:1.35}
 .mis-mem b{color:#e9c2ff}
 .mis-obi{display:flex;flex-direction:column;gap:4px;margin:8px 0}
@@ -4357,7 +4358,7 @@ function colpisci(S, o, danno, evs, da){
   const u = o.u; u.hp -= danno; if (o.k === 'dif') u.colpito = true; evs.push({k:'colpo', da, a:u.id, nodo:u.nodo, danno});
   if (u.hp <= 0){ if (o.k === 'dif'){ S.dif = S.dif.filter(x => x !== u); S.persi++; } else if (o.k === 'nem') S.nem = S.nem.filter(x => x !== u); else S.bar = S.bar.filter(x => x !== u);
     evs.push({k:'cade', id:u.id, nodo:u.nodo, chi:o.k, tipo:u.tipo}); if (o.k === 'nem'){ const lont = !S.vs && (DISTP[u.nodo] ?? 0) >= 3, g = (TIPI[u.tipo].pesante ? 4 : TIPI[u.tipo].area ? 2 : 1) + (lont ? 1 : 0); S.monete = (S.monete || 0) + g; if (lont) evs.push({k:'lontano', nodo:u.nodo});
-      conta(S, 'monete', g); conta(S, 'k'); conta(S, 'k:' + u.tipo); const dd = S.dif.find(q => q.id === da); if (dd){ conta(S, 'kd:' + dd.tipo); conta(S, 'k:' + dd.tipo + ':' + u.tipo); } } }
+      conta(S, 'monete', g); conta(S, 'k'); if (lont) conta(S, 'lontani'); conta(S, 'k:' + u.tipo); const dd = S.dif.find(q => q.id === da); if (dd){ conta(S, 'kd:' + dd.tipo); conta(S, 'k:' + dd.tipo + ':' + u.tipo); } } }
 }
 function conta(S, k, n = 1){ S.st = S.st || {}; S.st[k] = (S.st[k] || 0) + n; }
 function esito(S){ if (S.porta <= 0) S.esito = 'perso'; else if (S.vs){ if (S.turno > S.vs.turni) S.esito = 'vinto'; } else if (!S.nem.length && !S.coda.length) S.esito = 'vinto'; }
@@ -5147,7 +5148,7 @@ function intro(){
     <p class="mis-i">${M.intro}</p>
     ${(() => { if (RUN || SFIDA || M.evento || MI < 1) return ''; const m = memMappa(); if (!m) return ''; const top = Object.entries(m.dif).filter(([n]) => n !== META && NODI[n]).sort((a, b) => b[1] - a[1])[0], ing = ingressoSorpresa(m, 'fante');
       if (!top) return ''; const nb = Object.entries(m.bar).sort((a, b) => b[1] - a[1])[0];
-      return `<div class="mis-mem">${ico('teschio', 2)}<span><b>I nemici si ricordano di te.</b> L’ultima volta hai difeso soprattutto «${NODI[top[0]].nome}»${nb && nb[1] > .5 && NODI[nb[0]] ? `, con barricate a «${NODI[nb[0]].nome}»` : ''}. ${ing && NODI[ing] ? `Questa volta molti proveranno da «${NODI[ing].nome}».` : 'Questa volta cercheranno un’altra strada.'}</span></div>`; })()}
+      return `<div class="mis-mem">${ico('teschio', 2)}<span><b>I nemici si ricordano di te.</b> L’ultima volta hai difeso quasi sempre la stessa strada${nb && nb[1] > .5 ? ' e hai costruito tante barricate' : ''}. Questa volta molti arriveranno dalla parte che hai lasciato più scoperta: guarda le bandiere rosse.</span></div>`; })()}
     ${RUN ? '' : `<div class="mis-obi"><span class="mis-h">Stelle</span>${obiettivi().map(o => `<span class="mo">${ico('stellaV')} ${o.t}</span>`).join('')}</div>`}
     ${RUN || SFIDA || M.evento || MI === 0 ? '' : `<div class="mis-diff" role="group" aria-label="Difficoltà"><button type="button" data-d="0" aria-pressed="${!DIFFICILE}">Normale</button><button type="button" data-d="1" aria-pressed="${DIFFICILE}">Difficile <small>${Math.max(3, M.vite - 3)} vite · più nemici · meno tempo</small></button></div>`}
     <div class="mis-row"><span class="mis-h">Arrivano</span><div class="mis-icons" id="misNem"></div></div>
@@ -5185,12 +5186,14 @@ function intro(){
   const bq = o.querySelector('#tbSqC'); if (bq) bq.onclick = () => { chiudiOv(); squadra(MI); };
 }
 // obiettivi per le stelle: ogni missione chiede due cose diverse, così non basta una sola tattica
-const OBI = {1:['rupe:1','persi'], 2:['intatto','veloce:13'], 3:['mai:piazza','nobar'], 4:['persi','veloce:13'], 5:['veloce:14','intatto'], 6:['intatto','persi'], 7:['mai:cadutiM','rupe:2'], 8:['mai:roma2','nobar'],
-  9:['mai:marconi','persi'], 10:['intatto','veloce:22'], 11:['rupe:1','persi'], 12:['intatto','rupe:1'], 13:['mai:J','nobar'], 14:['rupe:2','persi'], 15:['intatto','mai:piazza']};
+const OBI = {1:['rupe:1','persi'], 2:['intatto','veloce:13'], 3:['lontano:9','nobar'], 4:['persi','veloce:13'], 5:['veloce:14','intatto'], 6:['intatto','persi'], 7:['lontano:14','rupe:2'], 8:['lontano:16','nobar'],
+  9:['lontano:11','persi'], 10:['intatto','veloce:22'], 11:['rupe:1','persi'], 12:['intatto','rupe:1'], 13:['lontano:12','nobar'], 14:['rupe:2','persi'], 15:['intatto','lontano:12']};
 function obiettivo(spec){ const [k, v] = spec.split(':'), n = +v, st = k2 => (S && S.st && S.st[k2]) || 0;
   if (k === 'rupe') return {t:`Butta giù ${n === 1 ? '1 nemico' : n + ' nemici'} dalla rupe`, ic:'rupe', ok:() => st('rupe') >= n};
   if (k === 'nobar') return {t:'Vinci senza costruire barricate', ic:'martello', ok:() => !st('bar')};
   if (k === 'veloce') return {t:`Vinci entro il turno ${n}`, ic:'clessidra', ok:() => S.turno - 1 <= n};
+  const daM = s => /^il /i.test(s) ? 'dal ' + s.slice(3) : /^la /i.test(s) ? 'dalla ' + s.slice(3) : /^lo /i.test(s) ? 'dallo ' + s.slice(3) : /^l[’']/i.test(s) ? 'dall’' + s.slice(2) : 'da ' + s;
+  if (k === 'lontano') return {t:`Abbatti ${n} nemici lontano ${daM(M.metaNome)}`, ic:'spade', ok:() => st('lontani') >= n};
   if (k === 'mai') return {t:`Nessun nemico in «${(NODI[v] || {}).nome || v}»`, ic:'scudo', ok:() => !(S.vis && S.vis[v])};
   if (k === 'intatto') return {t:`${M.metaNome.charAt(0).toUpperCase() + M.metaNome.slice(1)} senza danni`, ic:'cuore', ok:() => S.portaPersa === 0};
   return {t:'Nessun difensore cade', ic:'scudo', ok:() => S.persi === 0}; }
