@@ -3823,7 +3823,7 @@ const MAPPA_CENTRO ={num:2, titolo:'Il cuore del paese', livello:'Media', meta:'
    ['dante1','dante2',[[45,2],[48,-5],[50,-30]]], ['dante2','dante3',[[50,-30],[46,-50],[43,-62],[40,-75]]]],
   arrivi:{0:[['fante','cortell'],['fante','sud']], 1:[['fante','caduti']], 2:[['fante','caduti']], 3:[['balestriere','cortell']], 4:[['fante','sud'],['fante','caduti']], 5:[['cavaliere','cortell']],
    6:[['balestriere','sud']], 7:[['fante','caduti'],['fante','cortell']], 8:[['cavaliere','sud']], 9:[['fante','caduti'],['balestriere','cortell']], 10:[['cavaliere','caduti']]}};
-const MAPPA_ROCCA ={extra:[[9,'corvo','sud']], num:3, titolo:'La Rocca', livello:'Difficile', meta:'indip', corto:'Piazza', caduta:'Piazza Indipendenza è caduta', metaNome:'Piazza Indipendenza', metaLabel:'PIAZZA INDIPENDENZA', dentro:[],
+const MAPPA_ROCCA ={extra:[[9,'corvo','sudO']], num:3, titolo:'La Rocca', livello:'Difficile', meta:'indip', corto:'Piazza', caduta:'Piazza Indipendenza è caduta', metaNome:'Piazza Indipendenza', metaLabel:'PIAZZA INDIPENDENZA', dentro:[],
   intro:'I cavalieri salgono dalla <b>valle</b> per il sentiero sotto le mura, e arrivano da <b>Via dei Caduti</b> all’incrocio con Via Marconi. Alla fine arriva il loro capo, il <b>Cavaliere Nero</b>. Difendi <b>Piazza Indipendenza</b>.',
   consiglio:'Via Marconi è vicinissima alla piazza: chiudila subito. Dalla valle i nemici ci mettono di più, ma hanno tante strade. Il Cavaliere Nero non si spinge: colpiscilo in tanti.',
   vite:5, legname:4, start:[['lanciere','arco'],['lanciere','ovest'],['arciere','indip'],['arciere','marconi'],['carpentiere','dante']],
@@ -3892,50 +3892,50 @@ const MISSIONI = [
   arrivi:{0:[['fante','fessa']], 1:[['fante','monte2']], 3:[['cavaliere','fessa']], 5:[['fante','lupia2']], 6:[['fante','monte2']], 8:[['fante','fessa']], 10:[['cavaliere','lupia2']]}},
  {...MAPPA_CENTRO, num:3, titolo:'Il cuore del paese', livello:'Facile', intro:'I nemici entrano in paese da <b>Via Cortellucci</b>, da <b>Via dei Caduti</b> e dal sud. Difendi il <b>Municipio</b>, in piazza. Arriva il <b>Balestriere</b>: tira da lontano. Hai due Lancieri.',
   arrivi:{0:[['fante','cortell']], 2:[['fante','sud']], 4:[['fante','caduti']], 6:[['balestriere','cortell']], 7:[['fante','caduti']], 8:[['fante','sud']], 10:[['cavaliere','caduti']], 11:[['balestriere','sud']]}},
- {...MAPPA_CENTRO, extra:[[2,'corazzato','cortell'],[7,'corvo','caduti'],[12,'corazzato','sud']], num:4, titolo:'La piazza assediata', livello:'Media', vite:5, intro:'Ora i nemici arrivano anche in due alla volta. Difendi il <b>Municipio</b>.',
-  arrivi:{0:[['fante','cortell']], 1:[['fante','sud']], 3:[['fante','caduti']], 4:[['balestriere','cortell']], 5:[['catapulta','caduti']], 6:[['guastatore','sud'],['fante','caduti']], 7:[['cavaliere','cortell']], 8:[['catapulta','sud']], 9:[['balestriere','sud']], 10:[['balestriere','cortell']], 11:[['cavaliere','caduti']]}},
- {...MAPPA_ROCCA, extra:[[3,'corazzato','sudO'],[5,'spia','caduti1'],[8,'corvo','sudO']], num:5, titolo:'Verso la Rocca', livello:'Media', vite:6, intro:'I cavalieri salgono dalla <b>valle</b> per il sentiero sotto le mura, e arrivano da <b>Via dei Caduti</b> all’incrocio con Via Marconi. Difendi <b>Piazza Indipendenza</b>.',
-  arrivi:{0:[['fante','caduti1']], 1:[['fante','sudO']], 3:[['balestriere','caduti1']], 4:[['cavaliere','sudO']], 2:[['fante','caduti1']], 6:[['guastatore','caduti1'],['fante','sudO']], 7:[['catapulta','caduti1']], 8:[['cavaliere','caduti1']], 9:[['balestriere','sudO']], 10:[['cavaliere','sudO']], 11:[['cavaliere','caduti1']], 12:[['fante','sudO']]}},
- {...MAPPA_ROCCA, extra:[[2,'corvo','sudO'],[4,'corazzato','caduti1'],[6,'spia','sudO'],[9,'corazzato','sudO'],[11,'corvo','caduti1']], num:6, titolo:'Il Cavaliere Nero', livello:'Difficile', vite:5,
-  arrivi:{0:[['fante','caduti1']], 1:[['fante','sudO']], 2:[['balestriere','caduti1']], 3:[['cavaliere','sudO']], 4:[['catapulta','sudO'],['fante','caduti1']], 5:[['fante','caduti1'],['fante','sudO']], 6:[['cavaliere','caduti1']], 7:[['catapulta','caduti1'],['balestriere','sudO']], 8:[['balestriere','sudO']], 9:[['cavaliere','sudO']], 10:[['nero','sudO']], 11:[['cavaliere','caduti1']], 12:[['guastatore','sudO'],['fante','caduti1']]}},
- {...MAPPA_NORD, extra:[[2,'corazzato','fessa'],[4,'corvo','lupia2'],[6,'spia','fessa'],[9,'corvo','monte2'],[10,'corazzato','lupia2']], num:7, titolo:'Notte alla Porta Nord', livello:'Difficile', vite:5, legname:4,
+ {...MAPPA_CENTRO, extra:[], num:4, titolo:'La piazza assediata', livello:'Media', vite:5, intro:'Ora i nemici arrivano anche in due alla volta, e arriva il <b>Fante corazzato</b>: l’armatura toglie 1 danno ai colpi leggeri. I <b>Lancieri</b> lo bucano. Difendi il <b>Municipio</b>.',
+  arrivi:{0:[['fante','cortell']], 1:[['fante','sud']], 2:[['corazzato','cortell']], 3:[['fante','caduti']], 4:[['balestriere','cortell']], 5:[['fante','sud'], ['fante','caduti']], 6:[['cavaliere','cortell']], 7:[['corazzato','sud']], 8:[['balestriere','caduti']], 9:[['cavaliere','sud']]}},
+ {...MAPPA_ROCCA, extra:[], num:5, titolo:'Verso la Rocca', livello:'Media', vite:8, intro:'I cavalieri salgono dalla <b>valle</b> per il sentiero sotto le mura, e arrivano da <b>Via dei Caduti</b> all’incrocio con Via Marconi. Difendi <b>Piazza Indipendenza</b>. Arriva il <b>Corvo della Rocca</b>: vola sopra tutti, lo colpiscono solo gli <b>Arcieri</b>.',
+  arrivi:{0:[['fante','caduti1']], 1:[['fante','sudO']], 2:[['corvo','caduti1']], 3:[['balestriere','caduti1']], 4:[['cavaliere','sudO']], 5:[['corazzato','caduti1']], 6:[['fante','sudO'], ['corvo','sudO']], 7:[['cavaliere','caduti1']], 8:[['balestriere','sudO']], 9:[['cavaliere','sudO']]}},
+ {...MAPPA_ROCCA, extra:[], num:6, titolo:'Il Cavaliere Nero', livello:'Difficile', vite:6,
+  arrivi:{0:[['fante','caduti1']], 1:[['fante','sudO']], 2:[['balestriere','caduti1']], 3:[['cavaliere','sudO']], 4:[['corazzato','caduti1'], ['fante','sudO']], 5:[['corvo','sudO']], 6:[['cavaliere','caduti1']], 7:[['balestriere','sudO']], 8:[['nero','sudO']], 9:[['fante','caduti1'], ['corazzato','sudO']]}},
+ {...MAPPA_NORD, extra:[], num:7, titolo:'Notte alla Porta Nord', livello:'Difficile', vite:5, legname:4,
   intro:'Di notte i cavalieri tornano alla <b>Porta Nord</b> con le catapulte. Arrivano da tutte e tre le strade. Difendi la <b>Chiesa</b>.',
   consiglio:'Le catapulte tirano da lontano: vai a prenderle con i Lancieri. Non lasciare libera la Salita verso la Chiesa.',
   start:[['lanciere','piazzale'],['arciere','chiesa'],['lanciere','cadutiM'],['carpentiere','lupia1'],['arciere','cortS']],
-  arrivi:{0:[['fante','fessa'],['fante','lupia2']], 1:[['fante','monte2']], 2:[['balestriere','fessa']], 3:[['cavaliere','lupia2']], 4:[['catapulta','monte2']], 5:[['guastatore','fessa'],['fante','lupia2']], 6:[['cavaliere','monte2']], 7:[['catapulta','lupia2']], 8:[['balestriere','fessa'],['fante','monte2']], 9:[['cavaliere','fessa']], 10:[['guastatore','lupia2']], 11:[['nero','monte2']], 12:[['cavaliere','lupia2']]}},
- {...MAPPA_CENTRO, extra:[[1,'spia','sud'],[3,'corazzato','cortell'],[6,'corvo','caduti'],[8,'corazzato','sud'],[10,'spia','cortell'],[11,'corvo','sud']], num:8, titolo:'Il Municipio sotto assedio', livello:'Difficile', vite:6, legname:4,
-  intro:'Il Cavaliere Nero vuole il <b>Municipio</b>. I nemici entrano da <b>Via Cortellucci</b>, da <b>Via dei Caduti</b> e dal sud, tutti insieme.',
+  arrivi:{0:[['fante','fessa'], ['fante','lupia2']], 1:[['fante','monte2']], 2:[['balestriere','fessa']], 3:[['cavaliere','lupia2']], 4:[['catapulta','monte2']], 5:[['corazzato','fessa']], 6:[['cavaliere','monte2'], ['corvo','lupia2']], 7:[['catapulta','lupia2']], 8:[['balestriere','fessa']], 9:[['cavaliere','fessa']]}},
+ {...MAPPA_CENTRO, extra:[], num:8, titolo:'Il Municipio sotto assedio', livello:'Difficile', vite:6, legname:4,
+  intro:'Il Cavaliere Nero vuole il <b>Municipio</b>. I nemici entrano da <b>Via Cortellucci</b>, da <b>Via dei Caduti</b> e dal sud, tutti insieme. Arrivano anche i <b>Guastatori</b>: con un barile distruggono una barricata in un colpo.',
   consiglio:'Tutti passano da Via Roma: tienila, ma attento alle catapulte che colpiscono chi sta vicino.',
   start:[['lanciere','roma2'],['lanciere','spietro'],['arciere','piazza'],['carpentiere','roma3'],['arciere','roma1']],
-  arrivi:{0:[['fante','cortell'],['fante','sud']], 1:[['fante','caduti']], 2:[['balestriere','cortell']], 3:[['cavaliere','sud'],['fante','caduti']], 4:[['catapulta','caduti']], 5:[['guastatore','sud'],['fante','cortell']], 6:[['cavaliere','caduti']], 7:[['catapulta','sud'],['balestriere','cortell']], 8:[['cavaliere','cortell']], 9:[['guastatore','caduti'],['fante','sud']], 10:[['balestriere','sud']], 11:[['nero','caduti']], 12:[['cavaliere','sud'],['fante','cortell']]}},
- {...MAPPA_ROCCA, extra:[[1,'corazzato','sudO'],[3,'corvo','caduti1'],[5,'spia','sudO'],[7,'corazzato','caduti1'],[9,'corvo','sudO'],[10,'spia','caduti1'],[12,'corazzato','sudO']], num:9, titolo:'L’ultima battaglia', livello:'Difficilissima', vite:5, legname:5,
-  intro:'L’ultimo assalto: <b>due Cavalieri Neri</b>, catapulte e tanti soldati. Salgono dalla <b>valle</b> e da <b>Via dei Caduti</b>. Difendi <b>Piazza Indipendenza</b>.',
+  arrivi:{0:[['fante','cortell'], ['fante','sud']], 1:[['fante','caduti']], 2:[['balestriere','cortell']], 3:[['cavaliere','sud'], ['guastatore','caduti']], 4:[['catapulta','caduti']], 5:[['corazzato','cortell']], 6:[['cavaliere','caduti'], ['corvo','sud']], 7:[['guastatore','sud']], 8:[['nero','caduti']], 9:[['balestriere','sud'], ['fante','cortell']]}},
+ {...MAPPA_ROCCA, extra:[], num:9, titolo:'L’ultima battaglia', livello:'Difficilissima', vite:7, legname:5,
+  intro:'L’ultimo assalto: <b>due Cavalieri Neri</b>, catapulte, soldati e le <b>Spie</b>, che si nascondono: le colpisci solo con un tuo difensore accanto. Salgono dalla <b>valle</b> e da <b>Via dei Caduti</b>. Difendi <b>Piazza Indipendenza</b>.',
   consiglio:'Chiudi subito Via Marconi. Usa l’olio della Porta quando arrivano in tanti. Colpisci i Cavalieri Neri tutti insieme.',
-  arrivi:{0:[['fante','caduti1'],['fante','sudO']], 1:[['balestriere','caduti1']], 2:[['cavaliere','sudO']], 3:[['catapulta','sudO'],['fante','caduti1']], 4:[['cavaliere','caduti1']], 5:[['guastatore','caduti1'],['fante','sudO']], 6:[['catapulta','caduti1']], 7:[['balestriere','sudO'],['cavaliere','caduti1']], 8:[['nero','sudO']], 9:[['fante','caduti1'],['guastatore','sudO']], 10:[['cavaliere','sudO']], 11:[['catapulta','caduti1']], 12:[['nero','caduti1']], 13:[['cavaliere','sudO'],['fante','caduti1']]}},
- {...MAPPA_SM, extra:[[4,'corvo','est']], num:10, titolo:'San Martino al Faggio', livello:'Difficile', vite:7,
-  arrivi:{0:[['fante','est']], 1:[['fante','campi2']], 3:[['balestriere','est']], 4:[['cavaliere','campi2']], 6:[['fante','est']], 7:[['catapulta','est']], 9:[['cavaliere','est']], 10:[['fante','campi2']], 12:[['nero','est']]}},
- {...MAPPA_SM, extra:[[5,'corvo','bosco2'],[9,'spia','ovest2']], num:11, titolo:'Dalla faggeta', livello:'Difficile', vite:6, legname:5,
+  arrivi:{0:[['fante','caduti1'], ['fante','sudO']], 1:[['balestriere','caduti1']], 2:[['cavaliere','sudO'], ['spia','caduti1']], 3:[['catapulta','sudO']], 4:[['corazzato','caduti1']], 5:[['corvo','sudO']], 6:[['nero','sudO']], 7:[['spia','sudO']], 8:[['balestriere','sudO']], 9:[['nero','caduti1']]}},
+ {...MAPPA_SM, extra:[], num:10, titolo:'San Martino al Faggio', livello:'Difficile', vite:9,
+  arrivi:{0:[['fante','est']], 1:[['fante','campi2']], 2:[['corvo','est']], 3:[['balestriere','est']], 4:[['cavaliere','campi2']], 5:[['corazzato','est']], 6:[['catapulta','est']], 7:[['fante','campi2']], 8:[['cavaliere','est']], 9:[['nero','est']]}},
+ {...MAPPA_SM, extra:[], num:11, titolo:'Dalla faggeta', livello:'Difficile', vite:6, legname:5,
   intro:'Ora i nemici arrivano anche dalla <b>faggeta</b>, per il sentiero nel bosco dietro la chiesetta, e dalla <b>Provinciale in alto</b>. Queste due strade sono corte: tieni qualcuno vicino alla <b>chiesetta</b>.',
   consiglio:'Dal bosco e dalla Provinciale in alto arrivano in pochi passi. Il sentiero nel bosco è ripido: i Lancieri possono buttarli giù.',
   start:[['lanciere','salita'],['lanciere','parch'],['arciere','chiesa'],['arciere','vic2'],['arciere','font'],['carpentiere','sotto']],
-  arrivi:{0:[['fante','est']], 1:[['fante','bosco2']], 3:[['balestriere','campi2']], 4:[['cavaliere','est']], 5:[['fante','campi2']], 6:[['fante','ovest2']], 7:[['catapulta','campi2']], 8:[['cavaliere','bosco2']], 10:[['guastatore','est']], 11:[['fante','ovest2']], 12:[['cavaliere','campi2']], 13:[['nero','est']]}},
- {...MAPPA_SM, extra:[[3,'corvo','bosco2'],[11,'spia','campi2']], num:12, titolo:'La notte di San Martino', livello:'Difficilissima', vite:5, legname:5,
+  arrivi:{0:[['fante','est']], 1:[['fante','bosco2']], 2:[['balestriere','campi2']], 3:[['cavaliere','est']], 4:[['corvo','bosco2'], ['fante','campi2']], 5:[['fante','ovest2']], 6:[['catapulta','campi2']], 7:[['cavaliere','bosco2']], 8:[['guastatore','est']], 9:[['spia','ovest2'], ['fante','ovest2']], 10:[['nero','est']]}},
+ {...MAPPA_SM, extra:[], num:12, titolo:'La notte di San Martino', livello:'Difficilissima', vite:7, legname:5,
   intro:'L’ultimo assalto alla frazione: il <b>Cavaliere Nero</b> e il <b>Gatto Mammone</b>, catapulte e soldati da <b>tutte e quattro le strade</b>. Difendi la <b>chiesetta di San Vincenzo Ferrer</b>.',
   consiglio:'Il Gatto Mammone salta un turno sì e uno no: colpiscilo nei turni in cui resta a terra. Suona le campane quando arrivano in tanti.',
   start:[['lanciere','salita'],['lanciere','parch'],['arciere','chiesa'],['arciere','vic2'],['arciere','font'],['carpentiere','sotto']],
-  arrivi:{0:[['fante','est'],['fante','bosco2']], 1:[['balestriere','campi2']], 2:[['cavaliere','ovest2']], 3:[['catapulta','est'],['fante','bosco2']], 4:[['cavaliere','campi2']], 5:[['guastatore','est'],['fante','ovest2']], 6:[['catapulta','bosco2']], 7:[['balestriere','est'],['cavaliere','campi2']], 8:[['nero','est']], 9:[['fante','ovest2'],['guastatore','campi2']], 10:[['cavaliere','bosco2']], 12:[['mammone','campi2']]}},
- {...MAPPA_CE, extra:[[4,'corvo','basso']], num:13, titolo:'Ceresola', livello:'Difficile', vite:7,
-  arrivi:{0:[['fante','basso']], 1:[['fante','vigna']], 3:[['balestriere','basso']], 4:[['cavaliere','vigna']], 6:[['fante','basso']], 7:[['catapulta','basso']], 8:[['fante','vigna']], 10:[['cavaliere','basso']], 12:[['nero','vigna']]}},
- {...MAPPA_CE, extra:[[5,'corvo','nordovest'],[9,'spia','casale']], num:14, titolo:'Dalle grotte', livello:'Difficile', vite:7, legname:5,
+  arrivi:{0:[['fante','est'], ['fante','bosco2']], 1:[['balestriere','campi2']], 2:[['cavaliere','ovest2'], ['corvo','bosco2']], 3:[['catapulta','est']], 4:[['cavaliere','campi2']], 5:[['guastatore','est']], 7:[['spia','campi2']], 8:[['nero','est']], 9:[['cavaliere','bosco2']], 10:[['mammone','campi2']]}},
+ {...MAPPA_CE, extra:[], num:13, titolo:'Ceresola', livello:'Difficile', vite:8,
+  arrivi:{0:[['fante','basso']], 1:[['fante','vigna']], 2:[['corvo','basso']], 3:[['balestriere','basso']], 4:[['cavaliere','vigna']], 5:[['corazzato','basso']], 6:[['catapulta','basso']], 7:[['fante','vigna']], 8:[['cavaliere','basso']], 9:[['nero','vigna']]}},
+ {...MAPPA_CE, extra:[], num:14, titolo:'Dalle grotte', livello:'Difficile', vite:7, legname:5,
   intro:'Vicino a Ceresola ci sono <b>piccole grotte</b> dove una volta si tenevano gli attrezzi e il grano. Ora i nemici ci si nascondono e scendono anche dalla <b>strada per Smerillo</b> e dal <b>casale grande</b>. Difendi la <b>Chiesa di San Nicola</b>.',
   consiglio:'La strada in alto è ripida: i Lancieri possono buttare giù i nemici. Il casale è lontano: hai tempo per prepararti.',
   start:[['lanciere','J'],['lanciere','piazza'],['arciere','chiesa'],['arciere','tor1'],['arciere','b1'],['carpentiere','curva']],
-  arrivi:{0:[['fante','basso']], 1:[['fante','nordovest']], 3:[['balestriere','casale']], 4:[['cavaliere','basso']], 5:[['fante','vigna']], 6:[['fante','nordovest']], 7:[['catapulta','casale']], 8:[['cavaliere','nordovest']], 10:[['guastatore','basso']], 11:[['fante','vigna']], 12:[['cavaliere','casale']], 13:[['nero','basso']]}},
- {...MAPPA_CE, extra:[[3,'corvo','nordest'],[11,'spia','vigna']], num:15, titolo:'La notte di San Nicola', livello:'Difficilissima', vite:7, legname:5,
+  arrivi:{0:[['fante','basso']], 1:[['fante','nordovest']], 2:[['balestriere','casale']], 3:[['cavaliere','basso']], 4:[['corvo','nordovest'], ['fante','vigna']], 6:[['catapulta','casale']], 7:[['cavaliere','nordovest']], 9:[['spia','casale'], ['fante','vigna']], 10:[['nero','basso']]}},
+ {...MAPPA_CE, extra:[], num:15, titolo:'La notte di San Nicola', livello:'Difficilissima', vite:7, legname:5,
   intro:'È la notte prima della <b>festa di San Nicola</b>, che a Ceresola si fa la seconda domenica di settembre. Il <b>Cavaliere Nero</b> e il <b>Gatto Mammone</b> arrivano di notte, da <b>tutte le strade</b>, anche dai <b>tornanti nel bosco</b>. Difendi la <b>Chiesa di San Nicola</b>.',
   consiglio:'Il Gatto Mammone salta un turno sì e uno no: colpiscilo quando resta a terra. Suona le campane di San Nicola quando arrivano in tanti.',
   start:[['lanciere','J'],['lanciere','piazza'],['arciere','chiesa'],['arciere','ovest'],['arciere','b1'],['carpentiere','tor1']],
-  arrivi:{0:[['fante','basso'],['fante','nordest']], 1:[['balestriere','vigna']], 2:[['cavaliere','nordovest']], 3:[['catapulta','basso'],['fante','nordest']], 4:[['cavaliere','vigna']], 5:[['guastatore','casale'],['fante','nordovest']], 6:[['catapulta','nordest']], 7:[['balestriere','basso'],['cavaliere','vigna']], 8:[['nero','basso']], 9:[['fante','nordovest'],['guastatore','casale']], 10:[['cavaliere','nordest']], 11:[['mammone','vigna']]}},
+  arrivi:{0:[['fante','basso'], ['fante','nordest']], 1:[['balestriere','vigna']], 2:[['cavaliere','nordovest'], ['corvo','nordest']], 3:[['catapulta','basso']], 5:[['guastatore','casale'], ['fante','nordovest']], 7:[['balestriere','basso'], ['spia','vigna']], 8:[['nero','basso']], 10:[['mammone','vigna']]}},
 ];
 // ===== una piccola storia: due righe prima di ogni missione (personaggi del paese, inventati) =====
 const DIALOGHI = {
@@ -4281,16 +4281,17 @@ function variante(S){
   const R = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
   const conta = {}; for (const c of S.coda) if (c.tipo !== 'nero') conta[c.nodo] = (conta[c.nodo] || 0) + 1;
   const ingressi = Object.keys(conta).filter(n => ARRIVO.has(n));
-  const liv = MI; // 1..5: più avanti, più cambi
-  for (const c of S.coda){ if (c.tipo === 'nero') continue;
+  const liv = Math.min(5, Math.max(1, MI)); // 1..5: più avanti, più cambi
+  // si cambia solo con nemici che questa missione ha già: niente sorprese mai spiegate, niente missioni allungate
+  const noti = [...new Set(S.coda.map(c => c.tipo))].filter(t => t !== 'nero' && t !== 'mammone' && t !== 'fante'), ultimo = Math.max(1, ...S.coda.map(c => c.turno));
+  for (const c of S.coda){ if (c.tipo === 'nero' || c.tipo === 'mammone') continue;
     if (R() < .2 + .1*liv) c.adatta = true; // il comandante sceglie l'ingresso meno difeso
     if (ingressi.length > 1 && R() < .55) c.nodo = ingressi[Math.floor(R()*ingressi.length)];
-    if (c.turno > 1) c.turno = Math.max(1, c.turno + Math.floor(R()*3) - 1);
-    if (c.tipo === 'fante' && R() < .12*liv){ const r = R(); c.tipo = liv >= 3 && r < .2 ? 'guastatore' : liv >= 3 && r < .4 ? 'corazzato' : liv >= 4 && r < .55 ? 'corvo' : r < .75 ? 'balestriere' : 'cavaliere'; } }
-  // dalla missione 3 in poi, qualche nemico in più
-  const extra = [0, 1, 2, 3, 4, 5][Math.min(liv, 5)] || 0;
-  const tipiExtra = liv >= 4 ? ['fante','fante','balestriere','cavaliere','guastatore'] : liv >= 3 ? ['fante','fante','balestriere','cavaliere'] : ['fante'];
-  for (let k = 0; k < extra && ingressi.length; k++) S.coda.push({tipo: tipiExtra[Math.floor(R()*tipiExtra.length)], nodo: ingressi[Math.floor(R()*ingressi.length)], turno: 2 + Math.floor(R()*10), bonus:0});
+    if (c.turno > 1) c.turno = Math.min(ultimo, Math.max(1, c.turno + Math.floor(R()*3) - 1));
+    if (c.tipo === 'fante' && noti.length && R() < .07*liv) c.tipo = noti[Math.floor(R()*noti.length)]; }
+  // dalla missione 3 in poi, uno o due nemici in più, sempre di tipi già visti
+  const extra = Math.min(2, Math.floor(liv/2)), tipiExtra = ['fante', ...noti.filter(t => t !== 'catapulta')];
+  for (let k = 0; k < extra && ingressi.length; k++) S.coda.push({tipo: tipiExtra[Math.floor(R()*tipiExtra.length)], nodo: ingressi[Math.floor(R()*ingressi.length)], turno: 2 + Math.floor(R()*Math.max(1, ultimo - 2)), bonus:0});
 }
 function nuovo(){
   const S = {monete:2, turno:1, porta:M.vite, portaMax:M.vite, dif:[], nem:[], bar:[], coda:[], legname:M.legname, nid:1, persi:0, portaPersa:0, esito:null};
