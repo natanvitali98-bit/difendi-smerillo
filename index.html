@@ -4753,8 +4753,6 @@ function render(T = performance.now()/1000){
   for (const b of bers){ const [x,y] = scrN(b.nodo);
     if (b.k === 'attacca'){ g.strokeStyle = '#ff3a2a'; g.lineWidth = 3; const r = 14 + 2*pul; g.beginPath(); g.arc(x, y - 14, r, 0, 7); g.moveTo(x - r - 5, y - 14); g.lineTo(x - r + 6, y - 14); g.moveTo(x + r - 6, y - 14); g.lineTo(x + r + 5, y - 14); g.moveTo(x, y - 14 - r - 5); g.lineTo(x, y - 14 - r + 6); g.moveTo(x, y - 14 + r - 6); g.lineTo(x, y - 14 + r + 5); g.stroke(); }
     else { g.fillStyle = `rgba(248,208,72,${.45*pul})`; g.strokeStyle = '#f8d048'; g.lineWidth = 3; g.beginPath(); g.ellipse(x, y, 17, 10, 0, 0, 7); g.fill(); g.stroke(); etichetta(x, y + 18, 'Barricata', '#14141e', '#f8d048', 11); } }
-  // i nemici si ricordano: segno l'ingresso da cui arriveranno in tanti (primi turni)
-  if (S && S.memIng && NODI[S.memIng] && S.turno <= 4 && !V){ const [x, y] = scrN(S.memIng), pu = riduci ? .5 : (Math.sin(T*5) + 1)/2; g.strokeStyle = `rgba(192,132,252,${.5 + .5*pu})`; g.lineWidth = 4; g.beginPath(); g.ellipse(x, y, 22 + pu*6, 12 + pu*3, 0, 0, 7); g.stroke(); etichetta(x, y - 34, 'Arrivano da qui', '#f3e8ff', 'rgba(60,20,90,.92)', 12); }
   // la guida: una freccia gialla che salta sopra la cosa da toccare
   const pt = passoGuida(); if (pt && typeof pt.punta === 'function' && !V){ const id = pt.punta(); if (id){ const [x,y] = scrN(id), b = riduci ? 0 : Math.abs(Math.sin(T*4))*8, dir = x > SW/2 ? 1 : -1, xx = x + dir*(30 + b), yy = y - 18;
     // freccia di lato (non copre il nemico sopra)
@@ -5160,7 +5158,7 @@ function intro(){
     <p class="mis-i">${M.intro}</p>
     ${(() => { if (RUN || SFIDA || M.evento || MI < 1) return ''; const m = memMappa(); if (!m) return ''; const top = Object.entries(m.dif).filter(([n]) => n !== META && NODI[n]).sort((a, b) => b[1] - a[1])[0], ing = ingressoSorpresa(m, 'fante');
       if (!top) return ''; const nb = Object.entries(m.bar).sort((a, b) => b[1] - a[1])[0];
-      return `<div class="mis-mem">${ico('teschio', 2)}<span><b>I nemici si ricordano di te.</b> L’ultima volta hai difeso quasi sempre la stessa strada${nb && nb[1] > .5 ? ' e hai costruito tante barricate' : ''}. Questa volta molti arriveranno dalla parte che hai lasciato più scoperta: sulla mappa la trovi col cerchio viola.</span></div>`; })()}
+      return `<div class="mis-mem">${ico('teschio', 2)}<span><b>I nemici si ricordano di te.</b> L’ultima volta hai difeso quasi sempre la stessa strada${nb && nb[1] > .5 ? ' e hai costruito tante barricate' : ''}. Questa volta molti arriveranno dalla parte che hai lasciato più scoperta.</span></div>`; })()}
     ${RUN ? '' : `<div class="mis-obi"><span class="mis-h">Stelle</span>${obiettivi().map(o => `<span class="mo">${ico('stellaV')} ${o.t}</span>`).join('')}</div>`}
     ${RUN || SFIDA || M.evento || MI === 0 ? '' : `<div class="mis-diff" role="group" aria-label="Difficoltà"><button type="button" data-d="0" aria-pressed="${!DIFFICILE}">Normale</button><button type="button" data-d="1" aria-pressed="${DIFFICILE}">Difficile <small>${Math.max(3, M.vite - 3)} vite · più nemici · meno tempo</small></button></div>`}
     <div class="mis-row"><span class="mis-h">Arrivano</span><div class="mis-icons" id="misNem"></div></div>
