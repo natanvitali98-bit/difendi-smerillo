@@ -3025,7 +3025,7 @@ function draw(T){
         b.fillStyle = '#fff'; b.fillRect(Math.round(sx-1), Math.round(sy-12+bob), 3, 3); b.fillRect(Math.round(sx), Math.round(sy-9+bob), 1, 1); } }
     if (S.sel !== null && S.luoghi[S.sel]){ const L = S.luoghi[S.sel], st = STAT[L.tipo]; if (st.range) cerchioRaggio(L.e, L.n, L.z, st.range[Math.max(0,L.lvl-1)], '#ffd03a'); }
     // modalità costruzione: una fascia verde morbida lungo le strade (dove puoi costruire), la strada in rosso (no)
-    const vediCostr = (S.modo && S.modo.tipo === 'costruisci') || (ORIZ && !S.inCorso && !S.modo);
+    const vediCostr = (S.modo && S.modo.tipo === 'costruisci') || (ORIZ && !S.modo); // sul telefono si costruisce anche durante l'ondata
     if (vediCostr && ORIZ && !(S.modo)){ if (!POSTI) POSTI = calcolaPosti(); // sul telefono strada e pallini sono disegnati una volta sola (più fluido)
       if (!CACHE_COSTR || CACHE_COSTR._p !== POSTI){ CACHE_COSTR = document.createElement('canvas'); CACHE_COSTR.width = W; CACHE_COSTR.height = H; CACHE_COSTR._p = POSTI; const b0 = b; b = CACHE_COSTR.getContext('2d'); b.imageSmoothingEnabled = false; const T0 = T, rid = riduci; T = 0;
         b.save(); b.lineCap = b.lineJoin = 'round';
@@ -3036,7 +3036,7 @@ function draw(T){
       for (const [e,n] of (POSTI || [])){ const [x,y] = P(e, n, altB(e, n)); b.fillStyle = 'rgba(20,20,51,.55)'; b.beginPath(); b.ellipse(x, y, 6, 3.4, 0, 0, 7); b.fill(); b.fillStyle = '#ffffff'; b.beginPath(); b.ellipse(x, y - 1, 4.5, 2.6, 0, 0, 7); b.fill(); }
 
         b = b0; T = T0; }
-      b.drawImage(CACHE_COSTR, 0, 0); }
+      if (S.inCorso) b.globalAlpha = .55; b.drawImage(CACHE_COSTR, 0, 0); b.globalAlpha = 1; } // durante l'ondata più leggeri: si vedono i nemici
     else if (vediCostr){ if (ORIZ && !POSTI) POSTI = calcolaPosti(); b.save(); b.lineCap = b.lineJoin = 'round';
       // la strada dei nemici, tratteggiata e leggera: si costruisce accanto
       b.globalAlpha = .9; b.lineWidth = 5; b.strokeStyle = '#141433'; b.setLineDash([6, 5]); b.lineDashOffset = riduci ? 0 : -T*14;
@@ -3368,7 +3368,7 @@ function tocca(ev){
     let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     POSTI = POSTI || calcolaPosti(); const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]);
     S.sel = null; ui();
-    if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 9 : 16)){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
+    if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 12 : 16)){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
     else if (!S.inCorso) S.fx.push({k:'txt', e, n, z:z+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'});
     aggiornaHud(); return; }
   S.sel = idx; ui(); aggiornaHud();
