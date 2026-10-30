@@ -76,6 +76,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .title{font-family:var(--f-pixel);font-weight:700;font-size:18px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wave{font-family:var(--f-pixel);font-size:13px;color:var(--muted)}
 .hud-r{display:flex;align-items:center;gap:12px}
+.hud-st,.hud-bt{display:inline-flex;align-items:center;gap:inherit}
 .stat{display:flex;align-items:center;gap:5px;font-family:var(--f-pixel);font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
 .ic{width:14px;height:14px;image-rendering:pixelated;flex-shrink:0}
 
@@ -1110,20 +1111,25 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 @keyframes tabSaltaPc{0%{transform:scale(1)}50%{transform:scale(1.3) rotate(-5deg)}100%{transform:scale(1.12)}}
 @media (min-width:1600px) and (min-height:950px){ .cr{zoom:1.2} }
 .cr-h small{background:rgba(20,20,51,.82);padding:3px 10px;border-radius:999px}
-/* ===== tempo reale col telefono in orizzontale: mappa grande a sinistra, comandi a destra ===== */
+/* ===== tempo reale col telefono in orizzontale: si tiene con due mani.
+   Pollice sinistro: Falco, Frana e Negozio in basso a sinistra. Pollice destro: Avvia ondata in basso a destra. In mezzo la mappa. ===== */
 @media (orientation:landscape) and (max-height:560px) and (max-width:1199px){
-  #app{max-width:none!important;display:grid!important;grid-template-columns:1fr minmax(230px,30vw);grid-template-rows:auto 1fr auto;grid-template-areas:"stage hud" "stage info" "stage bar";gap:6px!important;padding:6px calc(6px + env(safe-area-inset-right)) 6px calc(6px + env(safe-area-inset-left))!important}
-  #app > .hud{grid-area:hud;flex-wrap:wrap;gap:4px;padding:4px 6px!important;min-height:0!important}
-  #app > .hud .hud-l{width:100%}
-  #app > .hud .hud-r{width:100%;justify-content:space-between;gap:4px}
-  #app > .hud .hbtn{min-width:40px;min-height:40px}
+  #app{max-width:none!important;display:grid!important;grid-template-columns:minmax(150px,21vw) 1fr 108px;grid-template-rows:auto auto 1fr auto auto;
+    grid-template-areas:"wave stage ctrl" "stats stage ctrl" "info stage ." "falco stage go" "frana stage go";gap:6px!important;
+    padding:6px calc(6px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(6px + env(safe-area-inset-left))!important}
+  #app > .hud,#app .hud-r,#app > #bar{display:contents!important}
+  #app .hud-l{grid-area:wave;background:var(--linea);color:#fff;border-radius:12px;padding:5px 9px;font-size:14px}
+  #app .hud-st{grid-area:stats;background:var(--linea);color:#fff;border-radius:12px;padding:5px 9px;justify-content:space-between;gap:6px}
+  #app .hud-st .stat b{font-size:18px}
+  #app .hud-bt{grid-area:ctrl;flex-direction:column;align-items:stretch;gap:6px}
+  #app .hud-bt .hbtn{min-height:46px;width:100%}
   #app > #stage{grid-area:stage;border-radius:14px!important}
-  #app > #info{grid-area:info;align-self:stretch;max-height:none!important;min-height:0!important;overflow-y:auto;font-size:13px!important}
+  #app > #info{grid-area:info;align-self:stretch;max-height:none!important;min-height:0!important;overflow-y:auto;font-size:12.5px!important;padding:7px 8px!important;flex-direction:column;align-items:stretch}
   #app #info .acts{flex-direction:column}
-  #app > #bar{grid-area:bar;grid-template-columns:1fr 1fr!important;gap:6px!important}
-  #app > #bar #bGo{grid-column:1 / -1;min-height:50px}
-  #app > #bar .skill{min-height:46px}
-  #app > #modBar{grid-area:bar}
+  #app #bFalco{grid-area:falco;min-height:52px} #app #bFrana{grid-area:frana;min-height:52px}
+  #app #bGo{grid-area:go;min-height:0;height:100%;writing-mode:horizontal-tb;font-size:19px;line-height:1.1;padding:6px;white-space:normal}
+  #app > #modBar{grid-area:go}
+  #bShop{left:8px!important;bottom:8px!important}
   #guidaCl{font-size:13px!important;padding:7px 10px!important;right:60px!important}
 }
 #giraTel{position:fixed;inset:0;z-index:2147483000;background:#162f8f;color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px;font:400 22px var(--f-big)}
@@ -1266,11 +1272,11 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
       <span class="wave" id="hWave">Smerillo, 806 m</span>
     </div>
     <div class="hud-r">
-      <span class="stat" title="Castagne"><canvas class="ic" data-ic="nut"></canvas><b id="hCast">0</b></span>
-      <span class="stat" title="Resistenza del borgo"><canvas class="ic" data-ic="cuore"></canvas><b id="hVite">20</b></span>
-      <button id="bVel" class="hbtn" aria-label="Velocità di gioco">×1</button>
+      <span class="hud-st"><span class="stat" title="Castagne"><canvas class="ic" data-ic="nut"></canvas><b id="hCast">0</b></span>
+      <span class="stat" title="Resistenza del borgo"><canvas class="ic" data-ic="cuore"></canvas><b id="hVite">20</b></span></span>
+      <span class="hud-bt"><button id="bVel" class="hbtn" aria-label="Velocità di gioco">×1</button>
       <button id="bPausa" class="hbtn" aria-label="Pausa">II</button>
-      <button id="bMod" class="hbtn" aria-pressed="false" hidden>Fine</button>
+      <button id="bMod" class="hbtn" aria-pressed="false" hidden>Fine</button></span>
     </div>
   </header>
 
