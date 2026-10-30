@@ -1111,27 +1111,39 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 @keyframes tabSaltaPc{0%{transform:scale(1)}50%{transform:scale(1.3) rotate(-5deg)}100%{transform:scale(1.12)}}
 @media (min-width:1600px) and (min-height:950px){ .cr{zoom:1.2} }
 .cr-h small{background:rgba(20,20,51,.82);padding:3px 10px;border-radius:999px}
-/* ===== tempo reale col telefono in orizzontale: si tiene con due mani.
-   Pollice sinistro: Falco, Frana e Negozio in basso a sinistra. Pollice destro: Avvia ondata in basso a destra. In mezzo la mappa. ===== */
-@media (orientation:landscape) and (max-height:560px) and (max-width:1199px){
-  #app{max-width:none!important;display:grid!important;grid-template-columns:minmax(150px,21vw) 1fr 108px;grid-template-rows:auto auto 1fr auto auto;
-    grid-template-areas:"wave stage ctrl" "stats stage ctrl" "info stage ." "falco stage go" "frana stage go";gap:6px!important;
-    padding:6px calc(6px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(6px + env(safe-area-inset-left))!important}
-  #app > .hud,#app .hud-r,#app > #bar{display:contents!important}
-  #app .hud-l{grid-area:wave;background:var(--linea);color:#fff;border-radius:12px;padding:5px 9px;font-size:14px}
-  #app .hud-st{grid-area:stats;background:var(--linea);color:#fff;border-radius:12px;padding:5px 9px;justify-content:space-between;gap:6px}
-  #app .hud-st .stat b{font-size:18px}
-  #app .hud-bt{grid-area:ctrl;flex-direction:column;align-items:stretch;gap:6px}
-  #app .hud-bt .hbtn{min-height:46px;width:100%}
-  #app > #stage{grid-area:stage;border-radius:14px!important}
-  #app > #info{grid-area:info;align-self:stretch;max-height:none!important;min-height:0!important;overflow-y:auto;font-size:12.5px!important;padding:7px 8px!important;flex-direction:column;align-items:stretch}
-  #app #info .acts{flex-direction:column}
-  #app #bFalco{grid-area:falco;min-height:52px} #app #bFrana{grid-area:frana;min-height:52px}
-  #app #bGo{grid-area:go;min-height:0;height:100%;writing-mode:horizontal-tb;font-size:19px;line-height:1.1;padding:6px;white-space:normal}
-  #app > #modBar{grid-area:go}
-  #bShop{left:8px!important;bottom:8px!important}
-  #guidaCl{font-size:13px!important;padding:7px 10px!important;right:60px!important}
-}
+/* ===== tempo reale col telefono in orizzontale (come Kingdom Rush): mappa a tutto schermo, comandi negli angoli sotto i pollici,
+   si costruisce toccando un pallino della mappa (si apre un cerchio con le difese) ===== */
+body.rt-oriz #app{max-width:none!important;display:block!important;padding:0!important;position:fixed;inset:0}
+body.rt-oriz #app > #stage{position:fixed;inset:0;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.rt-oriz #app > .hud{position:fixed;z-index:8;top:calc(6px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));display:flex!important;align-items:flex-start;gap:6px;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;pointer-events:none;min-height:0!important}
+body.rt-oriz #app > .hud > *,body.rt-oriz #app .hud-r > *{pointer-events:auto}
+body.rt-oriz #app .hud-r{display:contents!important}
+body.rt-oriz #app .hud-l,body.rt-oriz #app .hud-st{background:rgba(20,20,51,.88);color:#fff;border-radius:12px;padding:5px 10px;min-height:36px;display:inline-flex;align-items:center;gap:10px;font-size:14px}
+body.rt-oriz #app .hud-st .stat b{font-size:17px}
+body.rt-oriz #app .hud-bt{margin-left:auto;display:inline-flex;gap:6px}
+body.rt-oriz #app .hud-bt .hbtn{min-width:44px;min-height:44px}
+body.rt-oriz #app > #bar{display:contents!important}
+body.rt-oriz #app #bFalco,body.rt-oriz #app #bFrana{position:fixed;z-index:8;left:calc(10px + env(safe-area-inset-left));width:132px;min-height:56px;border-radius:28px!important}
+body.rt-oriz #app #bFrana{bottom:calc(10px + env(safe-area-inset-bottom))}
+body.rt-oriz #app #bFalco{bottom:calc(74px + env(safe-area-inset-bottom))}
+body.rt-oriz #app #bGo{position:fixed;z-index:8;right:calc(10px + env(safe-area-inset-right));bottom:calc(10px + env(safe-area-inset-bottom));width:168px;min-height:64px;border-radius:32px!important;font-size:19px}
+body.rt-oriz #app #bVel{position:fixed;z-index:8;right:calc(10px + env(safe-area-inset-right));bottom:calc(84px + env(safe-area-inset-bottom));min-width:60px;min-height:48px}
+body.rt-oriz #app > #info{position:fixed;z-index:8;top:calc(50px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));width:min(300px,36vw);max-height:44vh;min-height:0!important;overflow-y:auto;font-size:12.5px!important;padding:7px 9px!important;flex-direction:column;align-items:stretch;opacity:.97}
+body.rt-oriz #app #info .acts{flex-direction:column}
+body.rt-oriz.rt-onda #app > #info,body.rt-oriz.anello-on #app > #info{display:none!important}
+body.rt-oriz #bShop,body.rt-oriz #negozio{display:none!important}
+body.rt-oriz #stage .zoom{top:calc(50px + env(safe-area-inset-top))!important;right:calc(10px + env(safe-area-inset-right))!important;bottom:auto!important}
+body.rt-oriz #guidaCl{top:auto!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;left:calc(156px + env(safe-area-inset-left))!important;right:calc(190px + env(safe-area-inset-right))!important;font-size:13px!important;padding:7px 10px!important}
+body.rt-oriz #app > #modBar{position:fixed;bottom:0;left:0;right:0;z-index:9}
+#anello{position:absolute;z-index:9;width:0;height:0}
+#anello > *{pointer-events:inherit}
+#anello .an-c{position:absolute;left:-25px;top:-25px;width:50px;height:50px;border-radius:50%;background:#141433;color:#ffd03a;border:3px solid #fff;font:400 15px var(--f-big);box-shadow:0 3px 0 rgba(0,0,0,.4)}
+#anello .an-v{position:absolute;left:-37px;top:-37px;width:74px;height:74px;border-radius:50%;background:#fff;border:3px solid var(--linea);box-shadow:0 4px 0 var(--linea);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px;font:400 11px/1.05 var(--f-big);color:var(--testo);text-align:center;animation:anIn .2s cubic-bezier(.2,.9,.3,1.3) both}
+#anello .an-v canvas{width:26px;height:26px;image-rendering:pixelated}
+#anello .an-k{display:flex;align-items:center;gap:2px;font-size:12px;color:#7a4b12}
+#anello .an-v.off{opacity:.55;filter:grayscale(.8)}
+#anello .an-v:active{scale:.92}
+@keyframes anIn{from{opacity:0;scale:.3}to{opacity:1;scale:1}}
 #giraTel{position:fixed;inset:0;z-index:2147483000;background:#162f8f;color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px;font:400 22px var(--f-big)}
 #giraTel small{font:700 14px var(--f-body);color:#d8e2ff;max-width:340px}
 #giraTel .gt-ic{width:56px;height:90px;border:5px solid #fff;border-radius:12px;animation:gtGira 1.6s ease-in-out infinite}
@@ -2998,13 +3010,13 @@ function draw(T){
         b.fillStyle = '#fff'; b.fillRect(Math.round(sx-1), Math.round(sy-12+bob), 3, 3); b.fillRect(Math.round(sx), Math.round(sy-9+bob), 1, 1); } }
     if (S.sel !== null && S.luoghi[S.sel]){ const L = S.luoghi[S.sel], st = STAT[L.tipo]; if (st.range) cerchioRaggio(L.e, L.n, L.z, st.range[Math.max(0,L.lvl-1)], '#ffd03a'); }
     // modalità costruzione: una fascia verde morbida lungo le strade (dove puoi costruire), la strada in rosso (no)
-    if (S.modo && S.modo.tipo === 'costruisci'){ b.save(); b.lineCap = b.lineJoin = 'round';
+    if ((S.modo && S.modo.tipo === 'costruisci') || (ORIZ && !S.inCorso && !S.modo)){ if (ORIZ && !POSTI) POSTI = calcolaPosti(); b.save(); b.lineCap = b.lineJoin = 'round';
       // la strada dei nemici, tratteggiata e leggera: si costruisce accanto
       b.globalAlpha = .9; b.lineWidth = 5; b.strokeStyle = '#141433'; b.setLineDash([6, 5]); b.lineDashOffset = riduci ? 0 : -T*14;
       for (const pass of [0, 1]){ if (pass){ b.lineWidth = 3; b.strokeStyle = '#ffd03a'; } for (const v of VIE){ b.beginPath(); v.forEach(([e,n], k) => { const [x,y] = P(e, n, altB(e, n)); k ? b.lineTo(x, y) : b.moveTo(x, y); }); b.stroke(); } } b.setLineDash([]);
       b.restore();
       for (const [e,n] of (POSTI || [])){ const [x,y] = P(e, n, altB(e, n)); b.fillStyle = 'rgba(20,20,51,.55)'; b.beginPath(); b.ellipse(x, y, 6, 3.4, 0, 0, 7); b.fill(); b.fillStyle = '#ffffff'; b.beginPath(); b.ellipse(x, y - 1, 4.5, 2.6, 0, 0, 7); b.fill(); }
-      const gh = S.modo.ghost; if (gh){ const st = STAT[S.modo.t], r = st.range ? st.range[0] : 10; cerchioRaggio(gh.e, gh.n, gh.z, r, gh.err ? '#ff5a4a' : '#7cffa6');
+      const gh = S.modo && S.modo.ghost; if (gh){ const st = STAT[S.modo.t], r = st.range ? st.range[0] : 10; cerchioRaggio(gh.e, gh.n, gh.z, r, gh.err ? '#ff5a4a' : '#7cffa6');
         const [x,y] = P(gh.e, gh.n, gh.z); b.globalAlpha = .75; disegnaStruttura({tipo:S.modo.t, lvl:1, e:gh.e, n:gh.n, z:gh.z, spec:null, costr:0, anim:0}, x, y, T); b.globalAlpha = 1;
         b.fillStyle = gh.err ? '#ff5a4a' : '#3ee07a'; b.strokeStyle = '#141433'; b.lineWidth = 2; b.beginPath(); b.ellipse(x, y + 1, 9, 4, 0, 0, 7); b.fill(); b.stroke(); const img = SPR[ICONA[S.modo.t]], t0 = y - 20; b.fillStyle = gh.err ? '#ffd0c8' : '#fff'; b.beginPath(); b.arc(x, t0, 9, 0, 7); b.fill(); b.stroke(); if (img) spr(img, x, t0 + img.height*.75, false, 1.5); } }
     // bandiere di raduno della milizia
@@ -3112,7 +3124,8 @@ function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; 
   document.querySelectorAll('.punta').forEach(x => x.classList.remove('punta'));
   if (!S || fatto || MOD || S.fine){ g.hidden = true; return; }
   const costruite = S.luoghi.some(L => L.lvl); let t = '', sub = '', ok = false, punta = null;
-  if (!costruite && !(S.modo && S.modo.tipo === 'costruisci') && !NEG){ t = '1. Tocca Negozio, in basso.'; sub = 'Lì compri le difese. Le castagne 🌰 sono i tuoi soldi.'; punta = '#bShop'; }
+  if (ORIZ && !costruite){ t = ANELLO ? '2. Scegli la Balestra nel cerchio.' : '1. Tocca un pallino bianco vicino alla strada.'; sub = ANELLO ? 'Costa 70 castagne 🌰. Spara lontano.' : 'Si apre un cerchio con le difese.'; }
+  else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci') && !NEG){ t = '1. Tocca Negozio, in basso.'; sub = 'Lì compri le difese. Le castagne 🌰 sono i tuoi soldi.'; punta = '#bShop'; }
   else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci')){ t = '1. Tocca la Balestra.'; sub = 'Costa 70 castagne 🌰. Spara lontano.'; punta = '[data-shop="vedetta"]'; }
   else if (!costruite && !S.modo.ghost){ t = '2. Tocca un pallino bianco.'; sub = 'I pallini sono i posti vicino alla strada gialla, dove passano i nemici.'; }
   else if (!costruite){ t = '3. Il cerchio è il raggio: tocca Costruisci.'; sub = 'Spara a chi entra nel cerchio.'; punta = '#infoActs .act'; }
@@ -3130,7 +3143,7 @@ function aggiornaNegozio(){ const ok = !!S && !MOD && !S.fine;
   ng.hidden = !(ok && NEG); b.hidden = !ok || NEG || !!(S && S.modo && S.modo.tipo === 'costruisci');
   if (ok && NEG){ const sd = $('#ngSoldi'); if (sd){ sd.innerHTML = ''; sd.append(nutIcon(), document.createTextNode(' ' + Math.floor(S.castagne))); } } }
 function ui(){
-  setTimeout(guidaCl, 0); aggiornaNegozio();
+  setTimeout(guidaCl, 0); aggiornaNegozio(); document.body.classList.toggle('rt-onda', !!(S && S.inCorso && S.sel === null && !S.modo));
   const txt = $('#infoTxt'), acts = $('#infoActs'); acts.innerHTML = '';
   if (!S){ txt.textContent = ''; return; }
   if (S.modo && S.modo.tipo === 'costruisci'){ const off = NEGOZIO.find(x => x.tipo === S.modo.t), gh = S.modo.ghost;
@@ -3288,6 +3301,7 @@ function tocca(ev){
   const r = cv.getBoundingClientRect(); const sx = (ev.clientX - r.left - ox)/scale, sy = (ev.clientY - r.top - oy)/scale;
   if (MOD){ modSel = trovaOggetto(sx, sy); modUI(); return; }
   if (!S || S.fine) return;
+  if (ORIZ && ANELLO){ chiudiAnello(); S.sel = null; ui(); return; } // tocco fuori dal cerchio: si chiude
   if (S.modo){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     const m = S.modo; S.modo = null;
     if (m.tipo === 'trappola'){ if (S.ordini > 0 && S.castagne >= COSTO_TRAPPOLA) piazzaTrappola(e, n); }
@@ -3312,6 +3326,14 @@ function tocca(ev){
     if (tgt){ if (S.falcoCd <= 0) lanciaFalco(tgt); return; } }
   let idx = null, best = Math.max(16, 30/scale);
   S.luoghi.forEach((L,i) => { const [x,y] = P(L.e, L.n, L.z); const top = y - (STAT[L.tipo].h||0)*K - 6; const d = Math.min(Math.hypot(x-sx, y-sy), Math.hypot(x-sx, top-sy)); if (d < best){ best = d; idx = i; } });
+  if (ORIZ){ const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top;
+    if (idx !== null){ S.sel = idx; ui(); aggiornaHud(); anelloTorre(idx); return; }
+    let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
+    POSTI = POSTI || calcolaPosti(); const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]);
+    S.sel = null; ui();
+    if (Math.hypot(q[0]-e, q[1]-n) < 16){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
+    else S.fx.push({k:'txt', e, n, z:z+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'});
+    aggiornaHud(); return; }
   S.sel = idx; ui(); aggiornaHud();
 }
 $('#zIn').onclick = () => zoom(1.3, SW/2, SH/2); $('#zOut').onclick = () => zoom(1/1.3, SW/2, SH/2);
@@ -3352,7 +3374,32 @@ function puntoLibero(e, n){ let dv = 1e9, re = e, rn = n; for (const v of VIE) f
   for (const pol of [...CV().map(c => c.pts), CHIESA, COMUNE, LOGGE, portaPoly()]){ if (dentro(pol, e, n)) return 'Sopra una casa non si può'; for (let k = 0; k < pol.length; k++){ const q = pol[k], r = pol[(k+1) % pol.length]; if (distSeg(e, n, q[0], q[1], r[0], r[1]) < 2) return 'Troppo attaccato a una casa'; } }
   return null; }
 // i posti dove puoi costruire: pallini lungo la strada, a 7 e 12 metri dal bordo
-let POSTI = null;
+let POSTI = null, ORIZ = false, ANELLO = null; // ORIZ: telefono in orizzontale nella Difesa in tempo reale (si costruisce col cerchio, come Kingdom Rush)
+window.impostaOriz = o2 => { if (o2 === ORIZ) return; ORIZ = o2; document.body.classList.toggle('rt-oriz', o2); chiudiAnello(); if (S){ S.modo = null; NEG = false; POSTI = o2 ? calcolaPosti() : null; ui(); } dispatchEvent(new Event('resize')); };
+function chiudiAnello(){ const a = document.getElementById('anello'); if (a) a.remove(); ANELLO = null; document.body.classList.remove('anello-on'); }
+function apriAnello(sx, sy, voci, centro){ chiudiAnello(); const st = $('#stage'), a = document.createElement('div'); a.id = 'anello';
+  const R = 82, W = st.clientWidth, H = st.clientHeight, cx = Math.max(R + 40, Math.min(W - R - 40, sx)), cy = Math.max(R + 40, Math.min(H - R - 40, sy));
+  a.style.left = cx + 'px'; a.style.top = cy + 'px';
+  const c = document.createElement('button'); c.type = 'button'; c.className = 'an-c'; c.innerHTML = centro || '✕'; c.setAttribute('aria-label', 'Chiudi'); c.onclick = e => { e.stopPropagation(); chiudiAnello(); ui(); }; a.append(c);
+  voci.forEach((v, i) => { const ang = -Math.PI/2 + i*2*Math.PI/voci.length, b = document.createElement('button'); b.type = 'button'; b.className = 'an-v' + (v.off ? ' off' : '');
+    b.style.transform = `translate(${Math.round(Math.cos(ang)*R)}px,${Math.round(Math.sin(ang)*R)}px)`; b.style.animationDelay = (i*25) + 'ms'; b.append(...v.html);
+    b.onclick = e => { e.stopPropagation(); if (v.off){ if (v.perche) S.fx.push({k:'txt', e:ANELLO.e, n:ANELLO.n, z:ANELLO.z + 10, t:0, s:v.perche, col:'#ffd0c0'}); SUONI.suona && SUONI.suona('tocco'); return; } v.f(); };
+    a.append(b); });
+  a.style.pointerEvents = 'none'; setTimeout(() => { a.style.pointerEvents = ''; }, 380); // il 'click' che segue il tocco non deve premere subito un bottone del cerchio
+  st.append(a); document.body.classList.add('anello-on'); }
+const vocePiccola = (ic, nome, costo) => { const out = []; if (ic) out.push(ic); const n = document.createElement('span'); n.className = 'an-n'; n.textContent = nome; out.push(n);
+  if (costo != null){ const cl = document.createElement('span'); cl.className = 'an-k'; cl.append(nutIcon(), document.createTextNode(costo)); out.push(cl); } return out; };
+function anelloCostruisci(e, n, sx, sy){ const voci = NEGOZIO.map(off => ({html: vocePiccola(sprIcon(ICONA[off.tipo]), off.nome, off.costo), off: S.castagne < off.costo, perche:'Servono più castagne',
+    f: () => { chiudiAnello(); if (piazzaDifesa(off.tipo, e, n)){ S.sel = null; POSTI = calcolaPosti(); } ui(); aggiornaHud(); }}));
+  apriAnello(sx, sy, voci); ANELLO = {e, n, z:alt(e, n)}; }
+function vendiLuogo(L, i){ const r = Math.round(L.speso * .6); S.castagne += r; L.lvl = 0; L.spec = null; L.speso = 0; L.mira = 'primo'; if (L.tipo === 'milizia') aggiornaMilizia(L); if (L.libero){ S.luoghi.splice(i, 1); S.sel = null; costruisciTorri(); POSTI = calcolaPosti(); } ui(); aggiornaHud(); }
+function anelloTorre(i){ const L = S.luoghi[i]; if (!L) return; const [x, y] = P(L.e, L.n, L.z), sx = ox + x*scale, sy = oy + y*scale - 20, c = costoLivello(L), voci = [];
+  if (L.lvl >= 3) voci.push({html: vocePiccola(null, 'Al massimo', null), off:true, perche:'È già al massimo'});
+  else voci.push({html: vocePiccola(null, L.lvl === 0 ? 'Attiva' : L.lvl === 2 ? 'Specializza' : 'Potenzia', c), off: S.castagne < c, perche:'Servono più castagne', f: () => { compra(L); if ($('#cards').hidden) anelloTorre(i); else chiudiAnello(); }});
+  if (L.lvl && ['vedetta','nido','piazza'].includes(L.tipo)){ const m = MIRE.find(q => q[0] === L.mira) || MIRE[0]; voci.push({html: vocePiccola(null, 'Mira: ' + m[1], null), f: () => { const k = MIRE.findIndex(q => q[0] === L.mira); L.mira = MIRE[(k+1) % (L.tipo === 'piazza' ? 2 : 3)][0]; anelloTorre(i); ui(); }}); }
+  if (L.lvl && L.tipo === 'milizia') voci.push({html: vocePiccola(null, 'Sposta soldati', null), f: () => { chiudiAnello(); S.modo = {tipo:'raduno', L}; ui(); }});
+  if (L.lvl){ const r = Math.round(L.speso * .6); voci.push({html: vocePiccola(null, 'Vendi +', r), f: () => { chiudiAnello(); vendiLuogo(L, i); }}); }
+  apriAnello(sx, sy, voci, L.lvl ? '★'.repeat(L.lvl) : '✕'); ANELLO = {e:L.e, n:L.n, z:L.z}; }
 function calcolaPosti(){ const out = [], scr = [];
   for (const v of VIE) for (let i = 0; i < v.length-1; i++){ const [e0,n0] = v[i], [e1,n1] = v[i+1], L = Math.hypot(e1-e0, n1-n0); if (!L) continue; const ux = (e1-e0)/L, uy = (n1-n0)/L;
     for (let t = 0; t < L; t += 9){ const e = e0 + ux*t, n = n0 + uy*t; for (const d of [7, -7, 12, -12]){ const pe = e - uy*d, pn = n + ux*d; if (puntoLibero(pe, pn)) continue; if (out.some(q => Math.hypot(q[0]-pe, q[1]-pn) < 7)) continue; const [sx, sy] = P(pe, pn, altB(pe, pn)); if (scr.some(q => Math.hypot(q[0]-sx, q[1]-sy) < 8)) continue; scr.push([sx, sy]); out.push([pe, pn]); } } }
@@ -5589,6 +5636,7 @@ for (const t of ['gesturestart','gesturechange','gestureend']) document.addEvent
   const inRT = () => { const t = document.getElementById('title'), b = document.getElementById('tb'), ld = document.getElementById('caricamento'); return !!(t && t.hidden && b && b.hidden && !ld); };
   let avvisato = false;
   const agg = () => { const oriz = innerWidth > innerHeight, rt = inRT(); document.body.classList.toggle('gira-v', tel() && oriz && !rt);
+    if (window.impostaOriz) window.impostaOriz(rt && tel() && oriz);
     const g = document.getElementById('rtGira');
     if (rt && tel() && !oriz && !avvisato && !(typeof S !== 'undefined' && S && S.inCorso)){ avvisato = true; let ok = false; try { ok = sessionStorage.getItem('ds-gira') === '1'; } catch(e){} if (!ok){
         const d = document.createElement('div'); d.id = 'rtGira'; const lock = !!(screen.orientation && screen.orientation.lock) && !!document.documentElement.requestFullscreen;
