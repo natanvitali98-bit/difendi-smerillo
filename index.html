@@ -2910,7 +2910,9 @@ function mappaRT(cm){ const def = CMISSIONI[cm];
   RTMAP = {cm, scena: LG.crea(), centro: [Mt.e, Mt.n]}; W = LG.W; H = LG.H; buf.width = W; buf.height = H; b.imageSmoothingEnabled = false; CACHE_COSTR = null; POSTI = null; primo = true; fit(); }
 function limita(){
   scale = Math.max(scale, SW/W, SH/H); scale = Math.min(scale, 4);
-  camX = Math.max(SW/(2*scale), Math.min(W - SW/(2*scale), camX)); camY = Math.max(SH/(2*scale), Math.min(H - SH/(2*scale), camY));
+  // sul telefono la mappa può andare un po' oltre i bordi: così anche i posti sotto la barra in alto o sotto i bottoni si possono toccare
+  const oriz = ORIZ && document.body.classList.contains('rt-oriz'), pT = ORIZ ? 60 : 0, pB = ORIZ ? (oriz ? 90 : 170) : 0, pL = oriz ? 150 : 0, pR = oriz ? 190 : 0;
+  camX = Math.max((SW/2 - pL)/scale, Math.min(W - (SW/2 - pR)/scale, camX)); camY = Math.max((SH/2 - pT)/scale, Math.min(H - (SH/2 - pB)/scale, camY));
   ox = SW/2 - camX*scale; oy = SH/2 - camY*scale;
 }
 function fit(){
@@ -3403,7 +3405,7 @@ function tocca(ev){
   const r = cv.getBoundingClientRect(); const sx = (ev.clientX - r.left - ox)/scale, sy = (ev.clientY - r.top - oy)/scale;
   if (MOD){ modSel = trovaOggetto(sx, sy); modUI(); return; }
   if (!S || S.fine) return;
-  { const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top, f = FRECCE_ING.find(q => Math.hypot(q.x - px, q.y - py) < 30); if (f){ const VV = VIEZ[f.meta ? 0 : f.v], p0 = f.meta ? VV[VV.length - 1] : VV[0], [x, y] = P(p0[0], p0[1], p0[2]); S.camT = {x, y}; return; } }
+  { const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top, f = FRECCE_ING.find(q => Math.hypot(q.x - px, q.y - py) < 30); if (f && !(ORIZ && pallinoVicino((ev.clientX - rs.left - ox)/scale, (ev.clientY - rs.top - oy)/scale).d*scale < 16)){ const VV = VIEZ[f.meta ? 0 : f.v], p0 = f.meta ? VV[VV.length - 1] : VV[0], [x, y] = P(p0[0], p0[1], p0[2]); S.camT = {x, y}; return; } }
   if (ORIZ && ANELLO){ chiudiAnello(); S.sel = null; ui(); } // tocco fuori dal cerchio: si chiude e il tocco vale lo stesso (es. su un nemico)
   if (S.modo){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     const m = S.modo; S.modo = null;
@@ -3426,11 +3428,14 @@ function tocca(ev){
     S.fx.push({k:'txt', e:f.e, n:f.n, z:f.z+10, t:0, s:t, col:'#f8f0d0'}); aggiornaHud(); return; } }
   // 2) un nemico? attacco del tuo smeriglio
   if (S.inCorso){ let tgt = null, bd = ORIZ ? Math.max(22, 46/scale) : Math.max(14, 34/scale); for (const x of S.nemici){ const [X,Y] = P(x.e, x.n, x.z); const d = Math.hypot(X-sx, Y-(x.d.vola ? 16 : 6)-sy); if (d < bd){ bd = d; tgt = x; } }
-    if (tgt){ if (S.falcoCd <= 0) lanciaFalco(tgt); return; } }
+    let spot = false; if (tgt && ORIZ){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); } POSTI = POSTI || calcolaPosti();
+      const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]), [qx, qy] = P(q[0], q[1], altB(q[0], q[1])), [tx, ty] = P(tgt.e, tgt.n, tgt.z);
+      spot = Math.hypot(qx - sx, qy - sy) < Math.hypot(tx - sx, ty - (tgt.d.vola ? 16 : 6) - sy) && Math.hypot(qx - sx, qy - sy)*scale < 22; } // il tocco è più vicino a un pallino che al nemico: si costruisce
+    if (tgt && !spot){ if (S.falcoCd <= 0) lanciaFalco(tgt); return; } }
   let idx = null, best = Math.max(16, 30/scale);
   S.luoghi.forEach((L,i) => { const [x,y] = P(L.e, L.n, L.z); const top = y - (STAT[L.tipo].h||0)*K - 6; const d = Math.min(Math.hypot(x-sx, y-sy), Math.hypot(x-sx, top-sy)); if (d < best){ best = d; idx = i; } });
   if (ORIZ){ const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top;
-    if (idx !== null){ S.sel = idx; ui(); aggiornaHud(); anelloTorre(idx); return; }
+    const pv = pallinoVicino(sx, sy), dB = idx !== null ? (([x, y]) => Math.hypot(x - sx, y - sy))(P(S.luoghi[idx].e, S.luoghi[idx].n, S.luoghi[idx].z)) : 1e9; if (idx !== null && !(pv.d < dB*.7 && pv.d*scale < 14)){ S.sel = idx; ui(); aggiornaHud(); anelloTorre(idx); return; } // il tocco è più vicino a un pallino libero che alla difesa: si costruisce
     let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     POSTI = POSTI || calcolaPosti(); const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]);
     S.sel = null; ui();
@@ -3516,6 +3521,7 @@ const vocePiccola = (ic, nome, costo) => { const out = []; if (ic) out.push(ic);
 function anelloCostruisci(e, n, sx, sy){ const voci = NEGOZIO.map(off => ({html: vocePiccola(sprIcon(ICONA[off.tipo]), off.nome, off.costo), off: S.castagne < off.costo, perche:'Servono più castagne',
     f: () => { chiudiAnello(); if (piazzaDifesa(off.tipo, e, n)){ S.sel = null; POSTI = calcolaPosti(); } ui(); aggiornaHud(); }}));
   apriAnello(sx, sy, voci, '&nbsp;'); ANELLO = {e, n, z:altB(e, n), posto:true}; document.getElementById('anello').classList.add('costr'); centraAnello(); }
+function pallinoVicino(sx, sy){ POSTI = POSTI || calcolaPosti(); let best = null, bd = 1e9; for (const q of POSTI){ const [x, y] = P(q[0], q[1], altB(q[0], q[1])), d = Math.hypot(x - sx, y - sy); if (d < bd){ bd = d; best = q; } } return {q:best, d:bd}; } // distanza in pixel della mappa
 function vendiLuogo(L, i){ const r = Math.round(L.speso * .6); S.castagne += r; L.lvl = 0; L.spec = null; L.speso = 0; L.mira = 'primo'; if (L.tipo === 'milizia') aggiornaMilizia(L); if (L.libero){ S.luoghi.splice(i, 1); S.sel = null; costruisciTorri(); POSTI = calcolaPosti(); } ui(); aggiornaHud(); }
 function anelloTorre(i){ const L = S.luoghi[i]; if (!L) return; const [x, y] = P(L.e, L.n, L.z), sx = ox + x*scale, sy = oy + y*scale - 20, c = costoLivello(L), voci = [];
   if (L.lvl >= 3) voci.push({html: vocePiccola(null, 'Al massimo', null), off:true, perche:'È già al massimo'});
