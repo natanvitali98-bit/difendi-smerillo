@@ -2901,6 +2901,32 @@ function fit(){
   if (primo){ primo = false; scale = Math.max(SW/330, SH/430); const [cx,cy] = P(18, 0, Z0); camX = cx; camY = cy; }
   limita();
 }
+// da dove arrivano i nemici: un cartello rosso grande su ogni ingresso, con quanti ne arrivano.
+// Se l'ingresso è fuori dallo schermo, una freccia sul bordo che punta verso di lui (toccandola la mappa ci va)
+let FRECCE_ING = [];
+function ingressiNemici(T){ FRECCE_ING = [];
+  const vie = S.inCorso ? S.vieAttive : (S.prossima ? S.prossima.vie : []); if (!vie || !vie.length) return;
+  const lista = S.inCorso ? S.coda : (S.prossima ? S.prossima.coda : []), conta = {}, tipo = {}; for (const q of lista) if (q.via !== undefined){ conta[q.via] = (conta[q.via] || 0) + 1; if (!tipo[q.via]) tipo[q.via] = q.id; }
+  const icona = (v, x, y) => { const im = SPR[tipo[v]]; if (!im) return; const s = 2, w = im.width*s, hh = im.height*s; ctx.imageSmoothingEnabled = false; ctx.drawImage(im, Math.round(x - w/2), Math.round(y - hh/2), w, hh); };
+  const pu = riduci ? .5 : (Math.sin(T*5) + 1)/2, top = 54, bot = SH - (!ORIZ ? 0 : document.body.classList.contains('rt-oriz') ? 84 : (document.getElementById('guidaCl').hidden ? 120 : 205)), m = 26; // sopra i bottoni e la guida
+  for (const v of vie){ const V = VIEZ[v]; if (!V) continue; const n = conta[v] || 0; if (S.inCorso && !n) continue;
+    const [x0, y0] = P(V[0][0], V[0][1], V[0][2]), [x1, y1] = P(V[Math.min(3, V.length-1)][0], V[Math.min(3, V.length-1)][1], V[Math.min(3, V.length-1)][2]);
+    const sx = ox + x0*scale, sy = oy + y0*scale, ang = Math.atan2(y1 - y0, x1 - x0);
+    const dentro = sx > 44 && sx < SW - 44 && sy > top + 46 && sy < bot;
+    ctx.save(); ctx.lineJoin = 'round';
+    if (dentro){ // cartello sull'ingresso, con la freccia che indica dove vanno
+      ctx.translate(sx, sy); ctx.strokeStyle = `rgba(255,90,60,${.6 + .4*pu})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 0, 16 + pu*6, 8 + pu*3, 0, 0, 7); ctx.stroke();
+      ctx.save(); ctx.rotate(ang); ctx.translate(22 + pu*4, 0); ctx.fillStyle = '#ff5a3c'; ctx.strokeStyle = '#141433'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-4, -8); ctx.lineTo(-4, 8); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+      const by = -30 - pu*3; ctx.fillStyle = '#e04830'; ctx.strokeStyle = '#141433'; ctx.lineWidth = 3; const w = n ? 58 : 34; ctx.beginPath(); ctx.roundRect(-w/2, by - 13, w, 26, 9); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-5, by + 10); ctx.lineTo(0, by + 17); ctx.lineTo(5, by + 10); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#e04830'; ctx.fillRect(-4, by + 8, 8, 4);
+      icona(v, n ? -13 : 0, by); if (n){ ctx.fillStyle = '#fff'; ctx.font = '400 15px "Lilita One", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('×' + n, 12, by + 1); }
+    } else { // freccia sul bordo dello schermo
+      const cx = SW/2, cy = (top + bot)/2, dx = sx - cx, dy = sy - cy, k = Math.min((SW/2 - m)/Math.abs(dx || 1e-6), ((bot - top)/2 - 26)/Math.abs(dy || 1e-6)), ex = cx + dx*k, ey = cy + dy*k, a2 = Math.atan2(dy, dx);
+      ctx.translate(ex, ey); ctx.fillStyle = '#e04830'; ctx.strokeStyle = '#141433'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 23, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.save(); ctx.rotate(a2); ctx.translate(27 + pu*4, 0); ctx.fillStyle = '#ff5a3c'; ctx.beginPath(); ctx.moveTo(9, 0); ctx.lineTo(-3, -8); ctx.lineTo(-3, 8); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+      icona(v, 0, -5); if (n){ ctx.fillStyle = '#fff'; ctx.font = '400 13px "Lilita One", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('×' + n, 0, 12); }
+      FRECCE_ING.push({x:ex, y:ey, v}); }
+    ctx.restore(); } }
 function zoom(f, fx, fy){ const wx = (fx - ox)/scale, wy = (fy - oy)/scale; scale *= f; limita(); camX += wx - (fx - ox)/scale; camY += wy - (fy - oy)/scale; limita(); }
 function spr(img, x, y, flip, s = K){ const w = img.width*s, h = img.height*s, X = Math.round(x - w/2), Y = Math.round(y - h);
   if (flip){ b.save(); b.translate(X + w, Y); b.scale(-1,1); b.drawImage(img,0,0,w,h); b.restore(); } else b.drawImage(img, X, Y, w, h); }
@@ -3092,6 +3118,7 @@ function draw(T){
   ctx.drawImage(buf, Math.round((ox+dx)*dpr), Math.round((oy+dy)*dpr), Math.round(W*scale*dpr), Math.round(H*scale*dpr));
   ctx.setTransform(dpr,0,0,dpr,0,0);
   if (S && S.miss === 2 && !MOD){ ctx.fillStyle = 'rgba(14,22,70,.32)'; ctx.fillRect(0, 0, SW, SH); } // di notte
+  if (S && !MOD && !S.fine) ingressiNemici(T);
   if (MOD){ ctx.font = '700 12px "Pixelify Sans", monospace'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,20,30,.9)'; ctx.fillStyle = '#f8e04c';
     MAPPA.case.forEach((c, i) => { if (c.rimossa) return; const p = c.pts, ce = p.reduce((s,q) => [s[0]+q[0]/p.length, s[1]+q[1]/p.length], [0,0]); const [x,y] = P(ce[0], ce[1], Z0 + c.piani*3 + 2); const X = ox + x*scale, Y = oy + y*scale; ctx.strokeText(String(i+1), X, Y); ctx.fillText(String(i+1), X, Y); }); }
   ctx.font = '500 10px "Atkinson Hyperlegible", sans-serif'; ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(255,255,255,.75)';
@@ -3338,6 +3365,7 @@ function tocca(ev){
   const r = cv.getBoundingClientRect(); const sx = (ev.clientX - r.left - ox)/scale, sy = (ev.clientY - r.top - oy)/scale;
   if (MOD){ modSel = trovaOggetto(sx, sy); modUI(); return; }
   if (!S || S.fine) return;
+  { const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top, f = FRECCE_ING.find(q => Math.hypot(q.x - px, q.y - py) < 30); if (f){ const p0 = VIEZ[f.v][0], [x, y] = P(p0[0], p0[1], p0[2]); S.camT = {x, y}; return; } }
   if (ORIZ && ANELLO){ chiudiAnello(); S.sel = null; ui(); } // tocco fuori dal cerchio: si chiude e il tocco vale lo stesso (es. su un nemico)
   if (S.modo){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     const m = S.modo; S.modo = null;
