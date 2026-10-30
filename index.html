@@ -1347,7 +1347,7 @@ const $ = s => document.querySelector(s);
    Coordinate in metri: e = verso est, n = verso nord, origine vicino al centro del paese.
    Vista assonometrica dal sud-ovest: si vedono le facciate sud e ovest e la rupe ovest.
    ===================================================================== */
-const K = 2, W = 480, H = 690;
+const K = 2; let W = 480, H = 690; // W e H cambiano quando la Difesa in tempo reale si gioca nelle frazioni
 const E0 = 216, N0 = 210, KY = .68, TOP = 52, SK = .35, Z0 = 40;
 const P = (e, n, z = 0) => [E0 + K*(e + PE + z*SK), K*((N0 - n - PN)*KY - z) + TOP];
 
@@ -1593,10 +1593,12 @@ let CMIS = 1;
 const CMISSIONI = {
   1: {nome:'La nebbia del lago', desc:'Le creature della nebbia salgono da tutte le strade. Alla fine arriva il Re della Nebbia.', capo:'il Re della Nebbia'},
   2: {nome:'L’assalto della Rocca', desc:'Di notte i cavalieri fantasma scendono dalla Rocca lungo Via dei Caduti. Alla fine arriva il Cavaliere Nero.', capo:'il Cavaliere Nero'},
+  3: {nome:'San Martino al Faggio', desc:'I cavalieri salgono alla frazione dalla Provinciale, dai campi e dal bosco. Difendi la chiesetta di San Vincenzo Ferrer.', capo:'il Cavaliere Nero', luogo:'sm', mi:11, salvo:'San Martino è salva!', perso:'I cavalieri hanno raggiunto la chiesetta', meta:'la chiesetta di San Vincenzo Ferrer'},
+  4: {nome:'Ceresola', desc:'I nemici scendono dalle Provinciali, dalla vigna, dal casale e dai tornanti nel bosco. Difendi la Chiesa di San Nicola.', capo:'il Cavaliere Nero', luogo:'ce', mi:14, salvo:'Ceresola è salva!', perso:'I nemici hanno raggiunto San Nicola', meta:'la Chiesa di San Nicola'},
 };
 const POOL2 = [['fante_fantasma',2,1,10],['corvo_nebbia',2,2,4],['balestriere',3,3,5],['portabandiera',4,5,3],['cavaliere',5,7,3]];
 const PIANO_VIE2 = [[2],[2],[2],[2,1],[2],[0,2],[1,2],[2],[0,1,2],[2,1],[0,2],[0,1,2]];
-const RK = d => CMIS === 2 ? 'm2' + d : d;
+const RK = d => CMIS >= 2 ? 'm' + CMIS + d : d;
 const POOL = [['mazzamurello',1,1,10],['corvo_nebbia',2,2,6],['fante_fantasma',3,2,6],['gatto_mammone',3,3,4],['balestriere',4,4,4],['cinghiale_ombra',4,5,4],['portabandiera',5,6,3],['cavaliere',6,6,4],['fata_sibillina',5,7,3],['negromante_lago',6,9,2]];
 
 const LUOGHI = [
@@ -1692,12 +1694,12 @@ const EVENTI = [
 ];
 const NESSUNO = {nome:'', desc:''};
 function componiOndata(n){
-  let budget = Math.round(9.5 * Math.pow(1.18, n-1) * (S.ev.budget || 1) * (S.miss === 2 ? 1.05 : 1));
-  const disp = (S.miss === 2 ? POOL2 : POOL).filter(e => e[2] <= n), lista = [];
+  let budget = Math.round(9.5 * Math.pow(1.18, n-1) * (S.ev.budget || 1) * (S.miss >= 2 ? 1.05 : 1));
+  const disp = (S.miss >= 2 ? POOL2 : POOL).filter(e => e[2] <= n), lista = [];
   while (budget > 0){ const acq = disp.filter(e => e[1] <= budget); if (!acq.length) break; const s = pesato(acq); lista.push(s[0]); budget -= s[1]; }
   if (S.ev.stormo){ let b2 = budget + lista.length*2; lista.length = 0; while (b2 >= 2){ if (n >= 6 && Math.random() < .35 && b2 >= 5){ lista.push('fata_sibillina'); b2 -= 5; } else { lista.push('corvo_nebbia'); b2 -= 2; } } }
   shuffle(lista);
-  if (S.miss === 2){ if (n === ONDATE) lista.push('cavaliere', 'cavaliere_nero', 'cavaliere'); else if (n === 9) lista.push('lupo_della_rocca'); else if (n === 6) lista.push('cavaliere'); else if (n === 10) lista.push('cavaliere', 'cavaliere'); return lista; }
+  if (S.miss >= 2){ if (n === ONDATE) lista.push('cavaliere', 'cavaliere_nero', 'cavaliere'); else if (n === 9) lista.push('lupo_della_rocca'); else if (n === 6) lista.push('cavaliere'); else if (n === 10) lista.push('cavaliere', 'cavaliere'); return lista; }
   if (n === ONDATE) lista.push('ombra_del_lago'); else if (n === 10) lista.push('cavaliere_nero'); else if (n % 5 === 0) lista.push('lupo_della_rocca');
   return lista;
 }
@@ -1738,7 +1740,8 @@ function costruisciTerreno(){
     ALT[k] = Math.max(0, z + Math.min(d,20)/20*rumore(e,n));
   }
 }
-function alt(e, n){ if (e < EMIN || e > EMAX || n < NMIN || n > NMAX) return 0; return ALT[gi(e,n)]; }
+let ALTF = null;
+function alt(e, n){ if (ALTF) return ALTF(e, n); if (e < EMIN || e > EMAX || n < NMIN || n > NMAX) return 0; return ALT[gi(e,n)]; }
 function altB(e, n){ const e0 = Math.floor(e), n0 = Math.floor(n), fe = e - e0, fn = n - n0; return alt(e0,n0)*(1-fe)*(1-fn) + alt(e0+1,n0)*fe*(1-fn) + alt(e0,n0+1)*(1-fe)*fn + alt(e0+1,n0+1)*fe*fn; }
 const inPaese = (e,n) => e >= EMIN && e <= EMAX && n >= NMIN && n <= NMAX && DIST[gi(e,n)] <= 5;
 if (!MAPPA) MAPPA = mappaBase();
@@ -2644,7 +2647,7 @@ const CE = (() => {
 
 /* ================= STATO ================= */
 let S = null, scena = null, MOD = false, modSel = null, storia = [];
-function nuovaPartita(diff){
+function nuovaPartita(diff){ mappaRT(CMIS);
   const D = DIFF[diff || (S && S.diff) || 'normale'];
   S = { miss: CMIS, diff: diff || (S && S.diff) || 'normale', hpDiff: D.hp, viteMax: D.vite, castagne:D.cast, vite:D.vite, ondata:0, prossima:null, vieAttive:[], inCorso:false, coda:[], timer:0, intervallo:1, multVita:1, multVel:1,
         nemici:[], proj:[], fx:[], part:[], morti:[], monete:[], soldati:[], trappole:[], ordini:2, modo:null, assalti:[], shake:0, pausa:false, camT:null, luoghi: [], // niente posti fissi: le difese le costruisci tu dove vuoi
@@ -2659,9 +2662,9 @@ function nuovaPartita(diff){
 function preparaOndata(){
   const n = S.ondata + 1; if (n > ONDATE){ S.prossima = null; return; }
   let ev = NESSUNO;
-  if (n >= 2){ const pool = EVENTI.filter(v => v !== S.ultimoEv && (!v.min || n >= v.min) && !(S.miss === 2 && (v.stormo || v.via !== undefined))); ev = Math.random() < .8 ? pool[Math.floor(Math.random()*pool.length)] : NESSUNO; }
+  if (n >= 2){ const pool = EVENTI.filter(v => v !== S.ultimoEv && (!v.min || n >= v.min) && !(S.miss >= 2 && (v.stormo || v.via !== undefined))); ev = Math.random() < .8 ? pool[Math.floor(Math.random()*pool.length)] : NESSUNO; }
   const vecchio = S.ev; S.ev = ev; const lista = componiOndata(n); S.ev = vecchio;
-  const vie = ev.via !== undefined ? [ev.via] : (S.miss === 2 ? PIANO_VIE2 : PIANO_VIE)[n-1];
+  const vie = ev.via !== undefined ? [ev.via] : RTMAP ? pianoVie(n) : (S.miss === 2 ? PIANO_VIE2 : PIANO_VIE)[n-1];
   const coda = lista.map((id, k) => ({id, via: NEM[id].boss ? vie[0] : vie[k % vie.length]}));
   S.prossima = {n, ev, coda, vie}; S.ordini = 2; S.assalti = [];
 }
@@ -2673,7 +2676,7 @@ function avviaOndata(){
   for (const L of S.luoghi) if (L.tipo === 'logge' && L.lvl && specDi(L).frana) S.franaCd = 0;
   S.banner = {t:0, titolo: S.ondata === ONDATE ? 'Ultima ondata: ' + CMISSIONI[S.miss || 1].capo : S.ev.nome ? 'Ondata ' + S.ondata + ': ' + S.ev.nome : 'Ondata ' + S.ondata, testo: S.ev.desc};
   S.coda = pr.coda;
-  S.intervallo = Math.max(.35, 1.4 / (1 + .06*S.ondata)); S.multVita = (1 + .11*(S.ondata-1)) * S.hpDiff * (S.miss === 2 ? .82 : 1); // i cavalieri hanno l'armatura: un po' meno vita S.multVel = (1 + .02*S.ondata) * (S.ev.vel || 1); S.timer = .4;
+  S.intervallo = Math.max(.35, 1.4 / (1 + .06*S.ondata)); S.multVita = (1 + .11*(S.ondata-1)) * S.hpDiff * (S.miss === 2 ? .82 : S.miss === 3 ? .95 : 1); // i cavalieri hanno l'armatura: un po' meno vita S.multVel = (1 + .02*S.ondata) * (S.ev.vel || 1); S.timer = .4;
   aggiornaHud(); ui();
 }
 function genera(id, from, via){
@@ -2719,7 +2722,8 @@ function update(dt){
   if (S.banner){ S.banner.t += dt; if (S.banner.t > 3.5) S.banner = null; }
   // fossili della Fessa che affiorano: toccali per raccoglierli
   if (S.inCorso){ S.fossT -= dt * (S.ev.fossili || 1); if (S.fossT <= 0){ S.fossT = 6 + Math.random()*4;
-    for (let k = 0; k < 40; k++){ const e = -70 + Math.random()*160, n = -140 + Math.random()*270; const kk = gi(e,n); if (ROCCIA[kk] || (DIST[kk] <= 5 && DIST[kk] > 1.5)){ S.fossili.push({e, n, z:alt(e,n), t:0}); break; } } } }
+    if (RTMAP){ const V = VIEZ[Math.floor(Math.random()*VIEZ.length)], q = V[Math.floor(Math.random()*V.length)], e = q[0] + (Math.random()*2 - 1)*10, n = q[1] + (Math.random()*2 - 1)*10; S.fossili.push({e, n, z:alt(e, n), t:0}); }
+    else for (let k = 0; k < 40; k++){ const e = -70 + Math.random()*160, n = -140 + Math.random()*270; const kk = gi(e,n); if (ROCCIA[kk] || (DIST[kk] <= 5 && DIST[kk] > 1.5)){ S.fossili.push({e, n, z:alt(e,n), t:0}); break; } } } }
   for (const f of S.fossili) f.t += dt; S.fossili = S.fossili.filter(f => f.t < 9);
   S.nebbia += ((S.inCorso ? 1 : 0) - S.nebbia) * Math.min(1, dt*.6);
   if (S.inCorso && S.coda.length){ S.timer -= dt; if (S.timer <= 0){ genera(S.coda.shift()); S.timer = S.intervallo; } }
@@ -2890,6 +2894,20 @@ let scale = 1, ox = 0, oy = 0, dpr = 1;
 const riduci = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const px = (x,y,col) => { b.fillStyle = col; b.fillRect(Math.round(x),Math.round(y),1,1); };
 let SW = 1, SH = 1, camX = 0, camY = 0, primo = true;
+// ===== la Difesa in tempo reale nelle frazioni: stessa mappa e stesse strade vere della modalità a turni =====
+let RTMAP = null; const RT0 = {W, H, vie: VIE.map(v => v.map(p => p.slice())), viez: VIEZ.map(v => v.map(p => p.slice()))};
+function pianoVie(n){ const k = VIE.length, base = [[0],[1],[0,1],[2],[1,2],[0,2],[3],[0,3],[1,2,3],[2,4],[0,1,3],[0,1,2,3,4]]; return [...new Set(base[n-1].map(i => i % k))]; }
+function mappaRT(cm){ const def = CMISSIONI[cm];
+  if (!def || !def.luogo){ if (!RTMAP) return; RTMAP = null; W = RT0.W; H = RT0.H; ALTF = null; VIE.length = 0; RT0.vie.forEach(v => VIE.push(v.map(p => p.slice()))); VIEZ.length = 0; RT0.viez.forEach(v => VIEZ.push(v.map(p => p.slice())));
+    buf.width = W; buf.height = H; b.imageSmoothingEnabled = false; CACHE_COSTR = null; POSTI = null; primo = true; fit(); return; }
+  if (RTMAP && RTMAP.cm === cm) return;
+  const LG = def.luogo === 'sm' ? SM : CE, t = TB._test; t.caricaMissione(def.mi);
+  const NODI2 = t.NODI, NEXT2 = t.NEXT, VIA2 = t.VIA, META2 = t.META, ing = Object.keys(NODI2).filter(k => NODI2[k].arrivo);
+  ALTF = LG.alt; VIE.length = 0; VIEZ.length = 0;
+  for (const a of ing){ const pts = []; let x = a, g = 0; while (x && x !== META2 && g++ < 60){ const y = NEXT2[x], w = VIA2[x + '|' + y] || [[NODI2[x].e, NODI2[x].n, NODI2[x].z], [NODI2[y].e, NODI2[y].n, NODI2[y].z]]; for (const q of w){ const l = pts[pts.length - 1]; if (!l || Math.hypot(l[0] - q[0], l[1] - q[1]) > .3) pts.push([q[0], q[1], q[2] ?? LG.alt(q[0], q[1])]); } x = y; }
+    if (pts.length > 1){ VIEZ.push(pts); VIE.push(pts.map(q => [q[0], q[1]])); } }
+  const Mt = NODI2[META2];
+  RTMAP = {cm, scena: LG.crea(), centro: [Mt.e, Mt.n]}; W = LG.W; H = LG.H; buf.width = W; buf.height = H; b.imageSmoothingEnabled = false; CACHE_COSTR = null; POSTI = null; primo = true; fit(); }
 function limita(){
   scale = Math.max(scale, SW/W, SH/H); scale = Math.min(scale, 4);
   camX = Math.max(SW/(2*scale), Math.min(W - SW/(2*scale), camX)); camY = Math.max(SH/(2*scale), Math.min(H - SH/(2*scale), camY));
@@ -2898,7 +2916,7 @@ function limita(){
 function fit(){
   const r = $('#stage').getBoundingClientRect(); dpr = Math.min(ORIZ ? 1.5 : 2, window.devicePixelRatio || 1); SW = r.width; SH = r.height; // a tutto schermo sul telefono: un po' meno pixel, più fluido
   cv.width = Math.round(r.width*dpr); cv.height = Math.round(r.height*dpr); cv.style.width = r.width+'px'; cv.style.height = r.height+'px';
-  if (primo){ primo = false; scale = Math.max(SW/330, SH/430); const [cx,cy] = P(18, 0, Z0); camX = cx; camY = cy; }
+  if (primo){ primo = false; scale = Math.max(SW/330, SH/430); const c0 = RTMAP ? RTMAP.centro : [18, 0], [cx,cy] = P(c0[0], c0[1], RTMAP ? alt(c0[0], c0[1]) : Z0); camX = cx; camY = cy; }
   limita();
 }
 // da dove arrivano i nemici: un cartello rosso grande su ogni ingresso, con quanti ne arrivano.
@@ -3049,7 +3067,7 @@ function disegnaNemico(x, T){
 }
 function draw(T){
   if (!scena) scena = creaScena();
-  b.drawImage(scena, 0, 0);
+  b.drawImage(RTMAP ? RTMAP.scena : scena, 0, 0);
   if (MOD){
     const contorno = (pts, z, col, w) => { b.fillStyle = col; for (let k=0;k<pts.length;k++){ const a = pts[k], c2 = pts[(k+1)%pts.length], L = Math.hypot(c2[0]-a[0], c2[1]-a[1]); for (let t=0;t<=L;t+=.25){ const [x,y] = P(a[0]+(c2[0]-a[0])*t/L, a[1]+(c2[1]-a[1])*t/L, z); b.fillRect(Math.round(x), Math.round(y), w, w); } } };
     MAPPA.case.forEach((c, i) => c.rimossa || contorno(c.pts, Z0 + c.piani*3 + 1, (modSel && modSel.tipo === 'casa' && modSel.i === i) ? '#f8d048' : 'rgba(255,255,255,.55)', (modSel && modSel.i === i && modSel.tipo === 'casa') ? 2 : 1));
@@ -3128,7 +3146,7 @@ function draw(T){
       else if (f.k === 'frana'){ const [x,y] = P(f.e,f.n,f.z); const c = Math.min(1, f.t/.25); if (c < 1) spr(SPR.masso, x, y - 48*(1-c)); else { ellisse(f.e, f.n, f.z, f.r*(.5+(f.t-.25)*2), '#a87c46'); ellisse(f.e, f.n, f.z, f.r*(.3+(f.t-.25)), '#d6aa6a'); } }
     }
     // la nebbia che sale dalle due valli
-    if (S.nebbia > .02) for (const [cx,cy] of (S.vieAttive.length ? S.vieAttive : [1,2]).map(v => [P(-110,60,0), P(4,205,0), P(46,-212,0)][v])){
+    if (S.nebbia > .02 && !RTMAP) for (const [cx,cy] of (S.vieAttive.length ? S.vieAttive : [1,2]).map(v => [P(-110,60,0), P(4,205,0), P(46,-212,0)][v])){
       for (let k = 0; k < 6; k++){ const r = 52 + k*12, a = .07*S.nebbia; b.fillStyle = `rgba(232,236,246,${a})`; b.beginPath(); b.ellipse(cx + Math.sin(T*.5+k)*4, cy, r, r*.55, 0, 0, 6.283); b.fill(); }
     }
   }
@@ -3545,6 +3563,7 @@ function transizione(ev, fn){
 }
 let RIENTRO = null; // dopo uno scrigno si torna dove eri, senza rifare le animazioni
 function mostraMenu(pannello){
+  if (pannello !== 'gioca' && pannello !== 'cmis') mappaRT(0); // fuori dalla Difesa in tempo reale torna la mappa di Smerillo (serve allo sfondo del menu)
   const t = $('#title'), c = $('#titleC'); t.classList.toggle('cr-on', !pannello || pannello === 'home'); try { SUONI.musica('menu'); } catch(e){} S = null; MOD = false;
   $('#cards').hidden = true; $('#end').hidden = true; $('#pausa').hidden = true; $('#menu').hidden = true;
   t.hidden = false; aggiornaHud(); ui();
@@ -3690,13 +3709,14 @@ function mostraMenu(pannello){
       <button class="big alt" data-p="home">Indietro</button></div>`;
   } else if (pannello === 'cmis'){
     const aperta2 = Object.keys(DIFF).some(d => rec[d] && rec[d].stelle);
-    const st = k => Object.keys(DIFF).map(d => { const r = rec[(k === 2 ? 'm2' : '') + d]; return r && r.stelle ? `${DIFF[d].nome} ${'★'.repeat(r.stelle)}` : ''; }).filter(Boolean).join(' · ') || 'Non ancora vinta';
+    const st = k => Object.keys(DIFF).map(d => { const r = rec[(k >= 2 ? 'm' + k : '') + d]; return r && r.stelle ? `${DIFF[d].nome} ${'★'.repeat(r.stelle)}` : ''; }).filter(Boolean).join(' · ') || 'Non ancora vinta';
     c.innerHTML = `<div class="pan"><h2>Difesa in tempo reale</h2>
       <button class="hm-card hm-modo cm" data-cm="1"><span class="hm-ic hm-emo">🌫️</span><span class="hm-sx"><b>1. ${CMISSIONI[1].nome}</b><small>${CMISSIONI[1].desc}</small><small class="cmr">${st(1)}</small></span></button>
       <button class="hm-card hm-modo cm ${aperta2 ? '' : 'chiusa'}" data-cm="2" ${aperta2 ? '' : 'disabled'}><span class="hm-ic hm-emo">${aperta2 ? '🌙' : '🔒'}</span><span class="hm-sx"><b>2. ${CMISSIONI[2].nome}</b><small>${aperta2 ? CMISSIONI[2].desc : 'Vinci la Missione 1 (anche in Facile) per aprirla.'}</small>${aperta2 ? `<small class="cmr">${st(2)}</small>` : ''}</span></button>
+      ${[3, 4].map(k => `<button class="hm-card hm-modo cm ${aperta2 ? '' : 'chiusa'}" data-cm="${k}" ${aperta2 ? '' : 'disabled'}><span class="hm-ic">${TB.ico(aperta2 ? (k === 3 ? 'torre' : 'campana') : 'lucchetto', 3)}</span><span class="hm-sx"><b>${k}. ${CMISSIONI[k].nome}</b><small>${aperta2 ? CMISSIONI[k].desc : 'Vinci la Missione 1 (anche in Facile) per aprirla.'}</small>${aperta2 ? `<small class="cmr">${st(k)}</small>` : ''}</span></button>`).join('')}
       <button class="big alt" data-p="modo">Indietro</button></div>`;
   } else if (pannello === 'gioca'){
-    c.innerHTML = `<div class="pan"><h2>${CMIS === 2 ? 'Missione 2 · ' : 'Missione 1 · '}scegli la difficoltà</h2><div class="dif">
+    c.innerHTML = `<div class="pan"><h2>Missione ${CMIS} · scegli la difficoltà</h2><div class="dif">
       <button class="big alt" data-d="facile">Facile<small>30 di resistenza, nemici più deboli</small></button>
       <button class="big" data-d="normale">Normale<small>20 di resistenza</small></button>
       <button class="big alt" data-d="difficile">Difficile<small>12 di resistenza, nemici più forti</small></button></div>
@@ -3795,13 +3815,14 @@ function vittoria(){ S.fine = true; const e = $('#end');
   const rec = leggiRecord(), vecchio = rec[RK(S.diff)], nuovo = !vecchio || !vecchio.stelle || stelle > vecchio.stelle;
   if (nuovo){ rec[RK(S.diff)] = {stelle, ondata: ONDATE}; scriviRecord(rec); }
   const apre2 = S.miss !== 2 && nuovo && !Object.keys(DIFF).some(d => d !== S.diff && rec[d] && rec[d].stelle);
-  e.innerHTML = `<div class="dlg box"><span class="kicker">Missione ${S.miss || 1} · 12 ondate respinte · ${DIFF[S.diff].nome}</span><h2>Smerillo è salva!</h2><div class="stelle">${'★'.repeat(stelle)}${'☆'.repeat(3-stelle)}</div><p>${S.miss === 2 ? 'Il Cavaliere Nero è tornato alla Rocca.' : 'Il Re della Nebbia è tornato giù nella valle.'} Resistenza rimasta: ${S.vite} su ${S.viteMax}.${stelle < 3 ? ' Per 3 stelle non devi perdere quasi niente.' : ''}${nuovo ? ' Nuovo record!' : ''}</p>${apre2 ? '<p class="olavv">🔓 Hai aperto la <b>Missione 2: L’assalto della Rocca</b>!</p><button class="big" id="eM2">Gioca la Missione 2</button>' : ''}<button class="big ${apre2 ? 'alt' : ''}" id="eAgain">Gioca di nuovo</button><button class="big alt" id="eMenu">Le missioni</button></div>`;
+  e.innerHTML = `<div class="dlg box"><span class="kicker">Missione ${S.miss || 1} · 12 ondate respinte · ${DIFF[S.diff].nome}</span><h2>${(CMISSIONI[S.miss] || {}).salvo || 'Smerillo è salva!'}</h2><div class="stelle">${'★'.repeat(stelle)}${'☆'.repeat(3-stelle)}</div><p>${S.miss >= 2 ? 'Il Cavaliere Nero è tornato alla Rocca.' : 'Il Re della Nebbia è tornato giù nella valle.'} Resistenza rimasta: ${S.vite} su ${S.viteMax}.${stelle < 3 ? ' Per 3 stelle non devi perdere quasi niente.' : ''}${nuovo ? ' Nuovo record!' : ''}</p>${apre2 ? '<p class="olavv">🔓 Hai aperto la <b>Missione 2: L’assalto della Rocca</b>!</p><button class="big" id="eM2">Gioca la Missione 2</button>' : ''}<button class="big ${apre2 ? 'alt' : ''}" id="eAgain">Gioca di nuovo</button><button class="big alt" id="eMenu">Le missioni</button></div>`;
   const m2 = e.querySelector('#eM2'); if (m2) m2.onclick = () => { e.hidden = true; CMIS = 2; nuovaPartita(); };
   e.querySelector('#eMenu').onclick = () => { e.hidden = true; mostraMenu('cmis'); };
   e.hidden = false; e.querySelector('#eAgain').onclick = () => { e.hidden = true; nuovaPartita(); }; }
 function sconfitta(){ S.fine = true; S.inCorso = false; const e = $('#end');
   const rec = leggiRecord(), kk = RK(S.diff); if (!rec[kk] || (!rec[kk].stelle && S.ondata > rec[kk].ondata)){ rec[kk] = {stelle:0, ondata:S.ondata}; scriviRecord(rec); }
-  e.innerHTML = S.miss === 2 ? `<div class="dlg box"><span class="kicker">Missione 2 · Ondata ${S.ondata} di ${ONDATE}</span><h2>I cavalieri hanno preso il piazzale</h2><p>Quasi tutti scendono da <b>Via dei Caduti</b>: difendi quella strada per prima. I cavalieri hanno l’armatura: servono colpi forti (Balestre potenziate, Braciere). I portabandiera rinforzano chi hanno vicino: abbattili per primi.</p><button class="big" id="eRetry">Riprova</button><button class="big alt" id="eMenu">Le missioni</button></div>`
+  e.innerHTML = S.miss >= 3 ? `<div class="dlg box"><span class="kicker">Missione ${S.miss} · Ondata ${S.ondata} di ${ONDATE}</span><h2>${CMISSIONI[S.miss].perso}</h2><p>Guarda i cartelli rossi: da lì entrano i nemici. Metti le difese lungo le loro strade prima che arrivino a ${CMISSIONI[S.miss].meta}. I cavalieri hanno l’armatura: servono colpi forti.</p><button class="big" id="eRetry">Riprova</button><button class="big alt" id="eMenu">Le missioni</button></div>`
+    : S.miss === 2 ? `<div class="dlg box"><span class="kicker">Missione 2 · Ondata ${S.ondata} di ${ONDATE}</span><h2>I cavalieri hanno preso il piazzale</h2><p>Quasi tutti scendono da <b>Via dei Caduti</b>: difendi quella strada per prima. I cavalieri hanno l’armatura: servono colpi forti (Balestre potenziate, Braciere). I portabandiera rinforzano chi hanno vicino: abbattili per primi.</p><button class="big" id="eRetry">Riprova</button><button class="big alt" id="eMenu">Le missioni</button></div>`
     : `<div class="dlg box"><span class="kicker">Ondata ${S.ondata} di ${ONDATE}</span><h2>La nebbia ha raggiunto il piazzale</h2><p>Guarda da quale strada arriva la prossima ondata e difendi quella. Per corvi e fate servono belvedere e smerigli. Tieni la frana per quando arrivano tanti nemici insieme.</p><button class="big" id="eRetry">Riprova</button><button class="big alt" id="eMenu">Le missioni</button></div>`;
   e.querySelector('#eMenu').onclick = () => { e.hidden = true; mostraMenu('cmis'); };
   e.hidden = false; e.querySelector('#eRetry').onclick = () => { e.hidden = true; nuovaPartita(); }; aggiornaHud(); }
