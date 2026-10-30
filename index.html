@@ -5815,34 +5815,24 @@ function sfidaDiOggi(){ const g = oggi(), r = leggiRec(); let max = 0; while (ma
 function riepilogo(){ const r = leggiRec(); return {missioni: MISSIONI.map(m => ({num:m.num, titolo:m.titolo, stelle:(r['m' + m.num] || {}).stelle || 0})), sfida: sfidaDiOggi()}; }
 const prossima = () => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + MISSIONI[i].num]) i++; return MISSIONI[i]; };
 const contaDif = () => { const c = leggiCol(); return DIFENSORI.filter(t => c[t]).length + ' di ' + DIFENSORI.length; };
-return {eventoAttivo, preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
+return {eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE: () => SCENA_CE || (SCENA_CE = CE.crea()), preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
 })();
 
 // ===== Conquista: scegli il tuo borgo, rinforzalo e conquista gli altri (a turni, contro il computer) =====
 const CQ = (() => {
 const KEY = 'difendi-smerillo-conquista', KREC = 'difendi-smerillo-conquista-rec', KGUIDA = 'difendi-smerillo-conquista-guida';
-const MW = 320, MH = 400, MOSSE = 3, COSTO_SOLD = 3, REGALO = 8, TREGUA = 2;
+const MOSSE = 4, COSTO_SOLD = 3, REGALO = 8, TREGUA = 2;
 const STAGIONI = ['Primavera', 'Estate', 'Autunno', 'Inverno'];
 const FZ = {
   smerillo:  {nome:'Smerillo', corto:'Smerillo', col:'#e04830', scuro:'#8e2a1c', chiaro:'#ffb09a',
     vant:'Il tetto delle Marche: è il borgo più alto. Chi lo attacca deve salire: difesa del borgo +30%.',
-    diff:'Strade ripide e poca terra da coltivare: 1 moneta in meno ogni stagione, e confina con tutti.'},
+    diff:'Strade ripide e poca terra da coltivare: 1 moneta in meno ogni stagione.'},
   sanmartino:{nome:'San Martino al Faggio', corto:'San Martino', col:'#4a8fe0', scuro:'#1f4f8e', chiaro:'#b0d4ff',
     vant:'Il bosco dei faggi: la legna è vicina, costruire costa il 25% in meno.',
     diff:'Parte senza mura: all’inizio è il borgo più facile da attaccare.'},
   ceresola:  {nome:'Ceresola', corto:'Ceresola', col:'#a878e0', scuro:'#5a3c96', chiaro:'#dcc8ff',
     vant:'Campi e vigne: 2 monete in più ogni stagione.',
     diff:'Parte con 2 soldati in meno, e gli altri borghi la vedono come una preda facile.'}};
-// le terre tra i borghi: nomi veri di località del comune (posizioni sulla mappa indicative)
-const TERRE = {
-  smerillo:  {nome:'Smerillo', x:172, y:170, borgo:'smerillo', rend:6},
-  sanmartino:{nome:'San Martino al Faggio', x:64, y:206, borgo:'sanmartino', rend:6},
-  ceresola:  {nome:'Ceresola', x:190, y:306, borgo:'ceresola', rend:6},
-  castorano: {nome:'Castorano', x:100, y:92, rend:3, guar:4, desc:'Casali e campi verso la valle.'},
-  durano:    {nome:'Durano', x:262, y:146, rend:3, guar:4, desc:'Sul versante a nord-est di Smerillo.'},
-  tenna:     {nome:'Val di Tenna', x:214, y:44, rend:4, guar:5, desc:'La valle del fiume: la terra più fertile.'},
-  vallecupa: {nome:'Valle Cupa', x:92, y:330, rend:2, guar:3, desc:'Una valle stretta e boscosa.'}};
-const IDS = Object.keys(TERRE);
 const ED = {
   mura:     {nome:'Mura', ic:'scudo', max:3, costi:[10,16,24], desc:'Difesa del borgo +35% per ogni livello.'},
   torri:    {nome:'Torri', ic:'torre', max:3, costi:[12,18,26], desc:'Quando assediano il borgo, colpiscono prima: −15% dei nemici per livello.'},
@@ -5865,72 +5855,217 @@ const alleati = (a, b) => !!S.all[pk(a, b)];
 const stagione = t => STAGIONI[(t - 1) % 4] + ', anno ' + Math.ceil(t/4);
 const livAmic = v => v >= 50 ? ['Amico fidato', '#58c838'] : v >= 15 ? ['Amico', '#98d860'] : v > -15 ? ['Neutrale', '#c8c8d0'] : v > -50 ? ['Ostile', '#f08838'] : ['Nemico', '#e04830'];
 const salva = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} };
-const carica = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 1 && !s.fine ? s : null; } catch(e){ return null; } };
+const carica = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 2 && !s.fine ? s : null; } catch(e){ return null; } };
 const terreDi = f => IDS.filter(t => S.terre[t].own === f);
 const soldDi = f => terreDi(f).reduce((a, t) => a + S.terre[t].sold, 0);
 const eBorgo = t => TERRE[t].borgo && S.terre[t].own === TERRE[t].borgo; // il borgo è ancora in mano al suo popolo (con mura e torri)
 const costo = (f, k) => { const l = S.fz[f].ed[k]; if (l >= ED[k].max) return null; const c = ED[k].costi[l]; return f === 'sanmartino' ? Math.round(c*.75) : c; };
+// per assediare un borgo bisogna prima prendere almeno 2 delle sue terre
+const ASSEDIO = 2, terreDelBorgo = t => IDS.filter(x => TERRE[x].di === t), presePer = (t, f) => terreDelBorgo(t).filter(x => S.terre[x].own === f).length;
+const puoAssediare = (t, f) => !(TERRE[t].borgo && eBorgo(t)) || presePer(t, f) >= ASSEDIO;
 const capRecl = f => 4 + 2*S.fz[f].ed.armeria;
 function rendita(f, t = S.turno){ let r = terreDi(f).reduce((a, x) => a + TERRE[x].rend, 0); if (f === 'smerillo') r -= 1; if (f === 'ceresola') r += 2;
   for (const g of vivi()) if (g !== f && alleati(f, g)) r += 2;
   if ((t - 1) % 4 === 2) r += 2; if ((t - 1) % 4 === 3) r -= 2; return Math.max(2, r); }
 
-// ===== la mappa: terreno disegnato una volta, pixel per pixel =====
+// ===== il mondo: le tre mappe vere dei borghi, unite da campagna, boschi e frazioni (distanze accorciate) =====
+const WW = 1600, WH = 1800, Q = 4, GW = WW/Q, GH = WH/Q;
+// dove sta ogni mappa vera nel mondo (angolo in alto a sinistra) e quanto si taglia dei bordi
+const SCENE = {smerillo:{x:560, y:110, taglio:6}, sanmartino:{x:40, y:960, taglio:18}, ceresola:{x:1010, y:1170, taglio:20}};
+const TERRE = {
+  // i borghi: il centro del paese e le sue terre intorno (da prendere una alla volta prima di assediarlo)
+  smerillo:  {nome:'Smerillo', x:835, y:390, borgo:'smerillo', rend:5},
+  sm_n:      {nome:'I campi sopra Smerillo', x:870, y:170, di:'smerillo', rend:2},
+  sm_o:      {nome:'La rupe di Smerillo', x:660, y:470, di:'smerillo', rend:2},
+  sm_e:      {nome:'Il versante est', x:1010, y:430, di:'smerillo', rend:2},
+  sm_s:      {nome:'Il bosco sotto Smerillo', x:810, y:700, di:'smerillo', rend:2},
+  sanmartino:{nome:'San Martino al Faggio', x:300, y:1130, borgo:'sanmartino', rend:5},
+  sa_n:      {nome:'Il bosco dei faggi', x:140, y:1000, di:'sanmartino', rend:2},
+  sa_e:      {nome:'Il bosco a est', x:470, y:1060, di:'sanmartino', rend:2},
+  sa_s:      {nome:'I campi di San Martino', x:200, y:1400, di:'sanmartino', rend:2},
+  sa_c:      {nome:'Il Campo polivalente', x:450, y:1330, di:'sanmartino', rend:2},
+  ceresola:  {nome:'Ceresola', x:1230, y:1360, borgo:'ceresola', rend:5},
+  ce_n:      {nome:'Il bosco di Ceresola', x:1130, y:1240, di:'ceresola', rend:2},
+  ce_e:      {nome:'Le case sparse', x:1420, y:1290, di:'ceresola', rend:2},
+  ce_v:      {nome:'La vigna di Ceresola', x:1330, y:1520, di:'ceresola', rend:2},
+  ce_s:      {nome:'La strada in basso', x:1150, y:1560, di:'ceresola', rend:2},
+  // le altre frazioni del comune
+  castorano: {nome:'Castorano', x:790, y:1450, fraz:true, rend:4, guar:5, desc:'Una frazione tra San Martino e Ceresola.'},
+  durano:    {nome:'Durano', x:1330, y:600, fraz:true, rend:4, guar:5, desc:'Una frazione sul versante a nord-est.'},
+  tenna:     {nome:'Val di Tenna', x:330, y:210, fraz:true, rend:4, guar:5, desc:'Giù nella valle del fiume Tenna.'},
+  vallecupa: {nome:'Valle Cupa', x:760, y:1700, fraz:true, rend:4, guar:4, desc:'Una valle stretta in fondo.'}};
+// e i terreni vuoti tra un posto e l'altro: campi, prati e boschi da conquistare
+(() => { const fissi = Object.values(TERRE); let n = 0;
+  for (let y = 120; y < WH - 60; y += 170) for (let x = 90 + ((y/170) % 2)*85; x < WW - 60; x += 170){ const jx = x + (hash(x, y, 41) - .5)*90, jy = y + (hash(x, y, 43) - .5)*90;
+    if ([...fissi, ...Object.values(TERRE)].some(T => Math.hypot(T.x - jx, T.y - jy) < (T.borgo ? 230 : T.di || T.fraz ? 185 : 175))) continue;
+    TERRE['v' + (n++)] = {nome:'', x:Math.round(jx), y:Math.round(jy), vuota:true, rend:1, guar:1 + Math.floor(hash(x, y, 47)*3)}; } })();
+const IDS = Object.keys(TERRE);
+for (const t of IDS){ const T = TERRE[t]; if (!T.vuota) continue; let m = null, md = 1e9; for (const u of IDS){ const U = TERRE[u]; if (!(U.borgo || U.fraz)) continue; const d = Math.hypot(U.x - T.x, U.y - T.y); if (d < md){ md = d; m = U; } }
+  T.nome = ['Campi', 'Prati', 'Bosco', 'Pascoli', 'Vigne', 'Oliveto'][Math.floor(hash(T.x, T.y, 61)*6)] + ' verso ' + (m.borgo ? FZ[m.borgo].corto : m.nome); }
+const fiumeY = x => 44 + 16*Math.sin(x/170) + 6*Math.sin(x/47 + 1);
+// le strade principali: escono dalle mappe vere e vanno alle frazioni (come nella realtà, più o meno)
+const STRADE = [
+  [[560,360],[470,450],[380,600],[300,780],[262,960]],                 // da Smerillo a San Martino
+  [[862,110],[850,90],[900,fiumeY(900) + 26]],                          // da Smerillo giù al Tenna
+  [[0,0]],                                                               // (la strada di fondovalle si disegna a parte)
+  [[830,800],[880,960],[1000,1080],[1140,1170]],                        // da Smerillo a Ceresola
+  [[830,800],[800,1050],[790,1300],[790,1450]],                         // da Smerillo a Castorano
+  [[520,1490],[650,1470],[790,1450],[960,1560],[1170,1625]],           // San Martino - Castorano - Ceresola
+  [[1505,1560],[1560,1250],[1470,860],[1330,600],[1300,300],[1250,fiumeY(1250) + 26]], // da Ceresola a Durano e al Tenna
+  [[790,1450],[770,1580],[760,1700]],                                   // giù a Valle Cupa
+  [[330,210],[330,fiumeY(330) + 26]]];                                  // Val di Tenna sulla strada di fondovalle
+function curva(P){ const out = []; for (let i = 0; i < P.length - 1; i++){ const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)], L = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+  for (let k = 0; k < L; k += .8){ const t = k/L, t2 = t*t, t3 = t2*t; out.push([.5*((2*p1[0]) + (-p0[0] + p2[0])*t + (2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0])*t2 + (-p0[0] + 3*p1[0] - 3*p2[0] + p3[0])*t3), .5*((2*p1[1]) + (-p0[1] + p2[1])*t + (2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1])*t2 + (-p0[1] + 3*p1[1] - 3*p2[1] + p3[1])*t3)]); } } return out; }
+
 function hash(x, y, s = 1){ let h = (x*374761393 + y*668265263 + s*982451653) | 0; h = (h ^ (h >>> 13))*1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0)/4294967296; }
-// rumore "a griglia": i valori della griglia si calcolano una volta sola (molto più veloce sul telefono)
-function griglia(sc, s){ const o = Math.ceil(700/sc) + 2, w = Math.ceil((MW + 1500)/sc) + 4, h = Math.ceil((MH + 1500)/sc) + 4, A = new Float32Array(w*h); for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) A[j*w + i] = hash(i - o, j - o, s);
+function griglia(sc, s){ const o = 4, w = Math.ceil(WW/sc) + 10, h = Math.ceil(WH/sc) + 10, A = new Float32Array(w*h); for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) A[j*w + i] = hash(i - o, j - o, s);
   return (x, y) => { const X = x/sc, Y = y/sc, x0 = Math.floor(X), y0 = Math.floor(Y), fx = X - x0, fy = Y - y0, u = fx*fx*(3 - 2*fx), v = fy*fy*(3 - 2*fy), i = (y0 + o)*w + x0 + o;
     const a = A[i], b = A[i + 1], c = A[i + w], d = A[i + w + 1]; return a + (b - a)*u + (c - a)*v + (a - b - c + d)*u*v; }; }
-function fbmF(s){ const a = griglia(48, s), b = griglia(20, s + 7), c = griglia(8, s + 13); return (x, y) => a(x, y)*.55 + b(x, y)*.3 + c(x, y)*.15; }
-let FB3, FB4, FB9, FB31, FB37;
-const fiumeY = x => 20 + 7*Math.sin(x/38) + 3*Math.sin(x/11 + 1);
-function quota(x, y){ const g = (cx, cy, sx, sy, a) => a*Math.exp(-((x - cx)**2/(2*sx*sx) + (y - cy)**2/(2*sy*sy)));
-  let h = .28 + g(172, 168, 62, 70, .78) + g(225, 118, 46, 40, .3) + g(118, 205, 50, 34, .28) + g(64, 206, 40, 40, .36) + g(190, 304, 46, 42, .3) - g(95, 335, 36, 44, .22) - g(300, 300, 50, 80, .12);
-  h -= .55*Math.exp(-((y - fiumeY(x))**2)/(2*22*22)); return h + (FB3(x, y) - .5)*.16; }
 const HEX = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-const PAD = 290, BW = MW + 2*PAD, BH = MH + 2*PAD;
-function creaBase(){ FB3 = fbmF(3); FB4 = fbmF(4); FB9 = fbmF(9); FB31 = fbmF(31); FB37 = fbmF(37);
-  // le terre: zone attorno ai paesi, con confini storti come quelli veri (fossi, crinali, boschi)
-  idx = new Uint8Array(MW*MH);
-  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){ const wx = x + (FB31(x, y) - .5)*46, wy = y + (FB37(x, y) - .5)*46; let b = 0, bd = 1e9;
-    IDS.forEach((t, i) => { const T = TERRE[t], d = (wx - T.x)**2 + (wy - T.y)**2 - (T.borgo ? 900 : 0); if (d < bd){ bd = d; b = i; } }); idx[y*MW + x] = b; }
-  // confini e vicini, calcolati dalla mappa stessa: le strade collegano solo terre che si toccano
+
+// le terre: zone di Voronoi storte (seguono fossi e crinali), calcolate su una griglia di 4x4 pixel
+function creaTerre(){ const N1 = griglia(60, 31), N2 = griglia(60, 37), N3 = griglia(22, 33), N4 = griglia(22, 39);
+  idx = new Uint8Array(GW*GH); const L = IDS.map(t => TERRE[t]);
+  for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++){ const x = i*Q + 2, y = j*Q + 2, wx = x + (N1(x, y) - .5)*110 + (N3(x, y) - .5)*12, wy = y + (N2(x, y) - .5)*110 + (N4(x, y) - .5)*12; let b = 0, bd = 1e12;
+    for (let k = 0; k < L.length; k++){ const T = L[k], d = (wx - T.x)**2 + (wy - T.y)**2 - (T.borgo ? 7000 : T.fraz ? 2500 : 0); if (d < bd){ bd = d; b = k; } } idx[j*GW + i] = b; }
+  // niente isolette staccate: ogni terra resta un pezzo unico (i pezzi piccoli passano alla terra che li circonda)
+  { const comp = new Int32Array(GW*GH).fill(-1), pezzi = []; for (let p = 0; p < GW*GH; p++){ if (comp[p] >= 0) continue; const id = idx[p], st = [p], celle = []; comp[p] = pezzi.length;
+      while (st.length){ const c = st.pop(); celle.push(c); const x = c % GW, y = (c / GW) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= GW || Y >= GH) continue; const q = Y*GW + X; if (comp[q] < 0 && idx[q] === id){ comp[q] = pezzi.length; st.push(q); } } }
+      pezzi.push({id, celle}); }
+    const grande = {}; pezzi.forEach((pz, k) => { if (!grande[pz.id] || pz.celle.length > pezzi[grande[pz.id]].celle.length) grande[pz.id] = k; });
+    pezzi.forEach((pz, k) => { if (grande[pz.id] === k) return; const conta = {}; for (const c of pz.celle){ const x = c % GW, y = (c / GW) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= GW || Y >= GH) continue; const o = idx[Y*GW + X]; if (o !== pz.id) conta[o] = (conta[o] || 0) + 1; } }
+      const nuovo = +Object.keys(conta).sort((a, b) => conta[b] - conta[a])[0]; if (!isNaN(nuovo)) for (const c of pz.celle) idx[c] = nuovo; }); }
   const cont = {}; IDS.forEach(t => { BORDI[t] = []; VIC[t] = []; });
-  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){ const a = idx[y*MW + x]; for (const [dx, dy] of [[1, 0], [0, 1], [-1, 0], [0, -1]]){ const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= MW || Y >= MH) continue; const b = idx[Y*MW + X]; if (a !== b){ if (dx + dy > 0){ const k = pk(IDS[a], IDS[b]); cont[k] = (cont[k] || 0) + 1; } BORDI[IDS[a]].push(x, y); break; } } }
-  for (const k in cont) if (cont[k] > 14){ const [a, b] = k.split('|'); VIC[a].push(b); VIC[b].push(a); }
-  // il terreno si disegna anche fuori dalle terre, così la mappa riempie sempre lo schermo
-  cB = document.createElement('canvas'); cB.width = BW; cB.height = BH; const c = cB.getContext('2d'), im = c.createImageData(BW, BH), D = im.data;
-  const Q = new Float32Array(BW*BH); for (let y = 0; y < BH; y++) for (let x = 0; x < BW; x++) Q[y*BW + x] = quota(x - PAD, y - PAD);
-  const qa = (x, y) => Q[Math.max(0, Math.min(BH - 1, y))*BW + Math.max(0, Math.min(BW - 1, x))];
-  const VERDI = [[160,220,104],[128,200,80],[96,176,60],[72,148,50],[52,118,44]], CAMPI = [[226,198,100],[188,218,116],[180,140,84],[210,226,132],[164,204,92]];
-  const put = (i, r, g, b) => { D[i*4] = r; D[i*4 + 1] = g; D[i*4 + 2] = b; D[i*4 + 3] = 255; };
-  for (let Y = 0; Y < BH; Y++) for (let X = 0; X < BW; X++){ const x = X - PAD, y = Y - PAD;
-    const i = Y*BW + X, h = Q[i], nx = qa(X - 1, Y) - qa(X + 1, Y), ny = qa(X, Y - 1) - qa(X, Y + 1);
-    let luce = 1 + (nx*.55 + ny*.45)*9; luce = Math.round(Math.max(.72, Math.min(1.22, luce))*8)/8; // ombre a scalini, come i pixel del gioco
-    const fuori = Math.max(0, -x, x - MW + 1, -y, y - MH + 1); if (fuori > 0) luce *= Math.max(.84, 1 - fuori/260);
-    const fy = fiumeY(x), df = Math.abs(y - fy);
-    if (df < 1.6){ put(i, 74*luce, 144*luce, 208*luce); continue; } if (df < 2.6){ put(i, 168*luce, 224*luce, 248*luce); continue; }
-    const vic = Math.hypot(x - 64, y - 206), bosco = FB9(x + 400, y) + (vic < 80 ? .18*(1 - vic/80) : 0) + (h > .8 ? -.1 : 0);
-    let r, g, bb;
-    if (bosco > .6 && h > .2){ const tr = hash(x >> 1, y >> 1, 21); if (hash(x, y, 5) > .86){ r = 88; g = 168; bb = 56; } else if (tr > .55){ r = 31; g = 74; bb = 36; } else if (tr > .25){ r = 47; g = 110; bb = 42; } else { r = 64; g = 140; bb = 48; } }
-    else if (h < .62 && FB4(x - 200, y + 90) > .44){ const cx = Math.floor((x + y*.35)/14), cy = Math.floor((y - x*.2)/10), C = CAMPI[Math.floor(hash(cx, cy, 9)*CAMPI.length)], m = ((x + cy + 999) % 3) === 0 ? .88 : 1; r = C[0]*m; g = C[1]*m; bb = C[2]*m; }
-    else { const C = VERDI[4 - Math.max(0, Math.min(4, Math.floor((1.3 - h)*4)))], m = ((x*7 + y*13) % 17) === 0 ? 1.08 : 1; r = C[0]*m; g = C[1]*m; bb = C[2]*m; }
-    put(i, Math.min(255, r*luce), Math.min(255, g*luce), Math.min(255, bb*luce)); }
-  c.putImageData(im, 0, 0);
-  // strade di terra tra le terre vicine, e la strada di fondovalle lungo il Tenna
-  const fatte = {}, linea = pts => { for (const [px, py] of pts){ c.fillStyle = '#a87c46'; c.fillRect(Math.round(px) - 1 + PAD, Math.round(py) - 1 + PAD, 3, 3); } for (const [px, py] of pts){ c.fillStyle = '#d6aa6a'; c.fillRect(Math.round(px) + PAD, Math.round(py) + PAD, 1, 1); } };
-  const valle = []; for (let x = -PAD; x < MW + PAD; x += .7) valle.push([x, fiumeY(x) + 9 + 2*Math.sin(x/23)]); linea(valle);
-  for (const a of IDS) for (const b of VIC[a]){ const k = pk(a, b); if (fatte[k]) continue; fatte[k] = 1; linea(strada(a, b)); }
-  { const T = TERRE.tenna, p = []; for (let i = 0; i <= 30; i++){ const t = i/30; p.push([T.x + (T.x - 6 - T.x)*t, T.y + (fiumeY(T.x) + 9 - T.y)*t]); } linea(p); }
+  for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++){ const a = idx[j*GW + i]; for (const [dx, dy] of [[1, 0], [0, 1], [-1, 0], [0, -1]]){ const X = i + dx, Y = j + dy; if (X < 0 || Y < 0 || X >= GW || Y >= GH) continue; const b = idx[Y*GW + X]; if (a !== b){ if (dx + dy > 0){ const k = pk(IDS[a], IDS[b]); cont[k] = (cont[k] || 0) + 1; } BORDI[IDS[a]].push(i, j); break; } } }
+  for (const k in cont) if (cont[k] > 3){ const [a, b] = k.split('|'); VIC[a].push(b); VIC[b].push(a); } }
+
+// il terreno del mondo, disegnato a pezzi (così il telefono non si blocca), poi le tre mappe vere sopra
+function* generaMondo(){
+  creaTerre(); yield .05;
+  cB = document.createElement('canvas'); cB.width = WW; cB.height = WH; const c = cB.getContext('2d'), im = c.createImageData(WW, WH), D = im.data;
+  const ALT = griglia(140, 3), BOS = griglia(70, 9), BOS2 = griglia(18, 19), CAM = griglia(110, 4), DET = griglia(6, 27);
+  // l'altezza del terreno su una griglia larga (per le ombre dei colli), poi letta pixel per pixel
+  const A4 = new Float32Array((GW + 2)*(GH + 2)); for (let j = 0; j < GH + 2; j++) for (let i = 0; i < GW + 2; i++){ const x = (i - 1)*Q, y = (j - 1)*Q; A4[j*(GW + 2) + i] = ALT(x, y) - .45*Math.exp(-((y - fiumeY(x))**2)/(2*90*90)); }
+  const L4 = new Float32Array(GW*GH); for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++){ const k = (j + 1)*(GW + 2) + i + 1; L4[j*GW + i] = Math.round(Math.max(.78, Math.min(1.18, 1 + (A4[k - GW - 3] - A4[k + GW + 3])*5))*10)/10; }
+  const FY = new Float32Array(WW); for (let x = 0; x < WW; x++) FY[x] = fiumeY(x);
+  for (let y = 0; y < WH; y++){ const j4 = Math.min(GH - 1, y >> 2);
+    for (let x = 0; x < WW; x++){ const i = y*WW + x, df = Math.abs(y - FY[x]), k4 = j4*GW + (x >> 2);
+      let r, g, b; const h = A4[(j4 + 1)*(GW + 2) + (x >> 2) + 1], luce = L4[k4];
+      if (df < 4){ r = 70; g = 140; b = 206; if (hash(x >> 2, y, 7) > .9){ r = 160; g = 214; b = 240; } }
+      else if (df < 6){ r = 128; g = 158; b = 100; }
+      else { const bo = BOS(x, y)*.75 + BOS2(x, y)*.25 + (Math.hypot(x - 300, y - 1100) < 420 ? .08 : 0);
+        if (bo > .54 && h > .2){ // bosco fitto, come nelle mappe dei borghi
+          const v = hash(x >> 1, y >> 1, 21), d = DET(x, y); if (v > .8 && d > .5){ r = 104; g = 138; b = 64; } else if (v > .5){ r = 74; g = 108; b = 52; } else if (d > .45){ r = 56; g = 88; b = 42; } else { r = 40; g = 68; b = 32; } }
+        else if (CAM(x, y) > .5 && h < .62){ // campi a rettangoli, coi solchi
+          const cx = Math.floor((x + 7)/48), cy = Math.floor((y + 3)/26), bordo = (x + 7) % 48 < 2 || (y + 3) % 26 < 2, k = hash(cx, cy, 9);
+          if (bordo){ r = 110; g = 146; b = 74; } else if (k < .35){ r = 206; g = 184; b = 112; if (y % 3 === 0){ r = 186; g = 166; b = 100; } } else if (k < .7){ r = 146; g = 170; b = 96; if (y % 3 === 0){ r = 130; g = 158; b = 84; } } else { r = 176; g = 156; b = 108; if (y % 3 === 0){ r = 158; g = 140; b = 96; } } }
+        else { const d = DET(x, y); r = 116 + d*26; g = 150 + d*20; b = 76 + d*12; if (hash(x, y, 3) > .965){ r = 92; g = 124; b = 60; } } }
+      D[i*4] = Math.min(255, r*luce); D[i*4 + 1] = Math.min(255, g*luce); D[i*4 + 2] = Math.min(255, b*luce); D[i*4 + 3] = 255; }
+    if (y % 90 === 89) yield .05 + .55*y/WH; }
+  c.putImageData(im, 0, 0); yield .62;
+  // strade grigie come quelle delle mappe vere
+  const strada = (pts, w) => { c.fillStyle = '#6f7268'; for (const [x, y] of pts) c.fillRect(Math.round(x - w/2 - 1), Math.round(y - w/2 - 1), w + 2, w + 2); c.fillStyle = '#b4b4aa'; for (const [x, y] of pts) c.fillRect(Math.round(x - w/2), Math.round(y - w/2), w, w); };
+  const valle = []; for (let x = 0; x < WW; x += .8) valle.push([x, fiumeY(x) + 26 + 3*Math.sin(x/60)]); strada(valle, 4);
+  for (const P of STRADE) if (P.length > 1) strada(curva(P), 4);
+  yield .7;
+  // le tre mappe vere, con i bordi sfumati nella campagna
+  const sc = {smerillo: (typeof scena !== 'undefined' && scena) || creaScena()}; yield .78;
+  sc.sanmartino = TB.scenaSM ? TB.scenaSM() : SM.crea(); yield .86; sc.ceresola = TB.scenaCE ? TB.scenaCE() : CE.crea(); yield .93;
+  for (const f of Object.keys(SCENE)){ const P = SCENE[f], src = sc[f], tg = P.taglio, w = src.width - 2*tg, h = src.height - 2*tg, t = document.createElement('canvas'); t.width = w; t.height = h;
+    const tc = t.getContext('2d'); tc.drawImage(src, -tg, -tg); const id = tc.getImageData(0, 0, w, h), A = id.data, F = 46;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){ const d = Math.min(x, y, w - 1 - x, h - 1 - y), k = (y*w + x)*4; if (d < F){ const a = d/F, n = hash(x >> 1, y >> 1, 77)*.35; A[k + 3] = Math.max(0, Math.min(255, 255*(a*a*(3 - 2*a)*1.25 - n + .1))); } }
+    tc.putImageData(id, 0, 0); c.drawImage(t, P.x + tg, P.y + tg); }
+  // le case delle frazioni, nello stesso stile (muri chiari, tetti in coppi)
+  const casa = (x, y, w, d, tetto) => { c.fillStyle = 'rgba(0,0,0,.28)'; c.fillRect(x + 2, y + 3, w + 2, d + 6);
+    c.fillStyle = '#3a2a20'; c.fillRect(x - 1, y - 1, w + 2, d + 7); c.fillStyle = tetto; c.fillRect(x, y, w, d); c.fillStyle = 'rgba(255,255,255,.22)'; c.fillRect(x, y, w, 1); c.fillStyle = 'rgba(0,0,0,.18)'; c.fillRect(x, y + (d >> 1), w, d - (d >> 1));
+    c.fillStyle = '#e8dcc4'; c.fillRect(x, y + d, w, 5); c.fillStyle = '#c4b49a'; c.fillRect(x + w - 2, y + d, 2, 5); c.fillStyle = '#4a3a30'; for (let k = 2; k < w - 2; k += 4) c.fillRect(x + k, y + d + 1, 1, 2); };
+  const TETTI = ['#a0705a', '#b4846a', '#8e6450', '#c06a4c'];
+  for (const t of IDS){ const T = TERRE[t]; if (!T.fraz) continue; const n = t === 'castorano' ? 9 : 7;
+    for (let k = 0; k < n; k++){ const a = k*2.4 + hash(k, T.x, 5)*1.2, rr2 = 10 + k*5.5, x = Math.round(T.x + Math.cos(a)*rr2*1.3 - 6), y = Math.round(T.y - 26 + Math.sin(a)*rr2*.8);
+      casa(x, y, 10 + Math.floor(hash(k, T.y, 6)*6), 7 + Math.floor(hash(k, T.x, 8)*3), TETTI[(k + T.x) % 4]); } }
+  // casali sparsi nei terreni vuoti
+  for (const t of IDS){ const T = TERRE[t]; if (!T.vuota || hash(T.x, T.y, 51) < .45) continue; casa(T.x - 20, T.y - 30, 11, 7, TETTI[T.x % 4]); }
+  yield 1; }
+
+const MASK = {};
+function maschera(t, col){ const k = t + col; if (MASK[k]) return MASK[k]; const c = document.createElement('canvas'); c.width = GW; c.height = GH; const x = c.getContext('2d'), im = x.createImageData(GW, GH), D = im.data, i0 = IDS.indexOf(t), [r, g, b] = HEX(col);
+  for (let i = 0; i < GW*GH; i++) if (idx[i] === i0){ D[i*4] = r; D[i*4 + 1] = g; D[i*4 + 2] = b; D[i*4 + 3] = 255; } x.putImageData(im, 0, 0); return MASK[k] = c; }
+function creaTinta(){ const ter = VISTA || S.terre, key = IDS.map(t => ter[t].own).join(','); if (key === tintKey && cT) return; tintKey = key;
+  if (!cT){ cT = document.createElement('canvas'); cT.width = GW; cT.height = GH; } const c = cT.getContext('2d'), im = c.createImageData(GW, GH), D = im.data;
+  const colI = IDS.map(t => ter[t].own ? HEX(FZ[ter[t].own].col) : null);
+  for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++){ const i = y*GW + x, a = idx[i], col = colI[a]; let bordo = false, alt = -1;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= GW || Y >= GH) continue; const b = idx[Y*GW + X]; if (b !== a){ bordo = true; alt = b; } }
+    const p = (r, g, b, al) => { D[i*4] = r; D[i*4 + 1] = g; D[i*4 + 2] = b; D[i*4 + 3] = al; };
+    if (bordo){ const stesso = alt >= 0 && ter[IDS[alt]].own === ter[IDS[a]].own; if (col && stesso){ if ((x + y) % 2 === 0) p(col[0], col[1], col[2], 110); } else if (col) p(col[0], col[1], col[2], 255); else if ((x + y) % 2 === 0) p(250, 250, 240, 150); }
+    else if (col) p(col[0], col[1], col[2], 52); }
+  c.putImageData(im, 0, 0); }
+
+// ===== disegno e telecamera =====
+const INS = {t:0, b:0, l:0, r:0};
+function insets(){ const st = el('cqStage'); if (!st || !root) return; const r = st.getBoundingClientRect(), hu = root.querySelector('.cq-hud').getBoundingClientRect(), sd = root.querySelector('.cq-side').getBoundingClientRect();
+  INS.t = Math.max(0, hu.bottom - r.top + 6); if (sd.left > r.left + r.width*.45){ INS.r = Math.max(0, r.right - sd.left + 8); INS.b = 8; } else { INS.r = 0; INS.b = Math.max(0, r.bottom - sd.top + 6); } }
+const ZMAX = 2.4;
+function misura(){ const st = el('cqStage'); if (!st) return; const r = st.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = Math.max(1, r.width); H = Math.max(1, r.height);
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); insets();
+  fitS = Math.max(.1, Math.min((W - INS.l - INS.r)/WW, (H - INS.t - INS.b)/WH)); cam.s = Math.max(fitS, Math.min(ZMAX, cam.s)); limita(); }
+function centra(){ cam.s = fitS; cam.x = INS.l + (W - INS.l - INS.r - WW*cam.s)/2; cam.y = INS.t + (H - INS.t - INS.b - WH*cam.s)/2; }
+function vaiA(t, s){ const T = TERRE[t]; cam.s = Math.max(fitS, Math.min(ZMAX, s || Math.max(fitS*2.2, Math.min(.9, (W - INS.l - INS.r)/700)))); cam.x = INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s; cam.y = INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s; limita(); }
+function limita(){ const mw = WW*cam.s, mh = WH*cam.s, iw = W - INS.l - INS.r, ih = H - INS.t - INS.b;
+  cam.x = mw <= iw ? INS.l + (iw - mw)/2 : Math.min(INS.l, Math.max(INS.l + iw - mw, cam.x)); cam.y = mh <= ih ? INS.t + (ih - mh)/2 : Math.min(INS.t, Math.max(INS.t + ih - mh, cam.y)); }
+const aSchermo = (x, y) => [cam.x + x*cam.s, cam.y + y*cam.s];
+const aMappa = (x, y) => [(x - cam.x)/cam.s, (y - cam.y)/cam.s];
+function terraIn(sx, sy){ const [x, y] = aMappa(sx, sy); if (x < 0 || y < 0 || x >= WW || y >= WH) return null;
+  // prima il numero dei soldati (si tocca bene anche da lontano), poi la zona colorata
+  let best = null, bd = 1e9; for (const t of IDS){ const [px, py] = aSchermo(TERRE[t].x, TERRE[t].y), d = Math.hypot(sx - px, sy - py); if (d < 24 && d < bd){ bd = d; best = t; } }
+  return best || IDS[idx[Math.floor(y/Q)*GW + Math.floor(x/Q)]]; }
+function bersagli(){ if (!modo) return []; if (modo.tipo === 'sposta'){ if (!modo.lista) modo.lista = Object.keys(collegate(S.io, modo.da)).filter(t => t !== modo.da); return modo.lista; } return []; }
+function frame(Tm, dt){ if (!attivo || !ctx || !cB) return; try { disegna(Tm, dt); } catch(e){ console.error(e); } }
+const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); ctx.fill(); };
+function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
+  if (CAMT){ const k = Math.min(1, dt*7); cam.x += (CAMT.x - cam.x)*k; cam.y += (CAMT.y - cam.y)*k; const ox = cam.x, oy = cam.y; limita(); if (Math.hypot(CAMT.x - cam.x, CAMT.y - cam.y) < 2 || (ox !== cam.x && oy !== cam.y)) CAMT = null; }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#23421f'; ctx.fillRect(0, 0, W, H); ctx.imageSmoothingEnabled = cam.s < .7;
+  ctx.drawImage(cB, cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.imageSmoothingEnabled = false;
+  if (!ter) return;
+  creaTinta(); ctx.drawImage(cT, cam.x, cam.y, WW*cam.s, WH*cam.s);
+  { const fs = Math.round(Math.max(11, Math.min(17, 14*cam.s + 6))), [fx, fy] = aSchermo(60, fiumeY(60) - 10); ctx.font = `italic 700 ${fs}px "Atkinson Hyperlegible", sans-serif`; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(20,50,110,.9)'; ctx.fillText('Fiume Tenna', fx, fy); }
+  const q = Q*cam.s, evid = (t, col, a) => { const B = BORDI[t]; ctx.fillStyle = col; ctx.globalAlpha = a; for (let i = 0; i < B.length; i += 2) ctx.fillRect(cam.x + B[i]*q, cam.y + B[i + 1]*q, Math.max(1, q), Math.max(1, q)); ctx.globalAlpha = 1; };
+  const pul = .55 + .45*Math.sin(Tm*6);
+  for (const t of bersagli()){ ctx.globalAlpha = .2 + .25*pul; ctx.drawImage(maschera(t, '#ffd03a'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; evid(t, '#ffd03a', pul); }
+  if (sel && !modo){ ctx.globalAlpha = .12 + .06*Math.sin(Tm*4); ctx.drawImage(maschera(sel, '#ffffff'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; evid(sel, '#ffffff', .7 + .3*Math.sin(Tm*4)); }
+  if (modo && modo.da) evid(modo.da, '#ffd03a', 1);
+  const u = Math.max(.78, Math.min(1.35, .7 + cam.s*.45));
+  for (const t of IDS){ const T = TERRE[t], [px, py] = aSchermo(T.x, T.y), own = ter[t].own;
+    if (px < -80 || py < -80 || px > W + 80 || py > H + 80) continue;
+    const n = String(ter[t].sold), bh = Math.round(18*u), bw = Math.round((20 + n.length*8)*u), bx = Math.round(px - bw/2), by = Math.round(py - bh/2);
+    // bandierina + numero dei soldati
+    ctx.fillStyle = '#141433'; rr(bx - 2, by - 2, bw + 4, bh + 4, 7*u); ctx.fillStyle = own ? FZ[own].col : (T.vuota ? '#7a8466' : '#8088a8'); rr(bx, by, bw, bh, 5*u);
+    ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(bx + 3, by + 1, bw - 6, Math.max(1, 2*u));
+    const qq = Math.max(1, Math.round(u)), sx0 = bx + Math.round(5*u), sy0 = by + Math.round(3*u);
+    if (T.borgo){ ctx.fillStyle = '#141433'; ctx.fillRect(sx0 - qq, sy0 - qq, 7*qq, 12*qq); ctx.fillStyle = '#ffd03a'; ctx.fillRect(sx0, sy0, 5*qq, 10*qq); ctx.fillStyle = '#141433'; ctx.fillRect(sx0 + qq, sy0, qq, qq); ctx.fillRect(sx0 + 3*qq, sy0, qq, qq); ctx.fillRect(sx0 + 2*qq, sy0 + 6*qq, qq, 4*qq); } // la torre del borgo
+    else { ctx.fillStyle = '#141433'; ctx.fillRect(sx0 - qq, sy0 - qq, 6*qq, 13*qq); ctx.fillStyle = '#f8d8b0'; ctx.fillRect(sx0, sy0, 4*qq, 3*qq); ctx.fillStyle = '#ffffff'; ctx.fillRect(sx0, sy0 + 4*qq, 4*qq, 4*qq); ctx.fillStyle = '#5c3818'; ctx.fillRect(sx0, sy0 + 8*qq, qq, 3*qq); ctx.fillRect(sx0 + 3*qq, sy0 + 8*qq, qq, 3*qq); }
+    ctx.font = `400 ${Math.round(14*u)}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'left'; ctx.lineWidth = 3; ctx.strokeStyle = '#141433'; ctx.strokeText(n, bx + Math.round(13*u), by + bh - Math.round(4*u)); ctx.fillStyle = '#fff'; ctx.fillText(n, bx + Math.round(13*u), by + bh - Math.round(4*u));
+    if (own && own !== S.io && alleati(S.io, own)){ ctx.fillStyle = '#3ed46b'; rr(bx + bw - 4, by - 6, 9, 9, 3); }
+    if (TREGUA >= S.turno && T.borgo && eBorgo(t)){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('tregua', px, by + bh + F2 + 3); ctx.fillStyle = '#ffd03a'; ctx.fillText('tregua', px, by + bh + F2 + 3); } }
+  // i nomi sopra a tutto (solo borghi e frazioni: i terreni vuoti non hanno nome sulla mappa)
+  for (const t of IDS){ const T = TERRE[t]; if (!(T.borgo || T.fraz)) continue; const [px, py] = aSchermo(T.x, T.y); if (px < -120 || py < -80 || px > W + 120 || py > H + 80) continue;
+    const F1 = Math.round((T.borgo ? 16 : 13)*u), ny = Math.round(py - 9*u - 5*u); ctx.font = `400 ${F1}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#141433';
+    const nome = T.borgo ? FZ[t].corto : T.nome; ctx.strokeText(nome, px, ny); ctx.fillStyle = T.borgo ? '#ffffff' : '#fff2cc'; ctx.fillText(nome, px, ny); }
+  // soldati in marcia
+  for (let i = ANIM.length - 1; i >= 0; i--){ const a = ANIM[i]; a.t += dt/a.dur; const k = Math.min(1, a.t), P = a.pts, n = 5;
+    for (let j = 0; j < n; j++){ const qv = Math.max(0, Math.min(1, k - j*.05)), p = P[Math.min(P.length - 1, Math.floor(qv*(P.length - 1)))], [sx, sy] = aSchermo(p[0], p[1]), r = 4;
+      ctx.fillStyle = '#101420'; ctx.fillRect(sx - r - 1, sy - r - 1, r*2 + 2, r*2 + 2); ctx.fillStyle = a.col; ctx.fillRect(sx - r, sy - r, r*2, r*2); ctx.fillStyle = '#f8f8f0'; ctx.fillRect(sx - 1, sy - r - 4, 2, 4); }
+    if (a.t >= 1){ ANIM.splice(i, 1); if (a.fine) a.fine(); } }
+  for (let i = FLASH.length - 1; i >= 0; i--){ const f = FLASH[i]; f.t += dt; const [sx, sy] = aSchermo(TERRE[f.a].x, TERRE[f.a].y), r = 10 + f.t*80;
+    ctx.strokeStyle = f.col; ctx.globalAlpha = Math.max(0, 1 - f.t/.6); ctx.lineWidth = 4; ctx.strokeRect(sx - r, sy - r*.7, r*2, r*1.4); ctx.globalAlpha = 1; if (f.t > .6) FLASH.splice(i, 1); }
 }
-function strada(a, b){ const A = TERRE[a], B = TERRE[b], mx = (A.x + B.x)/2, my = (A.y + B.y)/2, dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy), o = (hash(A.x + B.x, A.y + B.y, 3) - .5)*L*.35;
-  const cx = mx - dy/L*o, cy = my + dx/L*o, pts = []; for (let i = 0; i <= L*1.4; i++){ const t = i/(L*1.4); pts.push([(1 - t)**2*A.x + 2*(1 - t)*t*cx + t*t*B.x, (1 - t)**2*A.y + 2*(1 - t)*t*cy + t*t*B.y]); } return pts; }
+function strada(a, b){ const A = TERRE[a], B = TERRE[b], mx = (A.x + B.x)/2, my = (A.y + B.y)/2, dx = B.x - A.x, dy = B.y - A.y, L = Math.max(1, Math.hypot(dx, dy)), o = (hash(A.x + B.x, A.y + B.y, 3) - .5)*L*.25;
+  const cx = mx - dy/L*o, cy = my + dx/L*o, pts = []; for (let i = 0; i <= 60; i++){ const t = i/60; pts.push([(1 - t)**2*A.x + 2*(1 - t)*t*cx + t*t*B.x, (1 - t)**2*A.y + 2*(1 - t)*t*cy + t*t*B.y]); } return pts; }
 
 // ===== i borghi in pixel: case con tetti rossi intorno al loro simbolo vero =====
 const SPRB = {};
 function spriteBorgo(t){ if (SPRB[t]) return SPRB[t]; const c = document.createElement('canvas'), x = c.getContext('2d'), P = (k, a, b, w = 1, h = 1) => { x.fillStyle = PAL[k] || k; x.fillRect(a, b, w, h); };
   const casa = (a, b, w, h, tetto = 'r') => { P('k', a - 1, b - 3, w + 2, h + 4); P(tetto, a, b - 2, w, 2); P(tetto === 'r' ? 'R' : 'B', a, b - 1, w, 1); P('e', a, b, w, h); P('E', a + w - 1, b, 1, h); P('k', a + 1, b + 1, 1, 1); if (w > 3) P('k', a + w - 3, b + h - 2, 1, 2); };
-  if (TERRE[t].borgo){ c.width = 26; c.height = 26;
+  if (FZ[t]){ c.width = 26; c.height = 26;
     if (t === 'smerillo'){ // la Rocca col cassero, in cima allo sperone
       casa(2, 16, 5, 4); casa(17, 17, 6, 4); casa(9, 20, 5, 4);
       P('k', 9, 1, 8, 18); P('a', 10, 2, 6, 16); P('A', 14, 2, 2, 16); for (let i = 0; i < 3; i++) P('k', 10 + i*2, 1, 1, 2); P('k', 12, 7, 2, 3); P('k', 12, 14, 2, 4); P('B', 12, 15, 2, 3);
@@ -5947,77 +6082,6 @@ function spriteBorgo(t){ if (SPRB[t]) return SPRB[t]; const c = document.createE
     casa(5, 7, 7, 5, t === 'tenna' ? 'r' : 'r'); P('k', 0, 6, 5, 6); P('G', 1, 7, 3, 3); P('g', 1, 7, 2, 2); P('B', 2, 10, 1, 2); P('k', 13, 5, 5, 7); P('G', 14, 6, 3, 3); P('l', 14, 6, 1, 1); P('B', 15, 9, 1, 3);
     if (t === 'tenna'){ P('y', 13, 12, 4, 2); P('o', 13, 13, 4, 1); } if (t === 'vallecupa'){ P('d', 0, 2, 4, 4); P('G', 1, 3, 2, 2); } }
   return SPRB[t] = c; }
-
-const MASK = {};
-function maschera(t, col){ const k = t + col; if (MASK[k]) return MASK[k]; const c = document.createElement('canvas'); c.width = MW; c.height = MH; const x = c.getContext('2d'), im = x.createImageData(MW, MH), D = im.data, i0 = IDS.indexOf(t), [r, g, b] = HEX(col);
-  for (let i = 0; i < MW*MH; i++) if (idx[i] === i0){ D[i*4] = r; D[i*4 + 1] = g; D[i*4 + 2] = b; D[i*4 + 3] = 255; } x.putImageData(im, 0, 0); return MASK[k] = c; }
-function creaTinta(){ const ter = VISTA || S.terre, key = IDS.map(t => ter[t].own).join(','); if (key === tintKey && cT) return; tintKey = key;
-  if (!cT){ cT = document.createElement('canvas'); cT.width = MW; cT.height = MH; } const c = cT.getContext('2d'), im = c.createImageData(MW, MH), D = im.data;
-  const colI = IDS.map(t => ter[t].own ? HEX(FZ[ter[t].own].col) : null);
-  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++){ const i = y*MW + x, a = idx[i], col = colI[a]; let bordo = false, alt = -1;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= MW || Y >= MH) continue; const b = idx[Y*MW + X]; if (b !== a){ bordo = true; alt = b; } }
-    if (bordo){ const stesso = alt >= 0 && ter[IDS[alt]].own === ter[IDS[a]].own && col; if (stesso){ if ((x + y) % 4 < 2){ D[i*4] = col[0]; D[i*4 + 1] = col[1]; D[i*4 + 2] = col[2]; D[i*4 + 3] = 90; } }
-      else if (col){ D[i*4] = col[0]; D[i*4 + 1] = col[1]; D[i*4 + 2] = col[2]; D[i*4 + 3] = 255; } else if ((x + y) % 3 === 0){ D[i*4] = 40; D[i*4 + 1] = 40; D[i*4 + 2] = 48; D[i*4 + 3] = 160; } }
-    else if (col){ D[i*4] = col[0]; D[i*4 + 1] = col[1]; D[i*4 + 2] = col[2]; D[i*4 + 3] = 46; } }
-  c.putImageData(im, 0, 0); }
-
-// ===== disegno e telecamera =====
-const INS = {t:0, b:0, l:0, r:0};
-function insets(){ const st = el('cqStage'); if (!st || !root) return; const r = st.getBoundingClientRect(), hu = root.querySelector('.cq-hud').getBoundingClientRect(), sd = root.querySelector('.cq-side').getBoundingClientRect();
-  INS.t = Math.max(0, hu.bottom - r.top + 6); if (sd.left > r.left + r.width*.45){ INS.r = Math.max(0, r.right - sd.left + 8); INS.b = 8; } else { INS.r = 0; INS.b = Math.max(0, r.bottom - sd.top + 6); } }
-function misura(){ const st = el('cqStage'); if (!st) return; const r = st.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = Math.max(1, r.width); H = Math.max(1, r.height);
-  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); insets();
-  const nf = Math.max(.3, Math.min((W - INS.l - INS.r)/MW, (H - INS.t - INS.b)/MH)); if (!fitS || Math.abs(nf - fitS) > .001){ const z = cam.s/(fitS || nf); fitS = nf; cam.s = Math.max(fitS, Math.min(fitS*3.2, fitS*(z || 1))); } limita(); }
-function centra(){ cam.s = fitS; cam.x = INS.l + (W - INS.l - INS.r - MW*cam.s)/2; cam.y = INS.t + (H - INS.t - INS.b - MH*cam.s)/2; }
-function limita(){ const mw = MW*cam.s, mh = MH*cam.s, iw = W - INS.l - INS.r, ih = H - INS.t - INS.b;
-  cam.x = mw <= iw ? INS.l + (iw - mw)/2 : Math.min(INS.l, Math.max(INS.l + iw - mw, cam.x)); cam.y = mh <= ih ? INS.t + (ih - mh)/2 : Math.min(INS.t, Math.max(INS.t + ih - mh, cam.y)); }
-const aSchermo = (x, y) => [cam.x + x*cam.s, cam.y + y*cam.s];
-const aMappa = (x, y) => [(x - cam.x)/cam.s, (y - cam.y)/cam.s];
-function terraIn(sx, sy){ const [x, y] = aMappa(sx, sy); if (x < 0 || y < 0 || x >= MW || y >= MH) return null;
-  // prima i simboli (borgo, bandiera e numero), poi la zona colorata: così anche le terre piccole si toccano bene
-  let best = null, bd = 1e9; for (const t of IDS){ const [px, py] = aSchermo(TERRE[t].x, TERRE[t].y), d = Math.hypot(sx - px, sy - py - 4); if (d < 34 && d < bd){ bd = d; best = t; } }
-  return best || IDS[idx[Math.floor(y)*MW + Math.floor(x)]]; }
-function bersagli(){ if (!modo) return []; if (modo.tipo === 'sposta') return VIC[modo.da].filter(t => S.terre[t].own === S.io); return []; }
-function frame(Tm, dt){ if (!attivo || !ctx || !cB) return; try { disegna(Tm, dt); } catch(e){ console.error(e); } }
-const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); ctx.fill(); };
-function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
-  if (!ter){ ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#1d3a24'; ctx.fillRect(0, 0, W, H); ctx.imageSmoothingEnabled = false; ctx.drawImage(cB, cam.x - PAD*cam.s, cam.y - PAD*cam.s, BW*cam.s, BH*cam.s); return; }
-  creaTinta();
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#1d3a24'; ctx.fillRect(0, 0, W, H); ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(cB, cam.x - PAD*cam.s, cam.y - PAD*cam.s, BW*cam.s, BH*cam.s); ctx.drawImage(cT, cam.x, cam.y, MW*cam.s, MH*cam.s);
-  { const fs = Math.round(Math.max(11, Math.min(16, 6*cam.s))), [fx, fy] = aSchermo(26, fiumeY(26) - 5); ctx.font = `italic 700 ${fs}px "Atkinson Hyperlegible", sans-serif`; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(20,60,120,.9)'; ctx.fillText('Fiume Tenna', fx, fy); }
-  const evid = (t, col, a) => { const B = BORDI[t]; ctx.fillStyle = col; ctx.globalAlpha = a; const q = Math.max(1, cam.s); for (let i = 0; i < B.length; i += 2) ctx.fillRect(cam.x + B[i]*cam.s, cam.y + B[i + 1]*cam.s, q, q); ctx.globalAlpha = 1; };
-  const pul = .55 + .45*Math.sin(Tm*6);
-  for (const t of bersagli()){ ctx.globalAlpha = .18 + .22*pul; ctx.drawImage(maschera(t, '#ffd03a'), cam.x, cam.y, MW*cam.s, MH*cam.s); ctx.globalAlpha = 1; evid(t, '#ffd03a', pul); }
-  if (sel && !modo){ ctx.globalAlpha = .1 + .06*Math.sin(Tm*4); ctx.drawImage(maschera(sel, '#ffffff'), cam.x, cam.y, MW*cam.s, MH*cam.s); ctx.globalAlpha = 1; evid(sel, '#ffffff', .65 + .35*Math.sin(Tm*4)); }
-  if (modo && modo.da) evid(modo.da, '#f8d048', 1);
-  const z = Math.max(1, Math.min(3, Math.round(cam.s*1.1)));
-  for (const t of IDS){ const T = TERRE[t], im = spriteBorgo(t), [px, py] = aSchermo(T.x, T.y), w = im.width*z, h = im.height*z, own = ter[t].own;
-    ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(px - w*.4, py + 2, w*.8, 3*z);
-    ctx.drawImage(im, Math.round(px - w/2), Math.round(py - h + 4*z), w, h);
-    // bandiera di chi la tiene
-    const fx = Math.round(px + w/2 - 2*z), fy = Math.round(py - h + 2*z), fc = own ? FZ[own].col : '#8c8c9c';
-    ctx.fillStyle = '#202028'; ctx.fillRect(fx - z, fy - 9*z, z*2 > 3 ? 2 : 1.5*z, 11*z); ctx.fillRect(fx, fy - 9*z, 7*z, 5*z); ctx.fillStyle = fc; ctx.fillRect(fx + z*.6, fy - 8.4*z, 5.6*z, 3.8*z);
-    if (alleati(S.io, own || '') && own !== S.io){ ctx.fillStyle = '#f8f8f0'; ctx.fillRect(fx + 2*z, fy - 7.4*z, 2*z, 1.8*z); }
-    // nome e soldati (in pixel dello schermo: si leggono bene a ogni zoom)
-    const u = Math.max(1, Math.min(1.45, cam.s/1.3)), F1 = Math.round(13*u), nome = T.borgo ? FZ[t].corto : T.nome, ny = Math.round(py + 4*z + 6 + F1);
-    ctx.font = `400 ${F1}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#141433';
-    ctx.strokeText(nome, px, ny); ctx.fillStyle = '#ffffff'; ctx.fillText(nome, px, ny);
-    const n = String(ter[t].sold), bh = Math.round(17*u), bw = Math.round((17 + n.length*8)*u), bx = Math.round(px - bw/2), by = ny + Math.round(4*u);
-    ctx.fillStyle = '#141433'; rr(bx - 2, by - 2, bw + 4, bh + 4, 7*u); ctx.fillStyle = own ? FZ[own].col : '#8088a8'; rr(bx, by, bw, bh, 5*u);
-    ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(bx + 3, by + 1, bw - 6, Math.max(1, 2*u));
-    const q = Math.max(1, Math.round(u)), sx0 = bx + Math.round(4*u), sy0 = by + Math.round(3*u); // l'omino del soldato
-    ctx.fillStyle = '#141433'; ctx.fillRect(sx0 - q, sy0 - q, 6*q, 13*q); ctx.fillStyle = '#f8d8b0'; ctx.fillRect(sx0, sy0, 4*q, 3*q); ctx.fillStyle = '#ffffff'; ctx.fillRect(sx0, sy0 + 4*q, 4*q, 4*q); ctx.fillStyle = '#5c3818'; ctx.fillRect(sx0, sy0 + 8*q, q, 3*q); ctx.fillRect(sx0 + 3*q, sy0 + 8*q, q, 3*q);
-    ctx.font = `400 ${Math.round(14*u)}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'left'; ctx.lineWidth = 3; ctx.strokeText(n, bx + Math.round(12*u), by + bh - Math.round(3*u)); ctx.fillStyle = '#fff'; ctx.fillText(n, bx + Math.round(12*u), by + bh - Math.round(3*u));
-    if (TREGUA >= S.turno && T.borgo && eBorgo(t)){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('tregua', px, by + bh + F2 + 3); ctx.fillStyle = '#ffd03a'; ctx.fillText('tregua', px, by + bh + F2 + 3); } }
-  // soldati in marcia
-  for (let i = ANIM.length - 1; i >= 0; i--){ const a = ANIM[i]; a.t += dt/a.dur; const k = Math.min(1, a.t), P = a.pts, n = 5;
-    for (let j = 0; j < n; j++){ const q = Math.max(0, Math.min(1, k - j*.05)), p = P[Math.min(P.length - 1, Math.floor(q*(P.length - 1)))], [sx, sy] = aSchermo(p[0], p[1]), r = 3 + Math.min(2, cam.s);
-      ctx.fillStyle = '#101420'; ctx.fillRect(sx - r - 1, sy - r - 1, r*2 + 2, r*2 + 2); ctx.fillStyle = a.col; ctx.fillRect(sx - r, sy - r, r*2, r*2); ctx.fillStyle = '#f8f8f0'; ctx.fillRect(sx - 1, sy - r - 4, 2, 4); }
-    if (a.t >= 1){ ANIM.splice(i, 1); if (a.fine) a.fine(); } }
-  for (let i = FLASH.length - 1; i >= 0; i--){ const f = FLASH[i]; f.t += dt; const [sx, sy] = aSchermo(TERRE[f.a].x, TERRE[f.a].y), r = 10 + f.t*80;
-    ctx.strokeStyle = f.col; ctx.globalAlpha = Math.max(0, 1 - f.t/.6); ctx.lineWidth = 4; ctx.strokeRect(sx - r, sy - r*.7, r*2, r*1.4); ctx.globalAlpha = 1; if (f.t > .6) FLASH.splice(i, 1); }
-}
 
 // ===== tocchi: trascina, pizzica, rotella =====
 const PT = new Map(); let gesto = null;
@@ -6058,27 +6122,41 @@ function diplomaziaAttacco(f, g){ if (!g) return; const trad = alleati(f, g);
   if (trad){ delete S.all[pk(f, g)]; } return trad; }
 
 // ===== il computer =====
-function minaccia(f){ let m = 0; for (const v of VIC[f]){ const o = S.terre[v].own; if (o && o !== f && !alleati(f, o)) m = Math.max(m, S.terre[v].sold*(1 + .2*S.fz[o].ed.armeria)); } return m; }
+// strade tra le proprie terre: si può spostare l'esercito lungo terre tue collegate (in una mossa)
+function collegate(f, da){ const vis = {[da]: null}, q = [da]; while (q.length){ const t = q.shift(); for (const v of VIC[t]) if (!(v in vis) && S.terre[v].own === f){ vis[v] = t; q.push(v); } } return vis; }
+function percorso(f, da, a){ const vis = collegate(f, da); if (!(a in vis)) return null; const p = [a]; let t = a; while (vis[t] != null){ t = vis[t]; p.unshift(t); } return p; }
+function cammino(p){ return curva(p.map(t => [TERRE[t].x, TERRE[t].y])); }
+const nemico = (f, o) => o !== f && !(o && alleati(f, o));
+const fronte = (f, t) => VIC[t].some(v => nemico(f, S.terre[v].own));
+// pericolo per il borgo: il nemico più forte entro due terre
+function minaccia(f){ let m = 0; const vicine = new Set(VIC[f]); for (const v of VIC[f]) for (const w of VIC[v]) vicine.add(w);
+  for (const v of vicine){ const o = S.terre[v].own; if (o && o !== f && !alleati(f, o)) m = Math.max(m, S.terre[v].sold*(1 + .2*S.fz[o].ed.armeria)); } return m; }
+const guardiaBorgo = f => S.terre[f].own !== f ? 1 : Math.max(2, Math.ceil(minaccia(f)*.75/((1 + .35*S.fz[f].ed.mura)*(f === 'smerillo' ? 1.3 : 1))));
 function turnoIA(f, ev){ const F = S.fz[f]; let az = MOSSE;
   const snap = () => JSON.parse(JSON.stringify(S.terre)), news = (o) => { o.snap = snap(); ev.push(o); };
   const m = minaccia(f), difB = S.terre[f].sold*(1 + .2*F.ed.armeria)*(1 + .35*F.ed.mura)*(f === 'smerillo' ? 1.3 : 1);
   // 1. costruire
   const ordine = m > difB*.8 ? ['mura', 'torri', 'armeria', 'meccanico'] : rnd() < .5 ? ['armeria', 'mura', 'meccanico', 'torri'] : ['mura', 'armeria', 'torri', 'meccanico'];
-  if (S.fz[f].vivo && rnd() < (m > difB*.8 ? .9 : .55)) for (const k of ordine){ const c = costo(f, k); if (c != null && F.monete >= c + 3){ F.monete -= c; F.ed[k]++; az--; news({t:'costr', f, testo:`${FZ[f].corto} costruisce: ${ED[k].nome} livello ${F.ed[k]}`}); break; } }
+  if (S.terre[f].own === f && rnd() < (m > difB*.8 ? .9 : .45)) for (const k of ordine){ const c = costo(f, k); if (c != null && F.monete >= c + 6){ F.monete -= c; F.ed[k]++; az--; news({t:'costr', f, testo:`${FZ[f].corto} costruisce: ${ED[k].nome} livello ${F.ed[k]}`}); break; } }
   // 2. reclutare
-  const nR = Math.min(capRecl(f), Math.floor(F.monete/COSTO_SOLD)); if (nR >= 2 && az > 0){ F.monete -= nR*COSTO_SOLD; S.terre[f].sold += nR; az--; news({t:'recl', f, testo:`${FZ[f].corto} arruola ${nR} soldati`, muto:true}); }
-  // 3. attaccare
-  let tentativi = 0; while (az > 0 && tentativi++ < 4){ let best = null;
-    for (const src of terreDi(f)){ const tieni = src === f ? Math.max(2, Math.ceil(minaccia(f)*.7/((1 + .35*F.ed.mura)*(f === 'smerillo' ? 1.3 : 1)))) : 1, n = S.terre[src].sold - tieni; if (n < 2) continue;
-      for (const v of VIC[src]){ const o = S.terre[v].own; if (o === f) continue; if (TERRE[v].borgo && eBorgo(v) && S.turno <= TREGUA) continue;
+  const nR = Math.min(capRecl(f), Math.floor(F.monete/COSTO_SOLD)); if (nR >= 2 && az > 0 && S.terre[f].own === f){ F.monete -= nR*COSTO_SOLD; S.terre[f].sold += nR; az--; news({t:'recl', f, testo:`${FZ[f].corto} arruola ${nR} soldati`, muto:true}); }
+  // 3. attaccare, oppure portare i soldati al fronte
+  let giri = 0; while (az > 0 && giri++ < 8){ let best = null;
+    for (const src of terreDi(f)){ const tieni = src === f ? guardiaBorgo(f) : 1, n = S.terre[src].sold - tieni; if (n < 2) continue;
+      for (const v of VIC[src]){ const o = S.terre[v].own; if (o === f) continue; if (TERRE[v].borgo && eBorgo(v) && (S.turno <= TREGUA || !puoAssediare(v, f))) continue;
         const pr = previsione(f, n, v), all = o && alleati(f, o); if (all && !(amic(f, o) < 55 && pr.p >= .8 && rnd() < .5)) continue;
-        let sc = pr.p + (o ? 0 : .12) - (o ? amic(f, o)/250 : 0) + (o === 'ceresola' ? .2 : 0) + (o === S.io && terreDi(S.io).length >= 4 ? .08 : 0) + (eBorgo(v) ? .06 : 0);
-        if (pr.p >= (S.turno > 8 ? .55 : .62) && (!best || sc > best.sc)) best = {sc, src, v, n, all}; } }
-    if (!best) break; const o = S.terre[best.v].own, r = battaglia(f, best.src, best.v, best.n); az--;
-    news({t:'att', f, da:best.src, a:best.v, ok:r.vinto, contro:o, trad:best.all, testo: (best.all ? `Tradimento! ${FZ[f].corto} rompe l’alleanza e attacca ` : `${FZ[f].corto} attacca `) + (o ? (o === S.io ? 'la tua terra ' : '') + TERRE[best.v].nome + (o !== S.io ? ' (di ' + FZ[o].corto + ')' : '') : TERRE[best.v].nome) + (r.vinto ? ': la conquista!' : ': respinto.') + (r.vinto && r.borgo && o ? ` ${FZ[o].nome} è caduto.` : '')}); }
-  // 4. spostare i soldati dalle terre tranquille verso il fronte o il borgo
-  for (const t of terreDi(f)){ if (t === f) continue; const fronte = VIC[t].some(v => S.terre[v].own !== f); if (fronte || S.terre[t].sold <= 1) continue;
-    const verso = VIC[t].find(v => S.terre[v].own === f && (v === f || VIC[v].some(w => S.terre[w].own !== f))); if (verso){ S.terre[verso].sold += S.terre[t].sold - 1; S.terre[t].sold = 1; } }
+        let sc = pr.p + (o ? 0 : .12) + TERRE[v].rend*.03 - (o ? amic(f, o)/250 : 0) + (o === 'ceresola' ? .15 : 0) + (o === S.io && terreDi(S.io).length >= IDS.length*.3 ? .08 : 0) + (eBorgo(v) ? .1 : 0) + (TERRE[v].di && o === TERRE[v].di ? .05 : 0);
+        if (pr.p >= (S.turno > 20 ? .48 : S.turno > 10 ? .55 : .6) && (!best || sc > best.sc)) best = {sc, src, v, n, all}; } }
+    if (best){ const o = S.terre[best.v].own, r = battaglia(f, best.src, best.v, best.n); az--;
+      news({t:'att', f, da:best.src, a:best.v, ok:r.vinto, contro:o, trad:best.all, testo: (best.all ? `Tradimento! ${FZ[f].corto} rompe l’alleanza e attacca ` : `${FZ[f].corto} attacca `) + (o ? (o === S.io ? 'la tua terra ' : '') + TERRE[best.v].nome + (o !== S.io ? ' (di ' + FZ[o].corto + ')' : '') : TERRE[best.v].nome) + (r.vinto ? ': la conquista!' : ': respinto.') + (r.vinto && r.borgo && o ? ` ${FZ[o].nome} è caduto.` : '')});
+      continue; }
+    // nessun attacco buono: radunare l'esercito più grande dietro al fronte, vicino al bersaglio più debole
+    let da = null, sur = 0; for (const t of terreDi(f)){ const k = S.terre[t].sold - (t === f ? guardiaBorgo(f) : 1); if (k > sur && (!fronte(f, t) || k >= 3)){ sur = k; da = t; } }
+    if (!da || sur < 2) break;
+    const vis = collegate(f, da); let meta = null, mv = 1e9;
+    for (const t in vis){ if (t === da || !fronte(f, t)) continue; for (const v of VIC[t]){ const o = S.terre[v].own; if (!nemico(f, o)) continue; if (TERRE[v].borgo && eBorgo(v) && !puoAssediare(v, f)) continue; const d = S.terre[v].sold*(o ? 1 + .2*S.fz[o].ed.armeria : 1)*(eBorgo(v) ? 1.6 : 1) - TERRE[v].rend - S.terre[t].sold*.3; if (d < mv){ mv = d; meta = t; } } }
+    if (!meta || meta === da) break;
+    const n = sur, p = percorso(f, da, meta); S.terre[da].sold -= n; S.terre[meta].sold += n; az--; news({t:'mov', f, da, a:meta, p, testo:`${FZ[f].corto} sposta ${n} soldati`, muto:true}); }
   // 5. amicizie
   for (const g of vivi()){ if (g === f) continue; const k = pk(f, g);
     if (!S.all[k] && amic(f, g) >= 45 && rnd() < .35 && vivi().length > 2){ if (g === S.io){ if (!S.proposte.includes(f)) S.proposte.push(f); } else { S.all[k] = true; news({t:'all', f, testo:`${FZ[f].corto} e ${FZ[g].corto} fanno un’alleanza`}); } }
@@ -6091,7 +6169,7 @@ function calcolaStagione(ev, tutti = false){
   S.turno++; S.mosse = MOSSE;
   for (const f of vivi()){ S.fz[f].monete += rendita(f); }
   for (const k in S.amic){ const v = S.amic[k], all = S.all[k]; S.amic[k] = Math.round(all ? v + (40 - v)*.1 : v - Math.sign(v)*Math.min(2, Math.abs(v))); }
-  const forte = vivi().find(f => terreDi(f).length >= 5); if (forte) for (const g of vivi()) if (g !== forte) setAmic(forte, g, amic(forte, g) - 3);
+  const forte = vivi().find(f => terreDi(f).length >= IDS.length*.4); if (forte) for (const g of vivi()) if (g !== forte) setAmic(forte, g, amic(forte, g) - 3);
   if (!S.fz[S.io].vivo) S.fine = 'perso'; else if (vivi().length === 1) S.fine = 'vinto'; }
 function fineStagione(){ if (GIOCA) return; modo = null; sel = null; const ev = []; PRIMA_SNAP = JSON.parse(JSON.stringify(S.terre));
   calcolaStagione(ev); salva(); riproduciEv(ev, () => { notizie(ev); }); }
@@ -6100,8 +6178,13 @@ function simula(io, max = 80){ nuova(io); let t = 0; while (vivi().length > 1 &&
   const r = {io, fine: vivi().length === 1 ? 'fatto' : 'pari', vinc: vivi().length === 1 ? vivi()[0] : null, turni: S.turno, vivi: vivi(), terre: Object.fromEntries(Object.keys(FZ).map(f => [f, terreDi(f).length]))}; try { localStorage.removeItem(KEY); } catch(e){} return r; }
 function passo(){ const G = GIOCA; if (!G) return; if (G.i >= G.ev.length){ GIOCA = null; VISTA = null; tintKey = ''; aggiornaUI(); G.dopo(); return; }
   const e = G.ev[G.i++]; el('cqToast').textContent = e.testo; el('cqToast').className = 'cq-toast on';
+  if (e.t === 'att' && !visibile(e.a)) guarda(e.a);
   if (e.t === 'att'){ const col = FZ[e.f].col; ANIM.push({pts: stradaVerso(e.da, e.a), t:0, dur:.75, col, fine: () => { VISTA = e.snap; FLASH.push({a:e.a, t:0, col: e.ok ? col : '#f8f8f0'}); suona(e.ok ? 'boom' : 'tonfo'); setTimeout(passo, 520); }}); }
+  else if (e.t === 'mov'){ if (!visibile(e.a) && !visibile(e.da)){ VISTA = e.snap; setTimeout(passo, 10); return; } ANIM.push({pts: cammino(e.p), t:0, dur:.55, col:FZ[e.f].col, fine: () => { VISTA = e.snap; setTimeout(passo, 120); }}); }
   else { VISTA = e.snap; if (!e.muto) suona(e.t === 'costr' ? 'costruisci' : e.t === 'regalo' ? 'moneta' : 'flip'); setTimeout(passo, e.muto ? 260 : 700); } }
+const visibile = t => { const [x, y] = aSchermo(TERRE[t].x, TERRE[t].y); return x > INS.l + 20 && x < W - INS.r - 20 && y > INS.t + 20 && y < H - INS.b - 20; };
+function guarda(t){ const T = TERRE[t]; CAMT = {x: INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s, y: INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s}; }
+let CAMT = null;
 function stradaVerso(a, b){ const p = strada(a < b ? a : b, a < b ? b : a); return a < b ? p : p.slice().reverse(); }
 
 // ===== interfaccia =====
@@ -6117,10 +6200,10 @@ function aggiornaUI(){ if (root) root.classList.toggle('vuoto', !S); if (!S) ret
 function barraAmic(v){ const [n, c] = livAmic(v); return `<span class="cq-am"><span class="cq-amb"><i style="left:${(v + 100)/2}%;background:${c}"></i></span><em style="color:${c}">${n}</em></span>`; }
 function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (GIOCA){ p.innerHTML = `<div class="cq-ph"><b>Muovono gli altri borghi…</b></div><button class="big alt cq-salta" id="cqSalta">Salta</button>`; el('cqSalta').onclick = () => { ANIM.length = 0; const G = GIOCA; if (G){ G.i = G.ev.length; passo(); } }; return; }
-  if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra vicina (bordo giallo che lampeggia).</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
+  if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra (gialla che lampeggia): ci arrivano passando per le tue terre.</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
   if (!sel){ const n = terreDi(S.io).length; p.innerHTML = `<div class="cq-ph"><b>Tocca una terra sulla mappa</b><small>Hai ${n} ${n === 1 ? 'terra' : 'terre'} e ${sol(soldDi(S.io))}. Ogni stagione guadagni ${rendita(S.io)} monete.${S.mosse === 0 ? ' Hai finito le mosse: premi <b>Fine stagione</b>.' : ''}</small></div>`; return; }
   const T = TERRE[sel], st = S.terre[sel], own = st.own, mio = own === S.io, borgoMio = sel === S.io && eBorgo(sel), F = S.fz[S.io], nm = S.mosse <= 0;
-  let h = `<div class="cq-ph"><b><span class="cq-dot" style="background:${own ? FZ[own].col : '#8c8c9c'}"></span>${T.nome}</b><small>${own ? (mio ? 'Tua' : 'Di ' + FZ[own].nome) : 'Libera: la tengono i briganti'} · ${sol(st.sold)} · rende ${T.rend} monete${T.desc && !T.borgo ? ' · ' + T.desc : ''}</small></div>`;
+  let h = `<div class="cq-ph"><b><span class="cq-dot" style="background:${own ? FZ[own].col : '#8c8c9c'}"></span>${T.nome}</b><small>${own ? (mio ? 'Tua' : 'Di ' + FZ[own].nome) : 'Libera: la tengono i briganti'} · ${sol(st.sold)} · rende ${T.rend} monete${T.di ? ' · Una delle terre di ' + FZ[T.di].corto + ': chi ne prende ' + ASSEDIO + ' può assediare il borgo.' : T.desc ? ' · ' + T.desc : ''}</small></div>`;
   if (eBorgo(sel)){ const E = S.fz[own].ed; h += `<div class="cq-ed">${Object.keys(ED).map(k => `<span title="${ED[k].nome}">${ico(ED[k].ic, 2)}<b>${E[k]}</b></span>`).join('')}</div>`; }
   if (own && !mio) h += `<div class="cq-rel">Con te: ${barraAmic(amic(S.io, own))}${alleati(S.io, own) ? ' <b class="cq-all">Alleato</b>' : ''}</div>`;
   h += '<div class="cq-az">';
@@ -6128,6 +6211,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (mio && VIC[sel].some(v => S.terre[v].own === S.io) && st.sold > 1) h += `<button class="big alt" id="cqSpo" ${nm ? 'disabled' : ''}>${ico('muovi', 2)} Sposta</button>`;
   if (!mio){ const fonti = VIC[sel].filter(v => S.terre[v].own === S.io && S.terre[v].sold > 1), tregua = T.borgo && eBorgo(sel) && S.turno <= TREGUA;
     if (tregua) h += `<p class="cq-nota">Tregua: nelle prime ${TREGUA} stagioni nessuno può attaccare i borghi.</p>`;
+    else if (!puoAssediare(sel, S.io)) h += `<p class="cq-nota">Per assediare ${FZ[own].corto} prendi prima ${ASSEDIO} delle sue terre intorno (ne hai ${presePer(sel, S.io)}).</p>`;
     else if (fonti.length) h += `<button class="big" id="cqAtt" ${nm ? 'disabled' : ''}>${ico('spade', 2)} Attacca</button>`;
     else h += `<p class="cq-nota">Per attaccarla ti serve una terra vicina con almeno 2 soldati.</p>`;
     if (own) h += `<button class="big alt" id="cqDip1">${ico('amici', 2)} Diplomazia</button>`; }
@@ -6153,7 +6237,7 @@ function dlgSposta(da, a){ const max = S.terre[da].sold - 1; if (max < 1) return
   const o = ov(`<div class="dlg box cq-dlg"><h2>Sposta soldati</h2><p>Da <b>${TERRE[da].nome}</b> a <b>${TERRE[a].nome}</b>. Almeno 1 soldato resta a fare la guardia.</p>${slider(max, max)}<button class="big" id="cqOk">Sposta</button><button class="big alt" id="cqNo">Annulla</button></div>`);
   legaSlider(o, () => {}); o.querySelector('#cqNo').onclick = () => { chiudiOv(); pannello(); };
   o.querySelector('#cqOk').onclick = () => { const n = +o.querySelector('#cqN').value; chiudiOv(); S.terre[da].sold -= n; GIOCA = {ev:[], i:0, dopo(){}}; VISTA = JSON.parse(JSON.stringify(S.terre)); aggiornaUI();
-    ANIM.push({pts: stradaVerso(da, a), t:0, dur:.6, col:FZ[S.io].col, fine: () => { S.terre[a].sold += n; GIOCA = null; VISTA = null; sel = a; suona('tocco'); usaMossa(); }}); }; }
+    ANIM.push({pts: cammino(percorso(S.io, da, a) || [da, a]), t:0, dur:.7, col:FZ[S.io].col, fine: () => { S.terre[a].sold += n; GIOCA = null; VISTA = null; sel = a; suona('tocco'); usaMossa(); }}); }; }
 function dlgAttacco(t){ const fonti = VIC[t].filter(v => S.terre[v].own === S.io && S.terre[v].sold > 1).sort((a, b) => S.terre[b].sold - S.terre[a].sold); if (!fonti.length) return;
   let da = fonti[0]; const own = S.terre[t].own, trad = own && alleati(S.io, own);
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('spade', 2)} Attacco</span><h2>${TERRE[t].nome}</h2>
@@ -6213,11 +6297,12 @@ function finePartita(){ const vinto = S.fine === 'vinto'; let rec = {}; try { re
     <button class="big" id="cqAg">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
   o.querySelector('#cqAg').onclick = () => { chiudiOv(); S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
 function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioca</h2><div class="how">
-    <span>1</span><span>Si gioca a <b>stagioni</b>. In ogni stagione hai <b>3 mosse</b>, poi premi <b>Fine stagione</b> e muovono gli altri borghi.</span>
+    <span>1</span><span>Si gioca a <b>stagioni</b>. In ogni stagione hai <b>${MOSSE} mosse</b>, poi premi <b>Fine stagione</b> e muovono gli altri borghi.</span>
     <span>2</span><span>Tocca il <b>tuo borgo</b> per <b>costruire</b> (mura, torri, armeria, meccanico) o <b>arruolare</b> soldati con le monete.</span>
-    <span>3</span><span>Tocca una terra vicina e premi <b>Attacca</b>: vedi subito la <b>probabilità di vittoria</b>. Ogni terra in più ti dà più monete.</span>
-    <span>4</span><span>Con la <b>Diplomazia</b> fai regali e alleanze. Chi ti è amico ti attacca meno… ma può tradire.</span>
-    <span>5</span><span>Vinci quando prendi <b>tutti e tre i borghi</b>. Perdi se cade il tuo.</span></div><button class="big" id="cqOk">Ho capito</button></div>`, false);
+    <span>3</span><span>Avanza <b>una terra alla volta</b>: tocca una terra vicina e premi <b>Attacca</b>, vedi subito la <b>probabilità di vittoria</b>. Le frazioni (Castorano, Durano…) rendono più monete.</span>
+    <span>4</span><span>Con <b>Sposta</b> porti i soldati dove servono, passando per le tue terre. Per assediare un borgo devi prima prendere <b>${ASSEDIO} delle sue terre</b>.</span>
+    <span>5</span><span>Con la <b>Diplomazia</b> fai regali e alleanze. Chi ti è amico ti attacca meno… ma può tradire.</span>
+    <span>6</span><span>Vinci quando prendi <b>tutti e tre i borghi</b>. Perdi se cade il tuo.</span></div><button class="big" id="cqOk">Ho capito</button></div>`, false);
   o.querySelector('#cqOk').onclick = () => { try { localStorage.setItem(KGUIDA, '1'); } catch(e){} chiudiOv(); if (dopo) dopo(); }; }
 function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){}
   const o = ov(`<div class="dlg box cq-dlg cq-scegli"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Quale borgo difendi?</h2><p>Rinforza il tuo borgo, fai amicizie e conquista gli altri due.</p>
@@ -6226,10 +6311,10 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*2.5 + 'px'; c.style.height = im.height*2.5 + 'px'; });
   o.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { suona('banner'); nuova(b.dataset.f); chiudiOv(); let g = false; try { g = localStorage.getItem(KGUIDA) === '1'; } catch(e){} if (!g) guida(); });
   o.querySelector('#cqMe').onclick = esci; }
-function nuova(io){ S = {v:1, io, turno:1, mosse:MOSSE, fz:{}, terre:{}, amic:{}, all:{}, proposte:[], fine:null};
+function nuova(io){ S = {v:2, io, turno:1, mosse:MOSSE, fz:{}, terre:{}, amic:{}, all:{}, proposte:[], fine:null};
   for (const f in FZ) S.fz[f] = {monete:15, vivo:true, ed:{mura: f === 'sanmartino' ? 0 : 1, torri:0, armeria:0, meccanico:0}};
-  for (const t of IDS) S.terre[t] = {own: TERRE[t].borgo || null, sold: TERRE[t].borgo ? (t === 'ceresola' ? 6 : t === 'smerillo' ? 9 : 8) : TERRE[t].guar};
-  sel = io; modo = null; VISTA = null; tintKey = ''; salva(); centra(); aggiornaUI(); }
+  for (const t of IDS){ const T = TERRE[t]; S.terre[t] = T.borgo ? {own:t, sold: t === 'ceresola' ? 6 : 9} : T.di ? {own:T.di, sold:2} : {own:null, sold:T.guar}; }
+  sel = io; modo = null; VISTA = null; tintKey = ''; salva(); vaiA(io); aggiornaUI(); }
 function pausa(){ const o = ov(`<div class="dlg box cq-dlg"><h2>Pausa</h2><p>La partita si salva da sola: puoi uscire e riprenderla quando vuoi.</p><button type="button" class="tbaudio" id="cqAud">${SUONI.muto ? 'Suoni spenti' : 'Suoni accesi'}</button>
     <button class="big" id="cqRi">Riprendi</button><button class="big alt" id="cqGu">Come si gioca</button><button class="big alt" id="cqNu">Ricomincia (scegli il borgo)</button><button class="big alt" id="cqMe">Torna al menu</button></div>`);
   o.querySelector('#cqRi').onclick = chiudiOv; o.querySelector('#cqGu').onclick = () => guida(); o.querySelector('#cqMe').onclick = esci;
@@ -6242,17 +6327,20 @@ function costruisciDom(){ root = document.createElement('section'); root.id = 'c
     <div class="cq-side"><div id="cqPan"></div><nav class="cq-bar"><button class="big alt" id="cqDip">${ico('amici', 2)} Diplomazia</button><button class="big" id="cqFine">Fine stagione ${ico('play', 2)}</button></nav></div>
     <section id="cqOv" class="overlay" hidden></section>`;
   document.body.append(root); cv = el('cqCv'); ctx = cv.getContext('2d'); inputMappa();
-  el('cqPausa').onclick = pausa; el('cqDip').onclick = () => dlgDiplomazia(); el('cqCentra').onclick = () => { centra(); };
+  el('cqPausa').onclick = pausa; el('cqDip').onclick = () => dlgDiplomazia(); el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
   el('cqFine').onclick = () => { if (GIOCA || !S) return; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le monete invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
       o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fineStagione(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fineStagione(); };
   new ResizeObserver(() => { if (attivo) misura(); }).observe(el('cqStage')); new ResizeObserver(() => { if (attivo){ insets(); limita(); } }).observe(root.querySelector('.cq-side')); }
 let PRIMA_SNAP = null;
 function apri(){ if (!root) costruisciDom(); root.hidden = false; attivo = true; try { SUONI.musica('sm'); } catch(e){}
-  if (!cB){ root.classList.add('vuoto'); ov(`<div class="dlg box cq-dlg cq-load"><span class="kicker">${ico('mappa', 2)} Conquista</span><h2>Disegno la mappa dei borghi…</h2><div class="cq-pbar"><i class="cq-carica"></i></div></div>`, false);
-    setTimeout(() => { try { creaBase(); } catch(e){ console.error(e); } chiudiOv(); if (attivo) avviaCQ(); }, 60); return; }
+  if (!cB){ root.classList.add('vuoto'); ov(`<div class="dlg box cq-dlg cq-load"><span class="kicker">${ico('mappa', 2)} Conquista</span><h2>Disegno la mappa dei borghi…</h2><div class="cq-pbar"><i class="cq-carica" style="width:2%"></i></div></div>`, false);
+    const gen = generaMondo(), bar = el('cqOv').querySelector('.cq-pbar i'); bar.classList.remove('cq-carica'); bar.style.background = 'var(--giallo)';
+    const pezzo = () => { if (!attivo) return; let r; try { const t0 = performance.now(); do { r = gen.next(); } while (!r.done && performance.now() - t0 < 40); } catch(e){ console.error(e); r = {done:true}; }
+      if (!r.done){ bar.style.width = Math.round((r.value || 0)*100) + '%'; setTimeout(pezzo, 0); } else { chiudiOv(); avviaCQ(); } };
+    setTimeout(pezzo, 60); return; }
   avviaCQ(); }
-function avviaCQ(){ requestAnimationFrame(() => { misura(); centra(); });
-  const c = carica(); if (c){ S = c; if (!S.proposte) S.proposte = []; sel = S.io; misura(); centra(); aggiornaUI();
+function avviaCQ(){ requestAnimationFrame(() => { misura(); if (S) vaiA(S.io); else centra(); });
+  const c = carica(); if (c){ S = c; if (!S.proposte) S.proposte = []; sel = S.io; misura(); vaiA(S.io); aggiornaUI();
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
     o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
   else { S = null; aggiornaUI(); scegli(); misura(); centra(); } }
@@ -6263,7 +6351,7 @@ function tasto(e, k){ const o = el('cqOv');
   else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
-return {apri, frame, tasto, get attivo(){ return attivo; }, _test:{simula, ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {apri, frame, tasto, get attivo(){ return attivo; }, _test:{simula, vai: t => vaiA(t), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 let last = performance.now(), T = 0;
