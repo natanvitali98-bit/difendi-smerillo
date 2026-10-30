@@ -1126,7 +1126,7 @@ body.rt-kr #app > #bar{display:contents!important}
 body.rt-kr #app #bFalco,body.rt-kr #app #bFrana,body.rt-kr #app #bGo,body.rt-kr #app #bVel{position:fixed;z-index:8}
 body.rt-kr #app > #info{position:fixed;z-index:8;top:calc(50px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));min-height:0!important;overflow-y:auto;font-size:12.5px!important;padding:7px 9px!important;flex-direction:column;align-items:stretch;opacity:.97}
 body.rt-kr #app #info .acts{flex-direction:column}
-body.rt-kr.rt-onda #app > #info,body.rt-kr.anello-on #app > #info{display:none!important}
+body.rt-kr.rt-onda #app > #info,body.rt-kr.anello-on #app > #info,body.rt-kr.rt-sel #app > #info{display:none!important}
 body.rt-kr #bShop,body.rt-kr #negozio{display:none!important}
 body.rt-kr #stage .zoom{top:calc(50px + env(safe-area-inset-top))!important;right:calc(10px + env(safe-area-inset-right))!important;bottom:auto!important}
 body.rt-kr #guidaCl{top:auto!important;font-size:13px!important;padding:7px 10px!important}
@@ -2892,7 +2892,7 @@ function limita(){
   ox = SW/2 - camX*scale; oy = SH/2 - camY*scale;
 }
 function fit(){
-  const r = $('#stage').getBoundingClientRect(); dpr = Math.min(2, window.devicePixelRatio || 1); SW = r.width; SH = r.height;
+  const r = $('#stage').getBoundingClientRect(); dpr = Math.min(ORIZ ? 1.5 : 2, window.devicePixelRatio || 1); SW = r.width; SH = r.height; // a tutto schermo sul telefono: un po' meno pixel, più fluido
   cv.width = Math.round(r.width*dpr); cv.height = Math.round(r.height*dpr); cv.style.width = r.width+'px'; cv.style.height = r.height+'px';
   if (primo){ primo = false; scale = Math.max(SW/330, SH/430); const [cx,cy] = P(18, 0, Z0); camX = cx; camY = cy; }
   limita();
@@ -3154,7 +3154,7 @@ function aggiornaNegozio(){ const ok = !!S && !MOD && !S.fine;
   ng.hidden = !(ok && NEG); b.hidden = !ok || NEG || !!(S && S.modo && S.modo.tipo === 'costruisci');
   if (ok && NEG){ const sd = $('#ngSoldi'); if (sd){ sd.innerHTML = ''; sd.append(nutIcon(), document.createTextNode(' ' + Math.floor(S.castagne))); } } }
 function ui(){
-  setTimeout(guidaCl, 0); aggiornaNegozio(); document.body.classList.toggle('rt-onda', !!(S && S.inCorso && S.sel === null && !S.modo));
+  setTimeout(guidaCl, 0); aggiornaNegozio(); document.body.classList.toggle('rt-onda', !!(S && S.inCorso && S.sel === null && !S.modo)); document.body.classList.toggle('rt-sel', !!(S && S.sel !== null));
   const txt = $('#infoTxt'), acts = $('#infoActs'); acts.innerHTML = '';
   if (!S){ txt.textContent = ''; return; }
   if (S.modo && S.modo.tipo === 'costruisci'){ const off = NEGOZIO.find(x => x.tipo === S.modo.t), gh = S.modo.ghost;
@@ -3312,7 +3312,7 @@ function tocca(ev){
   const r = cv.getBoundingClientRect(); const sx = (ev.clientX - r.left - ox)/scale, sy = (ev.clientY - r.top - oy)/scale;
   if (MOD){ modSel = trovaOggetto(sx, sy); modUI(); return; }
   if (!S || S.fine) return;
-  if (ORIZ && ANELLO){ chiudiAnello(); S.sel = null; ui(); return; } // tocco fuori dal cerchio: si chiude
+  if (ORIZ && ANELLO){ chiudiAnello(); S.sel = null; ui(); } // tocco fuori dal cerchio: si chiude e il tocco vale lo stesso (es. su un nemico)
   if (S.modo){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     const m = S.modo; S.modo = null;
     if (m.tipo === 'trappola'){ if (S.ordini > 0 && S.castagne >= COSTO_TRAPPOLA) piazzaTrappola(e, n); }
@@ -3333,7 +3333,7 @@ function tocca(ev){
     if (r < .45){ S.castagne += 20; t = 'Ammonite! +20 castagne'; } else if (r < .7){ S.franaCd = 0; t = 'Conchiglia! Frana pronta'; } else if (r < .9){ S.vite = Math.min(S.viteMax, S.vite+2); t = 'Riccio di mare fossile! +2'; } else { S.falcoCd = 0; S.bonus.nido *= 1.05; t = 'Dente di squalo! Falchi più forti'; }
     S.fx.push({k:'txt', e:f.e, n:f.n, z:f.z+10, t:0, s:t, col:'#f8f0d0'}); aggiornaHud(); return; } }
   // 2) un nemico? attacco del tuo smeriglio
-  if (S.inCorso){ let tgt = null, bd = Math.max(14, 34/scale); for (const x of S.nemici){ const [X,Y] = P(x.e, x.n, x.z); const d = Math.hypot(X-sx, Y-(x.d.vola ? 16 : 6)-sy); if (d < bd){ bd = d; tgt = x; } }
+  if (S.inCorso){ let tgt = null, bd = ORIZ ? Math.max(22, 46/scale) : Math.max(14, 34/scale); for (const x of S.nemici){ const [X,Y] = P(x.e, x.n, x.z); const d = Math.hypot(X-sx, Y-(x.d.vola ? 16 : 6)-sy); if (d < bd){ bd = d; tgt = x; } }
     if (tgt){ if (S.falcoCd <= 0) lanciaFalco(tgt); return; } }
   let idx = null, best = Math.max(16, 30/scale);
   S.luoghi.forEach((L,i) => { const [x,y] = P(L.e, L.n, L.z); const top = y - (STAT[L.tipo].h||0)*K - 6; const d = Math.min(Math.hypot(x-sx, y-sy), Math.hypot(x-sx, top-sy)); if (d < best){ best = d; idx = i; } });
@@ -3342,14 +3342,14 @@ function tocca(ev){
     let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     POSTI = POSTI || calcolaPosti(); const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]);
     S.sel = null; ui();
-    if (Math.hypot(q[0]-e, q[1]-n) < 16){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
-    else S.fx.push({k:'txt', e, n, z:z+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'});
+    if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 9 : 16)){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
+    else if (!S.inCorso) S.fx.push({k:'txt', e, n, z:z+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'});
     aggiornaHud(); return; }
   S.sel = idx; ui(); aggiornaHud();
 }
 $('#zIn').onclick = () => zoom(1.3, SW/2, SH/2); $('#zOut').onclick = () => zoom(1/1.3, SW/2, SH/2);
 $('#bFrana').onclick = () => { if (!S || S.franaCd > 0) return; S.frana = !S.frana; S.sel = null; ui(); aggiornaHud(); };
-$('#bGo').onclick = () => { chiudiAnello(); avviaOndata(); };
+$('#bGo').onclick = () => { if (ORIZ && S){ chiudiAnello(); S.sel = null; } avviaOndata(); };
 $('#bShop').onclick = () => { if (!S || S.fine) return; S.sel = null; if (S.modo && S.modo.tipo === 'costruisci') S.modo = null; NEG = true; costruisciTorri(); ui(); aggiornaHud(); };
 $('#ngX').onclick = () => { NEG = false; ui(); };
 $('#bVel').onclick = () => { if (!S) return; S.vel = S.vel === 1 ? 2 : S.vel === 2 ? 3 : 1; $('#bVel').textContent = '×'+S.vel; };
@@ -3386,7 +3386,7 @@ function puntoLibero(e, n){ let dv = 1e9, re = e, rn = n; for (const v of VIE) f
   return null; }
 // i posti dove puoi costruire: pallini lungo la strada, a 7 e 12 metri dal bordo
 let POSTI = null, ORIZ = false, ANELLO = null; // ORIZ: telefono in orizzontale nella Difesa in tempo reale (si costruisce col cerchio, come Kingdom Rush)
-window.impostaOriz = (o2, land) => { document.body.classList.toggle('rt-oriz', !!(o2 && land)); if (o2 === ORIZ) return; ORIZ = o2; document.body.classList.toggle('rt-kr', o2); chiudiAnello(); if (S){ S.modo = null; NEG = false; POSTI = o2 ? calcolaPosti() : null; ui(); } dispatchEvent(new Event('resize')); };
+window.impostaOriz = (o2, land) => { const prima = ORIZ; document.body.classList.toggle('rt-oriz', !!(o2 && land)); if (o2 === ORIZ) return; ORIZ = o2; document.body.classList.toggle('rt-kr', o2); chiudiAnello(); if (S){ S.modo = null; NEG = false; POSTI = o2 ? calcolaPosti() : null; ui(); } if (prima !== o2) fit(); };
 function chiudiAnello(){ const a = document.getElementById('anello'); if (a) a.remove(); ANELLO = null; document.body.classList.remove('anello-on'); }
 function apriAnello(sx, sy, voci, centro){ chiudiAnello(); const st = $('#stage'), a = document.createElement('div'); a.id = 'anello';
   const R = 82, W = st.clientWidth, H = st.clientHeight, cx = Math.max(R + 40, Math.min(W - R - 40, sx)), cy = Math.max(R + 40, Math.min(H - R - 40, sy));
