@@ -1126,7 +1126,8 @@ body.rt-kr #app > #bar{display:contents!important}
 body.rt-kr #app #bFalco,body.rt-kr #app #bFrana,body.rt-kr #app #bGo,body.rt-kr #app #bVel{position:fixed;z-index:8}
 body.rt-kr #app > #info{position:fixed;z-index:8;top:calc(50px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));min-height:0!important;overflow-y:auto;font-size:12.5px!important;padding:7px 9px!important;flex-direction:column;align-items:stretch;opacity:.97}
 body.rt-kr #app #info .acts{flex-direction:column}
-body.rt-kr.rt-onda #app > #info,body.rt-kr.anello-on #app > #info,body.rt-kr.rt-sel #app > #info{display:none!important}
+body.rt-kr #app > #info{display:none!important}
+body.rt-kr.rt-modo #app > #info{display:flex!important} /* sul telefono il riquadro compare solo quando serve un'istruzione (spostare i soldati) */
 body.rt-kr #bShop,body.rt-kr #negozio{display:none!important}
 body.rt-kr #stage .zoom{top:calc(50px + env(safe-area-inset-top))!important;right:calc(10px + env(safe-area-inset-right))!important;bottom:auto!important}
 body.rt-kr #guidaCl{top:auto!important;font-size:13px!important;padding:7px 10px!important}
@@ -3135,6 +3136,7 @@ function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; 
   document.querySelectorAll('.punta').forEach(x => x.classList.remove('punta'));
   if (!S || fatto || MOD || S.fine){ g.hidden = true; return; }
   const costruite = S.luoghi.some(L => L.lvl); let t = '', sub = '', ok = false, punta = null;
+  if (ORIZ && costruite){ g.hidden = true; return; } // sul telefono la guida serve solo per la prima difesa
   if (ORIZ && !costruite){ t = ANELLO ? '2. Scegli la Balestra nel cerchio.' : '1. Tocca un pallino bianco vicino alla strada.'; sub = ANELLO ? 'Costa 70 castagne 🌰. Spara lontano.' : 'Si apre un cerchio con le difese.'; }
   else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci') && !NEG){ t = '1. Tocca Negozio, in basso.'; sub = 'Lì compri le difese. Le castagne 🌰 sono i tuoi soldi.'; punta = '#bShop'; }
   else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci')){ t = '1. Tocca la Balestra.'; sub = 'Costa 70 castagne 🌰. Spara lontano.'; punta = '[data-shop="vedetta"]'; }
@@ -3154,7 +3156,7 @@ function aggiornaNegozio(){ const ok = !!S && !MOD && !S.fine;
   ng.hidden = !(ok && NEG); b.hidden = !ok || NEG || !!(S && S.modo && S.modo.tipo === 'costruisci');
   if (ok && NEG){ const sd = $('#ngSoldi'); if (sd){ sd.innerHTML = ''; sd.append(nutIcon(), document.createTextNode(' ' + Math.floor(S.castagne))); } } }
 function ui(){
-  setTimeout(guidaCl, 0); aggiornaNegozio(); document.body.classList.toggle('rt-onda', !!(S && S.inCorso && S.sel === null && !S.modo)); document.body.classList.toggle('rt-sel', !!(S && S.sel !== null));
+  setTimeout(guidaCl, 0); aggiornaNegozio(); document.body.classList.toggle('rt-onda', !!(S && S.inCorso && S.sel === null && !S.modo)); document.body.classList.toggle('rt-sel', !!(S && S.sel !== null)); document.body.classList.toggle('rt-modo', !!(S && S.modo));
   const txt = $('#infoTxt'), acts = $('#infoActs'); acts.innerHTML = '';
   if (!S){ txt.textContent = ''; return; }
   if (S.modo && S.modo.tipo === 'costruisci'){ const off = NEGOZIO.find(x => x.tipo === S.modo.t), gh = S.modo.ghost;
