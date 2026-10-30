@@ -5864,7 +5864,8 @@ const eBorgo = t => TERRE[t].borgo && S.terre[t].own === TERRE[t].borgo; // il b
 const costo = (f, k) => { const l = S.fz[f].ed[k]; if (l >= ED[k].max) return null; const c = ED[k].costi[l]; return f === 'sanmartino' ? Math.round(c*.75) : c; };
 // per assediare un borgo bisogna prima prendere almeno 2 delle sue terre
 const ASSEDIO = 2, terreDelBorgo = t => IDS.filter(x => TERRE[x].di === t), presePer = (t, f) => terreDelBorgo(t).filter(x => S.terre[x].own === f).length;
-const puoAssediare = (t, f) => !(TERRE[t].borgo && eBorgo(t)) || presePer(t, f) >= ASSEDIO;
+const perse = t => terreDelBorgo(t).filter(x => S.terre[x].own !== t).length; // terre del borgo prese da chiunque (te, gli altri borghi, gli alleati)
+const puoAssediare = (t, f) => !(TERRE[t].borgo && eBorgo(t)) || perse(t) >= ASSEDIO;
 // strutture da costruire nelle terre conquistate (fuori dal borgo)
 const STR = {
   torre:   {nome:'Torre di guardia', ic:'torre', costo:8, desc:'Questa terra si difende meglio: +50%.', dove: t => !TERRE[t].borgo},
@@ -5872,7 +5873,7 @@ const STR = {
   caserma: {nome:'Caserma', ic:'bandiera', costo:14, desc:'Puoi arruolare soldati anche qui, vicino al fronte.', dove: t => TERRE[t].fraz},
   mercato: {nome:'Mercato', ic:'moneta', costo:12, desc:'+3 monete ogni stagione, e +1 da ogni accordo commerciale.', dove: t => TERRE[t].fraz}};
 const accordo = (a, b) => !!(S.acc && S.acc[pk(a, b)]);
-const assediato = f => S.terre[f] && S.terre[f].own === f && terreDelBorgo(f).filter(x => { const o = S.terre[x].own; return o && o !== f && !alleati(f, o); }).length >= ASSEDIO;
+const assediato = f => S.terre[f] && S.terre[f].own === f && terreDelBorgo(f).filter(x => { const o = S.terre[x].own; return o !== f && !(o && alleati(f, o)); }).length >= ASSEDIO;
 const capRecl = f => { const c = 4 + 2*S.fz[f].ed.armeria; return assediato(f) ? Math.ceil(c/2) : c; };
 function rendita(f, t = S.turno){ let r = terreDi(f).reduce((a, x) => a + TERRE[x].rend + (S.terre[x].str === 'fattoria' ? 2 : S.terre[x].str === 'mercato' ? 3 : 0), 0); const merc = terreDi(f).filter(x => S.terre[x].str === 'mercato').length;
   for (const g of vivi()) if (g !== f && accordo(f, g)) r += 3 + merc; if (f === 'smerillo') r -= 1; if (f === 'ceresola') r += 2;
@@ -6232,7 +6233,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra (gialla che lampeggia): ci arrivano passando per le tue terre.</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
   if (!sel){ const n = terreDi(S.io).length; p.innerHTML = `<div class="cq-ph"><b>Tocca una terra sulla mappa</b><small>Hai ${n} ${n === 1 ? 'terra' : 'terre'} e ${sol(soldDi(S.io))}. Ogni stagione guadagni ${rendita(S.io)} monete.${S.mosse === 0 ? ' Hai finito le mosse: premi <b>Fine stagione</b>.' : ''}</small></div>`; return; }
   const T = TERRE[sel], st = S.terre[sel], own = st.own, mio = own === S.io, borgoMio = sel === S.io && eBorgo(sel), F = S.fz[S.io], nm = S.mosse <= 0;
-  let h = `<div class="cq-ph"><b><span class="cq-dot" style="background:${own ? FZ[own].col : '#8c8c9c'}"></span>${T.nome}</b><small>${own ? (mio ? 'Tua' : 'Di ' + FZ[own].nome) : 'Libera: la tengono i briganti'} · ${sol(st.sold)} · rende ${T.rend} monete${T.di ? ' · Una delle terre di ' + FZ[T.di].corto + ': chi ne prende ' + ASSEDIO + ' può assediare il borgo.' : T.desc ? ' · ' + T.desc : ''}</small></div>`;
+  let h = `<div class="cq-ph"><b><span class="cq-dot" style="background:${own ? FZ[own].col : '#8c8c9c'}"></span>${T.nome}</b><small>${own ? (mio ? 'Tua' : 'Di ' + FZ[own].nome) : 'Libera: la tengono i briganti'} · ${sol(st.sold)} · rende ${T.rend} monete${T.di ? ' · Una delle terre di ' + FZ[T.di].corto + ': quando ne vengono prese ' + ASSEDIO + ', il borgo si può attaccare.' : T.desc ? ' · ' + T.desc : ''}</small></div>`;
   if (eBorgo(sel)){ const E = S.fz[own].ed; h += `<div class="cq-ed">${Object.keys(ED).map(k => `<span title="${ED[k].nome}">${ico(ED[k].ic, 2)}<b>${E[k]}</b></span>`).join('')}</div>`; if (S.fz[own].assedio) h += `<p class="cq-warn">Sotto assedio da ${S.fz[own].assedio === 1 ? '1 stagione' : S.fz[own].assedio + ' stagioni'}: ogni stagione perde soldati per la fame, le mura si rovinano e si difende peggio.</p>`; else if (assediato(own)) h += `<p class="cq-warn">Circondato: dalla prossima stagione è sotto assedio.</p>`; }
   if (st.str) h += `<div class="cq-rel">${ico(STR[st.str].ic, 2)} <b>${STR[st.str].nome}</b>: ${STR[st.str].desc}</div>`;
   if (own && !mio) h += `<div class="cq-rel">Con te: ${barraAmic(amic(S.io, own))}${alleati(S.io, own) ? ' <b class="cq-all">Alleato</b>' : ''}</div>`;
@@ -6243,7 +6244,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (mio && VIC[sel].some(v => S.terre[v].own === S.io) && st.sold > 1) h += `<button class="big alt" id="cqSpo" ${nm ? 'disabled' : ''}>${ico('muovi', 2)} Sposta</button>`;
   if (!mio){ const fonti = VIC[sel].filter(v => S.terre[v].own === S.io && S.terre[v].sold > 1), tregua = T.borgo && eBorgo(sel) && S.turno <= TREGUA;
     if (tregua) h += `<p class="cq-nota">Tregua: nelle prime ${TREGUA} stagioni nessuno può attaccare i borghi.</p>`;
-    else if (!puoAssediare(sel, S.io)) h += `<p class="cq-nota">Per assediare ${FZ[own].corto} prendi prima ${ASSEDIO} delle sue terre intorno (ne hai ${presePer(sel, S.io)}).</p>`;
+    else if (!puoAssediare(sel, S.io)) h += `<p class="cq-nota">Per attaccare ${FZ[own].corto} devono essere prese almeno ${ASSEDIO} delle sue terre intorno, da te o dagli altri (ora ${perse(sel)}).</p>`;
     else if (fonti.length) h += `<button class="big" id="cqAtt" ${nm ? 'disabled' : ''}>${ico('spade', 2)} Attacca</button>`;
     else h += `<p class="cq-nota">Per attaccarla ti serve una terra vicina con almeno 2 soldati.</p>`;
     if (own) h += `<button class="big alt" id="cqDip1">${ico('amici', 2)} Diplomazia</button>`; }
@@ -6341,7 +6342,7 @@ function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioc
     <span>1</span><span>Si gioca a <b>stagioni</b>. In ogni stagione hai <b>${MOSSE} mosse</b>, poi premi <b>Fine stagione</b> e muovono gli altri borghi.</span>
     <span>2</span><span>Tocca il <b>tuo borgo</b> per <b>costruire</b> (mura, torri, armeria, meccanico) o <b>arruolare</b> soldati con le monete.</span>
     <span>3</span><span>Avanza <b>una terra alla volta</b>: tocca una terra vicina e premi <b>Attacca</b>, vedi subito la <b>probabilità di vittoria</b>. Le frazioni (Castorano, Durano…) rendono più monete.</span>
-    <span>4</span><span>Con <b>Sposta</b> porti i soldati dove servono, passando per le tue terre. Per assediare un borgo prendi prima <b>${ASSEDIO} delle sue terre</b>: da lì ogni stagione perde soldati per la fame, le mura si rovinano e diventa più facile da prendere.</span>
+    <span>4</span><span>Con <b>Sposta</b> porti i soldati dove servono, passando per le tue terre. Per attaccare un borgo devono essere prese <b>${ASSEDIO} delle sue terre</b> (da te o dagli altri): da lì ogni stagione perde soldati per la fame, le mura si rovinano e diventa più facile da prendere.</span>
     <span>5</span><span>Nelle terre conquistate puoi <b>costruire</b>: torre di guardia, fattoria e, nelle frazioni, caserma e mercato.</span>
     <span>6</span><span>Con la <b>Diplomazia</b> fai regali, accordi commerciali e alleanze. Chi ti è amico ti attacca meno… ma può tradire.</span>
     <span>7</span><span>Vinci quando prendi <b>tutti e tre i borghi</b>. Perdi se cade il tuo.</span></div><button class="big" id="cqOk">Ho capito</button></div>`, false);
