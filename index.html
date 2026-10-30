@@ -1111,30 +1111,41 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 @keyframes tabSaltaPc{0%{transform:scale(1)}50%{transform:scale(1.3) rotate(-5deg)}100%{transform:scale(1.12)}}
 @media (min-width:1600px) and (min-height:950px){ .cr{zoom:1.2} }
 .cr-h small{background:rgba(20,20,51,.82);padding:3px 10px;border-radius:999px}
-/* ===== tempo reale col telefono in orizzontale (come Kingdom Rush): mappa a tutto schermo, comandi negli angoli sotto i pollici,
-   si costruisce toccando un pallino della mappa (si apre un cerchio con le difese) ===== */
-body.rt-oriz #app{max-width:none!important;display:block!important;padding:0!important;position:fixed;inset:0}
-body.rt-oriz #app > #stage{position:fixed;inset:0;border:0!important;border-radius:0!important;box-shadow:none!important}
-body.rt-oriz #app > .hud{position:fixed;z-index:8;top:calc(6px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));display:flex!important;align-items:flex-start;gap:6px;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;pointer-events:none;min-height:0!important}
-body.rt-oriz #app > .hud > *,body.rt-oriz #app .hud-r > *{pointer-events:auto}
-body.rt-oriz #app .hud-r{display:contents!important}
-body.rt-oriz #app .hud-l,body.rt-oriz #app .hud-st{background:rgba(20,20,51,.88);color:#fff;border-radius:12px;padding:5px 10px;min-height:36px;display:inline-flex;align-items:center;gap:10px;font-size:14px}
-body.rt-oriz #app .hud-st .stat b{font-size:17px}
-body.rt-oriz #app .hud-bt{margin-left:auto;display:inline-flex;gap:6px}
-body.rt-oriz #app .hud-bt .hbtn{min-width:44px;min-height:44px}
-body.rt-oriz #app > #bar{display:contents!important}
-body.rt-oriz #app #bFalco,body.rt-oriz #app #bFrana{position:fixed;z-index:8;left:calc(10px + env(safe-area-inset-left));width:132px;min-height:56px;border-radius:28px!important}
-body.rt-oriz #app #bFrana{bottom:calc(10px + env(safe-area-inset-bottom))}
-body.rt-oriz #app #bFalco{bottom:calc(74px + env(safe-area-inset-bottom))}
-body.rt-oriz #app #bGo{position:fixed;z-index:8;right:calc(10px + env(safe-area-inset-right));bottom:calc(10px + env(safe-area-inset-bottom));width:168px;min-height:64px;border-radius:32px!important;font-size:19px}
-body.rt-oriz #app #bVel{position:fixed;z-index:8;right:calc(10px + env(safe-area-inset-right));bottom:calc(84px + env(safe-area-inset-bottom));min-width:60px;min-height:48px}
-body.rt-oriz #app > #info{position:fixed;z-index:8;top:calc(50px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));width:min(300px,36vw);max-height:44vh;min-height:0!important;overflow-y:auto;font-size:12.5px!important;padding:7px 9px!important;flex-direction:column;align-items:stretch;opacity:.97}
-body.rt-oriz #app #info .acts{flex-direction:column}
-body.rt-oriz.rt-onda #app > #info,body.rt-oriz.anello-on #app > #info{display:none!important}
-body.rt-oriz #bShop,body.rt-oriz #negozio{display:none!important}
-body.rt-oriz #stage .zoom{top:calc(50px + env(safe-area-inset-top))!important;right:calc(10px + env(safe-area-inset-right))!important;bottom:auto!important}
-body.rt-oriz #guidaCl{top:auto!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;left:calc(156px + env(safe-area-inset-left))!important;right:calc(190px + env(safe-area-inset-right))!important;font-size:13px!important;padding:7px 10px!important}
-body.rt-oriz #app > #modBar{position:fixed;bottom:0;left:0;right:0;z-index:9}
+/* ===== tempo reale sul telefono (come Kingdom Rush): mappa a tutto schermo, comandi negli angoli sotto i pollici,
+   si costruisce toccando un pallino della mappa (si apre un cerchio con le difese). Vale in verticale e in orizzontale ===== */
+body.rt-kr #app{max-width:none!important;display:block!important;padding:0!important;position:fixed;inset:0}
+body.rt-kr #app > #stage{position:fixed;inset:0;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.rt-kr #app > .hud{position:fixed;z-index:8;top:calc(6px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));display:flex!important;align-items:flex-start;gap:6px;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;pointer-events:none;min-height:0!important}
+body.rt-kr #app > .hud > *,body.rt-kr #app .hud-r > *{pointer-events:auto}
+body.rt-kr #app .hud-r{display:contents!important}
+body.rt-kr #app .hud-l,body.rt-kr #app .hud-st{background:rgba(20,20,51,.88);color:#fff;border-radius:12px;padding:5px 10px;min-height:36px;display:inline-flex;align-items:center;gap:10px;font-size:14px;white-space:nowrap}
+body.rt-kr #app .hud-st .stat b{font-size:17px}
+body.rt-kr #app .hud-bt{margin-left:auto;display:inline-flex;gap:6px}
+body.rt-kr #app .hud-bt .hbtn{min-width:44px;min-height:44px}
+body.rt-kr #app > #bar{display:contents!important}
+body.rt-kr #app #bFalco,body.rt-kr #app #bFrana,body.rt-kr #app #bGo,body.rt-kr #app #bVel{position:fixed;z-index:8}
+body.rt-kr #app > #info{position:fixed;z-index:8;top:calc(50px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));min-height:0!important;overflow-y:auto;font-size:12.5px!important;padding:7px 9px!important;flex-direction:column;align-items:stretch;opacity:.97}
+body.rt-kr #app #info .acts{flex-direction:column}
+body.rt-kr.rt-onda #app > #info,body.rt-kr.anello-on #app > #info{display:none!important}
+body.rt-kr #bShop,body.rt-kr #negozio{display:none!important}
+body.rt-kr #stage .zoom{top:calc(50px + env(safe-area-inset-top))!important;right:calc(10px + env(safe-area-inset-right))!important;bottom:auto!important}
+body.rt-kr #guidaCl{top:auto!important;font-size:13px!important;padding:7px 10px!important}
+body.rt-kr #app > #modBar{position:fixed;bottom:0;left:0;right:0;z-index:9}
+/* verticale: una riga in basso per il pollice (Falco, Frana, Avvia), la velocità sopra Avvia */
+body.rt-kr:not(.rt-oriz) #app #bFalco,body.rt-kr:not(.rt-oriz) #app #bFrana{bottom:calc(10px + env(safe-area-inset-bottom));width:calc((100vw - 40px)*.29);min-height:58px;border-radius:20px!important}
+body.rt-kr:not(.rt-oriz) #app #bFalco{left:10px} body.rt-kr:not(.rt-oriz) #app #bFrana{left:calc(20px + (100vw - 40px)*.29)}
+body.rt-kr:not(.rt-oriz) #app #bGo{right:10px;bottom:calc(10px + env(safe-area-inset-bottom));width:calc((100vw - 40px)*.42);min-height:58px;border-radius:20px!important;font-size:19px}
+body.rt-kr:not(.rt-oriz) #app #bVel{right:10px;bottom:calc(78px + env(safe-area-inset-bottom));min-width:60px;min-height:48px}
+body.rt-kr:not(.rt-oriz) #app > #info{right:calc(64px + env(safe-area-inset-right));max-height:32vh}
+body.rt-kr:not(.rt-oriz) #guidaCl{bottom:calc(78px + env(safe-area-inset-bottom))!important;left:10px!important;right:80px!important}
+/* orizzontale: pollice sinistro Falco e Frana, pollice destro Avvia e velocità */
+body.rt-kr.rt-oriz #app #bFalco,body.rt-kr.rt-oriz #app #bFrana{left:calc(10px + env(safe-area-inset-left));width:132px;min-height:56px;border-radius:28px!important}
+body.rt-kr.rt-oriz #app #bFrana{bottom:calc(10px + env(safe-area-inset-bottom))}
+body.rt-kr.rt-oriz #app #bFalco{bottom:calc(74px + env(safe-area-inset-bottom))}
+body.rt-kr.rt-oriz #app #bGo{right:calc(10px + env(safe-area-inset-right));bottom:calc(10px + env(safe-area-inset-bottom));width:168px;min-height:64px;border-radius:32px!important;font-size:19px}
+body.rt-kr.rt-oriz #app #bVel{right:calc(10px + env(safe-area-inset-right));bottom:calc(84px + env(safe-area-inset-bottom));min-width:60px;min-height:48px}
+body.rt-kr.rt-oriz #app > #info{width:min(300px,36vw);max-height:44vh}
+body.rt-kr.rt-oriz #guidaCl{bottom:calc(10px + env(safe-area-inset-bottom))!important;left:calc(156px + env(safe-area-inset-left))!important;right:calc(190px + env(safe-area-inset-right))!important}
 #anello{position:absolute;z-index:9;width:0;height:0}
 #anello > *{pointer-events:inherit}
 #anello .an-c{position:absolute;left:-25px;top:-25px;width:50px;height:50px;border-radius:50%;background:#141433;color:#ffd03a;border:3px solid #fff;font:400 15px var(--f-big);box-shadow:0 3px 0 rgba(0,0,0,.4)}
@@ -3338,7 +3349,7 @@ function tocca(ev){
 }
 $('#zIn').onclick = () => zoom(1.3, SW/2, SH/2); $('#zOut').onclick = () => zoom(1/1.3, SW/2, SH/2);
 $('#bFrana').onclick = () => { if (!S || S.franaCd > 0) return; S.frana = !S.frana; S.sel = null; ui(); aggiornaHud(); };
-$('#bGo').onclick = avviaOndata;
+$('#bGo').onclick = () => { chiudiAnello(); avviaOndata(); };
 $('#bShop').onclick = () => { if (!S || S.fine) return; S.sel = null; if (S.modo && S.modo.tipo === 'costruisci') S.modo = null; NEG = true; costruisciTorri(); ui(); aggiornaHud(); };
 $('#ngX').onclick = () => { NEG = false; ui(); };
 $('#bVel').onclick = () => { if (!S) return; S.vel = S.vel === 1 ? 2 : S.vel === 2 ? 3 : 1; $('#bVel').textContent = '×'+S.vel; };
@@ -3375,7 +3386,7 @@ function puntoLibero(e, n){ let dv = 1e9, re = e, rn = n; for (const v of VIE) f
   return null; }
 // i posti dove puoi costruire: pallini lungo la strada, a 7 e 12 metri dal bordo
 let POSTI = null, ORIZ = false, ANELLO = null; // ORIZ: telefono in orizzontale nella Difesa in tempo reale (si costruisce col cerchio, come Kingdom Rush)
-window.impostaOriz = o2 => { if (o2 === ORIZ) return; ORIZ = o2; document.body.classList.toggle('rt-oriz', o2); chiudiAnello(); if (S){ S.modo = null; NEG = false; POSTI = o2 ? calcolaPosti() : null; ui(); } dispatchEvent(new Event('resize')); };
+window.impostaOriz = (o2, land) => { document.body.classList.toggle('rt-oriz', !!(o2 && land)); if (o2 === ORIZ) return; ORIZ = o2; document.body.classList.toggle('rt-kr', o2); chiudiAnello(); if (S){ S.modo = null; NEG = false; POSTI = o2 ? calcolaPosti() : null; ui(); } dispatchEvent(new Event('resize')); };
 function chiudiAnello(){ const a = document.getElementById('anello'); if (a) a.remove(); ANELLO = null; document.body.classList.remove('anello-on'); }
 function apriAnello(sx, sy, voci, centro){ chiudiAnello(); const st = $('#stage'), a = document.createElement('div'); a.id = 'anello';
   const R = 82, W = st.clientWidth, H = st.clientHeight, cx = Math.max(R + 40, Math.min(W - R - 40, sx)), cy = Math.max(R + 40, Math.min(H - R - 40, sy));
@@ -5636,9 +5647,9 @@ for (const t of ['gesturestart','gesturechange','gestureend']) document.addEvent
   const inRT = () => { const t = document.getElementById('title'), b = document.getElementById('tb'), ld = document.getElementById('caricamento'); return !!(t && t.hidden && b && b.hidden && !ld); };
   let avvisato = false;
   const agg = () => { const oriz = innerWidth > innerHeight, rt = inRT(); document.body.classList.toggle('gira-v', tel() && oriz && !rt);
-    if (window.impostaOriz) window.impostaOriz(rt && tel() && oriz);
+    if (window.impostaOriz) window.impostaOriz(rt && tel(), oriz);
     const g = document.getElementById('rtGira');
-    if (rt && tel() && !oriz && !avvisato && !(typeof S !== 'undefined' && S && S.inCorso)){ avvisato = true; let ok = false; try { ok = sessionStorage.getItem('ds-gira') === '1'; } catch(e){} if (!ok){
+    if (false && rt && tel() && !oriz && !avvisato && !(typeof S !== 'undefined' && S && S.inCorso)){ avvisato = true; let ok = false; try { ok = sessionStorage.getItem('ds-gira') === '1'; } catch(e){} if (!ok){
         const d = document.createElement('div'); d.id = 'rtGira'; const lock = !!(screen.orientation && screen.orientation.lock) && !!document.documentElement.requestFullscreen;
         d.innerHTML = `<span>Gira il telefono: in orizzontale la mappa è più grande.</span>${lock ? '<button type="button" class="ok">Gira</button>' : ''}<button type="button" class="x" aria-label="Chiudi">✕</button>`;
         document.body.append(d); const via = () => { d.remove(); try { sessionStorage.setItem('ds-gira', '1'); } catch(e){} };
