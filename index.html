@@ -1132,6 +1132,8 @@ body.rt-kr #bShop,body.rt-kr #negozio{display:none!important}
 body.rt-kr #stage .zoom{top:calc(50px + env(safe-area-inset-top))!important;right:calc(10px + env(safe-area-inset-right))!important;bottom:auto!important}
 body.rt-kr #guidaCl{top:auto!important;font-size:13px!important;padding:7px 10px!important}
 body.rt-kr #app > #modBar{position:fixed;bottom:0;left:0;right:0;z-index:9}
+/* quando è aperta una finestra (pausa, carte, fine, scelta specialità) i comandi sulla mappa spariscono, così non la coprono */
+body.rt-kr:has(#pausa:not([hidden]),#cards:not([hidden]),#end:not([hidden]),#menu:not([hidden])) :is(#bFalco,#bFrana,#bGo,#bVel,#guidaCl,#anello){display:none!important}
 /* verticale: una riga in basso per il pollice (Falco, Frana, Avvia), la velocità sopra Avvia */
 body.rt-kr:not(.rt-oriz) #app #bFalco,body.rt-kr:not(.rt-oriz) #app #bFrana{bottom:calc(10px + env(safe-area-inset-bottom));width:calc((100vw - 40px)*.29);min-height:58px;border-radius:20px!important}
 body.rt-kr:not(.rt-oriz) #app #bFalco{left:10px} body.rt-kr:not(.rt-oriz) #app #bFrana{left:calc(20px + (100vw - 40px)*.29)}
