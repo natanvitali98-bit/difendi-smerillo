@@ -2904,7 +2904,27 @@ function fit(){
 // da dove arrivano i nemici: un cartello rosso grande su ogni ingresso, con quanti ne arrivano.
 // Se l'ingresso è fuori dallo schermo, una freccia sul bordo che punta verso di lui (toccandola la mappa ci va)
 let FRECCE_ING = [];
-function ingressiNemici(T){ FRECCE_ING = [];
+// il posto da difendere: dove finiscono tutte le strade dei nemici. Cartello giallo grande con le vite; fuori schermo, freccia gialla sul bordo
+function postoDaDifendere(T){ const V = VIEZ[0]; if (!V) return; const p = V[V.length - 1], [x, y] = P(p[0], p[1], p[2]), sx = ox + x*scale, sy = oy + y*scale;
+  const pu = riduci ? .5 : (Math.sin(T*3) + 1)/2, top = 54, bot = SH - (!ORIZ ? 0 : document.body.classList.contains('rt-oriz') ? 84 : (document.getElementById('guidaCl').hidden ? 120 : 205));
+  const pocheVite = S.vite <= Math.max(3, S.viteMax*.3), col = pocheVite ? '#ff6a4a' : '#ffd03a';
+  ctx.save(); ctx.lineJoin = 'round';
+  if (sx > 60 && sx < SW - 60 && sy > top + 60 && sy < bot){
+    ctx.translate(sx, sy); ctx.fillStyle = 'rgba(255,208,58,.22)'; ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(0, 0, 26 + pu*6, 13 + pu*3, 0, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.lineWidth = 2; ctx.globalAlpha = .6; ctx.beginPath(); ctx.ellipse(0, 0, 38 + pu*8, 19 + pu*4, 0, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.font = '400 15px "Lilita One", sans-serif'; const tw = ctx.measureText('DIFENDI').width, im0 = SPR.cuore, iw = im0.width*1.6, w = Math.round(tw + iw + 26), by = -40 - pu*3; ctx.fillStyle = col; ctx.strokeStyle = '#141433'; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(-w/2, by - 15, w, 30, 10); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-6, by + 13); ctx.lineTo(0, by + 22); ctx.lineTo(6, by + 13); ctx.fill(); ctx.stroke(); ctx.fillStyle = col; ctx.fillRect(-5, by + 10, 10, 5);
+    ctx.imageSmoothingEnabled = false; ctx.drawImage(im0, Math.round(-w/2 + 9), Math.round(by - im0.height*.8), iw, im0.height*1.6);
+    ctx.fillStyle = '#141433'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('DIFENDI', -w/2 + 15 + iw, by + 1);
+  } else {
+    const cx = SW/2, cy = (top + bot)/2, dx = sx - cx, dy = sy - cy, k = Math.min((SW/2 - 30)/Math.abs(dx || 1e-6), ((bot - top)/2 - 30)/Math.abs(dy || 1e-6)), ex = cx + dx*k, ey = cy + dy*k, a2 = Math.atan2(dy, dx);
+    ctx.translate(ex, ey); ctx.fillStyle = col; ctx.strokeStyle = '#141433'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 24, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.save(); ctx.rotate(a2); ctx.translate(28 + pu*4, 0); ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-3, -9); ctx.lineTo(-3, 9); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+    const im = SPR.cuore; ctx.imageSmoothingEnabled = false; ctx.drawImage(im, -im.width, -im.height - 4, im.width*2, im.height*2);
+    ctx.fillStyle = '#141433'; ctx.font = '400 10px "Lilita One", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('DIFENDI', 0, 12);
+    FRECCE_ING.push({x:ex, y:ey, meta:true}); }
+  ctx.restore(); }
+function ingressiNemici(T){ FRECCE_ING = []; postoDaDifendere(T);
   const vie = S.inCorso ? S.vieAttive : (S.prossima ? S.prossima.vie : []); if (!vie || !vie.length) return;
   const lista = S.inCorso ? S.coda : (S.prossima ? S.prossima.coda : []), conta = {}, tipo = {}; for (const q of lista) if (q.via !== undefined){ conta[q.via] = (conta[q.via] || 0) + 1; if (!tipo[q.via]) tipo[q.via] = q.id; }
   const icona = (v, x, y) => { const im = SPR[tipo[v]]; if (!im) return; const s = 2, w = im.width*s, hh = im.height*s; ctx.imageSmoothingEnabled = false; ctx.drawImage(im, Math.round(x - w/2), Math.round(y - hh/2), w, hh); };
@@ -3365,7 +3385,7 @@ function tocca(ev){
   const r = cv.getBoundingClientRect(); const sx = (ev.clientX - r.left - ox)/scale, sy = (ev.clientY - r.top - oy)/scale;
   if (MOD){ modSel = trovaOggetto(sx, sy); modUI(); return; }
   if (!S || S.fine) return;
-  { const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top, f = FRECCE_ING.find(q => Math.hypot(q.x - px, q.y - py) < 30); if (f){ const p0 = VIEZ[f.v][0], [x, y] = P(p0[0], p0[1], p0[2]); S.camT = {x, y}; return; } }
+  { const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top, f = FRECCE_ING.find(q => Math.hypot(q.x - px, q.y - py) < 30); if (f){ const VV = VIEZ[f.meta ? 0 : f.v], p0 = f.meta ? VV[VV.length - 1] : VV[0], [x, y] = P(p0[0], p0[1], p0[2]); S.camT = {x, y}; return; } }
   if (ORIZ && ANELLO){ chiudiAnello(); S.sel = null; ui(); } // tocco fuori dal cerchio: si chiude e il tocco vale lo stesso (es. su un nemico)
   if (S.modo){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     const m = S.modo; S.modo = null;
