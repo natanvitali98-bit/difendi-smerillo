@@ -3143,7 +3143,7 @@ function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; 
   if (!S || fatto || MOD || S.fine){ g.hidden = true; return; }
   const costruite = S.luoghi.some(L => L.lvl); let t = '', sub = '', ok = false, punta = null;
   if (ORIZ && costruite){ g.hidden = true; return; } // sul telefono la guida serve solo per la prima difesa
-  if (ORIZ && !costruite){ t = ANELLO ? '2. Scegli la Balestra nel cerchio.' : '1. Tocca un pallino bianco vicino alla strada.'; sub = ANELLO ? 'Costa 70 castagne 🌰. Spara lontano.' : 'Si apre un cerchio con le difese.'; }
+  if (ORIZ && !costruite){ t = ANELLO ? '2. Scegli la Balestra.' : '1. Tocca un pallino bianco vicino alla strada.'; sub = ANELLO ? 'Costa 70 castagne 🌰. Spara lontano.' : 'Si apre un cerchio con le difese.'; }
   else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci') && !NEG){ t = '1. Tocca Negozio, in basso.'; sub = 'Lì compri le difese. Le castagne 🌰 sono i tuoi soldi.'; punta = '#bShop'; }
   else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci')){ t = '1. Tocca la Balestra.'; sub = 'Costa 70 castagne 🌰. Spara lontano.'; punta = '[data-shop="vedetta"]'; }
   else if (!costruite && !S.modo.ghost){ t = '2. Tocca un pallino bianco.'; sub = 'I pallini sono i posti vicino alla strada gialla, dove passano i nemici.'; }
@@ -3397,20 +3397,41 @@ let POSTI = null, ORIZ = false, ANELLO = null; // ORIZ: telefono in orizzontale 
 window.impostaOriz = (o2, land) => { const prima = ORIZ; document.body.classList.toggle('rt-oriz', !!(o2 && land)); if (o2 === ORIZ) return; ORIZ = o2; document.body.classList.toggle('rt-kr', o2); chiudiAnello(); if (S){ S.modo = null; NEG = false; POSTI = o2 ? calcolaPosti() : null; ui(); } if (prima !== o2) fit(); };
 function chiudiAnello(){ const a = document.getElementById('anello'); if (a) a.remove(); ANELLO = null; document.body.classList.remove('anello-on'); }
 function apriAnello(sx, sy, voci, centro){ chiudiAnello(); const st = $('#stage'), a = document.createElement('div'); a.id = 'anello';
-  const R = 82, W = st.clientWidth, H = st.clientHeight, cx = Math.max(R + 40, Math.min(W - R - 40, sx)), cy = Math.max(R + 40, Math.min(H - R - 40, sy));
-  a.style.left = cx + 'px'; a.style.top = cy + 'px';
+  const R = 82; a.style.left = sx + 'px'; a.style.top = sy + 'px'; // poi segue sempre il posto sulla mappa (posAnello)
   const c = document.createElement('button'); c.type = 'button'; c.className = 'an-c'; c.innerHTML = centro || '✕'; c.setAttribute('aria-label', 'Chiudi'); c.onclick = e => { e.stopPropagation(); chiudiAnello(); ui(); }; a.append(c);
   voci.forEach((v, i) => { const ang = -Math.PI/2 + i*2*Math.PI/voci.length, b = document.createElement('button'); b.type = 'button'; b.className = 'an-v' + (v.off ? ' off' : '');
-    b.style.transform = `translate(${Math.round(Math.cos(ang)*R)}px,${Math.round(Math.sin(ang)*R)}px)`; b.style.animationDelay = (i*25) + 'ms'; b.append(...v.html);
+    b.dataset.i = i; b.style.transform = `translate(${Math.round(Math.cos(ang)*R)}px,${Math.round(Math.sin(ang)*R)}px)`; b.style.animationDelay = (i*25) + 'ms'; b.append(...v.html);
     b.onclick = e => { e.stopPropagation(); if (v.off){ if (v.perche) S.fx.push({k:'txt', e:ANELLO.e, n:ANELLO.n, z:ANELLO.z + 10, t:0, s:v.perche, col:'#ffd0c0'}); SUONI.suona && SUONI.suona('tocco'); return; } v.f(); };
     a.append(b); });
   a.style.pointerEvents = 'none'; setTimeout(() => { a.style.pointerEvents = ''; }, 380); // il 'click' che segue il tocco non deve premere subito un bottone del cerchio
   st.append(a); document.body.classList.add('anello-on'); }
+// il cerchio resta sempre centrato sul posto, anche quando la mappa si sposta
+function posAnello(){ const a = document.getElementById('anello'); if (!a || !ANELLO) return; const [x, y] = P(ANELLO.e, ANELLO.n, ANELLO.z); a.style.left = Math.round(ox + x*scale) + 'px'; a.style.top = Math.round(oy + y*scale - (ANELLO.dy || 0)) + 'px'; }
+// se il posto è vicino ai bordi (o sotto i bottoni), sposto la mappa per farci stare tutto il cerchio
+function layoutAnello(dir, q){ const a = document.getElementById('anello'); if (!a) return; const v = [...a.querySelectorAll('.an-v')], n = v.length;
+  if (dir == null){ v.forEach((b, i) => { const ang = -Math.PI/2 + i*2*Math.PI/n; b.style.transform = `translate(${Math.round(Math.cos(ang)*82)}px,${Math.round(Math.sin(ang)*82)}px)`; }); return; }
+  // vicino ai bordi: le scelte diventano un riquadro ordinato (3 per riga) accanto al posto, verso il centro dello schermo
+  const col = Math.min(3, n), rig = Math.ceil(n/col), S2 = 80, bw = col*S2, bh = rig*S2, d = 46 + Math.max(bw, bh)/2;
+  let bx = q.x + Math.cos(dir)*d, by = q.y + Math.sin(dir)*d;
+  bx = Math.max(8 + bw/2, Math.min(q.W - 8 - bw/2, bx)); by = Math.max(56 + bh/2, Math.min(q.H - q.basso - bh/2, by));
+  v.forEach((b, i) => { const cx = bx - bw/2 + (i % col + .5)*S2, cy = by - bh/2 + (Math.floor(i/col) + .5)*S2; b.style.transform = `translate(${Math.round(cx - q.x)}px,${Math.round(cy - q.y)}px)`; }); }
+// se il posto è vicino ai bordi (o sotto i bottoni), sposto la mappa; se la mappa è già al bordo, apro il cerchio a ventaglio verso l'interno
+function centraAnello(){ if (!ANELLO) return; const st = $('#stage'), W = st.clientWidth, H = st.clientHeight, R = 82 + 40, oriz = document.body.classList.contains('rt-oriz');
+  const [x, y] = P(ANELLO.e, ANELLO.n, ANELLO.z), sx = ox + x*scale, sy = oy + y*scale - (ANELLO.dy || 0);
+  const x0 = R + (oriz ? 150 : 0), x1 = W - R - (oriz ? 180 : 0), y0 = 56 + R, y1 = H - (oriz ? 20 : 150) - R;
+  const tx = x0 < x1 ? Math.max(x0, Math.min(x1, sx)) : W/2, ty = y0 < y1 ? Math.max(y0, Math.min(y1, sy)) : H/2;
+  let fx = camX, fy = camY;
+  if (Math.abs(tx - sx) > 2 || Math.abs(ty - sy) > 2){ const cx0 = camX, cy0 = camY; camX = cx0 + (sx - tx)/scale; camY = cy0 + (sy - ty)/scale; limita(); fx = camX; fy = camY; camX = cx0; camY = cy0; limita(); S.camT = {x:fx, y:fy}; }
+  const qx = sx - (fx - camX)*scale, qy = sy - (fy - camY)*scale; // dove sarà il posto quando la mappa ha finito di muoversi
+  let vx = qx < x0 - 20 ? 1 : qx > x1 + 20 ? -1 : 0, vy = qy < y0 - 20 ? 1 : qy > y1 + 20 ? -1 : 0; const M2 = 170;
+  if (vy && !vx){ if (qx < M2) vx = .8; else if (qx > W - M2) vx = -.8; } if (vx && !vy){ if (qy < 56 + M2) vy = .8; else if (qy > H - (oriz ? 20 : 150) - M2) vy = -.8; }
+  const dir = vx || vy ? Math.atan2(vy, vx) : null; // il ventaglio guarda verso il centro dello schermo
+  layoutAnello(dir, {x:qx, y:qy, W, H, basso: oriz ? 12 : 150}); posAnello(); }
 const vocePiccola = (ic, nome, costo) => { const out = []; if (ic) out.push(ic); const n = document.createElement('span'); n.className = 'an-n'; n.textContent = nome; out.push(n);
   if (costo != null){ const cl = document.createElement('span'); cl.className = 'an-k'; cl.append(nutIcon(), document.createTextNode(costo)); out.push(cl); } return out; };
 function anelloCostruisci(e, n, sx, sy){ const voci = NEGOZIO.map(off => ({html: vocePiccola(sprIcon(ICONA[off.tipo]), off.nome, off.costo), off: S.castagne < off.costo, perche:'Servono più castagne',
     f: () => { chiudiAnello(); if (piazzaDifesa(off.tipo, e, n)){ S.sel = null; POSTI = calcolaPosti(); } ui(); aggiornaHud(); }}));
-  apriAnello(sx, sy, voci, '&nbsp;'); ANELLO = {e, n, z:alt(e, n), posto:true}; document.getElementById('anello').classList.add('costr'); }
+  apriAnello(sx, sy, voci, '&nbsp;'); ANELLO = {e, n, z:altB(e, n), posto:true}; document.getElementById('anello').classList.add('costr'); centraAnello(); }
 function vendiLuogo(L, i){ const r = Math.round(L.speso * .6); S.castagne += r; L.lvl = 0; L.spec = null; L.speso = 0; L.mira = 'primo'; if (L.tipo === 'milizia') aggiornaMilizia(L); if (L.libero){ S.luoghi.splice(i, 1); S.sel = null; costruisciTorri(); POSTI = calcolaPosti(); } ui(); aggiornaHud(); }
 function anelloTorre(i){ const L = S.luoghi[i]; if (!L) return; const [x, y] = P(L.e, L.n, L.z), sx = ox + x*scale, sy = oy + y*scale - 20, c = costoLivello(L), voci = [];
   if (L.lvl >= 3) voci.push({html: vocePiccola(null, 'Al massimo', null), off:true, perche:'È già al massimo'});
@@ -3418,7 +3439,7 @@ function anelloTorre(i){ const L = S.luoghi[i]; if (!L) return; const [x, y] = P
   if (L.lvl && ['vedetta','nido','piazza'].includes(L.tipo)){ const m = MIRE.find(q => q[0] === L.mira) || MIRE[0]; voci.push({html: vocePiccola(null, 'Mira: ' + m[1], null), f: () => { const k = MIRE.findIndex(q => q[0] === L.mira); L.mira = MIRE[(k+1) % (L.tipo === 'piazza' ? 2 : 3)][0]; anelloTorre(i); ui(); }}); }
   if (L.lvl && L.tipo === 'milizia') voci.push({html: vocePiccola(null, 'Sposta soldati', null), f: () => { chiudiAnello(); S.modo = {tipo:'raduno', L}; ui(); }});
   if (L.lvl){ const r = Math.round(L.speso * .6); voci.push({html: vocePiccola(null, 'Vendi +', r), f: () => { chiudiAnello(); vendiLuogo(L, i); }}); }
-  apriAnello(sx, sy, voci, L.lvl ? '★'.repeat(L.lvl) : '✕'); ANELLO = {e:L.e, n:L.n, z:L.z}; }
+  apriAnello(sx, sy, voci, L.lvl ? '★'.repeat(L.lvl) : '✕'); ANELLO = {e:L.e, n:L.n, z:L.z, dy:20}; centraAnello(); }
 function calcolaPosti(){ const out = [], scr = [];
   for (const v of VIE) for (let i = 0; i < v.length-1; i++){ const [e0,n0] = v[i], [e1,n1] = v[i+1], L = Math.hypot(e1-e0, n1-n0); if (!L) continue; const ux = (e1-e0)/L, uy = (n1-n0)/L;
     for (let t = 0; t < L; t += 9){ const e = e0 + ux*t, n = n0 + uy*t; for (const d of [7, -7, 12, -12]){ const pe = e - uy*d, pn = n + ux*d; if (puntoLibero(pe, pn)) continue; if (out.some(q => Math.hypot(q[0]-pe, q[1]-pn) < 7)) continue; const [sx, sy] = P(pe, pn, altB(pe, pn)); if (scr.some(q => Math.hypot(q[0]-sx, q[1]-sy) < 8)) continue; scr.push([sx, sy]); out.push([pe, pn]); } } }
@@ -5599,7 +5620,7 @@ function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); la
   if (S && !S.fine && !S.attesaCarta && !S.pausa) update(dt * S.vel);
   if (S && S.camT){ camX += (S.camT.x - camX)*Math.min(1, dt*6); camY += (S.camT.y - camY)*Math.min(1, dt*6); limita(); if (Math.hypot(S.camT.x - camX, S.camT.y - camY) < 1) S.camT = null; }
   if (S && Math.floor(T*4) !== Math.floor((T-dt)*4)) aggiornaTorri();
-  if (TB.attivo) TB.frame(T, dt); else if (!$('#title').hidden) disegnaTitolo(T); else draw(T);
+  if (TB.attivo) TB.frame(T, dt); else if (!$('#title').hidden) disegnaTitolo(T); else { draw(T); if (ANELLO) posAnello(); }
   requestAnimationFrame(loop); }
 new ResizeObserver(fit).observe($('#stage'));
 // ===== tastiera (versione PC) =====
