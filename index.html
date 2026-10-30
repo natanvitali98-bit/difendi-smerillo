@@ -1360,6 +1360,9 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-v{color:#1f6a34}
 .cq-d{color:#8a2a1c}
 .cq-bt small{color:var(--blu);font-weight:700}
+.cq-dif{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cq-dif button{min-height:44px;border-radius:12px;border:3px solid var(--linea);background:#fff;font-family:var(--f-big);font-size:16px;color:var(--testo)}
+.cq-dif button[aria-checked=true]{background:var(--giallo);box-shadow:0 3px 0 var(--linea)}
 .cq-salta{width:100%;min-height:46px}
 .cq-carica{width:40%;background:var(--giallo);animation:cqCar 1s ease-in-out infinite alternate}
 @keyframes cqCar{from{margin-left:0}to{margin-left:60%}}
@@ -5823,7 +5826,14 @@ return {eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE
 // ===== Conquista: scegli il tuo borgo, rinforzalo e conquista gli altri (a turni, contro il computer) =====
 const CQ = (() => {
 const KEY = 'difendi-smerillo-conquista', KREC = 'difendi-smerillo-conquista-rec', KGUIDA = 'difendi-smerillo-conquista-guida';
-const MOSSE = 4, COSTO_SOLD = 3, REGALO = 8, TREGUA = 2;
+const MOSSE = 4, COSTO_SOLD = 3, REGALO = 8;
+// livelli di difficoltà: cambiano solo i borghi del computer
+const DIFF = {
+  facile:   {nome:'Facile', desc:'Gli altri borghi guadagnano meno e attaccano con prudenza. Tregua di 4 stagioni.', rend:.75, soglia:.08, tregua:4},
+  normale:  {nome:'Normale', desc:'Tutti alla pari. Tregua di 2 stagioni.', rend:1, soglia:0, tregua:2},
+  difficile:{nome:'Difficile', desc:'Gli altri borghi guadagnano di più, osano di più e se ti allarghi si mettono contro di te. Tregua di 1 stagione.', rend:1.3, soglia:-.06, tregua:1}};
+const KDIF = 'difendi-smerillo-conquista-dif';
+const DF = () => DIFF[(S && S.dif) || 'normale'] || DIFF.normale;
 const STAGIONI = ['Primavera', 'Estate', 'Autunno', 'Inverno'];
 const FZ = {
   smerillo:  {nome:'Smerillo', corto:'Smerillo', col:'#e04830', scuro:'#8e2a1c', chiaro:'#ffb09a',
@@ -5878,7 +5888,7 @@ const capRecl = f => { const c = 4 + 2*S.fz[f].ed.armeria; return assediato(f) ?
 function rendita(f, t = S.turno){ let r = terreDi(f).reduce((a, x) => a + TERRE[x].rend + (S.terre[x].str === 'fattoria' ? 2 : S.terre[x].str === 'mercato' ? 3 : 0), 0); const merc = terreDi(f).filter(x => S.terre[x].str === 'mercato').length;
   for (const g of vivi()) if (g !== f && accordo(f, g)) r += 3 + merc; if (f === 'smerillo') r -= 1; if (f === 'ceresola') r += 2;
   for (const g of vivi()) if (g !== f && alleati(f, g)) r += 2;
-  if ((t - 1) % 4 === 2) r += 2; if ((t - 1) % 4 === 3) r -= 2; return Math.max(2, r); }
+  if ((t - 1) % 4 === 2) r += 2; if ((t - 1) % 4 === 3) r -= 2; return Math.max(2, Math.round(r*(f === S.io ? 1 : DF().rend))); }
 
 // ===== il mondo: le tre mappe vere dei borghi, unite da campagna, boschi e frazioni (distanze accorciate) =====
 const WW = 1600, WH = 1800, Q = 4, GW = WW/Q, GH = WH/Q;
@@ -6060,7 +6070,7 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
     if (own && own !== S.io && alleati(S.io, own)){ ctx.fillStyle = '#3ed46b'; rr(bx + bw - 4, by - 6, 9, 9, 3); }
     if (T.borgo && eBorgo(t) && S.fz[t].assedio && !VISTA){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('assedio', px, by + bh + F2 + 3); ctx.fillStyle = '#ff9a3a'; ctx.fillText('assedio', px, by + bh + F2 + 3); }
     if (ter[t].str){ const im = icoImg(STR[ter[t].str].ic); if (im.complete && im.width){ const w = Math.round(im.width*1.6*u), h = Math.round(im.height*1.6*u); ctx.fillStyle = '#141433'; rr(bx + bw - 2, by - h + 4, w + 6, h + 6, 4); ctx.fillStyle = '#fff'; rr(bx + bw, by - h + 6, w + 2, h + 2, 3); ctx.drawImage(im, bx + bw + 1, by - h + 7, w, h); } }
-    if (TREGUA >= S.turno && T.borgo && eBorgo(t)){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('tregua', px, by + bh + F2 + 3); ctx.fillStyle = '#ffd03a'; ctx.fillText('tregua', px, by + bh + F2 + 3); } }
+    if (DF().tregua >= S.turno && T.borgo && eBorgo(t)){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('tregua', px, by + bh + F2 + 3); ctx.fillStyle = '#ffd03a'; ctx.fillText('tregua', px, by + bh + F2 + 3); } }
   // i nomi sopra a tutto (solo borghi e frazioni: i terreni vuoti non hanno nome sulla mappa)
   for (const t of IDS){ const T = TERRE[t]; if (!(T.borgo || T.fraz)) continue; const [px, py] = aSchermo(T.x, T.y); if (px < -120 || py < -80 || px > W + 120 || py > H + 80) continue;
     const F1 = Math.round((T.borgo ? 16 : 13)*u), ny = Math.round(py - 9*u - 5*u); ctx.font = `400 ${F1}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#141433';
@@ -6167,10 +6177,10 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = MOSSE;
   // 3. attaccare, oppure portare i soldati al fronte
   let giri = 0; while (az > 0 && giri++ < 8){ let best = null;
     for (const src of terreDi(f)){ const tieni = src === f ? guardiaBorgo(f) : 1, n = S.terre[src].sold - tieni; if (n < 2) continue;
-      for (const v of VIC[src]){ const o = S.terre[v].own; if (o === f) continue; if (TERRE[v].borgo && eBorgo(v) && (S.turno <= TREGUA || !puoAssediare(v, f))) continue;
+      for (const v of VIC[src]){ const o = S.terre[v].own; if (o === f) continue; if (TERRE[v].borgo && eBorgo(v) && (S.turno <= DF().tregua || !puoAssediare(v, f))) continue;
         const pr = previsione(f, n, v), all = o && alleati(f, o); if (all && !(amic(f, o) < 55 && pr.p >= .8 && rnd() < .5)) continue;
-        let sc = pr.p + (o ? 0 : .12) + TERRE[v].rend*.03 - (o ? amic(f, o)/250 : 0) + (o === 'ceresola' ? .15 : 0) + (o === S.io && terreDi(S.io).length >= IDS.length*.3 ? .08 : 0) + (eBorgo(v) ? .1 : 0) + (TERRE[v].di && o === TERRE[v].di ? .05 : 0);
-        if (pr.p >= (S.turno > 20 ? .48 : S.turno > 10 ? .55 : .6) && (!best || sc > best.sc)) best = {sc, src, v, n, all}; } }
+        let sc = pr.p + (o ? 0 : .12) + TERRE[v].rend*.03 - (o ? amic(f, o)/250 : 0) + (o === 'ceresola' ? .15 : 0) + (o === S.io && terreDi(S.io).length >= IDS.length*(S.dif === 'difficile' ? .2 : .3) ? (S.dif === 'difficile' ? .15 : .08) : 0) + (eBorgo(v) ? .1 : 0) + (TERRE[v].di && o === TERRE[v].di ? .05 : 0);
+        if (pr.p >= (S.turno > 20 ? .48 : S.turno > 10 ? .55 : .6) + DF().soglia && (!best || sc > best.sc)) best = {sc, src, v, n, all}; } }
     if (best){ const o = S.terre[best.v].own, r = battaglia(f, best.src, best.v, best.n); az--;
       news({t:'att', f, da:best.src, a:best.v, ok:r.vinto, contro:o, trad:best.all, testo: (best.all ? `Tradimento! ${FZ[f].corto} rompe l’alleanza e attacca ` : `${FZ[f].corto} attacca `) + (o ? (o === S.io ? 'la tua terra ' : '') + TERRE[best.v].nome + (o !== S.io ? ' (di ' + FZ[o].corto + ')' : '') : TERRE[best.v].nome) + (r.vinto ? ': la conquista!' : ': respinto.') + (r.vinto && r.borgo && o ? ` ${FZ[o].nome} è caduto.` : '')});
       continue; }
@@ -6204,7 +6214,7 @@ function calcolaStagione(ev, tutti = false){
 function fineStagione(){ if (GIOCA) return; modo = null; sel = null; const ev = []; PRIMA_SNAP = JSON.parse(JSON.stringify(S.terre));
   calcolaStagione(ev); salva(); riproduciEv(ev, () => { notizie(ev); }); }
 // prova automatica: il computer gioca anche per te, per controllare che le partite finiscano e siano equilibrate
-function simula(io, max = 80){ nuova(io); let t = 0; while (vivi().length > 1 && t++ < max){ const ev = []; calcolaStagione(ev, true); S.proposte.forEach(p => { if (rnd() < .5){ if (p.tipo === 'acc') S.acc[pk(S.io, p.f)] = true; else if (vivi().length > 2) S.all[pk(S.io, p.f)] = true; } }); S.proposte = []; }
+function simula(io, max = 80, dif = 'normale'){ nuova(io, dif); let t = 0; while (vivi().length > 1 && t++ < max){ const ev = []; calcolaStagione(ev, true); S.proposte.forEach(p => { if (rnd() < .5){ if (p.tipo === 'acc') S.acc[pk(S.io, p.f)] = true; else if (vivi().length > 2) S.all[pk(S.io, p.f)] = true; } }); S.proposte = []; }
   const r = {io, fine: vivi().length === 1 ? 'fatto' : 'pari', vinc: vivi().length === 1 ? vivi()[0] : null, turni: S.turno, vivi: vivi(), terre: Object.fromEntries(Object.keys(FZ).map(f => [f, terreDi(f).length]))}; try { localStorage.removeItem(KEY); } catch(e){} return r; }
 function passo(){ const G = GIOCA; if (!G) return; if (G.i >= G.ev.length){ GIOCA = null; VISTA = null; tintKey = ''; aggiornaUI(); G.dopo(); return; }
   const e = G.ev[G.i++]; el('cqToast').textContent = e.testo; el('cqToast').className = 'cq-toast on';
@@ -6222,7 +6232,7 @@ const ovAperto = () => !el('cqOv').hidden;
 function ov(html, chiudibile = true){ const o = el('cqOv'), t0 = performance.now(); o.innerHTML = html; o.hidden = false; o.scrollTop = 0; if (chiudibile) o.onclick = e => { if (e.target === o && performance.now() - t0 > 450) chiudiOv(); }; else o.onclick = null; return o; } // il tocco che apre la finestra non deve anche chiuderla
 function chiudiOv(){ const o = el('cqOv'); o.hidden = true; o.innerHTML = ''; }
 function aggiornaUI(){ if (root) root.classList.toggle('vuoto', !S); if (!S) return; const F = S.fz[S.io];
-  el('cqTit').textContent = FZ[S.io].corto; el('cqStag').textContent = stagione(S.turno);
+  el('cqTit').textContent = FZ[S.io].corto; el('cqStag').textContent = stagione(S.turno) + (S.dif && S.dif !== 'normale' ? ' · ' + DIFF[S.dif].nome : '');
   el('cqMon').innerHTML = ico('moneta', 2) + ' ' + F.monete;
   el('cqMos').innerHTML = '<span class="cq-mt">Mosse</span> ' + Array.from({length:MOSSE}, (_, i) => `<i class="${i < S.mosse ? 'on' : ''}"></i>`).join('');
   el('cqFine').disabled = !!GIOCA; el('cqFine').classList.toggle('pronto', S.mosse === 0 && !GIOCA); el('cqDip').disabled = !!GIOCA;
@@ -6242,8 +6252,8 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (mio && st.str === 'caserma') h += `<button class="big" id="cqRec2" ${nm ? 'disabled' : ''}>${ico('spada', 2)} Arruola qui</button>`;
   if (mio && !TERRE[sel].borgo && !st.str && Object.values(STR).some(x => x.dove(sel))) h += `<button class="big" id="cqStr" ${nm ? 'disabled' : ''}>${ico('martello', 2)} Costruisci qui</button>`;
   if (mio && VIC[sel].some(v => S.terre[v].own === S.io) && st.sold > 1) h += `<button class="big alt" id="cqSpo" ${nm ? 'disabled' : ''}>${ico('muovi', 2)} Sposta</button>`;
-  if (!mio){ const fonti = VIC[sel].filter(v => S.terre[v].own === S.io && S.terre[v].sold > 1), tregua = T.borgo && eBorgo(sel) && S.turno <= TREGUA;
-    if (tregua) h += `<p class="cq-nota">Tregua: nelle prime ${TREGUA} stagioni nessuno può attaccare i borghi.</p>`;
+  if (!mio){ const fonti = VIC[sel].filter(v => S.terre[v].own === S.io && S.terre[v].sold > 1), tregua = T.borgo && eBorgo(sel) && S.turno <= DF().tregua;
+    if (tregua) h += `<p class="cq-nota">Tregua: nelle prime ${DF().tregua} stagioni nessuno può attaccare i borghi.</p>`;
     else if (!puoAssediare(sel, S.io)) h += `<p class="cq-nota">Per attaccare ${FZ[own].corto} devono essere prese almeno ${ASSEDIO} delle sue terre intorno, da te o dagli altri (ora ${perse(sel)}).</p>`;
     else if (fonti.length) h += `<button class="big" id="cqAtt" ${nm ? 'disabled' : ''}>${ico('spade', 2)} Attacca</button>`;
     else h += `<p class="cq-nota">Per attaccarla ti serve una terra vicina con almeno 2 soldati.</p>`;
@@ -6321,7 +6331,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} ${stagione(S.turno)}</span><h2>Notizie dai borghi</h2>
     <ul class="cq-news">${mie.length ? mie.map(e => `<li class="${e.t === 'att' && e.contro === S.io ? (e.ok ? 'male' : 'bene') : e.trad || (e.t === 'assedio' && e.f === S.io) ? 'male' : ''}"><span class="cq-dot" style="background:${FZ[e.f].col}"></span>${e.testo}</li>`).join('') : '<li>Una stagione tranquilla: nessuno ha attaccato.</li>'}</ul>
     <p>Hai incassato ${ico('moneta', 2)} <b>${entrate}</b> monete${(S.turno - 1) % 4 === 2 ? ' (in autunno ci sono le castagne: +2)' : (S.turno - 1) % 4 === 3 ? ' (in inverno si raccoglie poco: −2)' : ''}. Hai ${MOSSE} mosse.</p>
-    ${S.turno === TREGUA + 1 ? `<p class="cq-warn">La tregua è finita: da ora i borghi si possono attaccare.</p>` : ''}
+    ${S.turno === DF().tregua + 1 ? `<p class="cq-warn">La tregua è finita: da ora i borghi si possono attaccare.</p>` : ''}
     <button class="big" id="cqOk">Tocca a te ${ico('play', 2)}</button></div>`, false);
   o.querySelector('#cqOk').onclick = () => { chiudiOv(); proposte(); }; aggiornaUI(); }
 function proposte(){ let p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
@@ -6347,14 +6357,17 @@ function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioc
     <span>6</span><span>Con la <b>Diplomazia</b> fai regali, accordi commerciali e alleanze. Chi ti è amico ti attacca meno… ma può tradire.</span>
     <span>7</span><span>Vinci quando prendi <b>tutti e tre i borghi</b>. Perdi se cade il tuo.</span></div><button class="big" id="cqOk">Ho capito</button></div>`, false);
   o.querySelector('#cqOk').onclick = () => { try { localStorage.setItem(KGUIDA, '1'); } catch(e){} chiudiOv(); if (dopo) dopo(); }; }
+let DIFSC = null; const difScelta = () => { if (!DIFSC){ try { DIFSC = localStorage.getItem(KDIF); } catch(e){} } return DIFF[DIFSC] ? DIFSC : 'normale'; };
 function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){}
   const o = ov(`<div class="dlg box cq-dlg cq-scegli"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Quale borgo difendi?</h2><p>Rinforza il tuo borgo, fai amicizie e conquista gli altri due.</p>
+    <div class="cq-dif" role="radiogroup" aria-label="Difficoltà">${Object.keys(DIFF).map(k => `<button type="button" role="radio" data-dif="${k}" aria-checked="${k === difScelta() ? 'true' : 'false'}">${DIFF[k].nome}</button>`).join('')}</div><p class="cq-nota" id="cqDifT">${DIFF[difScelta()].desc}</p>
     <div class="cq-list">${Object.keys(FZ).map(f => `<button class="cq-bo" data-f="${f}" style="--c:${FZ[f].col}"><canvas data-sp="${f}"></canvas><span class="cq-bt"><b>${FZ[f].nome}</b><span class="cq-v">${ico('stella', 2)} ${FZ[f].vant}</span><span class="cq-d">${ico('attenzione', 2)} ${FZ[f].diff}</span>${rec[f] ? `<small>Record: vinto in ${rec[f]} stagioni</small>` : ''}</span></button>`).join('')}</div>
     <button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
   o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*2.5 + 'px'; c.style.height = im.height*2.5 + 'px'; });
-  o.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { suona('banner'); nuova(b.dataset.f); chiudiOv(); let g = false; try { g = localStorage.getItem(KGUIDA) === '1'; } catch(e){} if (!g) guida(); });
+  o.querySelectorAll('[data-dif]').forEach(b => b.onclick = () => { try { localStorage.setItem(KDIF, b.dataset.dif); } catch(e){} DIFSC = b.dataset.dif; o.querySelectorAll('[data-dif]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqDifT').textContent = DIFF[b.dataset.dif].desc; suona('tocco'); });
+  o.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { suona('banner'); nuova(b.dataset.f, difScelta()); chiudiOv(); let g = false; try { g = localStorage.getItem(KGUIDA) === '1'; } catch(e){} if (!g) guida(); });
   o.querySelector('#cqMe').onclick = esci; }
-function nuova(io){ S = {v:2, io, turno:1, mosse:MOSSE, fz:{}, terre:{}, amic:{}, all:{}, acc:{}, proposte:[], fine:null};
+function nuova(io, dif = 'normale'){ S = {v:2, io, dif, turno:1, mosse:MOSSE, fz:{}, terre:{}, amic:{}, all:{}, acc:{}, proposte:[], fine:null};
   for (const f in FZ) S.fz[f] = {monete:15, vivo:true, ed:{mura: f === 'sanmartino' ? 0 : 1, torri:0, armeria:0, meccanico:0}};
   for (const t of IDS){ const T = TERRE[t]; S.terre[t] = T.borgo ? {own:t, sold: t === 'ceresola' ? 6 : 9} : T.di ? {own:T.di, sold:2} : {own:null, sold:T.guar}; }
   sel = io; modo = null; VISTA = null; tintKey = ''; salva(); vaiA(io); aggiornaUI(); }
