@@ -2883,7 +2883,7 @@ function ondataFinita(){
 /* ================= DISEGNO ================= */
 const cv = $('#cv'), ctx = cv.getContext('2d');
 const buf = document.createElement('canvas'); buf.width = W; buf.height = H;
-const b = buf.getContext('2d'); b.imageSmoothingEnabled = false;
+let b = buf.getContext('2d'); b.imageSmoothingEnabled = false; let CACHE_COSTR = null;
 let scale = 1, ox = 0, oy = 0, dpr = 1;
 const riduci = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const px = (x,y,col) => { b.fillStyle = col; b.fillRect(Math.round(x),Math.round(y),1,1); };
@@ -3023,7 +3023,19 @@ function draw(T){
         b.fillStyle = '#fff'; b.fillRect(Math.round(sx-1), Math.round(sy-12+bob), 3, 3); b.fillRect(Math.round(sx), Math.round(sy-9+bob), 1, 1); } }
     if (S.sel !== null && S.luoghi[S.sel]){ const L = S.luoghi[S.sel], st = STAT[L.tipo]; if (st.range) cerchioRaggio(L.e, L.n, L.z, st.range[Math.max(0,L.lvl-1)], '#ffd03a'); }
     // modalità costruzione: una fascia verde morbida lungo le strade (dove puoi costruire), la strada in rosso (no)
-    if ((S.modo && S.modo.tipo === 'costruisci') || (ORIZ && !S.inCorso && !S.modo)){ if (ORIZ && !POSTI) POSTI = calcolaPosti(); b.save(); b.lineCap = b.lineJoin = 'round';
+    const vediCostr = (S.modo && S.modo.tipo === 'costruisci') || (ORIZ && !S.inCorso && !S.modo);
+    if (vediCostr && ORIZ && !(S.modo)){ if (!POSTI) POSTI = calcolaPosti(); // sul telefono strada e pallini sono disegnati una volta sola (più fluido)
+      if (!CACHE_COSTR || CACHE_COSTR._p !== POSTI){ CACHE_COSTR = document.createElement('canvas'); CACHE_COSTR.width = W; CACHE_COSTR.height = H; CACHE_COSTR._p = POSTI; const b0 = b; b = CACHE_COSTR.getContext('2d'); b.imageSmoothingEnabled = false; const T0 = T, rid = riduci; T = 0;
+        b.save(); b.lineCap = b.lineJoin = 'round';
+      // la strada dei nemici, tratteggiata e leggera: si costruisce accanto
+      b.globalAlpha = .9; b.lineWidth = 5; b.strokeStyle = '#141433'; b.setLineDash([6, 5]); b.lineDashOffset = 0;
+      for (const pass of [0, 1]){ if (pass){ b.lineWidth = 3; b.strokeStyle = '#ffd03a'; } for (const v of VIE){ b.beginPath(); v.forEach(([e,n], k) => { const [x,y] = P(e, n, altB(e, n)); k ? b.lineTo(x, y) : b.moveTo(x, y); }); b.stroke(); } } b.setLineDash([]);
+      b.restore();
+      for (const [e,n] of (POSTI || [])){ const [x,y] = P(e, n, altB(e, n)); b.fillStyle = 'rgba(20,20,51,.55)'; b.beginPath(); b.ellipse(x, y, 6, 3.4, 0, 0, 7); b.fill(); b.fillStyle = '#ffffff'; b.beginPath(); b.ellipse(x, y - 1, 4.5, 2.6, 0, 0, 7); b.fill(); }
+
+        b = b0; T = T0; }
+      b.drawImage(CACHE_COSTR, 0, 0); }
+    else if (vediCostr){ if (ORIZ && !POSTI) POSTI = calcolaPosti(); b.save(); b.lineCap = b.lineJoin = 'round';
       // la strada dei nemici, tratteggiata e leggera: si costruisce accanto
       b.globalAlpha = .9; b.lineWidth = 5; b.strokeStyle = '#141433'; b.setLineDash([6, 5]); b.lineDashOffset = riduci ? 0 : -T*14;
       for (const pass of [0, 1]){ if (pass){ b.lineWidth = 3; b.strokeStyle = '#ffd03a'; } for (const v of VIE){ b.beginPath(); v.forEach(([e,n], k) => { const [x,y] = P(e, n, altB(e, n)); k ? b.lineTo(x, y) : b.moveTo(x, y); }); b.stroke(); } } b.setLineDash([]);
@@ -3300,21 +3312,25 @@ $('#mCopy').onclick = () => {
   try { navigator.clipboard.writeText(testo).then(ok, ripiego); } catch(e){ ripiego(); }
 };
 
-const punti = new Map(); let trascina = null, distPinch = 0;
+const punti = new Map(); let trascina = null, distPinch = 0, midPinch = null;
 cv.addEventListener('pointerdown', ev => { try { cv.setPointerCapture(ev.pointerId); } catch(e){} punti.set(ev.pointerId, [ev.clientX, ev.clientY]);
   if (punti.size === 1){ trascina = {x:ev.clientX, y:ev.clientY, cx:camX, cy:camY, mosso:false, ogg:false, px:ev.clientX, py:ev.clientY};
     if (MOD && modSel){ const r = cv.getBoundingClientRect(); const o = trovaOggetto((ev.clientX - r.left - ox)/scale, (ev.clientY - r.top - oy)/scale);
       if (o && o.tipo === modSel.tipo && o.i === modSel.i){ trascina.ogg = true; memo(); } } }
-  if (punti.size === 2){ const [p1,p2] = [...punti.values()]; distPinch = Math.hypot(p1[0]-p2[0], p1[1]-p2[1]); if (trascina) trascina.mosso = true; } });
+  if (punti.size === 2){ const [p1,p2] = [...punti.values()]; distPinch = Math.hypot(p1[0]-p2[0], p1[1]-p2[1]); midPinch = [(p1[0]+p2[0])/2, (p1[1]+p2[1])/2]; if (trascina) trascina.mosso = true; if (S) S.camT = null; } });
 cv.addEventListener('pointermove', ev => { if (!punti.has(ev.pointerId)) return; punti.set(ev.pointerId, [ev.clientX, ev.clientY]);
   const r = cv.getBoundingClientRect();
-  if (punti.size === 2){ const [p1,p2] = [...punti.values()]; const d = Math.hypot(p1[0]-p2[0], p1[1]-p2[1]); if (distPinch) zoom(d/distPinch, (p1[0]+p2[0])/2 - r.left, (p1[1]+p2[1])/2 - r.top); distPinch = d; return; }
+  if (punti.size === 2){ const [p1,p2] = [...punti.values()]; const d = Math.hypot(p1[0]-p2[0], p1[1]-p2[1]), m = [(p1[0]+p2[0])/2, (p1[1]+p2[1])/2];
+    if (midPinch){ camX -= (m[0] - midPinch[0])/scale; camY -= (m[1] - midPinch[1])/scale; limita(); } // le due dita spostano anche la mappa, non solo lo zoom
+    if (distPinch && d > 0) zoom(d/distPinch, m[0] - r.left, m[1] - r.top); distPinch = d; midPinch = m; return; }
   if (trascina){ const dx = ev.clientX - trascina.x, dy = ev.clientY - trascina.y; if (Math.hypot(dx,dy) > 7) trascina.mosso = true;
     if (trascina.mosso){
       if (trascina.ogg){ const ddx = ev.clientX - trascina.px, ddy = ev.clientY - trascina.py; trascina.px = ev.clientX; trascina.py = ev.clientY; spostaSel(ddx/(scale*K), -ddy/(scale*K*KY)); }
       else { if (S) S.camT = null; camX = trascina.cx - dx/scale; camY = trascina.cy - dy/scale; limita(); } } } });
-cv.addEventListener('pointerup', ev => { if (trascina && trascina.ogg){ if (trascina.mosso) ricostruisci(); else storia.pop(); modUI(); } const tocco = punti.size === 1 && trascina && !trascina.mosso; punti.delete(ev.pointerId); if (!punti.size){ trascina = null; distPinch = 0; } if (tocco) tocca(ev); });
-cv.addEventListener('pointercancel', ev => { punti.delete(ev.pointerId); trascina = null; });
+cv.addEventListener('pointerup', ev => { if (trascina && trascina.ogg){ if (trascina.mosso) ricostruisci(); else storia.pop(); modUI(); } const tocco = punti.size === 1 && trascina && !trascina.mosso; punti.delete(ev.pointerId); if (!punti.size){ trascina = null; distPinch = 0; midPinch = null; }
+  else if (punti.size === 1){ const [q] = [...punti.values()]; trascina = {x:q[0], y:q[1], cx:camX, cy:camY, mosso:true, ogg:false, px:q[0], py:q[1]}; distPinch = 0; midPinch = null; } // resta un dito: continua da qui, senza salti
+  if (tocco) tocca(ev); });
+cv.addEventListener('pointercancel', ev => { punti.delete(ev.pointerId); if (!punti.size){ trascina = null; distPinch = 0; midPinch = null; } else if (punti.size === 1){ const [q] = [...punti.values()]; trascina = {x:q[0], y:q[1], cx:camX, cy:camY, mosso:true, ogg:false, px:q[0], py:q[1]}; distPinch = 0; midPinch = null; } });
 cv.addEventListener('wheel', ev => { ev.preventDefault(); const r = cv.getBoundingClientRect(); zoom(ev.deltaY < 0 ? 1.15 : 1/1.15, ev.clientX - r.left, ev.clientY - r.top); }, {passive:false});
 function tocca(ev){
   const r = cv.getBoundingClientRect(); const sx = (ev.clientX - r.left - ox)/scale, sy = (ev.clientY - r.top - oy)/scale;
