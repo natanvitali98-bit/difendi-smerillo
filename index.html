@@ -1407,8 +1407,9 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-casb{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:#fff6d6;border:3px solid var(--linea);text-align:left;color:var(--testo)}
 .cq-casb span{display:flex;flex-direction:column}
 .cq-casb b{font-family:var(--f-big);font-weight:400;font-size:17px}
-.cq-casb small{color:var(--grigio);font-size:12.5px}
-.cq-casb em{margin-left:auto;font-style:normal;font-weight:700;color:var(--blu);white-space:nowrap}
+.cq-casb small{color:var(--grigio);font-size:12px;white-space:nowrap}
+.cq-casb span{min-width:0}
+.cq-casb em{margin-left:auto;font-style:normal;font-weight:700;font-size:13px;color:var(--blu);white-space:nowrap}
 .cq-stp{display:flex;align-items:center;gap:14px}
 .cq-nomec{display:flex;flex-direction:column;gap:4px;font-family:var(--f-big);font-size:16px;flex:1;min-width:0}
 .cq-nomec input{font:700 18px var(--f-body);padding:10px 12px;border-radius:12px;border:3px solid var(--linea);min-width:0;width:100%;color:var(--testo);background:#fff}
@@ -1442,6 +1443,16 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-salta{width:100%;min-height:46px}
 .cq-carica{width:40%;background:var(--giallo);animation:cqCar 1s ease-in-out infinite alternate}
 @keyframes cqCar{from{margin-left:0}to{margin-left:60%}}
+.cq-it:not(.cq-sc){grid-template-columns:auto 1fr auto;align-items:start;row-gap:3px}
+.cq-it:not(.cq-sc) .cq-it-t{display:contents}
+.cq-it:not(.cq-sc) .cq-ii{grid-row:1 / span 4;align-self:center}
+.cq-it:not(.cq-sc) .cq-it-t > b{grid-column:2;grid-row:1;align-self:center;line-height:1.15}
+.cq-it:not(.cq-sc) .cq-it-t > b small{display:block;margin-top:1px}
+.cq-it:not(.cq-sc) .cq-pr{grid-column:3;grid-row:1;align-self:center}
+.cq-it:not(.cq-sc) .cq-it-t > small{grid-column:2 / 4}
+.cq-rep{margin:0}
+.cq-come ul{margin:8px 0 2px;padding:0 0 0 18px;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:1.35}
+.cq-come summary b{color:var(--blu)}
 #cq.vuoto .cq-hud,#cq.vuoto .cq-side,#cq.vuoto .cq-centra{visibility:hidden}
 @media (min-width:860px) and (min-aspect-ratio:1/1){
   .cq-hl{flex:0 1 auto;min-width:240px;max-width:460px;margin-right:auto}
@@ -6322,14 +6333,26 @@ function disegnaCostruzioni(Tm){ const ter = VISTA || S.terre, now = performance
     else ctx.drawImage(im, Math.round(sx - w/2), Math.round(sy - h), w, h); } }
 const ICOIMG = {}; function icoImg(k){ if (ICOIMG[k]) return ICOIMG[k]; const im = new Image(); const m = /src="([^"]+)"/.exec(ico(k, 1)); if (m) im.src = m[1]; return ICOIMG[k] = im; }
 const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); ctx.fill(); };
+let cFog = null;
+function sfondo(){ const mw = WW*cam.s, mh = WH*cam.s; if (cam.x <= 0 && cam.y <= 0 && cam.x + mw >= W && cam.y + mh >= H) return;
+  if (!cFog || cFog.src !== cB){ cFog = document.createElement('canvas'); cFog.width = 40; cFog.height = 45; cFog.src = cB; const g = cFog.getContext('2d'); g.drawImage(cB, 0, 0, 40, 45); g.fillStyle = 'rgba(12,30,18,.5)'; g.fillRect(0, 0, 40, 45); }
+  const ex = Math.max(W, H)*1.2; ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(cFog, 0, 0, 1, 45, cam.x - ex, cam.y, ex, mh); ctx.drawImage(cFog, 39, 0, 1, 45, cam.x + mw, cam.y, ex, mh);
+  ctx.drawImage(cFog, 0, 0, 40, 1, cam.x, cam.y - ex, mw, ex); ctx.drawImage(cFog, 0, 44, 40, 1, cam.x, cam.y + mh, mw, ex);
+  ctx.drawImage(cFog, 0, 0, 1, 1, cam.x - ex, cam.y - ex, ex, ex); ctx.drawImage(cFog, 39, 0, 1, 1, cam.x + mw, cam.y - ex, ex, ex);
+  ctx.drawImage(cFog, 0, 44, 1, 1, cam.x - ex, cam.y + mh, ex, ex); ctx.drawImage(cFog, 39, 44, 1, 1, cam.x + mw, cam.y + mh, ex, ex); }
+function bordoMondo(){ const mw = WW*cam.s, mh = WH*cam.s, d = 26; if (cam.x <= 0 && cam.y <= 0 && cam.x + mw >= W && cam.y + mh >= H) return;
+  const lin = (x0, y0, x1, y1, x, y, w, h) => { const g = ctx.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, 'rgba(8,20,12,.55)'); g.addColorStop(1, 'rgba(8,20,12,0)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); };
+  if (cam.x > 0) lin(cam.x, 0, cam.x + d, 0, cam.x, cam.y, d, mh); if (cam.x + mw < W) lin(cam.x + mw, 0, cam.x + mw - d, 0, cam.x + mw - d, cam.y, d, mh);
+  if (cam.y > 0) lin(0, cam.y, 0, cam.y + d, cam.x, cam.y, mw, d); if (cam.y + mh < H) lin(0, cam.y + mh, 0, cam.y + mh - d, cam.x, cam.y + mh - d, mw, d); }
 function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
   if (CAMT){ const k = Math.min(1, dt*7); cam.x += (CAMT.x - cam.x)*k; cam.y += (CAMT.y - cam.y)*k; const ox = cam.x, oy = cam.y; limita(); if (Math.hypot(CAMT.x - cam.x, CAMT.y - cam.y) < 2 || (ox !== cam.x && oy !== cam.y)) CAMT = null; }
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#23421f'; ctx.fillRect(0, 0, W, H); ctx.imageSmoothingEnabled = cam.s < .7;
-  ctx.drawImage(cB, cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.imageSmoothingEnabled = false;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#1f3a22'; ctx.fillRect(0, 0, W, H); sfondo(); ctx.imageSmoothingEnabled = cam.s < .7;
+  ctx.drawImage(cB, cam.x, cam.y, WW*cam.s, WH*cam.s); bordoMondo(); ctx.imageSmoothingEnabled = false;
   if (!ter) return;
   creaTinta(); ctx.drawImage(cT, cam.x, cam.y, WW*cam.s, WH*cam.s);
   if (cam.s >= .45){ const et = (txt, x, y) => { const [sx, sy] = aSchermo(x, y); if (sx < -40 || sy < -20 || sx > W + 40 || sy > H + 20) return; ctx.font = '700 11px "Atkinson Hyperlegible", sans-serif'; const w = ctx.measureText(txt).width + 8; ctx.fillStyle = 'rgba(250,250,245,.92)'; rr(sx - w/2, sy - 8, w, 16, 4); ctx.strokeStyle = '#6f7268'; ctx.lineWidth = 1; ctx.strokeRect(sx - w/2 + .5, sy - 7.5, w - 1, 15); ctx.fillStyle = '#2a2e38'; ctx.textAlign = 'center'; ctx.fillText(txt, sx, sy + 4); };
-    for (const R of STRADE) if (R.nome){ const m = R.p[Math.floor(R.p.length/2)]; et(R.nome, m[0], m[1]); } et('SP 239 Val di Tenna', 1150, fiumeY(1150) + 26); }
+    for (const R of STRADE) if (R.nome){ const m = R.p[Math.floor(R.p.length/2)]; et(R.nome, m[0], m[1]); } et('SP 239 Val di Tenna', 1040, fiumeY(1150) + 26); }
   { const fs = Math.round(Math.max(11, Math.min(17, 14*cam.s + 6))), [fx, fy] = aSchermo(60, fiumeY(60) - 10); ctx.font = `italic 700 ${fs}px "Atkinson Hyperlegible", sans-serif`; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(20,50,110,.9)'; ctx.fillText('Fiume Tenna', fx, fy); }
   const q = Q*cam.s, evid = (t, col, a) => { const B = BORDI[t]; ctx.fillStyle = col; ctx.globalAlpha = a; for (let i = 0; i < B.length; i += 2) ctx.fillRect(cam.x + B[i]*q, cam.y + B[i + 1]*q, Math.max(1, q), Math.max(1, q)); ctx.globalAlpha = 1; };
   const pul = .55 + .45*Math.sin(Tm*6);
@@ -6689,7 +6712,7 @@ function attaccaIo(da, t, n){ const prima = JSON.parse(JSON.stringify(S.terre)),
       o.querySelector('#cqOk').onclick = () => { chiudiOv(); if (S.fine) finePartita(); }; suona(r.vinto ? 'vinto' : 'perso'); }, 450); }}); }
 function soldatini(vivi, tot){ let h = ''; for (let i = 0; i < Math.min(tot, 24); i++) h += `<span class="${i < vivi ? '' : 'caduto'}"></span>`; return h; }
 function dlgDiplomazia(foc){ const altri = vivi().filter(g => g !== S.io), mr = rep(S.io);
-  const o = ov(`<div class="dlg box cq-dlg"><h2>Diplomazia</h2><p>La tua reputazione: <b>${livRep(mr)}</b> (${mr}). Se tradisci un patto o un’alleanza, crolla e nessuno si fida più. <b>Patto</b>: 8 stagioni senza attaccarvi. <b>Accordo</b>: 3 monete in più a stagione. <b>Alleanza</b>: vi aiutate in battaglia e 2 monete in più. Con patti e accordi l’amicizia cresce da sola.</p>
+  const o = ov(`<div class="dlg box cq-dlg"><h2>Diplomazia</h2><p class="cq-rep">La tua reputazione: <b>${livRep(mr)}</b> (${mr})</p><details class="cq-gen cq-come"><summary><b>Come funziona</b></summary><ul><li><b>Patto</b>: 8 stagioni senza attaccarvi.</li><li><b>Accordo</b>: 3 monete in più a stagione.</li><li><b>Alleanza</b>: vi aiutate in battaglia e 2 monete in più.</li><li>Con patti e accordi l’amicizia cresce da sola.</li><li>Se tradisci un patto o un’alleanza, la reputazione crolla e nessuno si fida più.</li></ul></details>
     <div class="cq-list">${altri.map(g => { const v = amic(S.io, g), all = alleati(S.io, g), pat = patto(S.io, g), k = pk(S.io, g), nm = S.mosse < 1;
       return `<div class="cq-dip ${foc === g ? 'foc' : ''}"><div class="cq-dh"><span class="cq-dot" style="background:${FZ[g].col}"></span><b>${FZ[g].nome}</b>${all ? '<b class="cq-all">Alleato</b>' : ''}${pat ? `<b class="cq-all cq-pat">Patto: ${S.patti[k] - S.turno + 1}</b>` : ''}${accordo(S.io, g) ? '<b class="cq-all cq-acc">Accordo</b>' : ''}</div><div>${barraAmic(v)}</div><small>${terreDi(g).length === 1 ? '1 terra' : terreDi(g).length + ' terre'} · ${sol(soldDi(g))} · reputazione ${livRep(rep(g)).toLowerCase()} · carattere: ${notoCar(g) ? '<b>' + CARATTERI[S.car[g]].nome + '</b>' : 'ancora non lo conosci'}${S.fz[g].opera ? ` · <b style="color:#d8342a">Grande Fiera ${S.fz[g].opera}/3</b>` : ''}</small>
         <div class="cq-db"><button class="big mini" data-mer="${g}">${ico('moneta', 2)} Scambi</button><button class="big alt mini" data-reg="${g}" ${nm || S.fz[S.io].monete < REGALO ? 'disabled' : ''}>Regalo ${ico('moneta', 2)} ${REGALO}</button>
@@ -6853,7 +6876,7 @@ function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioc
   o.querySelector('#cqOk').onclick = () => { try { localStorage.setItem(KGUIDA + '3', '1'); } catch(e){} chiudiOv(); if (dopo) dopo(); }; }
 let DIFSC = null; const difScelta = () => { if (!DIFSC){ try { DIFSC = localStorage.getItem(KDIF); } catch(e){} } return DIFF[DIFSC] ? DIFSC : 'normale'; };
 function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){}
-  const o = ov(`<div class="dlg box cq-dlg cq-scegli"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Quale borgo difendi?</h2>${CAS ? `<button type="button" class="cq-casb" id="cqCas">${imgStemma(CAS.stemma, 2)}<span><b>Casata ${CAS.nome}</b><small>${LIVC[livCas(CAS.gloria)][1]} · ${CAS.gen ? 'prossima: ' + (CAS.gen + 1) + 'ª generazione' : 'prima generazione'}</small></span><em>Cronaca ›</em></button>` : ''}<p>Rinforza il tuo borgo, fai amicizie e conquista gli altri due.</p>
+  const o = ov(`<div class="dlg box cq-dlg cq-scegli"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Quale borgo difendi?</h2>${CAS ? `<button type="button" class="cq-casb" id="cqCas">${imgStemma(CAS.stemma, 2)}<span><b>Casata ${CAS.nome}</b><small>${LIVC[livCas(CAS.gloria)][1]} · ${(CAS.gen || 0) + 1}ª generazione</small></span><em>Cronaca ›</em></button>` : ''}<p>Rinforza il tuo borgo, fai amicizie e conquista gli altri due.</p>
     <div class="cq-dif" role="radiogroup" aria-label="Difficoltà">${Object.keys(DIFF).map(k => `<button type="button" role="radio" data-dif="${k}" aria-checked="${k === difScelta() ? 'true' : 'false'}">${DIFF[k].nome}</button>`).join('')}</div><p class="cq-nota" id="cqDifT">${DIFF[difScelta()].desc}</p>
     <div class="cq-list">${Object.keys(FZ).map(f => `<button class="cq-bo" data-f="${f}" style="--c:${FZ[f].col}"><canvas data-sp="${f}"></canvas><span class="cq-bt"><b>${FZ[f].nome}</b><span class="cq-v">${ico('stella', 2)} ${FZ[f].vant}</span><span class="cq-d">${ico('attenzione', 2)} ${FZ[f].diff}</span>${rec[f] ? `<small>Record: vinto in ${rec[f]} stagioni</small>` : ''}</span></button>`).join('')}</div>
     <button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
