@@ -5940,7 +5940,7 @@ const WW = 1600, WH = 1800, Q = 4, GW = WW/Q, GH = WH/Q;
 const SCENE = {smerillo:{x:560, y:110, taglio:6}, sanmartino:{x:40, y:960, taglio:18}, ceresola:{x:1010, y:1170, taglio:20}};
 const TERRE = {
   // i borghi: il centro del paese e le sue terre intorno (da prendere una alla volta prima di assediarlo)
-  smerillo:  {nome:'Smerillo', x:835, y:390, borgo:'smerillo', rend:5},
+  smerillo:  {nome:'Smerillo', x:835, y:390, borgo:'smerillo', rend:5, ay:.72}, // il paese è lungo da nord a sud
   sm_n:      {nome:'I campi sopra Smerillo', x:870, y:170, di:'smerillo', rend:2},
   sm_o:      {nome:'La rupe di Smerillo', x:660, y:470, di:'smerillo', rend:2},
   sm_e:      {nome:'Il versante est', x:1010, y:430, di:'smerillo', rend:2},
@@ -5997,7 +5997,7 @@ const HEX = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), pars
 function creaTerre(){ const N1 = griglia(60, 31), N2 = griglia(60, 37), N3 = griglia(22, 33), N4 = griglia(22, 39);
   idx = new Uint8Array(GW*GH); const L = IDS.map(t => TERRE[t]);
   for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++){ const x = i*Q + 2, y = j*Q + 2, wx = x + (N1(x, y) - .5)*110 + (N3(x, y) - .5)*12, wy = y + (N2(x, y) - .5)*110 + (N4(x, y) - .5)*12; let b = 0, bd = 1e12;
-    for (let k = 0; k < L.length; k++){ const T = L[k], d = (wx - T.x)**2 + (wy - T.y)**2 - (T.borgo ? 7000 : T.fraz ? 2500 : 0); if (d < bd){ bd = d; b = k; } } idx[j*GW + i] = b; }
+    for (let k = 0; k < L.length; k++){ const T = L[k], d = ((wx - T.x)*(T.ax || 1))**2 + ((wy - T.y)*(T.ay || 1))**2 - (T.borgo ? 15000 : T.fraz ? 2500 : 0); if (d < bd){ bd = d; b = k; } } idx[j*GW + i] = b; }
   // niente isolette staccate: ogni terra resta un pezzo unico (i pezzi piccoli passano alla terra che li circonda)
   { const comp = new Int32Array(GW*GH).fill(-1), pezzi = []; for (let p = 0; p < GW*GH; p++){ if (comp[p] >= 0) continue; const id = idx[p], st = [p], celle = []; comp[p] = pezzi.length;
       while (st.length){ const c = st.pop(); celle.push(c); const x = c % GW, y = (c / GW) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= GW || Y >= GH) continue; const q = Y*GW + X; if (comp[q] < 0 && idx[q] === id){ comp[q] = pezzi.length; st.push(q); } } }
@@ -6149,40 +6149,45 @@ function spriteStr(k, lv){ const key = k + lv; if (SPRS[key]) return SPRS[key]; 
   return SPRS[key] = c; }
 
 // ===== dove vanno: solo sulla terra libera della propria terra (niente case, strade o acqua), calcolato una volta sulla mappa vera
-let OCC = null, BOS = null, SPOT = {}, MURA = {}; const SCALA_STR = 1.6;
-function analizzaMappa(){ const D = cB.getContext('2d').getImageData(0, 0, WW, WH).data; OCC = new Uint8Array(GW*GH); BOS = new Uint8Array(GW*GH);
-  for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++){ let costr = 0, bosco = 0;
+let OCC = null, BOS = null, CASA = null, SPOT = {}, MURA = {}; const SCALA_STR = 1.6;
+function analizzaMappa(){ const D = cB.getContext('2d').getImageData(0, 0, WW, WH).data; OCC = new Uint8Array(GW*GH); BOS = new Uint8Array(GW*GH); CASA = new Uint8Array(GW*GH);
+  for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++){ let costr = 0, bosco = 0, casa = 0;
     for (const [ox, oy] of [[0,0],[2,0],[0,2],[2,2],[1,1],[3,3]]){ const k = ((j*Q + oy)*WW + i*Q + ox)*4, r = D[k], g = D[k + 1], b = D[k + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-      if ((mx - mn < 58 && mx > 92) || (r > g + 34 && r > b + 60) || (b > r + 30 && b > g - 10)) costr++; if (g >= r && mx < 112) bosco++; }
-    OCC[j*GW + i] = costr >= 2 ? 1 : 0; BOS[j*GW + i] = bosco >= 4 ? 1 : 0; }
+      if ((mx - mn < 58 && mx > 92) || (r > g + 34 && r > b + 60) || (b > r + 30 && b > g - 10)) costr++; if (g >= r && mx < 112) bosco++; if ((r - b >= 20 && mx - mn < 72 && mx > 88 && r >= g) || (r > g + 34 && r > b + 60)) casa++; }
+    OCC[j*GW + i] = costr >= 2 ? 1 : 0; BOS[j*GW + i] = bosco >= 4 ? 1 : 0; CASA[j*GW + i] = casa >= 2 ? 1 : 0; }
   // un margine intorno alle case e ai numeri dei soldati
   const O2 = OCC.slice(); for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) if (OCC[j*GW + i]) for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const X = i + dx, Y = j + dy; if (X >= 0 && Y >= 0 && X < GW && Y < GH) O2[Y*GW + X] = 1; }
   OCC = O2; for (const t of IDS){ const T = TERRE[t]; for (let j = -14; j <= 6; j++) for (let i = -16; i <= 16; i++){ const X = Math.floor(T.x/Q) + i, Y = Math.floor(T.y/Q) + j; if (X >= 0 && Y >= 0 && X < GW && Y < GH) OCC[Y*GW + X] = 2; } }
   const USATO = new Uint8Array(GW*GH), ti = IDS.indexOf.bind(IDS);
-  let MODO = 0; // 0: tutto dentro la terra e libero; 1: un po' più largo (si può toccare il bordo e un pezzetto di strada)
-  const libero = (t, x, y, w, h) => { const i0 = Math.floor((x - w/2)/Q), i1 = Math.floor((x + w/2)/Q), j0 = Math.floor((y - h*.6)/Q), j1 = Math.floor(y/Q), it = ti(t); let bos = 0, fuori = 0, occ = 0, n = (i1 - i0 + 1)*(j1 - j0 + 1);
-    if (i0 < 0 || j0 < 0 || i1 >= GW || j1 >= GH) return -1; for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++){ const k = j*GW + i; if (OCC[k] === 2 || USATO[k]) return -1; if (idx[k] !== it) fuori++; if (OCC[k]) occ++; bos += BOS[k]; }
-    if (MODO === 0 && (fuori || occ)) return -1; if (MODO === 1 && (fuori > n*.35 || occ > n*.15)) return -1; if (MODO === 2 && (fuori > n*.55 || occ > n*.25)) return -1; return bos/n; };
+  let MODO = 0; // 0: tutto libero; 1: può toccare un pezzetto di strada (mai case, mai le terre degli altri)
+  const libero = (t, x, y, w, h) => { const i0 = Math.floor((x - w/2)/Q), i1 = Math.floor((x + w/2)/Q), j0 = Math.floor((y - h)/Q), j1 = Math.floor(y/Q), it = ti(t); let bos = 0, occ = 0, n = (i1 - i0 + 1)*(j1 - j0 + 1);
+    if (i0 < 0 || j0 < 0 || i1 >= GW || j1 >= GH) return -1; for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++){ const k = j*GW + i; if (OCC[k] === 2 || USATO[k] || CASA[k] || idx[k] !== it) return -1; if (OCC[k]) occ++; bos += BOS[k]; }
+    if (MODO === 0 && occ) return -1; if (MODO === 1 && occ > n*.1) return -1; if (MODO === 2 && occ > n*.3) return -1; return bos/n; };
   const vicinoBosco = (x, y) => { let n = 0; for (let j = -5; j <= 5; j++) for (let i = -5; i <= 5; i++){ const X = Math.floor(x/Q) + i, Y = Math.floor(y/Q) + j; if (X >= 0 && Y >= 0 && X < GW && Y < GH) n += BOS[Y*GW + X]; } return n; };
-  const cerca = (t, k, w, h, dentro = t) => { for (MODO = 0; MODO < 3; MODO++){ const r = cerca1(t, k, w, h, dentro); if (r) return r; } return null; };
+  // si prova prima a grandezza piena, poi più piccolo se la terra è stretta
+  const cerca = (t, k, w, h, dentro = t) => { for (const sc of [SCALA_STR, 1.3, 1.05, .85]) for (MODO = 0; MODO < 3; MODO++){ const r = cerca1(t, k, w*sc, h*sc, dentro); if (r){ r.s = sc; r.w = w*sc; r.h = h*sc; return r; } } return null; };
   const cerca1 = (t, k, w, h, dentro) => { const T = TERRE[t], it = ti(dentro); let best = null, bs = -1e9;
     for (let j = 0; j < GH; j += 2) for (let i = 0; i < GW; i += 2){ if (idx[j*GW + i] !== it) continue; const x = i*Q + 2, y = j*Q + 2, bos = libero(dentro, x, y, w, h); if (bos < 0) continue; const d = Math.hypot(x - T.x, y - T.y);
       let sc = -Math.abs(d - 80)*.5; if (k === 'fattoria') sc -= bos*80; if (k === 'segheria') sc += vicinoBosco(x, y)*.8 - bos*60; if (k === 'mercato' || k === 'caserma' || ED[k] || k === 'fiera') sc = -d - bos*40; if (k === 'torre') sc = -d*.3;
       sc += hash(i, j, 99)*3; if (sc > bs){ bs = sc; best = {x, y}; } }
     return best; };
-  const MIS = Object.fromEntries(Object.entries({fattoria:[46,36], segheria:[44,34], mercato:[58,30], caserma:[44,36], torre:[20,38], armeria:[40,32], meccanico:[46,30], fiera:[86,34]}).map(([k, [w, h]]) => [k, [w*SCALA_STR, h*SCALA_STR]]));
-  // le botteghe del borgo vanno subito fuori dalle case, nelle sue terre più vicine
-  const vicine = f => [f, ...IDS.filter(x => TERRE[x].di === f).sort((a, b) => Math.hypot(TERRE[a].x - TERRE[f].x, TERRE[a].y - TERRE[f].y) - Math.hypot(TERRE[b].x - TERRE[f].x, TERRE[b].y - TERRE[f].y))];
-  for (const f of Object.keys(FZ)) for (const k of ['armeria', 'meccanico', 'fiera']){ let sp = null; for (const d of vicine(f)){ sp = cerca(f, k, ...MIS[k], d); if (sp) break; } if (sp){ SPOT[f + '|' + k] = sp; const [w, h] = MIS[k]; for (let j = Math.floor((sp.y - h)/Q); j <= Math.floor(sp.y/Q); j++) for (let i = Math.floor((sp.x - w/2)/Q); i <= Math.floor((sp.x + w/2)/Q); i++) USATO[j*GW + i] = 1; } }
-  for (const t of IDS){ const T = TERRE[t]; for (const k of Object.keys(STR)){ if (!STR[k].dove(t)) continue; const sp = cerca(t, k, ...MIS[k]); SPOT[t + '|' + k] = sp || {x: T.x + 50, y: T.y + 70}; } }
-  // il giro delle mura: il bordo della terra del borgo, cioè intorno alle case
-  for (const f of Object.keys(FZ)){ const T = TERRE[f], B = BORDI[f], N = 160, rr = new Array(N).fill(0);
-    for (let q = 0; q < B.length; q += 2){ const x = B[q]*Q + 2 - T.x, y = B[q + 1]*Q + 2 - T.y, a = Math.floor(((Math.atan2(y, x) + Math.PI)/(2*Math.PI))*N) % N, r = Math.hypot(x, y); if (r > rr[a]) rr[a] = r; }
-    for (let a = 0; a < N; a++) if (!rr[a]){ let p = a, n = a; while (!rr[p]) p = (p + N - 1) % N; while (!rr[n]) n = (n + 1) % N; rr[a] = (rr[p] + rr[n])/2; }
-    // le mura passano fuori dalle case: lungo ogni direzione si allarga il giro oltre l'ultima casa vicina
-    for (let a = 0; a < N; a++){ const ang = (a + .5)/N*2*Math.PI - Math.PI; let ult = 0; for (let r = 20; r < rr[a] + 34; r += 2){ const X = Math.floor((T.x + Math.cos(ang)*r)/Q), Y = Math.floor((T.y + Math.sin(ang)*r)/Q); if (X < 0 || Y < 0 || X >= GW || Y >= GH) break; if (OCC[Y*GW + X] === 1) ult = r; } rr[a] = Math.max(rr[a] - 10, ult + 10) + 10; }
-    let sm = rr.slice(); for (let it = 0; it < 4; it++) sm = sm.map((v, a) => (sm[(a + N - 1) % N] + 2*v + sm[(a + 1) % N])/4);
-    MURA[f] = sm.map((r, a) => { const ang = (a + .5)/N*2*Math.PI - Math.PI, rm = r - 10; return [T.x + Math.cos(ang)*rm, T.y + Math.sin(ang)*rm]; }); } }
+  const BASE = {fattoria:[46,36], segheria:[44,34], mercato:[58,30], caserma:[44,36], torre:[20,38], armeria:[40,32], meccanico:[46,30], fiera:[86,34]};
+  const occupa = sp => { for (let j = Math.floor((sp.y - sp.h)/Q); j <= Math.floor(sp.y/Q); j++) for (let i = Math.floor((sp.x - sp.w/2)/Q); i <= Math.floor((sp.x + sp.w/2)/Q); i++) if (i >= 0 && j >= 0 && i < GW && j < GH) USATO[j*GW + i] = 1; };
+  // le botteghe del borgo vanno subito fuori dalle mura, nelle sue terre più vicine
+  const terreB = f => IDS.filter(x => TERRE[x].di === f).sort((a, b) => Math.hypot(TERRE[a].x - TERRE[f].x, TERRE[a].y - TERRE[f].y) - Math.hypot(TERRE[b].x - TERRE[f].x, TERRE[b].y - TERRE[f].y));
+  for (const f of Object.keys(FZ)) for (const k of ['armeria', 'meccanico', 'fiera']){ let sp = null; for (const d of terreB(f)){ sp = cerca(f, k, ...BASE[k], d); if (sp) break; } if (sp){ SPOT[f + '|' + k] = sp; occupa(sp); } }
+  for (const t of IDS){ for (const k of Object.keys(STR)){ if (!STR[k].dove(t)) continue; const sp = cerca(t, k, ...BASE[k]); if (sp) SPOT[t + '|' + k] = sp; } }
+  // il giro delle mura: intorno alle case del borgo, sempre dentro la sua terra
+  for (const f of Object.keys(FZ)){ const T = TERRE[f], N = 180, it = ti(f), bordo = [], casa = [];
+    const cella = (x, y) => { const X = Math.floor(x/Q), Y = Math.floor(y/Q); return X < 0 || Y < 0 || X >= GW || Y >= GH ? -1 : Y*GW + X; };
+    for (let a = 0; a < N; a++){ const ang = (a + .5)/N*2*Math.PI - Math.PI, cx = Math.cos(ang), cy = Math.sin(ang); let r = 6, ult = 0, vuoto = 0;
+      for (; r < 600; r += 2){ const k = cella(T.x + cx*r, T.y + cy*r); if (k < 0 || idx[k] !== it) break; if (CASA[k]){ ult = r; vuoto = 0; } else if (ult && (vuoto += 2) > 56) { /* dopo un pezzo vuoto le case non sono più del paese */ for (; r < 600; r += 2){ const k2 = cella(T.x + cx*r, T.y + cy*r); if (k2 < 0 || idx[k2] !== it) break; } break; } }
+      bordo.push(r); casa.push(ult); }
+    // togli i picchi (una casa isolata o una strada) con la mediana, poi ammorbidisci
+    const med = casa.map((v, a) => { const w = []; for (let d = -5; d <= 5; d++) w.push(casa[(a + d + N) % N]); w.sort((p, q) => p - q); return w[6]; });
+    let rr = med.map((v, a) => Math.max(34, Math.min(v + 16, bordo[a] - 8, T.borgo === 'smerillo' ? 400 : 175)));
+    for (let k = 0; k < 3; k++) rr = rr.map((v, a) => Math.min(bordo[a] - 8, (rr[(a + N - 1) % N] + 2*v + rr[(a + 1) % N])/4));
+    MURA[f] = rr.map((r, a) => { const ang = (a + .5)/N*2*Math.PI - Math.PI; return [T.x + Math.cos(ang)*r, T.y + Math.sin(ang)*r]; }); } }
 // le mura e le torri del borgo, disegnate lungo il giro (in pixel, alla stessa grandezza della mappa)
 const CMURA = {};
 function telaMura(f, mu, to){ const key = f + mu + '|' + to; if (CMURA[key]) return CMURA[key]; const L = MURA[f]; if (!L) return null;
@@ -6208,7 +6213,7 @@ function disegnaCostruzioni(Tm){ const ter = VISTA || S.terre, now = performance
   // le altre costruzioni, ognuna al suo posto sulla terra libera
   const L = []; for (const t of IDS){ const st = ter[t]; if (st.str) L.push([t, st.str, st.sl || 1]); if (TERRE[t].borgo && st.own === t && S.fz[t]){ const E = S.fz[t].ed; if (E.armeria) L.push([t, 'armeria', E.armeria]); if (E.meccanico) L.push([t, 'meccanico', E.meccanico]); if (S.fz[t].opera) L.push([t, 'fiera', S.fz[t].opera]); } }
   L.sort((p, q) => (SPOT[p[0] + '|' + p[1]] || TERRE[p[0]]).y - (SPOT[q[0] + '|' + q[1]] || TERRE[q[0]]).y);
-  for (const [t, k, lv] of L){ const sp = SPOT[t + '|' + k]; if (!sp) continue; const im = spriteStr(k, lv), [sx, sy] = aSchermo(sp.x, sp.y), w = im.width*z, h = im.height*z; if (sx < -100 || sy < -60 || sx > W + 100 || sy > H + 100) continue;
+  for (const [t, k, lv] of L){ const sp = SPOT[t + '|' + k]; if (!sp) continue; const im = spriteStr(k, lv), [sx, sy] = aSchermo(sp.x, sp.y), zz = cam.s*(sp.s || SCALA_STR), w = im.width*zz, h = im.height*zz; if (sx < -100 || sy < -60 || sx > W + 100 || sy > H + 100) continue;
     const a = anima(t, k); if (a < 1){ const e = 1 + 2.2*Math.pow(a - 1, 3) + 1.2*Math.pow(a - 1, 2); ctx.save(); ctx.translate(sx, sy); ctx.scale(1, Math.max(0, e)); ctx.drawImage(im, -w/2, -h, w, h); ctx.restore();
       for (let i = 0; i < 10; i++){ const ang = i/10*Math.PI*2, r = (8 + a*30)*z; ctx.globalAlpha = (1 - a)*.8; ctx.fillStyle = i % 2 ? '#e8dcc4' : '#c8b898'; ctx.fillRect(sx + Math.cos(ang)*r - 2, sy - 4 + Math.sin(ang)*r*.35, 4, 4); } ctx.globalAlpha = 1; }
     else ctx.drawImage(im, Math.round(sx - w/2), Math.round(sy - h), w, h); } }
@@ -6691,7 +6696,7 @@ function tasto(e, k){ const o = el('cqOv');
   else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
-return {apri, frame, tasto, get attivo(){ return attivo; }, _test:{spot: () => SPOT, simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {apri, frame, tasto, get attivo(){ return attivo; }, _test:{spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 let last = performance.now(), T = 0;
