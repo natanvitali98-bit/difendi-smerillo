@@ -6188,7 +6188,9 @@ function analizzaMappa(){ const D = cB.getContext('2d').getImageData(0, 0, WW, W
     // togli i picchi (una casa isolata o una strada) con la mediana, poi ammorbidisci
     const med = casa.map((v, a) => { const w = []; for (let d = -5; d <= 5; d++) w.push(casa[(a + d + N) % N]); w.sort((p, q) => p - q); return w[6]; });
     let rr = med.map((v, a) => Math.max(34, Math.min(v + 16, bordo[a] - 8, T.borgo === 'smerillo' ? 400 : 175)));
-    for (let k = 0; k < 3; k++) rr = rr.map((v, a) => Math.min(bordo[a] - 8, (rr[(a + N - 1) % N] + 2*v + rr[(a + 1) % N])/4));
+    // niente scalini: tra un punto e il vicino il raggio cambia poco, così le mura non fanno pieghe o anse strette
+    for (let k = 0; k < 2*N; k++){ let cambi = 0; for (let a = 0; a < N; a++){ const m = Math.min(bordo[a] - 8, Math.max(rr[(a + N - 1) % N], rr[(a + 1) % N]) - 3); if (rr[a] < m){ rr[a] = m; cambi++; } } if (!cambi) break; }
+    for (let k = 0; k < 8; k++) rr = rr.map((v, a) => Math.min(bordo[a] - 8, (rr[(a + N - 2) % N] + rr[(a + N - 1) % N] + 2*v + rr[(a + 1) % N] + rr[(a + 2) % N])/6));
     MURA[f] = rr.map((r, a) => { const ang = (a + .5)/N*2*Math.PI - Math.PI; return [T.x + Math.cos(ang)*r, T.y + Math.sin(ang)*r]; }); } }
 // le mura e le torri del borgo, disegnate lungo il giro (in pixel, alla stessa grandezza della mappa)
 const CMURA = {};
