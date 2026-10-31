@@ -3851,6 +3851,7 @@ function mostraMenu(pannello){
     c.innerHTML = `<div class="pan"><h2>Come vuoi giocare?</h2>
       <button class="hm-card hm-modo" id="mTurni"><span class="hm-ic">${TB.ico('scudo', 3)}</span><span class="hm-sx"><b>Missioni a turni</b><small>Muovi i tuoi difensori uno alla volta, come a scacchi. Missione ${pm.num}: ${pm.titolo}</small></span></button>
       <button class="hm-card hm-modo" data-p="cmis"><span class="hm-ic">${TB.ico('torre', 3)}</span><span class="hm-sx"><b>Difesa in tempo reale</b><small>Compra torri nel negozio e mettile lungo la strada. I nemici arrivano a ondate.</small></span></button>
+      <button class="hm-card hm-modo" id="tCq"><span class="hm-ic">${TB.ico('bandiera', 3)}</span><span class="hm-sx"><b>Conquista</b><small>Scegli il tuo borgo: costruisci, commercia, fai alleanze e conquista Smerillo, San Martino e Ceresola.</small></span></button>
       <button class="big alt" data-p="home">Indietro</button></div>`;
   } else if (pannello === 'cmis'){
     const aperta2 = Object.keys(DIFF).some(d => rec[d] && rec[d].stelle);
