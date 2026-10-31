@@ -5974,16 +5974,17 @@ for (const t of IDS){ const T = TERRE[t]; if (!T.vuota) continue; let m = null, 
   for (const t of IDS){ const T = TERRE[t]; const r = RIS[t] || TIPO[T.nome.split(' ')[0]] || [1,0]; T.c = r[0]; T.l = r[1]; if (T.vuota && /^(Vigne|Oliveto)/.test(T.nome)) T.rend = 2; } }
 const fiumeY = x => 44 + 16*Math.sin(x/170) + 6*Math.sin(x/47 + 1);
 // le strade principali: escono dalle mappe vere e vanno alle frazioni (come nella realtà, più o meno)
+// le strade: solo quelle vere (Provincia di Fermo), unite alle uscite delle tre mappe; i sentieri di campagna sono marroni
 const STRADE = [
-  [[560,360],[470,450],[380,600],[300,780],[262,960]],                 // da Smerillo a San Martino
-  [[862,110],[850,90],[900,fiumeY(900) + 26]],                          // da Smerillo giù al Tenna
-  [[0,0]],                                                               // (la strada di fondovalle si disegna a parte)
-  [[830,800],[880,960],[1000,1080],[1140,1170]],                        // da Smerillo a Ceresola
-  [[830,800],[800,1050],[790,1300],[790,1450]],                         // da Smerillo a Castorano
-  [[520,1490],[650,1470],[790,1450],[960,1560],[1170,1625]],           // San Martino - Castorano - Ceresola
-  [[1505,1560],[1560,1250],[1470,860],[1330,600],[1300,300],[1250,fiumeY(1250) + 26]], // da Ceresola a Durano e al Tenna
-  [[790,1450],[770,1580],[760,1700]],                                   // giù a Valle Cupa
-  [[330,210],[330,fiumeY(330) + 26]]];                                  // Val di Tenna sulla strada di fondovalle
+  {nome:'SP 19', tipo:'prov', p:[[202,980],[214,800],[238,600],[258,400],[272,fiumeY(272) + 26]]},           // SP 19 Ceresola: da San Martino su alla Val di Tenna
+  {nome:'SP 19', tipo:'prov', p:[[519,1490],[650,1470],[790,1450],[960,1560],[1199,1609]]},                    // SP 19: San Martino, Castorano, Ceresola
+  {nome:'SP 121', tipo:'prov', p:[[830,791],[868,940],[990,1070],[1141,1192]]},                               // SP 121 Ceresola - Smerillo
+  {nome:'SP 50', tipo:'prov', p:[[1507,1318],[1560,1330],[1600,1345]]},                                        // SP 50 verso Montefalcone
+  {nome:'', tipo:'com', p:[[866,118],[872,96],[900,fiumeY(900) + 26]]},                                        // da Smerillo giù al Tenna
+  {nome:'', tipo:'com', p:[[568,362],[470,430],[380,520],[300,590],[238,600]]},                                 // la strada coi tornanti a ovest di Smerillo
+  {nome:'', tipo:'campagna', p:[[900,880],[1100,760],[1250,660],[1330,600]]},                                  // sentiero per Durano
+  {nome:'', tipo:'campagna', p:[[790,1450],[775,1580],[760,1700]]},                                            // sentiero per Valle Cupa
+  {nome:'', tipo:'campagna', p:[[330,210],[315,fiumeY(315) + 26]]}];                                          // Val di Tenna sulla strada di fondovalle
 function curva(P){ const out = []; for (let i = 0; i < P.length - 1; i++){ const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)], L = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
   for (let k = 0; k < L; k += .8){ const t = k/L, t2 = t*t, t3 = t2*t; out.push([.5*((2*p1[0]) + (-p0[0] + p2[0])*t + (2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0])*t2 + (-p0[0] + 3*p1[0] - 3*p2[0] + p3[0])*t3), .5*((2*p1[1]) + (-p0[1] + p2[1])*t + (2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1])*t2 + (-p0[1] + 3*p1[1] - 3*p2[1] + p3[1])*t3)]); } } return out; }
 
@@ -6036,7 +6037,8 @@ function* generaMondo(){
   // strade grigie come quelle delle mappe vere
   const strada = (pts, w) => { c.fillStyle = '#6f7268'; for (const [x, y] of pts) c.fillRect(Math.round(x - w/2 - 1), Math.round(y - w/2 - 1), w + 2, w + 2); c.fillStyle = '#b4b4aa'; for (const [x, y] of pts) c.fillRect(Math.round(x - w/2), Math.round(y - w/2), w, w); };
   const valle = []; for (let x = 0; x < WW; x += .8) valle.push([x, fiumeY(x) + 26 + 3*Math.sin(x/60)]); strada(valle, 4);
-  for (const P of STRADE) if (P.length > 1) strada(curva(P), 4);
+  const sentiero = pts => { c.fillStyle = '#8c6a40'; for (const [x, y] of pts) c.fillRect(Math.round(x - 1), Math.round(y - 1), 3, 3); c.fillStyle = '#c8a46c'; for (const [x, y] of pts) c.fillRect(Math.round(x), Math.round(y), 1, 1); };
+  for (const R of STRADE){ const pts = curva(R.p); if (R.tipo === 'campagna') sentiero(pts); else strada(pts, R.tipo === 'prov' ? 4 : 3); }
   yield .7;
   // le tre mappe vere, con i bordi sfumati nella campagna
   const sc = {smerillo: (typeof scena !== 'undefined' && scena) || creaScena()}; yield .78;
@@ -6225,6 +6227,8 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
   ctx.drawImage(cB, cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.imageSmoothingEnabled = false;
   if (!ter) return;
   creaTinta(); ctx.drawImage(cT, cam.x, cam.y, WW*cam.s, WH*cam.s);
+  if (cam.s >= .45){ const et = (txt, x, y) => { const [sx, sy] = aSchermo(x, y); if (sx < -40 || sy < -20 || sx > W + 40 || sy > H + 20) return; ctx.font = '700 11px "Atkinson Hyperlegible", sans-serif'; const w = ctx.measureText(txt).width + 8; ctx.fillStyle = 'rgba(250,250,245,.92)'; rr(sx - w/2, sy - 8, w, 16, 4); ctx.strokeStyle = '#6f7268'; ctx.lineWidth = 1; ctx.strokeRect(sx - w/2 + .5, sy - 7.5, w - 1, 15); ctx.fillStyle = '#2a2e38'; ctx.textAlign = 'center'; ctx.fillText(txt, sx, sy + 4); };
+    for (const R of STRADE) if (R.nome){ const m = R.p[Math.floor(R.p.length/2)]; et(R.nome, m[0], m[1]); } et('SP 239 Val di Tenna', 1150, fiumeY(1150) + 26); }
   { const fs = Math.round(Math.max(11, Math.min(17, 14*cam.s + 6))), [fx, fy] = aSchermo(60, fiumeY(60) - 10); ctx.font = `italic 700 ${fs}px "Atkinson Hyperlegible", sans-serif`; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(20,50,110,.9)'; ctx.fillText('Fiume Tenna', fx, fy); }
   const q = Q*cam.s, evid = (t, col, a) => { const B = BORDI[t]; ctx.fillStyle = col; ctx.globalAlpha = a; for (let i = 0; i < B.length; i += 2) ctx.fillRect(cam.x + B[i]*q, cam.y + B[i + 1]*q, Math.max(1, q), Math.max(1, q)); ctx.globalAlpha = 1; };
   const pul = .55 + .45*Math.sin(Tm*6);
