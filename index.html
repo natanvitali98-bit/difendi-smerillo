@@ -1433,6 +1433,12 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-gen ol{margin:8px 0 2px;padding:0 0 0 4px;list-style:none;display:flex;flex-direction:column;gap:6px;border-left:3px solid #d8c890}
 .cq-gen li{padding-left:10px;font-size:14px;line-height:1.35;font-family:Georgia,"Times New Roman",serif}
 .cq-gen li em{display:block;font-style:normal;font-family:var(--f-body);font-size:11.5px;font-weight:700;color:#a07820}
+.cq-anno{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:#fff6d6;border:3px solid var(--linea)}
+.cq-anno p{margin:0;font-weight:700}
+.cq-annop{font-size:13px;line-height:1.35;padding:6px 10px;border-radius:10px;background:#fff6d6}
+.cq-annop img{vertical-align:-3px}
+.cq-evs{display:flex;flex-direction:column;gap:8px}
+.cq-news li.info{background:#e3ecff}
 .cq-salta{width:100%;min-height:46px}
 .cq-carica{width:40%;background:var(--giallo);animation:cqCar 1s ease-in-out infinite alternate}
 @keyframes cqCar{from{margin-left:0}to{margin-left:60%}}
@@ -5975,13 +5981,33 @@ const MANGIANO = 3; // ogni 3 soldati mangiano 1 cibo a stagione
 const mangia = f => Math.floor(soldDi(f)/MANGIANO);
 const LIVF = ['Casale', 'Villaggio', 'Paese'], CRESCE = 4;
 const prosp = t => (S.terre[t].lv || 1);
-const OPERA = [[50,35,20],[70,45,30],[95,60,40]]; // le tre fasi della Grande Fiera: monete, legna, cibo
+const OPERA = [[50,35,20],[70,45,30],[95,60,40]];
+// il carattere dei borghi del computer: cambia ogni partita, e all'inizio non lo sai
+const CARATTERI = {
+  guerriero:{nome:'Guerriero', ic:'spade', desc:'Attacca presto e spesso, costruisce poco.', soglia:-.08, costr:.35, str:.45, fiera:.5, dipl:-15, guardia:1},
+  mercante: {nome:'Mercante', ic:'moneta', desc:'Vuole commerciare e arricchirsi: cerca accordi e prepara la Grande Fiera.', soglia:.08, costr:.4, str:1, fiera:1.8, dipl:12, guardia:1},
+  traditore:{nome:'Traditore', ic:'teschio', desc:'Fa subito amicizia, ma appena può ti attacca alle spalle.', soglia:0, costr:.4, str:.65, fiera:.8, dipl:18, guardia:1, tradisce:true},
+  timoroso: {nome:'Timoroso', ic:'scudo', desc:'Si chiude dietro le mura e attacca solo quando è sicuro.', soglia:.12, costr:.65, str:.8, fiera:1, dipl:5, guardia:1.4}};
+const CAR = f => CARATTERI[(S && S.car && S.car[f]) || ''] || {soglia:0, costr:.4, str:.65, fiera:1, dipl:0, guardia:1};
+const notoCar = f => S.noto && S.noto[f];
+// l'anno: una regola speciale scelta a caso a ogni partita
+const ANNI = {
+  calmo:     {nome:'Un anno tranquillo', ic:'trifoglio', desc:'Nessuna regola speciale.'},
+  carestia:  {nome:'L’anno della carestia', ic:'castagna', desc:'I campi danno il 40% di cibo in meno: i soldati costano cari.'},
+  briganti:  {nome:'L’anno dei briganti', ic:'spada', desc:'Le terre libere sono piene di briganti: il doppio da battere.'},
+  fiera:     {nome:'L’anno della Fiera', ic:'coppa', desc:'La Grande Fiera costa il 40% in meno, per tutti.'},
+  inverno:   {nome:'L’inverno lungo', ic:'nebbia', desc:'D’inverno la neve blocca le strade: nessuno può attaccare.'},
+  abbondanza:{nome:'L’anno dell’abbondanza', ic:'albero', desc:'Cibo e legna il 30% in più per tutti.'},
+  mercanti:  {nome:'L’anno dei mercanti', ic:'moneta', desc:'Ogni accordo commerciale rende 2 monete in più.'}};
+const ANNO = () => (S && S.anno) || 'calmo';
+const costoOpera = fase => { const o = OPERA[fase]; if (!o) return null; return ANNO() === 'fiera' ? o.map(v => Math.round(v*.6)) : o; };
+const neve = () => ANNO() === 'inverno' && (S.turno - 1) % 4 === 3; // le tre fasi della Grande Fiera: monete, legna, cibo
 const patto = (a, b) => !!(S.patti && S.patti[pk(a, b)] >= S.turno);
 const rep = f => S.rep ? (S.rep[f] == null ? 50 : S.rep[f]) : 50;
 const livRep = v => v >= 70 ? 'Affidabile' : v >= 45 ? 'Normale' : v >= 25 ? 'Poco affidabile' : 'Traditore';
 function prodCibo(f, t = S.turno){ let c = 0; for (const x of terreDi(f)){ const st = S.terre[x]; c += TERRE[x].c + (st.str === 'fattoria' ? 2*(st.sl || 1) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? prosp(x) - 1 : 0); }
-  if ((t - 1) % 4 === 2) c += 2; if ((t - 1) % 4 === 3) c -= 2; return Math.max(0, Math.round(c*(f === S.io ? 1 : DF().rend))); }
-function prodLegna(f){ let l = 0; for (const x of terreDi(f)){ const st = S.terre[x]; l += TERRE[x].l + (st.str === 'segheria' ? 2*(st.sl || 1) : 0); } return Math.round(l*(f === S.io ? 1 : DF().rend)); }
+  if ((t - 1) % 4 === 2) c += 2; if ((t - 1) % 4 === 3) c -= 2; const ma = ANNO() === 'carestia' ? .6 : ANNO() === 'abbondanza' ? 1.3 : 1; return Math.max(0, Math.round(c*ma*(f === S.io ? 1 : DF().rend))); }
+function prodLegna(f){ let l = 0; for (const x of terreDi(f)){ const st = S.terre[x]; l += TERRE[x].l + (st.str === 'segheria' ? 2*(st.sl || 1) : 0); } return Math.round(l*(ANNO() === 'abbondanza' ? 1.3 : 1)*(f === S.io ? 1 : DF().rend)); }
 const puoPagare = (F, m, l = 0, c = 0) => F.monete >= m && F.legna >= l && F.cibo >= c;
 const paga = (F, m, l = 0, c = 0) => { F.monete -= m; F.legna -= l; F.cibo -= c; };
 const prezzo = (m, l = 0, c = 0) => `${ico('moneta', 2)} ${m}${l ? ' ' + ico('albero', 2) + ' ' + l : ''}${c ? ' ' + ico('castagna', 2) + ' ' + c : ''}`;
@@ -6004,7 +6030,7 @@ const accordo = (a, b) => !!(S.acc && S.acc[pk(a, b)]);
 const assediato = f => S.terre[f] && S.terre[f].own === f && terreDelBorgo(f).filter(x => { const o = S.terre[x].own; return o !== f && !(o && alleati(f, o)); }).length >= ASSEDIO;
 const capRecl = f => { const c = 4 + 2*S.fz[f].ed.armeria; return assediato(f) ? Math.ceil(c/2) : c; };
 function rendita(f, t = S.turno){ let r = 0, merc = 0; for (const x of terreDi(f)){ const st = S.terre[x]; r += TERRE[x].rend + (st.str === 'mercato' ? 3*(st.sl || 1) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? 2*(prosp(x) - 1) : 0); if (st.str === 'mercato') merc++; }
-  for (const g of vivi()) if (g !== f && accordo(f, g)) r += 3 + merc; if (f === 'ceresola') r += 2;
+  for (const g of vivi()) if (g !== f && accordo(f, g)) r += 3 + merc + (ANNO() === 'mercanti' ? 2 : 0); if (f === 'ceresola') r += 2;
   for (const g of vivi()) if (g !== f && alleati(f, g)) r += 2;
   return Math.max(2, Math.round(r*(f === S.io ? 1 : DF().rend))); }
 // ===== il mondo: le tre mappe vere dei borghi, unite da campagna, boschi e frazioni (distanze accorciate) =====
@@ -6385,7 +6411,7 @@ function tocca(sx, sy){ if (GIOCA || ovAperto()) return; const t = terraIn(sx, s
 // ===== battaglie: previsione chiara, poi un po' di fortuna =====
 function previsione(f, n, t){ const df = S.terre[t].own, D = S.terre[t].sold, borgo = eBorgo(t), Ef = S.fz[f].ed, Ed = df ? S.fz[df].ed : null, voci = [];
   const kill = borgo && Ed.torri ? Math.min(n - 1, Math.round(n*.12*Ed.torri)) : 0, A = n - kill; if (kill) voci.push(`Le torri abbattono ${kill} dei tuoi prima della battaglia`);
-  let att = A*(1 + .2*Ef.armeria); if (Ef.armeria) voci.push(`La tua armeria: +${20*Ef.armeria}%`);
+  let att = A*(1 + .2*Ef.armeria); if (f === S.io && S.spia && S.spia.f === df && S.turno <= S.spia.fino){ att *= 1.15; voci.push('La tua spia conosce le loro difese: +15%'); } if (Ef.armeria) voci.push(`La tua armeria: +${20*Ef.armeria}%`);
   { const am = vivi().find(h => h !== f && h !== df && alleati(h, f) && VIC[t].some(v => S.terre[v].own === h)); if (am){ att *= 1.15; voci.push(`${FZ[am].corto} è tua alleata e ti aiuta: +15%`); } }
   let mult = df ? 1 + .2*Ed.armeria : 1; if (df && Ed.armeria) voci.push(`La loro armeria: +${20*Ed.armeria}%`);
   if (borgo){ const mu = Math.max(0, Ed.mura - Ef.meccanico); if (Ed.mura){ voci.push(`Mura livello ${Ed.mura}` + (Ef.meccanico ? `, i tuoi arieti ne annullano ${Math.min(Ed.mura, Ef.meccanico)}` : '') + (mu ? `: +${30*mu}%` : ': niente bonus')); } mult *= 1 + .3*mu; if (df === 'smerillo'){ mult *= 1.25; voci.push('Smerillo è in alto: +25%'); } if (S.fz[df].assedio){ mult *= .85; voci.push('È sotto assedio da ' + S.fz[df].assedio + (S.fz[df].assedio === 1 ? ' stagione' : ' stagioni') + ': difesa −15%'); } }
@@ -6420,7 +6446,7 @@ const fronte = (f, t) => VIC[t].some(v => nemico(f, S.terre[v].own));
 // pericolo per il borgo: il nemico più forte entro due terre
 function minaccia(f){ let m = 0; const vicine = new Set(VIC[f]); for (const v of VIC[f]) for (const w of VIC[v]) vicine.add(w);
   for (const v of vicine){ const o = S.terre[v].own; if (o && o !== f && !alleati(f, o)) m = Math.max(m, S.terre[v].sold*(1 + .2*S.fz[o].ed.armeria)); } return m; }
-const guardiaBorgo = f => S.terre[f].own !== f ? 1 : Math.max(2, Math.ceil(minaccia(f)*.75/((1 + .3*S.fz[f].ed.mura)*(f === 'smerillo' ? 1.25 : 1))));
+const guardiaBorgo = f => S.terre[f].own !== f ? 1 : Math.max(2, Math.ceil(minaccia(f)*.75*(f === S.io && STRAT ? 1 : CAR(f).guardia)/((1 + .3*S.fz[f].ed.mura)*(f === 'smerillo' ? 1.25 : 1))));
 let STRAT = null; // solo per le prove automatiche: come gioca il 'giocatore'
 function diploIO(){ const io = S.io, F = S.fz[io]; let az = MOSSE, usate = 0; const altri = vivi().filter(g => g !== io); const fid = g => amic(io, g) + (rep(io) - 50)/2;
   for (const g of altri){ if (az <= 1) break; const k = pk(io, g);
@@ -6437,19 +6463,19 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
   // 0. scambi col mercato (senza mosse): chi ha troppo di una cosa la cambia
   if (F.legna > 25 && F.cibo < 8){ F.legna -= 10; F.cibo += 7; } if (F.cibo > 30 && F.legna < 6){ F.cibo -= 10; F.legna += 7; } if (F.monete > 40 && F.cibo < 5){ F.monete -= 10; F.cibo += 6; } if (F.monete > 40 && F.legna < 5){ F.monete -= 10; F.legna += 6; }
   // 1. la Grande Fiera, se è al sicuro e ha le risorse
-  const fase = F.opera || 0; if (mio && fase < 3 && az > 1 && inPace(f)){ const [cm, cl, cc] = OPERA[fase]; if (st0 !== 'guerra' && puoPagare(F, cm + 8, cl, cc + 4) && m < S.terre[f].sold*(st0 === 'economia' || st0 === 'diplofiera' ? 1.2 : .7) && rnd() < (st0 === 'economia' || st0 === 'diplofiera' ? .9 : .35)){ paga(F, cm, cl, cc); F.opera = fase + 1; az--;
+  const fase = F.opera || 0; if (mio && fase < 3 && az > 1 && inPace(f)){ const [cm, cl, cc] = costoOpera(fase); if (st0 !== 'guerra' && puoPagare(F, cm + 8, cl, cc + 4) && m < S.terre[f].sold*(st0 === 'economia' || st0 === 'diplofiera' ? 1.2 : .7) && rnd() < (st0 === 'economia' || st0 === 'diplofiera' ? .9 : Math.min(.8, .35*(st0 ? 1 : CAR(f).fiera)))){ paga(F, cm, cl, cc); F.opera = fase + 1; az--;
     cron(`${FZ[f].corto} prepara la Grande Fiera (fase ${F.opera} di 3).`, F.opera >= 2 ? 2 : 1);
     news({t:'opera', f, a:f, k:'fiera', testo: F.opera >= 3 ? `${FZ[f].corto} ha finito la Grande Fiera!` : `Attenzione: ${FZ[f].corto} costruisce la Grande Fiera (fase ${F.opera} di 3). Se la finisce, vince.`});
     if (F.opera >= 3){ S.vincitore = f; S.vitt = 'opera'; return; } } }
   // 2. costruire nel borgo
-  const ordine = m > difB*.8 ? ['mura', 'torri', 'armeria', 'meccanico'] : rnd() < .5 ? ['armeria', 'mura', 'meccanico', 'torri'] : ['mura', 'armeria', 'torri', 'meccanico'];
-  if (mio && rnd() < (m > difB*.8 ? .9 : .4)) for (const k of ordine){ const c = costo(f, k), cl = costoL(f, k); if (c != null && puoPagare(F, c + 6, cl)){ paga(F, c, cl); F.ed[k]++; az--; news({t:'costr', f, a:f, k, testo:`${FZ[f].corto} costruisce: ${ED[k].nome} livello ${F.ed[k]}`}); break; } }
+  const ordine = m > difB*.8 || (!st0 && S.car && S.car[f] === 'timoroso') ? ['mura', 'torri', 'armeria', 'meccanico'] : rnd() < .5 ? ['armeria', 'mura', 'meccanico', 'torri'] : ['mura', 'armeria', 'torri', 'meccanico'];
+  if (mio && rnd() < (m > difB*.8 ? .9 : st0 ? .4 : CAR(f).costr)) for (const k of ordine){ const c = costo(f, k), cl = costoL(f, k); if (c != null && puoPagare(F, c + 6, cl)){ paga(F, c, cl); F.ed[k]++; az--; news({t:'costr', f, a:f, k, testo:`${FZ[f].corto} costruisce: ${ED[k].nome} livello ${F.ed[k]}`}); break; } }
   // 3. arruolare, ma solo i soldati che si possono sfamare
   const casIA = terreDi(f).find(t => S.terre[t].str === 'caserma' && fronte(f, t)), dove = (!mio || (casIA && !assediato(f) && m < S.terre[f].sold)) ? casIA : f;
   const sfama = Math.max(0, (prodCibo(f) + Math.floor(F.cibo/4))*MANGIANO - soldDi(f) + 2);
   const nR = Math.min(capRecl(f), Math.floor(F.monete/COSTO_SOLD), sfama); if (nR >= 2 && az > 0 && dove && S.terre[dove].own === f){ F.monete -= nR*COSTO_SOLD; S.terre[dove].sold += nR; az--; news({t:'recl', f, testo:`${FZ[f].corto} arruola ${nR} soldati`, muto:true}); }
   // 4. migliorare la campagna: fattorie se manca il cibo, segherie se manca la legna, poi mercati, caserme e torri
-  if (st0 !== 'guerra' && az > 1 && rnd() < (st0 === 'economia' || st0 === 'pace' || st0 === 'diplo' || st0 === 'diplofiera' ? 1 : .65)){ const mie = terreDi(f).filter(t => !TERRE[t].borgo), dietro = mie.filter(t => !fronte(f, t)), fr = mie.filter(t => fronte(f, t)); let scelta = null;
+  if (st0 !== 'guerra' && az > 1 && rnd() < (st0 === 'economia' || st0 === 'pace' || st0 === 'diplo' || st0 === 'diplofiera' ? 1 : st0 ? .65 : CAR(f).str)){ const mie = terreDi(f).filter(t => !TERRE[t].borgo), dietro = mie.filter(t => !fronte(f, t)), fr = mie.filter(t => fronte(f, t)); let scelta = null;
     const migl = (k, lista) => { for (const t of lista){ const st = S.terre[t]; if (!STR[k].dove(t)) continue; if (!st.str) return [t, k, 0]; if (st.str === k && (st.sl || 1) < STR[k].max) return [t, k, st.sl || 1]; } return null; };
     if (prodCibo(f) - mangia(f) < 2) scelta = migl('fattoria', dietro) || migl('fattoria', mie);
     if (!scelta && F.legna < 12) scelta = migl('segheria', dietro) || migl('segheria', mie);
@@ -6458,12 +6484,12 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
     if (!scelta) { const t = fr.find(t => S.terre[t].sold >= 4 && !S.terre[t].str); if (t) scelta = [t, 'torre', 0]; }
     if (scelta){ const [t, k, lv] = scelta, c = costoStr(f, k, lv); if (c && puoPagare(F, c[0] + 3, c[1])){ paga(F, c[0], c[1]); S.terre[t].str = k; S.terre[t].sl = lv + 1; az--; news({t:'str', f, a:t, k, muto: true, testo:`${FZ[f].corto} costruisce: ${STR[k].nome}${lv ? ' livello ' + (lv + 1) : ''} a ${TERRE[t].nome}`}); } } }
   // 5. attaccare, oppure portare i soldati al fronte
-  let giri = 0; while (az > 0 && giri++ < 8){ let best = null;
+  let giri = 0; while (az > 0 && giri++ < 8 && !neve()){ let best = null;
     for (const src of terreDi(f)){ const tieni = src === f ? guardiaBorgo(f) : 1, n = S.terre[src].sold - tieni; if (n < 2) continue;
       for (const v of VIC[src]){ const o = S.terre[v].own; if (o === f) continue; if (TERRE[v].borgo && eBorgo(v) && (S.turno <= DF().tregua || !puoAssediare(v, f))) continue;
-        if ((st0 === 'pace' || st0 === 'diplo' || st0 === 'diplofiera') && o) continue; const pr = previsione(f, n, v), legato = o && (alleati(f, o) || patto(f, o)); if (legato && !(amic(f, o) < 40 && pr.p >= .85 && rnd() < .15)) continue;
+        if ((st0 === 'pace' || st0 === 'diplo' || st0 === 'diplofiera') && o) continue; const pr = previsione(f, n, v), legato = o && (alleati(f, o) || patto(f, o)); if (legato && !(st0 ? (amic(f, o) < 40 && pr.p >= .85 && rnd() < .15) : CAR(f).tradisce ? (pr.p >= .7 && S.turno > 5 && rnd() < .4) : (amic(f, o) < 40 && pr.p >= .85 && rnd() < .15))) continue;
         let sc = pr.p + (o ? 0 : .12) + TERRE[v].rend*.03 - (o ? amic(f, o)/250 : 0) + (o === 'ceresola' ? .15 : 0) + (o === S.io && terreDi(S.io).length >= IDS.length*(S.dif === 'difficile' ? .2 : .3) ? (S.dif === 'difficile' ? .15 : .08) : 0) + (eBorgo(v) ? .1 : 0) + (TERRE[v].di && o === TERRE[v].di ? .05 : 0) + (o && (S.fz[o].opera || 0) >= 1 ? .15*(S.fz[o].opera) : 0) - (o ? .1*(rep(o) < 30 ? -1 : 0) : 0);
-        if (pr.p >= (S.turno > 20 ? .48 : S.turno > 10 ? .55 : .6) + (st0 ? {guerra:-.05, economia:.1, pace:0}[st0] : DF().soglia) && (!best || sc > best.sc)) best = {sc, src, v, n, all: legato}; } }
+        if (pr.p >= (S.turno > 20 ? .48 : S.turno > 10 ? .55 : .6) + (st0 ? {guerra:-.05, economia:.1, pace:0}[st0] || 0 : DF().soglia + CAR(f).soglia) && (!best || sc > best.sc)) best = {sc, src, v, n, all: legato}; } }
     if (best){ const o = S.terre[best.v].own, r = battaglia(f, best.src, best.v, best.n); az--;
       news({t:'att', f, da:best.src, a:best.v, ok:r.vinto, contro:o, trad:best.all, testo: (best.all ? `Tradimento! ${FZ[f].corto} rompe il patto e attacca ` : `${FZ[f].corto} attacca `) + (o ? (o === S.io ? 'la tua terra ' : '') + TERRE[best.v].nome + (o !== S.io ? ' (di ' + FZ[o].corto + ')' : '') : TERRE[best.v].nome) + (r.vinto ? ': la conquista!' : ': respinto.') + (r.vinto && r.borgo && o ? ` ${FZ[o].nome} è caduto.` : '')});
       continue; }
@@ -6475,7 +6501,7 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
     if (!meta || meta === da) break;
     const n = sur, p = percorso(f, da, meta); S.terre[da].sold -= n; S.terre[meta].sold += n; az--; news({t:'mov', f, da, a:meta, p, testo:`${FZ[f].corto} sposta ${n} soldati`, muto:true}); }
   // 6. politica
-  for (const g of vivi()){ if (g === f) continue; const k = pk(f, g), fid = amic(f, g) + (rep(g) - 50)/2;
+  for (const g of vivi()){ if (g === f) continue; const k = pk(f, g), fid = amic(f, g) + (rep(g) - 50)/2 + (f === S.io && STRAT ? 0 : CAR(f).dipl);
     if (!S.all[k] && fid >= 50 && !troppoForte(g) && rnd() < .3 && vivi().length > 2){ if (g === S.io){ if (!S.proposte.some(p => p.f === f && p.tipo === 'all')) S.proposte.push({f, tipo:'all'}); } else { S.all[k] = true; news({t:'all', f, testo:`${FZ[f].corto} e ${FZ[g].corto} fanno un’alleanza`}); } }
     if (!S.acc[k] && fid >= 10 && rnd() < .3){ if (g === S.io){ if (!S.proposte.some(p => p.f === f && p.tipo === 'acc')) S.proposte.push({f, tipo:'acc'}); } else { S.acc[k] = true; news({t:'acc', f, testo:`${FZ[f].corto} e ${FZ[g].corto} firmano un accordo commerciale`}); } }
     if (!patto(f, g) && !S.all[k] && fid >= (S.turno <= 6 ? -5 : 0) && rnd() < (S.turno <= 6 && g === S.io ? .35 : .2)){ if (g === S.io){ if (!S.proposte.some(p => p.f === f && p.tipo === 'patto')) S.proposte.push({f, tipo:'patto'}); } else { S.patti[k] = S.turno + 8; news({t:'patto', f, muto:true, testo:`${FZ[f].corto} e ${FZ[g].corto} firmano un patto di non aggressione`}); } }
@@ -6508,6 +6534,11 @@ function calcolaStagione(ev, tutti = false){
   const forte = vivi().find(f => terreDi(f).length >= IDS.length*.4); if (forte) for (const g of vivi()) if (g !== forte) setAmic(forte, g, amic(forte, g) - 3);
   // la vittoria diplomatica: alleato di tutti, con una buona reputazione
   const altri = vivi().filter(g => g !== S.io); if (S.fz[S.io].vivo && altri.length >= 2 && altri.every(g => alleati(S.io, g)) && rep(S.io) >= 65){ S.dipl = (S.dipl || 0) + 1; if (S.dipl >= 8){ S.vincitore = S.io; S.vitt = 'dipl'; } } else S.dipl = 0;
+  // il carattere si scopre dopo un po' (prima se ti tradisce o ti attacca spesso)
+  if (!tutti) for (const g of vivi()){ if (g === S.io || !S.car || notoCar(g)) continue; const att = ev.filter(e => e.t === 'att' && e.f === g && e.contro === S.io).length, tr = ev.some(e => e.trad && e.f === g);
+    if (S.turno >= 6 + (g.length % 3) || tr || (att >= 2 && S.car[g] === 'guerriero')){ S.noto[g] = true; const C = CARATTERI[S.car[g]]; ev.push({t:'carattere', f:g, snap: sn(), testo:`Ormai lo hai capito: il capo di ${FZ[g].corto} è un ${C.nome.toLowerCase()}. ${C.desc}`}); cron(`Si scopre che il capo di ${FZ[g].corto} è un ${C.nome.toLowerCase()}.`, 1); } }
+  if (!tutti && S.turno >= 3 && !S.evento && rnd() < .38){ const ok = Object.keys(EVENTI).filter(k => !(S.eventi || []).includes(k) && EVENTI[k].quando()); if (ok.length){ const k = ok[Math.floor(rnd()*ok.length)]; S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; } }
+  if (!tutti && neve()) ev.push({t:'neve', f:S.io, snap: sn(), testo:'È arrivato l’inverno lungo: la neve blocca le strade, nessuno può attaccare.'});
   // richieste dei borghi (solo per te)
   if (!tutti && rnd() < .4){ const cand = altri.filter(g => amic(S.io, g) > -40 && !(S.richieste || []).some(r => r.f === g)); if (cand.length){ const g = cand[Math.floor(rnd()*cand.length)], terzi = altri.filter(h => h !== g && amic(g, h) < 10 && !alleati(S.io, h)); const tipi = ['monete', 'legna', 'cibo'];
       if (terzi.length) tipi.push('aiuto', 'aiuto'); if (S.fz[g].cibo < 8) tipi.push('cibo'); const tipo = tipi[Math.floor(rnd()*tipi.length)];
@@ -6519,7 +6550,7 @@ function fineStagione(){ if (GIOCA) return; modo = null; sel = null; const ev = 
 // prova automatica: il computer gioca anche per te, per controllare che le partite finiscano e siano equilibrate
 function simula(io, max = 80, dif = 'normale', strat = null){ STRAT = strat; nuova(io, dif, true); const ST = {}; let fame = 0; let t = 0, amS = 0, amN = 0, attIO = 0, attPatto = 0; while (vivi().length > 1 && !S.vincitore && t++ < max){ const ev = []; AZ_IO = (strat === 'diplo' || strat === 'diplofiera') ? MOSSE - diploIO() : null; if ((strat === 'diplo' || strat === 'diplofiera')){ for (const g of vivi()) if (g !== S.io){ amS += amic(S.io, g); amN++; } } const pattiPrima = {...S.patti}, allPrima = {...S.all}; calcolaStagione(ev, true); AZ_IO = null;
     for (const e of ev) if (e.t === 'att' && e.contro === S.io){ attIO++; const k = pk(e.f, S.io); if (pattiPrima[k] >= S.turno - 1 || allPrima[k]) attPatto++; } for (const e of ev){ const k = e.t + (e.t === 'att' && e.trad ? '_trad' : ''); ST[k] = (ST[k] || 0) + 1; } fame += ev.filter(e => e.t === 'fame').length; if (strat === 'pace' || strat === 'diplo' || strat === 'diplofiera') S.proposte.forEach(p => { if (p.tipo === 'acc') S.acc[pk(S.io, p.f)] = true; else if (p.tipo === 'patto') S.patti[pk(S.io, p.f)] = S.turno + 8; else if (vivi().length > 2) S.all[pk(S.io, p.f)] = true; }); S.proposte.forEach(p => { if (rnd() < .5){ if (p.tipo === 'acc') S.acc[pk(S.io, p.f)] = true; else if (p.tipo === 'patto') S.patti[pk(S.io, p.f)] = S.turno + 8; else if (vivi().length > 2) S.all[pk(S.io, p.f)] = true; } }); S.proposte = []; S.richieste = []; }
-  STRAT = null; const vinc = S.vincitore || (vivi().length === 1 ? vivi()[0] : null), r = {amMed: amN ? Math.round(amS/amN) : null, attIO, attPatto, ST, strutture: IDS.filter(t => S.terre[t].str).length, io, fine: vinc ? 'fatto' : 'pari', vinc, vitt: S.vitt || (vinc ? 'conquista' : null), turni: S.turno, vivi: vivi(), terre: Object.fromEntries(Object.keys(FZ).map(f => [f, terreDi(f).length]))}; try { localStorage.removeItem(KEY); } catch(e){} return r; }
+  const carV = S.car ? {...S.car} : {}, annoV = S.anno; STRAT = null; const vinc = S.vincitore || (vivi().length === 1 ? vivi()[0] : null), r = {car: carV, anno: annoV, amMed: amN ? Math.round(amS/amN) : null, attIO, attPatto, ST, strutture: IDS.filter(t => S.terre[t].str).length, io, fine: vinc ? 'fatto' : 'pari', vinc, vitt: S.vitt || (vinc ? 'conquista' : null), turni: S.turno, vivi: vivi(), terre: Object.fromEntries(Object.keys(FZ).map(f => [f, terreDi(f).length]))}; try { localStorage.removeItem(KEY); } catch(e){} return r; }
 function passo(){ const G = GIOCA; if (!G) return; if (G.i >= G.ev.length){ GIOCA = null; VISTA = null; tintKey = ''; aggiornaUI(); G.dopo(); return; }
   const e = G.ev[G.i++]; el('cqToast').textContent = e.testo; el('cqToast').className = 'cq-toast on';
   if (e.t === 'att' && !visibile(e.a)) guarda(e.a);
@@ -6548,6 +6579,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra (gialla che lampeggia): ci arrivano passando per le tue terre.</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
   if (!sel){ const n = terreDi(S.io).length, mieB = Object.keys(FZ).filter(f => S.terre[f].own === S.io).length, F0 = S.fz[S.io];
     p.innerHTML = `<div class="cq-ph"><b>Tocca una terra sulla mappa</b><small>Hai ${n} ${n === 1 ? 'terra' : 'terre'} e ${sol(soldDi(S.io))}.${S.mosse === 0 ? ' Hai finito le mosse: premi <b>Fine stagione</b>.' : ''}</small></div>
+      <div class="cq-annop">${ico(ANNI[ANNO()].ic, 2)} <b>${ANNI[ANNO()].nome}</b>: ${ANNI[ANNO()].desc}</div>
       <div class="cq-cons">${consigli().map(x => `<span>${x}</span>`).join('')}</div>
       <div class="cq-vie"><span class="cq-mh">Tre modi per vincere <button type="button" class="cq-aiuto" id="cqAiuto">Come funziona?</button></span><span>${ico('spade', 2)} Conquista: borghi presi <b>${mieB}/3</b></span><span>${ico('coppa', 2)} Grande Fiera: <b>${F0.opera || 0}/3</b> fasi</span><span>${ico('amici', 2)} Pace: alleato di tutti da <b>${S.dipl || 0}/8</b> stagioni</span></div>`; const ba = el('cqAiuto'); if (ba) ba.onclick = dlgAiuto; return; }
   const T = TERRE[sel], st = S.terre[sel], own = st.own, mio = own === S.io, borgoMio = sel === S.io && eBorgo(sel), F = S.fz[S.io], nm = S.mosse <= 0;
@@ -6555,6 +6587,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (eBorgo(sel)){ const E = S.fz[own].ed; h += `<div class="cq-ed">${Object.keys(ED).map(k => `<span title="${ED[k].nome}">${ico(ED[k].ic, 2)}<b>${E[k]}</b></span>`).join('')}</div>`; if (S.fz[own].assedio) h += `<p class="cq-warn">Sotto assedio da ${S.fz[own].assedio === 1 ? '1 stagione' : S.fz[own].assedio + ' stagioni'}: ogni stagione perde soldati per la fame, le mura si rovinano e si difende peggio.</p>`; else if (assediato(own)) h += `<p class="cq-warn">Circondato: dalla prossima stagione è sotto assedio.</p>`; }
   if (st.str) h += `<div class="cq-rel">${ico(STR[st.str].ic, 2)} <b>${STR[st.str].nome}${STR[st.str].max > 1 ? ' liv. ' + (st.sl || 1) : ''}</b>: ${STR[st.str].desc}</div>`;
   if ((T.fraz || T.borgo) && own) h += `<div class="cq-rel">${T.fraz ? LIVF[prosp(sel) - 1] : 'Prosperità ' + prosp(sel) + ' di 3'}${prosp(sel) < 3 ? ` · in pace cresce (${st.cresc || 0}/${CRESCE} stagioni)` : ' · al massimo'}. La guerra la fa calare.</div>`;
+  if (own && !mio && notoCar(own)) h += `<div class="cq-rel">${ico(CARATTERI[S.car[own]].ic, 2)} <b>${CARATTERI[S.car[own]].nome}</b>: ${CARATTERI[S.car[own]].desc}</div>`;
   if (own && !mio) h += `<div class="cq-rel">Con te: ${barraAmic(amic(S.io, own))}${alleati(S.io, own) ? ' <b class="cq-all">Alleato</b>' : ''}${patto(S.io, own) ? ' <b class="cq-all cq-pat">Patto</b>' : ''}</div>`;
   h += '<div class="cq-az">';
   if (borgoMio){ h += `<button class="big" id="cqCos" ${nm ? 'disabled' : ''}>${ico('martello', 2)} Costruisci</button><button class="big" id="cqRec" ${nm ? 'disabled' : ''}>${ico('spada', 2)} Arruola</button>`; }
@@ -6564,6 +6597,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (!mio){ const fonti = VIC[sel].filter(v => S.terre[v].own === S.io && S.terre[v].sold > 1), tregua = T.borgo && eBorgo(sel) && S.turno <= DF().tregua;
     if (tregua) h += `<p class="cq-nota">Tregua: nelle prime ${DF().tregua} stagioni nessuno può attaccare i borghi.</p>`;
     else if (!puoAssediare(sel, S.io)) h += `<p class="cq-nota">Per attaccare ${FZ[own].corto} devono essere prese almeno ${ASSEDIO} delle sue terre intorno, da te o dagli altri (ora ${perse(sel)}).</p>`;
+    else if (neve()) h += `<p class="cq-nota">${ico('nebbia', 2)} La neve blocca le strade: in questo inverno nessuno può attaccare.</p>`;
     else if (fonti.length) h += `<button class="big" id="cqAtt" ${nm ? 'disabled' : ''}>${ico('spade', 2)} Attacca</button>`;
     else h += `<p class="cq-nota">Per attaccarla ti serve una terra vicina con almeno 2 soldati.</p>`;
     if (own) h += `<button class="big alt" id="cqDip1">${ico('amici', 2)} Diplomazia</button>`; }
@@ -6582,7 +6616,7 @@ function consigli(){ const f = S.io, F = S.fz[f], dc = prodCibo(f, S.turno + 1) 
   if (!L.length) L.push(`${ico('lampadina', 2)} Tocca una tua terra per costruire, una terra vicina per attaccare. Scambi e patti sono in <b>Diplomazia</b>.`);
   return L.slice(0, 2); }
 function usaMossa(){ S.mosse = Math.max(0, S.mosse - 1); salva(); aggiornaUI(); }
-function dlgCostruisci(){ const F = S.fz[S.io], fase = F.opera || 0, op = OPERA[fase];
+function dlgCostruisci(){ const F = S.fz[S.io], fase = F.opera || 0, op = costoOpera(fase);
   const o = ov(`<div class="dlg box cq-dlg"><h2>Costruisci a ${FZ[S.io].corto}</h2><p>Hai ${prezzo(F.monete, F.legna, F.cibo)}. Costruire usa 1 mossa.</p><div class="cq-list">${Object.keys(ED).map(k => { const c = costo(S.io, k), cl = costoL(S.io, k), l = F.ed[k];
     return `<button class="cq-it" data-k="${k}" ${c == null || !puoPagare(F, c, cl) ? 'disabled' : ''}><span class="cq-ii">${ico(ED[k].ic, 3)}</span><span class="cq-it-t"><b>${ED[k].nome} <small>livello ${l} di ${ED[k].max}</small></b><small>${ED[k].desc}</small></span><span class="cq-pr">${c == null ? 'Max' : prezzo(c, cl)}</span></button>`; }).join('')}
     <button class="cq-it cq-opera" id="cqOp" ${!op || !puoPagare(F, ...op) || !inPace(S.io) ? 'disabled' : ''}><span class="cq-ii">${ico('coppa', 3)}</span><span class="cq-it-t"><b>La Grande Fiera <small>fase ${fase} di 3</small></b><small>Una grande festa che porta gente da tutte le Marche. Quando finisci la fase 3, <b>vinci</b>. Si costruisce solo in pace: ${inPace(S.io) ? 'ora puoi.' : `hai combattuto contro un borgo da poco, aspetta ${PACE_FIERA - (S.turno - S.fz[S.io].guerra)} ${PACE_FIERA - (S.turno - S.fz[S.io].guerra) === 1 ? 'stagione' : 'stagioni'}.`} Gli altri borghi cercheranno di fermarti.</small></span><span class="cq-pr">${op ? prezzo(...op) : 'Fatta'}</span></button></div><button class="big alt" id="cqNo">Indietro</button></div>`);
@@ -6657,7 +6691,7 @@ function soldatini(vivi, tot){ let h = ''; for (let i = 0; i < Math.min(tot, 24)
 function dlgDiplomazia(foc){ const altri = vivi().filter(g => g !== S.io), mr = rep(S.io);
   const o = ov(`<div class="dlg box cq-dlg"><h2>Diplomazia</h2><p>La tua reputazione: <b>${livRep(mr)}</b> (${mr}). Se tradisci un patto o un’alleanza, crolla e nessuno si fida più. <b>Patto</b>: 8 stagioni senza attaccarvi. <b>Accordo</b>: 3 monete in più a stagione. <b>Alleanza</b>: vi aiutate in battaglia e 2 monete in più. Con patti e accordi l’amicizia cresce da sola.</p>
     <div class="cq-list">${altri.map(g => { const v = amic(S.io, g), all = alleati(S.io, g), pat = patto(S.io, g), k = pk(S.io, g), nm = S.mosse < 1;
-      return `<div class="cq-dip ${foc === g ? 'foc' : ''}"><div class="cq-dh"><span class="cq-dot" style="background:${FZ[g].col}"></span><b>${FZ[g].nome}</b>${all ? '<b class="cq-all">Alleato</b>' : ''}${pat ? `<b class="cq-all cq-pat">Patto: ${S.patti[k] - S.turno + 1}</b>` : ''}${accordo(S.io, g) ? '<b class="cq-all cq-acc">Accordo</b>' : ''}</div><div>${barraAmic(v)}</div><small>${terreDi(g).length === 1 ? '1 terra' : terreDi(g).length + ' terre'} · ${sol(soldDi(g))} · reputazione ${livRep(rep(g)).toLowerCase()}${S.fz[g].opera ? ` · <b style="color:#d8342a">Grande Fiera ${S.fz[g].opera}/3</b>` : ''}</small>
+      return `<div class="cq-dip ${foc === g ? 'foc' : ''}"><div class="cq-dh"><span class="cq-dot" style="background:${FZ[g].col}"></span><b>${FZ[g].nome}</b>${all ? '<b class="cq-all">Alleato</b>' : ''}${pat ? `<b class="cq-all cq-pat">Patto: ${S.patti[k] - S.turno + 1}</b>` : ''}${accordo(S.io, g) ? '<b class="cq-all cq-acc">Accordo</b>' : ''}</div><div>${barraAmic(v)}</div><small>${terreDi(g).length === 1 ? '1 terra' : terreDi(g).length + ' terre'} · ${sol(soldDi(g))} · reputazione ${livRep(rep(g)).toLowerCase()} · carattere: ${notoCar(g) ? '<b>' + CARATTERI[S.car[g]].nome + '</b>' : 'ancora non lo conosci'}${S.fz[g].opera ? ` · <b style="color:#d8342a">Grande Fiera ${S.fz[g].opera}/3</b>` : ''}</small>
         <div class="cq-db"><button class="big mini" data-mer="${g}">${ico('moneta', 2)} Scambi</button><button class="big alt mini" data-reg="${g}" ${nm || S.fz[S.io].monete < REGALO ? 'disabled' : ''}>Regalo ${ico('moneta', 2)} ${REGALO}</button>
         ${pat || all ? '' : `<button class="big alt mini" data-pat="${g}" ${nm ? 'disabled' : ''}>Patto di non aggressione</button>`}
         ${accordo(S.io, g) ? `<button class="big alt mini" data-cac="${g}" ${nm ? 'disabled' : ''}>Chiudi l’accordo</button>` : `<button class="big alt mini" data-acc="${g}" ${nm ? 'disabled' : ''}>Accordo commerciale</button>`}
@@ -6689,7 +6723,7 @@ function toast(t){ const x = el('cqToast'); x.textContent = t; x.className = 'cq
 function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePartita(); return; }
   const mie = ev.filter(e => !e.muto), entrate = rendita(S.io);
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} ${stagione(S.turno)}</span><h2>Notizie dai borghi</h2>
-    <ul class="cq-news">${mie.length ? mie.map(e => `<li class="${e.t === 'att' && e.contro === S.io ? (e.ok ? 'male' : 'bene') : e.trad || e.t === 'opera' || e.t === 'miss' || ((e.t === 'assedio' || e.t === 'fame') && e.f === S.io) ? 'male' : e.t === 'cresce' ? 'bene' : ''}"><span class="cq-dot" style="background:${FZ[e.f].col}"></span>${e.testo}</li>`).join('') : '<li>Una stagione tranquilla: nessuno ha attaccato.</li>'}</ul>
+    <ul class="cq-news">${mie.length ? mie.map(e => `<li class="${e.t === 'att' && e.contro === S.io ? (e.ok ? 'male' : 'bene') : e.trad || e.t === 'opera' || e.t === 'miss' || ((e.t === 'assedio' || e.t === 'fame') && e.f === S.io) ? 'male' : e.t === 'cresce' ? 'bene' : e.t === 'carattere' || e.t === 'neve' ? 'info' : ''}"><span class="cq-dot" style="background:${FZ[e.f].col}"></span>${e.testo}</li>`).join('') : '<li>Una stagione tranquilla: nessuno ha attaccato.</li>'}</ul>
     <p>Entrate: ${ico('moneta', 2)} <b>+${entrate}</b> · ${ico('castagna', 2)} <b>${prodCibo(S.io, S.turno) - mangia(S.io) >= 0 ? '+' : ''}${prodCibo(S.io, S.turno) - mangia(S.io)}</b> · ${ico('albero', 2)} <b>+${prodLegna(S.io)}</b>${(S.turno - 1) % 4 === 2 ? ' (in autunno le castagne danno più cibo)' : (S.turno - 1) % 4 === 3 ? ' (in inverno si raccoglie poco cibo)' : ''}. Hai ${MOSSE} mosse.</p>
     ${S.turno === DF().tregua + 1 ? `<p class="cq-warn">La tregua è finita: da ora i borghi si possono attaccare.</p>` : ''}
     <button class="big" id="cqOk">Tocca a te ${ico('play', 2)}</button></div>`, false);
@@ -6703,7 +6737,7 @@ function proposte(){ let p = S.proposte.shift(); salva(); if (typeof p === 'stri
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico(T[0], 2)} Proposta</span><h2>${FZ[f].nome} ${T[1]}</h2><p>${T[2]}</p><button class="big" id="cqSi">Accetta</button><button class="big alt" id="cqNo">Rifiuta</button></div>`, false);
   o.querySelector('#cqSi').onclick = () => { const k = pk(S.io, f); if (p.tipo === 'acc') S.acc[k] = true; else if (p.tipo === 'patto') S.patti[k] = S.turno + 8; else S.all[k] = true; cron(p.tipo === 'all' ? `${FZ[f].corto} chiede e ottiene l’alleanza con ${nomeCas()}.` : p.tipo === 'patto' ? `${NomeCas()} accetta la pace con ${FZ[f].corto}.` : `${NomeCas()} accetta i commerci con ${FZ[f].corto}.`, p.tipo === 'all' ? 2 : 1); setAmic(S.io, f, amic(S.io, f) + 5); suona('stella2'); chiudiOv(); salva(); aggiornaUI(); proposte(); };
   o.querySelector('#cqNo').onclick = () => { setAmic(S.io, f, amic(S.io, f) - 8); chiudiOv(); salva(); aggiornaUI(); proposte(); }; }
-function richieste(){ const r = (S.richieste || []).shift(); salva(); if (!r) return; if (!S.fz[r.f].vivo || (r.contro && !S.fz[r.contro].vivo)){ richieste(); return; }
+function richieste(){ const r = (S.richieste || []).shift(); salva(); if (!r){ evento(); return; } if (!S.fz[r.f].vivo || (r.contro && !S.fz[r.contro].vivo)){ richieste(); return; }
   const F = S.fz[S.io], IC = {monete:'moneta', cibo:'castagna', legna:'albero'}, aiuto = r.tipo === 'aiuto', ok = aiuto || F[r.tipo] >= r.n;
   const testo = aiuto ? `${FZ[r.f].corto} ti chiede aiuto contro <b>${FZ[r.contro].corto}</b>: conquista una sua terra entro 3 stagioni. Se ci riesci, ${FZ[r.f].corto} ti sarà molto più amica e ti darà 10 monete.`
     : `${FZ[r.f].corto} ${r.tipo === 'cibo' ? 'ha poco da mangiare' : r.tipo === 'legna' ? 'deve riparare le case' : 'prepara una festa'} e ti chiede <b>${r.n}</b> ${ico(IC[r.tipo], 2)}. Se l’aiuti, diventa molto più amica e la tua reputazione sale.`;
@@ -6712,6 +6746,40 @@ function richieste(){ const r = (S.richieste || []).shift(); salva(); if (!r) re
     else { F[r.tipo] -= r.n; S.fz[r.f][r.tipo] += r.n; setAmic(S.io, r.f, amic(S.io, r.f) + 20); S.rep[S.io] = Math.min(100, rep(S.io) + 4); toast(`${FZ[r.f].corto} ti ringrazia!`); }
     suona('stella1'); chiudiOv(); salva(); aggiornaUI(); richieste(); };
   o.querySelector('#cqNo').onclick = () => { setAmic(S.io, r.f, amic(S.io, r.f) - 5); chiudiOv(); salva(); aggiornaUI(); richieste(); }; }
+// ===== gli eventi: piccole storie con una scelta da fare
+const terraMia = (filt = () => true) => { const L = terreDi(S.io).filter(t => !TERRE[t].borgo && filt(t)); return L[Math.floor(rnd()*L.length)]; };
+const altroVivo = () => { const L = vivi().filter(g => g !== S.io); return L[Math.floor(rnd()*L.length)]; };
+const EVENTI = {
+  mercante:{ic:'moneta', tit:'Un mercante forestiero', quando: () => S.fz[S.io].legna >= 10, prepara: () => ({n:10, m:18}),
+    testo: d => `Un mercante che viene da Fermo vuole comprare <b>${d.n} legna</b> e ti offre <b>${d.m} monete</b>.`,
+    scelte: d => [['Vendi', () => S.fz[S.io].legna >= d.n, () => { S.fz[S.io].legna -= d.n; S.fz[S.io].monete += d.m; return `Hai venduto la legna: +${d.m} monete.`; }], ['No grazie', () => true, () => 'Il mercante riparte per la valle.']]},
+  matrimonio:{ic:'amici', tit:'Una proposta di matrimonio', quando: () => vivi().some(g => g !== S.io && amic(S.io, g) > -20 && !alleati(S.io, g)), prepara: () => ({g: vivi().filter(g => g !== S.io && amic(S.io, g) > -20 && !alleati(S.io, g))[0]}),
+    testo: d => `La famiglia che guida <b>${FZ[d.g].nome}</b> propone un matrimonio con ${nomeCas()}. La dote costa <b>15 monete</b>: in cambio avrete pace per 12 stagioni e grande amicizia.`,
+    scelte: d => [['Accetta (15 monete)', () => S.fz[S.io].monete >= 15, () => { S.fz[S.io].monete -= 15; setAmic(S.io, d.g, amic(S.io, d.g) + 35); S.patti[pk(S.io, d.g)] = S.turno + 12; cron(`Matrimonio tra ${nomeCas()} e ${FZ[d.g].nome}: dodici stagioni di pace.`, 2); return `Festa grande: pace con ${FZ[d.g].corto} per 12 stagioni.`; }], ['Rifiuta', () => true, () => { setAmic(S.io, d.g, amic(S.io, d.g) - 12); return `${FZ[d.g].corto} si offende.`; }]]},
+  castagnata:{ic:'castagna', tit:'La Castagnata in piazza', quando: () => (S.turno - 1) % 4 === 2 && S.fz[S.io].cibo >= 10,
+    testo: () => `È autunno: il popolo vuole la <b>Castagnata in piazza</b>. Costa <b>10 cibo</b>, ma la tua reputazione sale e le frazioni crescono più in fretta.`,
+    scelte: () => [['Fai la festa', () => S.fz[S.io].cibo >= 10, () => { S.fz[S.io].cibo -= 10; S.rep[S.io] = Math.min(100, rep(S.io) + 10); for (const t of terreDi(S.io)) if (TERRE[t].fraz || TERRE[t].borgo) S.terre[t].cresc = (S.terre[t].cresc || 0) + 2; cron(`La Castagnata in piazza di ${nomeCas()} fa festa in tutto il comune.`, 2); return 'Che festa! Reputazione +10, le frazioni crescono.'; }], ['Non quest’anno', () => true, () => { S.rep[S.io] = Math.max(0, rep(S.io) - 3); return 'Il popolo è un po’ deluso.'; }]]},
+  briganti:{ic:'spada', tit:'Briganti nel bosco', quando: () => !!terraMia(t => S.terre[t].sold >= 2), prepara: () => ({t: terraMia(t => S.terre[t].sold >= 2)}),
+    testo: d => `Dei briganti si nascondono vicino a <b>${TERRE[d.t].nome}</b>. Puoi pagarli perché se ne vadano (<b>8 monete</b>) o mandare i soldati: se va bene trovi il loro bottino, se va male perdi 2 soldati.`,
+    scelte: d => [['Paga (8 monete)', () => S.fz[S.io].monete >= 8, () => { S.fz[S.io].monete -= 8; return 'I briganti prendono i soldi e spariscono.'; }], ['Combatti', () => true, () => { if (rnd() < .55){ S.fz[S.io].monete += 12; S.fz[S.io].cibo += 4; cron(`I soldati ${diCas()} cacciano i briganti da ${TERRE[d.t].nome}.`, 1); return 'Vittoria! Nel covo trovi 12 monete e 4 cibo.'; } S.terre[d.t].sold = Math.max(1, S.terre[d.t].sold - 2); return 'I briganti erano tanti: perdi 2 soldati.'; }]]},
+  disertori:{ic:'bandiera', tit:'Disertori', quando: () => vivi().some(g => g !== S.io && soldDi(g) >= 10), prepara: () => ({g: vivi().filter(g => g !== S.io && soldDi(g) >= 10)[0]}),
+    testo: d => `<b>5 soldati di ${FZ[d.g].corto}</b> sono stanchi del loro capo e vogliono passare con te. Se li accogli, ${FZ[d.g].corto} se la prenderà.`,
+    scelte: d => [['Accoglili', () => true, () => { S.terre[S.io].own === S.io ? S.terre[S.io].sold += 5 : S.terre[terreDi(S.io)[0]].sold += 5; const t = terreDi(d.g).sort((a, b) => S.terre[b].sold - S.terre[a].sold)[0]; if (t) S.terre[t].sold = Math.max(1, S.terre[t].sold - 5); setAmic(S.io, d.g, amic(S.io, d.g) - 20); return `+5 soldati. ${FZ[d.g].corto} è furiosa.`; }], ['Rimandali indietro', () => true, () => { setAmic(S.io, d.g, amic(S.io, d.g) + 8); return `${FZ[d.g].corto} apprezza la tua lealtà.`; }]]},
+  freddo:{ic:'nebbia', tit:'Un inverno gelido', quando: () => (S.turno - 1) % 4 === 3,
+    testo: () => `Fa un freddo terribile. Servono <b>8 legna</b> per scaldare le case, altrimenti qualche soldato si ammala.`,
+    scelte: () => [['Scalda le case (8 legna)', () => S.fz[S.io].legna >= 8, () => { S.fz[S.io].legna -= 8; return 'Le case sono calde, tutti stanno bene.'; }], ['Resistiamo', () => true, () => { let n = 0; for (const t of terreDi(S.io)) if (S.terre[t].sold > 2 && n < 3){ S.terre[t].sold--; n++; } return n ? `Il freddo ti costa ${sol(n)}.` : 'Ce la fate per un pelo.'; }]]},
+  spia:{ic:'pergamena', tit:'Una spia', quando: () => vivi().some(g => g !== S.io), prepara: () => ({g: altroVivo()}),
+    testo: d => `Un viandante dice di conoscere i segreti di <b>${FZ[d.g].nome}</b>. Per <b>10 monete</b> ti rivela il loro carattere e per 4 stagioni i tuoi attacchi contro di loro sono più forti.`,
+    scelte: d => [['Paga la spia', () => S.fz[S.io].monete >= 10, () => { S.fz[S.io].monete -= 10; S.noto[d.g] = true; S.spia = {f:d.g, fino:S.turno + 4}; return `Il capo di ${FZ[d.g].corto} è un ${CARATTERI[S.car[d.g]].nome.toLowerCase()}: ${CARATTERI[S.car[d.g]].desc}`; }], ['Cacciala', () => true, () => 'Il viandante se ne va borbottando.']]},
+  frana:{ic:'massi', tit:'Una frana', quando: () => !!terraMia(), prepara: () => ({t: terraMia()}),
+    testo: d => `Dopo le piogge una frana ha coperto la strada vicino a <b>${TERRE[d.t].nome}</b>. Ripararla costa <b>8 legna</b>; altrimenti la terra rende di meno e ci vuole tempo perché torni come prima.`,
+    scelte: d => [['Ripara (8 legna)', () => S.fz[S.io].legna >= 8, () => { S.fz[S.io].legna -= 8; return 'La strada è di nuovo aperta.'; }], ['Lasciamo stare', () => true, () => { const st = S.terre[d.t]; if (st.str && (st.sl || 1) > 1) st.sl--; else S.fz[S.io].cibo = Math.max(0, S.fz[S.io].cibo - 6); return st.str ? 'La frana rovina una parte della struttura.' : 'Perdi 6 cibo nei campi coperti di fango.'; }]]}};
+function evento(){ const E = S.evento; if (!E){ return; } const D = EVENTI[E.k]; if (!D || (D.prepara && Object.values(E.d).some(v => v == null))){ S.evento = null; return; }
+  if (E.d.g && !S.fz[E.d.g].vivo){ S.evento = null; return; } if (E.d.t && S.terre[E.d.t].own !== S.io){ S.evento = null; return; }
+  const sc = D.scelte(E.d);
+  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico(D.ic, 2)} Evento</span><h2>${D.tit}</h2><p>${D.testo(E.d)}</p><div class="cq-evs">${sc.map(([t, ok], i) => `<button class="big ${i ? 'alt' : ''}" data-ev="${i}" ${ok() ? '' : 'disabled'}>${t}</button>`).join('')}</div></div>`, false);
+  o.querySelectorAll('[data-ev]').forEach(b => b.onclick = () => { const r = sc[+b.dataset.ev][2](); S.eventi.push(E.k); S.evento = null; suona('stella1'); salva(); aggiornaUI();
+    const o2 = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico(D.ic, 2)} ${D.tit}</span><p>${r}</p><button class="big" id="cqOk">Continua</button></div>`, false); o2.querySelector('#cqOk').onclick = chiudiOv; }); }
 function finePartita2(){ ULTIMO_G_SALTA = true; finePartita(); }
 let ULTIMO_G = null, ULTIMO_G_SALTA = false;
 function finePartita(){ let G = chiudiGenerazione(); if (G) ULTIMO_G = G; else if (ULTIMO_G_SALTA) G = ULTIMO_G; ULTIMO_G_SALTA = false; const vinto = S.fine === 'vinto', vt = S.vitt || 'conquista', chi = S.vincitore; let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){}
@@ -6791,13 +6859,20 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
     <button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
   o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*2.5 + 'px'; c.style.height = im.height*2.5 + 'px'; });
   o.querySelectorAll('[data-dif]').forEach(b => b.onclick = () => { try { localStorage.setItem(KDIF, b.dataset.dif); } catch(e){} DIFSC = b.dataset.dif; o.querySelectorAll('[data-dif]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqDifT').textContent = DIFF[b.dataset.dif].desc; suona('tocco'); });
-  o.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { suona('banner'); nuova(b.dataset.f, difScelta()); chiudiOv(); let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); });
+  o.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { suona('banner'); nuova(b.dataset.f, difScelta()); chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); }); });
   const cb = o.querySelector('#cqCas'); if (cb) cb.onclick = () => dlgCasata();
   o.querySelector('#cqMe').onclick = esci; }
+function dlgAnno(dopo){ const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f => f !== S.io);
+  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} Comincia una nuova generazione</span><h2>${A.nome}</h2><div class="cq-anno">${ico(A.ic, 4)}<p>${A.desc}</p></div>
+    <p>I tuoi vicini sono ${altri.map(f => '<b>' + FZ[f].nome + '</b>').join(' e ')}. Ognuno ha un <b>carattere</b> (guerriero, mercante, traditore o timoroso), ma ancora non sai quale: lo scoprirai giocando.</p>
+    <button class="big" id="cqOk">Si comincia ${ico('play', 2)}</button></div>`, false);
+  o.querySelector('#cqOk').onclick = () => { chiudiOv(); suona('banner'); if (dopo) dopo(); }; }
 function nuova(io, dif = 'normale', sim = false){ S = {v:3, io, dif, sim, turno:1, mosse:MOSSE, fz:{}, terre:{}, amic:{}, all:{}, acc:{}, patti:{}, rep:{}, proposte:[], richieste:[], missioni:[], scambi:0, fine:null, cron:[]};
   for (const f in FZ){ S.fz[f] = {monete:15, cibo:10, legna: f === 'sanmartino' ? 14 : 8, opera:0, vivo:true, ed:{mura: f === 'sanmartino' ? 0 : 1, torri:0, armeria:0, meccanico:0}}; S.rep[f] = 50; }
-  for (const t of IDS){ const T = TERRE[t]; S.terre[t] = T.borgo ? {own:t, sold: t === 'ceresola' ? 6 : 9} : T.di ? {own:T.di, sold:2} : {own:null, sold:T.guar}; }
-  if (!sim){ leggiCas(); cron(`${NomeCas()}${CAS ? ', alla ' + (CAS.gen + 1) + 'ª generazione,' : ''} prende ${FZ[io].nome}.`, 3); }
+  const ks = Object.keys(CARATTERI).sort(() => rnd() - .5); S.car = {}; S.noto = {}; Object.keys(FZ).filter(f => f !== io).forEach((f, i) => { S.car[f] = ks[i]; });
+  const an = Object.keys(ANNI); S.anno = rnd() < .2 ? 'calmo' : an[1 + Math.floor(rnd()*(an.length - 1))]; S.eventi = [];
+  for (const t of IDS){ const T = TERRE[t]; S.terre[t] = T.borgo ? {own:t, sold: t === 'ceresola' ? 6 : 9} : T.di ? {own:T.di, sold:2} : {own:null, sold:T.guar*(S.anno === 'briganti' ? 2 : 1)}; }
+  if (!sim){ leggiCas(); cron(`${NomeCas()}${CAS ? ', alla ' + (CAS.gen + 1) + 'ª generazione,' : ''} prende ${FZ[io].nome}. È ${ANNI[S.anno].nome.charAt(0).toLowerCase() + ANNI[S.anno].nome.slice(1)}.`, 3); }
   sel = io; modo = null; VISTA = null; tintKey = ''; if (!sim) salva(); vaiA(io); aggiornaUI(); }
 function pausa(){ const o = ov(`<div class="dlg box cq-dlg"><h2>Pausa</h2><p>La partita si salva da sola: puoi uscire e riprenderla quando vuoi.</p><button type="button" class="tbaudio" id="cqAud">${SUONI.muto ? 'Suoni spenti' : 'Suoni accesi'}</button>
     <button class="big" id="cqRi">Riprendi</button><button class="big alt" id="cqCs">La casata e la cronaca</button><button class="big alt" id="cqGu">Come funziona</button><button class="big alt" id="cqNu">Ricomincia (scegli il borgo)</button><button class="big alt" id="cqMe">Torna al menu</button></div>`);
@@ -6826,7 +6901,7 @@ function apri(){ if (!root) costruisciDom(); root.hidden = false; attivo = true;
   avviaCQ(); }
 function avviaCQ(){ if (!leggiCas()){ root.classList.add('vuoto'); misura(); centra(); dlgStemma(() => avviaCQ()); return; }
   requestAnimationFrame(() => { misura(); if (S) vaiA(S.io); else centra(); });
-  const c = carica(); if (c){ S = c; for (const k of ['acc', 'patti', 'rep']) if (!S[k]) S[k] = {}; for (const k of ['proposte', 'richieste', 'missioni', 'cron']) if (!S[k]) S[k] = []; sel = S.io; misura(); vaiA(S.io); aggiornaUI();
+  const c = carica(); if (c){ S = c; for (const k of ['acc', 'patti', 'rep']) if (!S[k]) S[k] = {}; for (const k of ['proposte', 'richieste', 'missioni', 'cron', 'eventi']) if (!S[k]) S[k] = []; if (!S.car){ S.car = {}; S.noto = {}; const ks = Object.keys(CARATTERI).sort(() => rnd() - .5); Object.keys(FZ).filter(f => f !== S.io).forEach((f, i) => { S.car[f] = ks[i]; }); } if (!S.noto) S.noto = {}; if (!S.anno) S.anno = 'calmo'; sel = S.io; misura(); vaiA(S.io); aggiornaUI();
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
     o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
   else { S = null; aggiornaUI(); scegli(); misura(); centra(); } }
@@ -6837,7 +6912,7 @@ function tasto(e, k){ const o = el('cqOv');
   else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
-return {apri, frame, tasto, get attivo(){ return attivo; }, _test:{casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {apri, frame, tasto, get attivo(){ return attivo; }, _test:{EVENTI, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 let last = performance.now(), T = 0;
