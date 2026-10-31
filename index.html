@@ -1279,6 +1279,11 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-ris span{display:flex;align-items:center;gap:4px}
 .cq-ris small{font-size:12px;color:#9be06a;margin-left:2px}
 .cq-ris .meno small{color:#ff8a6a}
+.cq-cons{display:flex;flex-direction:column;gap:4px;font-size:13.5px;line-height:1.35;color:var(--testo)}
+.cq-cons span{display:block}
+.cq-cons img{vertical-align:-3px;margin-right:4px}
+.cq-aiuto{float:right;font-family:var(--f-body);font-size:12px;font-weight:700;color:var(--blu);text-decoration:underline;padding:0 0 0 8px}
+.cq-eff{color:#1f6a34!important;font-weight:700}
 .cq-vie{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:12px;background:var(--carta2);font-size:13.5px}
 .cq-vie span{display:flex;align-items:center;gap:6px}
 .cq-mh{font-family:var(--f-big);font-size:15px;color:var(--testo)}
@@ -6109,12 +6114,14 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
     ctx.font = `400 ${Math.round(14*u)}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'left'; ctx.lineWidth = 3; ctx.strokeStyle = '#141433'; ctx.strokeText(n, bx + Math.round(13*u), by + bh - Math.round(4*u)); ctx.fillStyle = '#fff'; ctx.fillText(n, bx + Math.round(13*u), by + bh - Math.round(4*u));
     if (own && own !== S.io && alleati(S.io, own)){ ctx.fillStyle = '#3ed46b'; rr(bx + bw - 4, by - 6, 9, 9, 3); }
     if (T.borgo && eBorgo(t) && S.fz[t].assedio && !VISTA){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('assedio', px, by + bh + F2 + 3); ctx.fillStyle = '#ff9a3a'; ctx.fillText('assedio', px, by + bh + F2 + 3); }
+    if (!ter[t].str && !T.borgo && cam.s >= .5 && (T.c || T.l)){ const im = icoImg(T.c >= T.l ? 'castagna' : 'albero'); if (im.complete && im.width){ const w = Math.round(im.width*1.3*u), h = Math.round(im.height*1.3*u); ctx.globalAlpha = .9; ctx.drawImage(im, bx - w - 3, by + (bh - h)/2, w, h); ctx.globalAlpha = 1; } }
     if (ter[t].str){ const im = icoImg(STR[ter[t].str].ic); if (im.complete && im.width){ const w = Math.round(im.width*1.6*u), h = Math.round(im.height*1.6*u); ctx.fillStyle = '#141433'; rr(bx + bw - 2, by - h + 4, w + 6, h + 6, 4); ctx.fillStyle = '#fff'; rr(bx + bw, by - h + 6, w + 2, h + 2, 3); ctx.drawImage(im, bx + bw + 1, by - h + 7, w, h); } }
     if (DF().tregua >= S.turno && T.borgo && eBorgo(t)){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('tregua', px, by + bh + F2 + 3); ctx.fillStyle = '#ffd03a'; ctx.fillText('tregua', px, by + bh + F2 + 3); } }
   // i nomi sopra a tutto (solo borghi e frazioni: i terreni vuoti non hanno nome sulla mappa)
   for (const t of IDS){ const T = TERRE[t]; if (!(T.borgo || T.fraz)) continue; const [px, py] = aSchermo(T.x, T.y); if (px < -120 || py < -80 || px > W + 120 || py > H + 80) continue;
     const F1 = Math.round((T.borgo ? 16 : 13)*u), ny = Math.round(py - 9*u - 5*u); ctx.font = `400 ${F1}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#141433';
-    const nome = T.borgo ? FZ[t].corto : T.nome; ctx.strokeText(nome, px, ny); ctx.fillStyle = T.borgo ? '#ffffff' : '#fff2cc'; ctx.fillText(nome, px, ny); }
+    const nome = T.borgo ? FZ[t].corto : T.nome; ctx.strokeText(nome, px, ny); ctx.fillStyle = T.borgo ? '#ffffff' : '#fff2cc'; ctx.fillText(nome, px, ny);
+    if (T.fraz && ter[t].own && cam.s >= .45){ const F2 = Math.round(10*u), lv = ter[t].lv || 1; ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.lineWidth = 3; ctx.strokeText(LIVF[lv - 1], px, ny - F1); ctx.fillStyle = lv >= 3 ? '#ffd03a' : '#cfe8ff'; ctx.fillText(LIVF[lv - 1], px, ny - F1); } }
   // soldati in marcia
   for (let i = ANIM.length - 1; i >= 0; i--){ const a = ANIM[i]; a.t += dt/a.dur; const k = Math.min(1, a.t), P = a.pts, n = 5;
     for (let j = 0; j < n; j++){ const qv = Math.max(0, Math.min(1, k - j*.05)), p = P[Math.min(P.length - 1, Math.floor(qv*(P.length - 1)))], [sx, sy] = aSchermo(p[0], p[1]), r = 4;
@@ -6312,7 +6319,8 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra (gialla che lampeggia): ci arrivano passando per le tue terre.</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
   if (!sel){ const n = terreDi(S.io).length, mieB = Object.keys(FZ).filter(f => S.terre[f].own === S.io).length, F0 = S.fz[S.io];
     p.innerHTML = `<div class="cq-ph"><b>Tocca una terra sulla mappa</b><small>Hai ${n} ${n === 1 ? 'terra' : 'terre'} e ${sol(soldDi(S.io))}.${S.mosse === 0 ? ' Hai finito le mosse: premi <b>Fine stagione</b>.' : ''}</small></div>
-      <div class="cq-vie"><span class="cq-mh">Tre modi per vincere</span><span>${ico('spade', 2)} Conquista: borghi presi <b>${mieB}/3</b></span><span>${ico('coppa', 2)} Grande Fiera: <b>${F0.opera || 0}/3</b> fasi</span><span>${ico('amici', 2)} Pace: alleato di tutti da <b>${S.dipl || 0}/6</b> stagioni</span></div>`; return; }
+      <div class="cq-cons">${consigli().map(x => `<span>${x}</span>`).join('')}</div>
+      <div class="cq-vie"><span class="cq-mh">Tre modi per vincere <button type="button" class="cq-aiuto" id="cqAiuto">Come funziona?</button></span><span>${ico('spade', 2)} Conquista: borghi presi <b>${mieB}/3</b></span><span>${ico('coppa', 2)} Grande Fiera: <b>${F0.opera || 0}/3</b> fasi</span><span>${ico('amici', 2)} Pace: alleato di tutti da <b>${S.dipl || 0}/6</b> stagioni</span></div>`; const ba = el('cqAiuto'); if (ba) ba.onclick = dlgAiuto; return; }
   const T = TERRE[sel], st = S.terre[sel], own = st.own, mio = own === S.io, borgoMio = sel === S.io && eBorgo(sel), F = S.fz[S.io], nm = S.mosse <= 0;
   let h = `<div class="cq-ph"><b><span class="cq-dot" style="background:${own ? FZ[own].col : '#8c8c9c'}"></span>${T.nome}</b><small>${own ? (mio ? 'Tua' : 'Di ' + FZ[own].nome) : 'Libera: la tengono i briganti'} · ${sol(st.sold)} · produce ${prodTerra(sel)}${T.di ? ' · Una delle terre di ' + FZ[T.di].corto + ': quando ne vengono prese ' + ASSEDIO + ', il borgo si può attaccare.' : T.desc ? ' · ' + T.desc : ''}</small></div>`;
   if (eBorgo(sel)){ const E = S.fz[own].ed; h += `<div class="cq-ed">${Object.keys(ED).map(k => `<span title="${ED[k].nome}">${ico(ED[k].ic, 2)}<b>${E[k]}</b></span>`).join('')}</div>`; if (S.fz[own].assedio) h += `<p class="cq-warn">Sotto assedio da ${S.fz[own].assedio === 1 ? '1 stagione' : S.fz[own].assedio + ' stagioni'}: ogni stagione perde soldati per la fame, le mura si rovinano e si difende peggio.</p>`; else if (assediato(own)) h += `<p class="cq-warn">Circondato: dalla prossima stagione è sotto assedio.</p>`; }
@@ -6336,7 +6344,14 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   on('cqCos', dlgCostruisci); on('cqRec', () => dlgArruola(S.io)); on('cqRec2', () => dlgArruola(sel)); on('cqStr', () => dlgStruttura(sel)); on('cqSpo', () => { modo = {tipo:'sposta', da:sel}; suona('tocco'); pannello(); });
   on('cqAtt', () => dlgAttacco(sel)); on('cqDip1', () => dlgDiplomazia(own)); }
 function prodTerra(t){ const T = TERRE[t], st = S.terre[t], c = T.c + (st.str === 'fattoria' ? 2*(st.sl || 1) : 0) + ((T.fraz || T.borgo) ? prosp(t) - 1 : 0), l = T.l + (st.str === 'segheria' ? 2*(st.sl || 1) : 0), m = T.rend + (st.str === 'mercato' ? 3*(st.sl || 1) : 0) + ((T.fraz || T.borgo) ? 2*(prosp(t) - 1) : 0);
-  return [m ? m + ' ' + ico('moneta', 1) : '', c ? c + ' ' + ico('castagna', 1) : '', l ? l + ' ' + ico('albero', 1) : ''].filter(Boolean).join(' '); }
+  return [m ? m + ' ' + (m === 1 ? 'moneta' : 'monete') : '', c ? c + ' cibo' : '', l ? l + ' legna' : ''].filter(Boolean).join(', ') + ' a stagione'; }
+function consigli(){ const f = S.io, F = S.fz[f], dc = prodCibo(f, S.turno + 1) - mangia(f), L = [];
+  const fo = vivi().find(g => g !== f && (S.fz[g].opera || 0) >= 1); if (fo) L.push(`${ico('attenzione', 2)} ${FZ[fo].corto} costruisce la Grande Fiera (${S.fz[fo].opera}/3): attacca le sue terre per fermarla.`);
+  if (dc < 0) L.push(`${ico('castagna', 2)} Il cibo cala di ${-dc} a stagione. Costruisci una <b>Fattoria</b> su un campo (sulla mappa hanno la castagna) o scambia al mercato.`);
+  if (F.legna < 8 && prodLegna(f) < 4) L.push(`${ico('albero', 2)} Ti serve legna: costruisci una <b>Segheria</b> in un bosco (sulla mappa hanno l’albero) o scambia al mercato.`);
+  if (F.monete >= 45) L.push(`${ico('moneta', 2)} Hai tante monete: migliora le strutture o costruisci la <b>Grande Fiera</b> nel tuo borgo.`);
+  if (!L.length) L.push(`${ico('lampadina', 2)} Tocca una tua terra per costruire, una terra vicina per attaccare. Scambi e patti sono in <b>Diplomazia</b>.`);
+  return L.slice(0, 2); }
 function usaMossa(){ S.mosse = Math.max(0, S.mosse - 1); salva(); aggiornaUI(); }
 function dlgCostruisci(){ const F = S.fz[S.io], fase = F.opera || 0, op = OPERA[fase];
   const o = ov(`<div class="dlg box cq-dlg"><h2>Costruisci a ${FZ[S.io].corto}</h2><p>Hai ${prezzo(F.monete, F.legna, F.cibo)}. Costruire usa 1 mossa.</p><div class="cq-list">${Object.keys(ED).map(k => { const c = costo(S.io, k), cl = costoL(S.io, k), l = F.ed[k];
@@ -6355,9 +6370,22 @@ function dlgArruola(dove = S.io){ const F = S.fz[S.io], max = Math.min(capRecl(S
   o.querySelector('#cqNo').onclick = chiudiOv; o.querySelector('#cqOk').onclick = () => { const n = +o.querySelector('#cqN').value; F.monete -= n*COSTO_SOLD; S.terre[dove].sold += n; suona('moneta'); chiudiOv(); FLASH.push({a:dove, t:0, col:FZ[S.io].col}); usaMossa(); toast(`+${sol(n)} a ${TERRE[dove].nome}`); }; }
 function dlgStruttura(t){ const F = S.fz[S.io], st = S.terre[t], ks = st.str ? [st.str] : Object.keys(STR).filter(k => STR[k].dove(t)), lv = st.str ? (st.sl || 1) : 0;
   const o = ov(`<div class="dlg box cq-dlg"><h2>${st.str ? 'Migliora' : 'Costruisci'} a ${TERRE[t].nome}</h2><p>Hai ${prezzo(F.monete, F.legna)}. ${st.str ? 'Ogni livello produce di più.' : 'In ogni terra c’è posto per una sola struttura, che poi puoi migliorare.'} Se perdi la terra, passa a chi la conquista. Usa 1 mossa.</p><div class="cq-list">${ks.map(k => { const c = costoStr(S.io, k, lv);
-    return `<button class="cq-it" data-s="${k}" ${!c || !puoPagare(F, c[0], c[1]) ? 'disabled' : ''}><span class="cq-ii">${ico(STR[k].ic, 3)}</span><span class="cq-it-t"><b>${STR[k].nome}${STR[k].max > 1 ? ` <small>livello ${lv + 1} di ${STR[k].max}</small>` : ''}</b><small>${STR[k].desc}</small></span><span class="cq-pr">${c ? prezzo(c[0], c[1]) : 'Max'}</span></button>`; }).join('')}</div><button class="big alt" id="cqNo">Indietro</button></div>`);
+    return `<button class="cq-it" data-s="${k}" ${!c || !puoPagare(F, c[0], c[1]) ? 'disabled' : ''}><span class="cq-ii">${ico(STR[k].ic, 3)}</span><span class="cq-it-t"><b>${STR[k].nome}${STR[k].max > 1 ? ` <small>livello ${lv + 1} di ${STR[k].max}</small>` : ''}</b><small>${STR[k].desc}</small><small class="cq-eff">${effetto(k, t)}</small></span><span class="cq-pr">${c ? prezzo(c[0], c[1]) : 'Max'}</span></button>`; }).join('')}</div><button class="big alt" id="cqNo">Indietro</button></div>`);
   o.querySelector('#cqNo').onclick = chiudiOv;
   o.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { const k = b.dataset.s, c = costoStr(S.io, k, lv); if (!c || !puoPagare(F, c[0], c[1])) return; paga(F, c[0], c[1]); st.str = k; st.sl = lv + 1; suona('costruisci'); chiudiOv(); FLASH.push({a:t, t:0, col:'#f8d048'}); usaMossa(); toast(`${STR[k].nome}${lv ? ' livello ' + (lv + 1) : ''} a ${TERRE[t].nome}`); }); }
+function dlgAiuto(){ const sez = [
+    ['moneta', 'Monete', 'Arrivano dalle terre, dai mercati e dagli accordi. Servono per arruolare soldati e costruire.'],
+    ['castagna', 'Cibo', `Viene dai campi, dalle vigne e dalle fattorie. Ogni ${MANGIANO} soldati mangiano 1 cibo a stagione: se finisce, i soldati se ne vanno. In autunno le castagne danno di più, in inverno meno.`],
+    ['albero', 'Legna', 'Viene dai boschi e dalle segherie. Serve per mura, torri, strutture e per la Grande Fiera.'],
+    ['martello', 'Costruire nelle terre', 'Tocca una tua terra e premi Costruisci qui. Fattoria sui campi (cibo), Segheria nei boschi (legna), Mercato nelle frazioni (monete). Poi premi Migliora: fino al livello 3.'],
+    ['casa', 'Le frazioni crescono', `Se una frazione resta in pace per ${CRESCE} stagioni passa da casale a villaggio a paese, e produce più monete e cibo. Se c’è una battaglia, cala.`],
+    ['amici', 'Amici e nemici', 'Patto: 8 stagioni senza attaccarvi. Accordo: 3 monete in più e scambi più convenienti. Alleanza: vi aiutate in battaglia. Con questi l’amicizia sale da sola a ogni stagione.'],
+    ['stella', 'Reputazione', 'Se rompi un patto o un’alleanza attaccando, la reputazione crolla e nessuno vuole più trattare con te. Aiutare chi te lo chiede la fa salire.'],
+    ['coppa', 'Tre modi per vincere', 'Conquista i tre borghi, oppure finisci la Grande Fiera nel tuo borgo (3 fasi), oppure resta alleato di tutti per 6 stagioni.']];
+  const o = ov(`<div class="dlg box cq-dlg"><h2>Come funziona</h2><div class="cq-bil">${sez.map(([i, t, d]) => `<span>${ico(i, 3)}</span><span><b>${t}</b><small>${d}</small></span>`).join('')}</div><button class="big" id="cqNo">Ho capito</button></div>`);
+  o.querySelector('#cqNo').onclick = chiudiOv; }
+function effetto(k, t){ const T = TERRE[t]; if (k === 'fattoria') return 'Questa terra: cibo da ' + (T.c + 2*(S.terre[t].str === k ? S.terre[t].sl || 1 : 0)) + ' a ' + (T.c + 2*((S.terre[t].str === k ? S.terre[t].sl || 1 : 0) + 1));
+  if (k === 'segheria') return 'Questa terra: legna da ' + (T.l + 2*(S.terre[t].str === k ? S.terre[t].sl || 1 : 0)) + ' a ' + (T.l + 2*((S.terre[t].str === k ? S.terre[t].sl || 1 : 0) + 1)); if (k === 'mercato') return '+3 monete a stagione'; return ''; }
 function dlgBilancio(){ if (!S || GIOCA) return; const f = S.io, F = S.fz[f], pc = prodCibo(f, S.turno + 1), mc = mangia(f);
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} Bilancio</span><h2>Le tue risorse</h2>
     <div class="cq-bil"><span>${ico('moneta', 3)}</span><span><b>Monete: ${F.monete}</b><small>+${rendita(f)} a stagione. Servono per soldati e costruzioni.</small></span>
@@ -6419,15 +6447,15 @@ function dlgDiplomazia(foc){ const altri = vivi().filter(g => g !== S.io), mr = 
   o.querySelectorAll('[data-cac]').forEach(b => b.onclick = () => { const g = b.dataset.cac; delete S.acc[pk(S.io, g)]; setAmic(S.io, g, amic(S.io, g) - 10); usaMossa(); toast(`Accordo con ${FZ[g].corto} chiuso`); dlgDiplomazia(g); });
   o.querySelectorAll('[data-rom]').forEach(b => b.onclick = () => { const g = b.dataset.rom; delete S.all[pk(S.io, g)]; setAmic(S.io, g, amic(S.io, g) - 30); usaMossa(); toast(`Alleanza con ${FZ[g].corto} finita`); dlgDiplomazia(g); }); }
 // scambi al mercato: non usano mosse, massimo 3 a stagione; con l'accordo e l'amicizia si guadagna di più
-function dlgMercato(g){ const F = S.fz[S.io], G = S.fz[g], k = pk(S.io, g), v = amic(S.io, g), rate = (accordo(S.io, g) ? 1 : .75)*(v >= 50 ? 1.15 : v < -15 ? .6 : 1), rimasti = 3 - (S.scambi || 0);
-  const NOMI = {monete:'monete', cibo:'cibo', legna:'legna'}, IC = {monete:'moneta', cibo:'castagna', legna:'albero'}, VAL = {monete:1, cibo:1.3, legna:1.1};
-  const offerte = []; for (const da of ['legna', 'cibo', 'monete']) for (const a of ['cibo', 'legna', 'monete']){ if (da === a) continue; const n = da === 'monete' ? 8 : 6, r = Math.max(1, Math.floor(n*VAL[da]/VAL[a]*rate)); offerte.push({da, a, n, r}); }
+function dlgMercato(g){ const F = S.fz[S.io], G = S.fz[g], k = pk(S.io, g), v = amic(S.io, g), rate = (accordo(S.io, g) ? 1.3 : 1)*(v >= 50 ? 1.15 : v < -15 ? .7 : 1), rimasti = 4 - (S.scambi || 0);
+  const NOMI = {monete:'monete', cibo:'cibo', legna:'legna'}, IC = {monete:'moneta', cibo:'castagna', legna:'albero'}, VAL = {monete:1, cibo:1.15, legna:1};
+  const offerte = []; for (const da of ['legna', 'cibo', 'monete']) for (const a of ['cibo', 'legna', 'monete']){ if (da === a) continue; const n = 6, r = Math.max(1, Math.round(n*VAL[da]/VAL[a]*rate)); offerte.push({da, a, n, r}); }
   if (v < -40){ toast(`${FZ[g].corto} non vuole commerciare con un nemico`); return; }
-  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('moneta', 2)} Mercato</span><h2>Scambi con ${FZ[g].corto}</h2><p>Hai ${prezzo(F.monete, F.legna, F.cibo)}. Ogni scambio fa salire un po’ l’amicizia. ${accordo(S.io, g) ? 'Con l’accordo commerciale hai prezzi migliori.' : 'Con un accordo commerciale avresti prezzi migliori.'} Scambi rimasti in questa stagione: <b>${rimasti}</b>.</p>
+  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('moneta', 2)} Mercato</span><h2>Scambi con ${FZ[g].corto}</h2><p>Hai ${prezzo(F.monete, F.legna, F.cibo)}. Ogni scambio fa salire un po’ l’amicizia. ${accordo(S.io, g) ? 'Con l’accordo commerciale ricevi il 30% in più.' : 'Con un accordo commerciale riceveresti il 30% in più.'} Scambi rimasti in questa stagione: <b>${rimasti}</b>.</p>
     <div class="cq-list">${offerte.map((x, i) => { const ok = rimasti > 0 && F[x.da] >= x.n && G[x.a] >= x.r; return `<button class="cq-it cq-sc" data-i="${i}" ${ok ? '' : 'disabled'}><span>Dai <b>${x.n}</b> ${ico(IC[x.da], 2)}</span><span class="cq-fr">▶</span><span>Ricevi <b>${x.r}</b> ${ico(IC[x.a], 2)}</span></button>`; }).join('')}</div>
     <p class="cq-nota">${FZ[g].corto} ha ${prezzo(G.monete, G.legna, G.cibo)}: non può darti più di quello che ha.</p><button class="big alt" id="cqNo">Indietro</button></div>`);
   o.querySelector('#cqNo').onclick = () => dlgDiplomazia(g);
-  o.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { const x = offerte[+b.dataset.i]; if ((S.scambi || 0) >= 3 || F[x.da] < x.n || G[x.a] < x.r) return; F[x.da] -= x.n; G[x.da] += x.n; F[x.a] += x.r; G[x.a] -= x.r; S.scambi = (S.scambi || 0) + 1; setAmic(S.io, g, amic(S.io, g) + 2); suona('moneta'); salva(); aggiornaUI(); toast(`Scambio fatto: +${x.r} ${NOMI[x.a]}`); dlgMercato(g); }); }
+  o.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { const x = offerte[+b.dataset.i]; if ((S.scambi || 0) >= 4 || F[x.da] < x.n || G[x.a] < x.r) return; F[x.da] -= x.n; G[x.da] += x.n; F[x.a] += x.r; G[x.a] -= x.r; S.scambi = (S.scambi || 0) + 1; setAmic(S.io, g, amic(S.io, g) + 2); suona('moneta'); salva(); aggiornaUI(); toast(`Scambio fatto: +${x.r} ${NOMI[x.a]}`); dlgMercato(g); }); }
 function toast(t){ const x = el('cqToast'); x.textContent = t; x.className = 'cq-toast on'; clearTimeout(toast.tm); toast.tm = setTimeout(() => { x.className = 'cq-toast'; }, 1800); }
 function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePartita(); return; }
   const mie = ev.filter(e => !e.muto), entrate = rendita(S.io);
@@ -6436,7 +6464,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
     <p>Entrate: ${ico('moneta', 2)} <b>+${entrate}</b> · ${ico('castagna', 2)} <b>${prodCibo(S.io, S.turno) - mangia(S.io) >= 0 ? '+' : ''}${prodCibo(S.io, S.turno) - mangia(S.io)}</b> · ${ico('albero', 2)} <b>+${prodLegna(S.io)}</b>${(S.turno - 1) % 4 === 2 ? ' (in autunno le castagne danno più cibo)' : (S.turno - 1) % 4 === 3 ? ' (in inverno si raccoglie poco cibo)' : ''}. Hai ${MOSSE} mosse.</p>
     ${S.turno === DF().tregua + 1 ? `<p class="cq-warn">La tregua è finita: da ora i borghi si possono attaccare.</p>` : ''}
     <button class="big" id="cqOk">Tocca a te ${ico('play', 2)}</button></div>`, false);
-  o.querySelector('#cqOk').onclick = () => { chiudiOv(); proposte(); }; aggiornaUI(); }
+  o.querySelector('#cqOk').onclick = () => { chiudiOv(); proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); }; aggiornaUI(); }
 function proposte(){ let p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
   if (!p){ richieste(); return; }
   if (!S.fz[f].vivo || (p.tipo === 'all' && (vivi().length <= 2 || alleati(S.io, f))) || (p.tipo === 'acc' && accordo(S.io, f)) || (p.tipo === 'patto' && (patto(S.io, f) || alleati(S.io, f)))){ proposte(); return; }
@@ -6488,8 +6516,8 @@ function nuova(io, dif = 'normale'){ S = {v:3, io, dif, turno:1, mosse:MOSSE, fz
   for (const t of IDS){ const T = TERRE[t]; S.terre[t] = T.borgo ? {own:t, sold: t === 'ceresola' ? 6 : 9} : T.di ? {own:T.di, sold:2} : {own:null, sold:T.guar}; }
   sel = io; modo = null; VISTA = null; tintKey = ''; salva(); vaiA(io); aggiornaUI(); }
 function pausa(){ const o = ov(`<div class="dlg box cq-dlg"><h2>Pausa</h2><p>La partita si salva da sola: puoi uscire e riprenderla quando vuoi.</p><button type="button" class="tbaudio" id="cqAud">${SUONI.muto ? 'Suoni spenti' : 'Suoni accesi'}</button>
-    <button class="big" id="cqRi">Riprendi</button><button class="big alt" id="cqGu">Come si gioca</button><button class="big alt" id="cqNu">Ricomincia (scegli il borgo)</button><button class="big alt" id="cqMe">Torna al menu</button></div>`);
-  o.querySelector('#cqRi').onclick = chiudiOv; o.querySelector('#cqGu').onclick = () => guida(); o.querySelector('#cqMe').onclick = esci;
+    <button class="big" id="cqRi">Riprendi</button><button class="big alt" id="cqGu">Come funziona</button><button class="big alt" id="cqNu">Ricomincia (scegli il borgo)</button><button class="big alt" id="cqMe">Torna al menu</button></div>`);
+  o.querySelector('#cqRi').onclick = chiudiOv; o.querySelector('#cqGu').onclick = () => dlgAiuto(); o.querySelector('#cqMe').onclick = esci;
   o.querySelector('#cqAud').onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('sm'); o.querySelector('#cqAud').textContent = SUONI.muto ? 'Suoni spenti' : 'Suoni accesi'; };
   o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; }
 function costruisciDom(){ root = document.createElement('section'); root.id = 'cq'; root.hidden = true;
