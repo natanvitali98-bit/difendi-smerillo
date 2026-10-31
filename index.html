@@ -1548,6 +1548,79 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-vel{grid-template-columns:1fr 1fr}
 .cq-vie span.cq-tempo{display:block;line-height:1.45;margin-top:2px;padding-top:5px;border-top:2px dashed #d5dbef}
 .cq-vie span.cq-tempo img{vertical-align:-3px;margin-right:2px}
+/* ===== scelta del borgo: la mappa resta visibile ===== */
+#cqOv.scelta{background:linear-gradient(180deg,rgba(14,22,70,0) 30%,rgba(14,22,70,.35));pointer-events:none;padding-top:0}
+#cqOv.scelta .cq-scbox{pointer-events:auto;max-height:62vh;overflow-y:auto;margin:auto 0 0 auto;margin-left:auto;margin-right:auto;padding:14px 14px 10px;display:flex;flex-direction:column;gap:9px}
+.cq-scbox h2{margin:0}
+.cq-schead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cq-casmini{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 6px;border-radius:12px;background:#fff6d6;border:2px solid var(--linea);font-weight:700;font-size:13px;color:var(--testo)}
+.cq-casmini img{width:14px;height:auto}
+.cq-casmini em{font-style:normal;color:var(--blu)}
+.cq-schint{margin:-4px 0 0}
+.cq-sctab{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cq-sct{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:8px 4px 6px;min-height:84px;border-radius:14px;border:3px solid var(--linea);background:var(--carta2);box-shadow:0 4px 0 var(--linea),inset 0 -6px 0 var(--c);font-family:var(--f-big);font-size:15px;color:var(--testo);transition:transform .15s,background .15s}
+.cq-sct canvas{image-rendering:pixelated}
+.cq-sct.on{background:#fff3c4;transform:translateY(-3px);box-shadow:0 7px 0 var(--linea),inset 0 -6px 0 var(--c),0 0 0 3px var(--c)}
+.cq-scdet{display:flex;flex-direction:column;gap:7px;padding:10px 12px;border-radius:14px;background:var(--carta2);border-left:8px solid var(--c)}
+.cq-scdet p{margin:0;font-size:13.5px;line-height:1.35;display:flex;gap:6px;align-items:flex-start}
+.cq-scdet p img{flex:none;margin-top:2px}
+.cq-scnome{display:flex;gap:12px;align-items:center}
+.cq-scnome canvas{image-rendering:pixelated;flex:none}
+.cq-scnome span{display:flex;flex-direction:column;gap:2px}
+.cq-scnome b{font-family:var(--f-big);font-weight:400;font-size:22px;line-height:1.1}
+.cq-scnome small{color:var(--grigio);font-size:13px;line-height:1.3}
+.cq-scnome small img{vertical-align:-3px}
+.cq-scst{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cq-scst span{display:flex;align-items:center;justify-content:center;gap:5px;padding:5px;border-radius:10px;background:#fff}
+.cq-scst b{font-family:var(--f-big);font-weight:400;font-size:18px}
+.cq-scst small{color:var(--grigio);font-size:12px}
+.cq-entra{animation:cqEntra .3s ease}
+@keyframes cqEntra{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.cq-scopt{border-radius:12px;background:var(--carta2);padding:6px 10px}
+.cq-scopt summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none;font-weight:700;color:var(--testo);min-height:32px}
+.cq-scopt summary::-webkit-details-marker{display:none}
+.cq-scopt summary img{vertical-align:-3px}
+.cq-scopt summary b{color:var(--blu);font-size:13px}
+.cq-scopt[open] summary{margin-bottom:6px}
+.cq-scopt .cq-dif{margin-top:4px}
+#cqVai{background:var(--giallo)}
+.cq-link{background:none;border:0;color:var(--blu);font-weight:700;text-decoration:underline;padding:4px;align-self:center;min-height:36px}
+@media (min-width:860px) and (min-aspect-ratio:1/1){
+  #cqOv.scelta{background:linear-gradient(90deg,rgba(14,22,70,.35),rgba(14,22,70,0) 45%);padding:16px}
+  #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px);width:420px;margin:auto auto auto 0}
+}
+#cqOv.scelta .cq-scbox{max-height:64vh;padding-bottom:0}
+.cq-scvai{position:sticky;bottom:0;margin:0 -14px;padding:8px 14px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,255,255,0),var(--carta) 30%);order:9}
+.cq-scvai .big{width:100%}
+.cq-scbox .cq-link{order:10;margin-bottom:6px}
+.cq-scbox h2{font-size:24px}
+.cq-schip{position:absolute;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:7px 14px;border-radius:14px;background:rgba(20,20,51,.85);color:#fff;font-weight:700;font-size:14px;white-space:nowrap;pointer-events:none;animation:cqChip 2.4s ease-in-out infinite}
+.cq-schip img{vertical-align:-3px}
+@keyframes cqChip{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,4px)}}
+@media (max-width:859px), (max-aspect-ratio:1/1){ .cq-sct{min-height:72px;padding:6px 4px 5px} .cq-scdet{padding:8px 10px;gap:5px} .cq-scdet p{font-size:13px} .cq-scnome b{font-size:20px} }
+@media (min-width:860px) and (min-aspect-ratio:1/1){ .cq-schip{left:calc(50% + 220px)} }
+/* ===== effetti: tocchi, scintille, numeri che volano ===== */
+:where(#cq) button{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+:where(#cq) button:not(:disabled):active{transform:translateY(2px) scale(.97)}
+.cq-rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(0);animation:cqRip .5s ease-out forwards;pointer-events:none}
+@keyframes cqRip{to{transform:scale(1);opacity:0}}
+.cq-burst{position:fixed;z-index:60;width:0;height:0;pointer-events:none}
+.cq-burst i{position:absolute;width:5px;height:5px;left:-2px;top:-2px;border:1px solid #141433;animation:cqBu .55s ease-out forwards}
+@keyframes cqBu{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.4);opacity:0}}
+.cq-fl{position:fixed;z-index:60;transform:translate(-50%,0);font-family:var(--f-big);font-size:18px;pointer-events:none;-webkit-text-stroke:1px #141433;animation:cqFl 1.25s ease-out forwards}
+.cq-fl.su{color:#7cf07a}
+.cq-fl.giu{color:#ff8a6a}
+@keyframes cqFl{0%{opacity:0;transform:translate(-50%,-4px) scale(.7)}15%{opacity:1;transform:translate(-50%,4px) scale(1.15)}100%{opacity:0;transform:translate(-50%,30px) scale(1)}}
+.cq-bump{animation:cqBump .45s ease}
+@keyframes cqBump{0%,100%{transform:none}40%{transform:scale(1.25)}}
+#cqOv:not(.scelta) .dlg.box{animation:cqDlg .26s cubic-bezier(.2,1.3,.4,1)}
+@keyframes cqDlg{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+#cqPan{transition:box-shadow .2s}
+.cq-panin{animation:cqPanIn .22s ease}
+@keyframes cqPanIn{from{opacity:.3;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){ .cq-rip,.cq-burst,.cq-fl{display:none} #cqOv .dlg.box,.cq-panin,.cq-bump,.cq-entra,.cq-schip{animation:none!important} }
+#cqOv.scelta .cq-scbox{scroll-padding-bottom:90px}
+@media (min-width:860px) and (min-aspect-ratio:1/1){ #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px)} }
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -6353,7 +6426,10 @@ function bersagli(){ if (!modo) return []; if (modo.tipo === 'sposta'){ if (!mod
 function frame(Tm, dt){ if (!attivo || !ctx || !cB) return; try { disegna(Tm, dt); } catch(e){ console.error(e); } }
 // ===== le costruzioni: disegnate nello stesso stile delle mappe (vista dall'alto obliqua, ombre morbide, niente contorni neri)
 const SPRS = {}, NATI = {};
-const nasce = (t, k) => { NATI[t + '|' + k] = performance.now(); };
+const PART = [], TAPS = [];
+// una manciata di particelle in coordinate della mappa: polvere, scintille, stelline
+function spruzzo(x, y, n, cols, vel = 60, grav = 60, vita = .8, dim = 3){ for (let i = 0; i < n; i++){ const a = Math.random()*Math.PI*2, v = vel*(.4 + Math.random()*.8); PART.push({x, y, vx: Math.cos(a)*v, vy: Math.sin(a)*v*.7 - vel*.35, g: grav, t:0, vita: vita*(.7 + Math.random()*.6), col: cols[i % cols.length], d: dim*(.7 + Math.random()*.7)}); } if (PART.length > 400) PART.splice(0, PART.length - 400); }
+const nasce = (t, k) => { NATI[t + '|' + k] = performance.now(); const sp = SPOT[t + '|' + k] || TERRE[t]; if (sp) setTimeout(() => spruzzo(sp.x, sp.y - (sp.h || 20)/2, 18, ['#ffd03a', '#fff3a8', '#ffffff'], 70, 40, 1), 650); };
 const RGB = (c, f = 1) => `rgb(${Math.min(255, Math.round(c[0]*f))},${Math.min(255, Math.round(c[1]*f))},${Math.min(255, Math.round(c[2]*f))})`;
 const MURO = [228,214,186], LEGNO = [150,108,66], PIETRA = [190,178,150], COPPI = [176,120,92];
 function tela(w, h){ const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); const P = (col, x, y, ww = 1, hh = 1) => { g.fillStyle = typeof col === 'string' ? col : RGB(col); g.fillRect(Math.round(x), Math.round(y), ww, hh); }; return [c, g, P]; }
@@ -6543,7 +6619,7 @@ function bordoMondo(){ const mw = WW*cam.s, mh = WH*cam.s, d = 26; if (cam.x <= 
   const lin = (x0, y0, x1, y1, x, y, w, h) => { const g = ctx.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, 'rgba(8,20,12,.55)'); g.addColorStop(1, 'rgba(8,20,12,0)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); };
   if (cam.x > 0) lin(cam.x, 0, cam.x + d, 0, cam.x, cam.y, d, mh); if (cam.x + mw < W) lin(cam.x + mw, 0, cam.x + mw - d, 0, cam.x + mw - d, cam.y, d, mh);
   if (cam.y > 0) lin(0, cam.y, 0, cam.y + d, cam.x, cam.y, mw, d); if (cam.y + mh < H) lin(0, cam.y + mh, 0, cam.y + mh - d, cam.x, cam.y + mh - d, mw, d); }
-function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
+function disegna(Tm, dt){ const ter = VISTA || (S && S.terre); passoVolo(dt);
   if (CAMT){ const k = Math.min(1, dt*7); cam.x += (CAMT.x - cam.x)*k; cam.y += (CAMT.y - cam.y)*k; const ox = cam.x, oy = cam.y; limita(); if (Math.hypot(CAMT.x - cam.x, CAMT.y - cam.y) < 2 || (ox !== cam.x && oy !== cam.y)) CAMT = null; }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#1f3a22'; ctx.fillRect(0, 0, W, H); sfondo(); ctx.imageSmoothingEnabled = cam.s < .7;
   ctx.drawImage(cB, cam.x, cam.y, WW*cam.s, WH*cam.s); bordoMondo(); ctx.imageSmoothingEnabled = false;
@@ -6557,7 +6633,9 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
   for (const t of bersagli()){ ctx.globalAlpha = .2 + .25*pul; ctx.drawImage(maschera(t, '#ffd03a'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; evid(t, '#ffd03a', pul); }
   if (sel && !modo){ ctx.globalAlpha = .12 + .06*Math.sin(Tm*4); ctx.drawImage(maschera(sel, '#ffffff'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; evid(sel, '#ffffff', .7 + .3*Math.sin(Tm*4)); }
   if (modo && modo.da) evid(modo.da, '#ffd03a', 1);
+  if (SCELTA){ for (const t of IDS){ const o = ter[t].own; if (o === SCELTA){ ctx.globalAlpha = .06 + .08*pul; ctx.drawImage(maschera(t, '#ffffff'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; evid(t, '#ffffff', .6 + .4*pul); } else { ctx.globalAlpha = .28; ctx.drawImage(maschera(t, '#0c1420'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; } } }
   if (cam.s >= .35) disegnaCostruzioni(Tm);
+  nuvole(Tm);
   const u = Math.max(.78, Math.min(1.35, .7 + cam.s*.45));
   for (const t of IDS){ const T = TERRE[t], [px, py] = aSchermo(T.x, T.y), own = ter[t].own;
     if (px < -80 || py < -80 || px > W + 80 || py > H + 80) continue;
@@ -6573,7 +6651,7 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
     if (T.borgo && eBorgo(t) && S.fz[t].assedio && !VISTA){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('assedio', px, by + bh + F2 + 3); ctx.fillStyle = '#ff9a3a'; ctx.fillText('assedio', px, by + bh + F2 + 3); }
     if (!ter[t].str && !T.borgo && cam.s >= .5 && (T.c || T.l)){ const im = icoImg(T.c >= T.l ? 'castagna' : 'albero'); if (im.complete && im.width){ const w = Math.round(im.width*1.3*u), h = Math.round(im.height*1.3*u); ctx.globalAlpha = .9; ctx.drawImage(im, bx - w - 3, by + (bh - h)/2, w, h); ctx.globalAlpha = 1; } }
     if (ter[t].str && cam.s < .35){ const im = icoImg(STR[ter[t].str].ic); if (im.complete && im.width){ const w = Math.round(im.width*1.6*u), h = Math.round(im.height*1.6*u); ctx.fillStyle = '#141433'; rr(bx + bw - 2, by - h + 4, w + 6, h + 6, 4); ctx.fillStyle = '#fff'; rr(bx + bw, by - h + 6, w + 2, h + 2, 3); ctx.drawImage(im, bx + bw + 1, by - h + 7, w, h); } }
-    if (TREGUA() >= S.turno && T.borgo && eBorgo(t)){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('tregua', px, by + bh + F2 + 3); ctx.fillStyle = '#ffd03a'; ctx.fillText('tregua', px, by + bh + F2 + 3); } }
+    if (!SCELTA && TREGUA() >= S.turno && T.borgo && eBorgo(t)){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('tregua', px, by + bh + F2 + 3); ctx.fillStyle = '#ffd03a'; ctx.fillText('tregua', px, by + bh + F2 + 3); } }
   // i nomi sopra a tutto (solo borghi e frazioni: i terreni vuoti non hanno nome sulla mappa)
   for (const t of IDS){ const T = TERRE[t]; if (!(T.borgo || T.fraz)) continue; const [px, py] = aSchermo(T.x, T.y); if (px < -120 || py < -80 || px > W + 120 || py > H + 80) continue;
     const F1 = Math.round((T.borgo ? 16 : 13)*u), ny = Math.round(py - 9*u - 5*u); ctx.font = `400 ${F1}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#141433';
@@ -6583,11 +6661,21 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
   // soldati in marcia
   for (let i = ANIM.length - 1; i >= 0; i--){ const a = ANIM[i]; a.t += dt/a.dur; const k = Math.min(1, a.t), P = a.pts, n = 5;
     for (let j = 0; j < n; j++){ const qv = Math.max(0, Math.min(1, k - j*.05)), p = P[Math.min(P.length - 1, Math.floor(qv*(P.length - 1)))], [sx, sy] = aSchermo(p[0], p[1]), r = 4;
-      ctx.fillStyle = '#101420'; ctx.fillRect(sx - r - 1, sy - r - 1, r*2 + 2, r*2 + 2); ctx.fillStyle = a.col; ctx.fillRect(sx - r, sy - r, r*2, r*2); ctx.fillStyle = '#f8f8f0'; ctx.fillRect(sx - 1, sy - r - 4, 2, 4); }
+      const z = Math.max(1, Math.round(Math.min(2.4, .8 + cam.s))), ph = Math.floor(performance.now()/120 + j) % 2, X = Math.round(sx), Y = Math.round(sy) + (r - r);
+      ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(X - 3*z, Y + 4*z, 6*z, 2*z); ctx.fillStyle = '#101420'; ctx.fillRect(X - 3*z, Y - 6*z, 6*z, 11*z);
+      ctx.fillStyle = '#f2c8a0'; ctx.fillRect(X - 2*z, Y - 5*z, 4*z, 3*z); ctx.fillStyle = a.col; ctx.fillRect(X - 2*z, Y - 2*z, 4*z, 4*z); ctx.fillStyle = '#5c3818'; ctx.fillRect(X - 2*z + (ph ? 0 : z), Y + 2*z, z, 2*z); ctx.fillRect(X + z - (ph ? z : 0), Y + 2*z, z, 2*z);
+      if (j === 0){ ctx.fillStyle = '#101420'; ctx.fillRect(X + 3*z, Y - 11*z, z, 12*z); ctx.fillStyle = a.col; ctx.fillRect(X + 4*z, Y - 11*z, 4*z, 3*z); }
+      if (Math.random() < .15) spruzzo(p[0], p[1] + 3, 1, ['#c8b898', '#e0d4bc'], 12, -8, .5, 3); }
     if (a.t >= 1){ ANIM.splice(i, 1); if (a.fine) a.fine(); } }
-  for (let i = FLASH.length - 1; i >= 0; i--){ const f = FLASH[i]; f.t += dt; const [sx, sy] = aSchermo(TERRE[f.a].x, TERRE[f.a].y), r = 10 + f.t*80;
+  for (let i = PART.length - 1; i >= 0; i--){ const p = PART[i]; p.t += dt; if (p.t >= p.vita){ PART.splice(i, 1); continue; } p.vy += p.g*dt; p.x += p.vx*dt; p.y += p.vy*dt; const [sx, sy] = aSchermo(p.x, p.y), d = Math.max(2, p.d*Math.min(2, cam.s*1.4)); ctx.globalAlpha = Math.min(1, 2*(1 - p.t/p.vita)); ctx.fillStyle = p.col; ctx.fillRect(Math.round(sx - d/2), Math.round(sy - d/2), Math.round(d), Math.round(d)); } ctx.globalAlpha = 1;
+  for (let i = TAPS.length - 1; i >= 0; i--){ const p = TAPS[i]; p.t += dt; if (p.t > .45){ TAPS.splice(i, 1); continue; } const k = p.t/.45, r = 6 + k*26, a = 1 - k; ctx.globalAlpha = a; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.strokeRect(Math.round(p.x - r), Math.round(p.y - r*.75), Math.round(r*2), Math.round(r*1.5)); ctx.strokeStyle = '#141433'; ctx.lineWidth = 1; ctx.strokeRect(Math.round(p.x - r) - 2, Math.round(p.y - r*.75) - 2, Math.round(r*2) + 4, Math.round(r*1.5) + 4); ctx.globalAlpha = 1; }
+  for (let i = FLASH.length - 1; i >= 0; i--){ const f = FLASH[i]; if (!f.t && TERRE[f.a]){ const T = TERRE[f.a]; spruzzo(T.x, T.y, 22, [f.col, '#ffd03a', '#fff', '#c8b898'], 90, 70, .9, 4); } f.t += dt; const [sx, sy] = aSchermo(TERRE[f.a].x, TERRE[f.a].y), r = 10 + f.t*80;
     ctx.strokeStyle = f.col; ctx.globalAlpha = Math.max(0, 1 - f.t/.6); ctx.lineWidth = 4; ctx.strokeRect(sx - r, sy - r*.7, r*2, r*1.4); ctx.globalAlpha = 1; if (f.t > .6) FLASH.splice(i, 1); }
 }
+// le ombre delle nuvole che passano piano sulla mappa
+const NUV = [[0, 300, 260, 1], [500, 900, 340, .8], [1100, 200, 220, 1.2], [300, 1400, 300, .9], [900, 1600, 260, 1.1], [1400, 1100, 320, .7]];
+function nuvole(Tm){ ctx.save(); for (const [bx, by, r, v] of NUV){ const x = ((bx + Tm*9*v) % (WW + 800)) - 400, y = by + Math.sin(Tm*.1 + bx)*30, [sx, sy] = aSchermo(x, y), R = r*cam.s; if (sx < -R*1.6 || sy < -R || sx > W + R*1.6 || sy > H + R) continue;
+  const g = ctx.createRadialGradient(sx, sy, R*.1, sx, sy, R); g.addColorStop(0, 'rgba(10,20,40,.13)'); g.addColorStop(.6, 'rgba(10,20,40,.07)'); g.addColorStop(1, 'rgba(10,20,40,0)'); ctx.fillStyle = g; ctx.setTransform(dpr*1.5, 0, 0, dpr, -sx*dpr*.5, 0); ctx.fillRect(sx - R, sy - R, R*2, R*2); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); } ctx.restore(); }
 function strada(a, b){ const A = TERRE[a], B = TERRE[b], mx = (A.x + B.x)/2, my = (A.y + B.y)/2, dx = B.x - A.x, dy = B.y - A.y, L = Math.max(1, Math.hypot(dx, dy)), o = (hash(A.x + B.x, A.y + B.y, 3) - .5)*L*.25;
   const cx = mx - dy/L*o, cy = my + dx/L*o, pts = []; for (let i = 0; i <= 60; i++){ const t = i/60; pts.push([(1 - t)**2*A.x + 2*(1 - t)*t*cx + t*t*B.x, (1 - t)**2*A.y + 2*(1 - t)*t*cy + t*t*B.y]); } return pts; }
 
@@ -6625,9 +6713,9 @@ function inputMappa(){ cv.addEventListener('pointerdown', e => { CAMT = null; cv
     if (PT.size === 0) gesto = null; else if (gesto && gesto.pinch){ const [a] = [...PT.values()]; gesto = {x:a[0], y:a[1], cx:cam.x, cy:cam.y, mosso:true}; } };
   cv.addEventListener('pointerup', su); cv.addEventListener('pointercancel', su);
   cv.addEventListener('wheel', e => { e.preventDefault(); CAMT = null; const r = cv.getBoundingClientRect(), lx = e.clientX - r.left, ly = e.clientY - r.top, ns = Math.max(fitS, Math.min(fitS*3.2, cam.s*(e.deltaY < 0 ? 1.15 : 1/1.15))), wx = (lx - cam.x)/cam.s, wy = (ly - cam.y)/cam.s; cam.s = ns; cam.x = lx - wx*ns; cam.y = ly - wy*ns; limita(); }, {passive:false}); }
-function tocca(sx, sy){ if (GIOCA || ovAperto()) return; const t = terraIn(sx, sy); if (!t) return;
+function tocca(sx, sy){ if (SCELTA && SCELTA_MOSTRA){ const t = terraIn(sx, sy); if (!t) return; const f = FZ[S.terre[t].own] ? S.terre[t].own : TERRE[t].di; if (f && FZ[f]) SCELTA_MOSTRA(f); return; } if (GIOCA || ovAperto()) return; const t = terraIn(sx, sy); if (!t) return;
   if (modo && modo.tipo === 'sposta'){ if (t !== modo.da && bersagli().includes(t)){ const da = modo.da; modo = null; dlgSposta(da, t); return; } if (t === modo.da){ modo = null; pannello(); return; } }
-  modo = null; sel = t; suona('tocco'); pannello(); }
+  modo = null; sel = t; suona('tocco'); TAPS.push({x: sx, y: sy, t: 0}); pannello(); const pn = el('cqPan'); pn.classList.remove('cq-panin'); void pn.offsetWidth; pn.classList.add('cq-panin'); }
 
 // ===== battaglie: previsione chiara, poi un po' di fortuna =====
 function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t].sold, borgo = eBorgo(t), Ef = S.fz[f].ed, Ed = df ? S.fz[df].ed : null, voci = [], sp = !!(cap && borgo && df && haAb(cap, 'spacca'));
@@ -6790,12 +6878,16 @@ function stradaVerso(a, b){ const p = strada(a < b ? a : b, a < b ? b : a); retu
 
 // ===== interfaccia =====
 const ovAperto = () => !el('cqOv').hidden;
-function ov(html, chiudibile = true){ const o = el('cqOv'), t0 = performance.now(); o.innerHTML = html; o.hidden = false; o.scrollTop = 0; if (chiudibile) o.onclick = e => { if (e.target === o && performance.now() - t0 > 450) chiudiOv(); }; else o.onclick = null; return o; } // il tocco che apre la finestra non deve anche chiuderla
-function chiudiOv(){ const o = el('cqOv'); o.hidden = true; o.innerHTML = ''; }
-function aggiornaUI(){ if (root) root.classList.toggle('vuoto', !S); if (!S) return; const F = S.fz[S.io];
+function ov(html, chiudibile = true){ const o = el('cqOv'), t0 = performance.now(); o.classList.remove('scelta'); o.innerHTML = html; o.hidden = false; o.scrollTop = 0; if (chiudibile) o.onclick = e => { if (e.target === o && performance.now() - t0 > 450) chiudiOv(); }; else o.onclick = null; return o; } // il tocco che apre la finestra non deve anche chiuderla
+function chiudiOv(){ const o = el('cqOv'); o.hidden = true; o.innerHTML = ''; o.classList.remove('scelta'); }
+let RPREV = null;
+function volaNumeri(F){ const cur = {monete: F.monete, cibo: F.cibo, legna: F.legna}; if (!RPREV || RPREV.s !== S || RPREV.io !== S.io){ RPREV = {...cur, s: S, io: S.io}; return; }
+  const sp = el('cqRis').querySelectorAll(':scope > span'), ord = ['monete', 'cibo', 'legna']; ord.forEach((k, i) => { const d = cur[k] - RPREV[k]; if (!d || !sp[i]) return; const r = sp[i].getBoundingClientRect(), f = document.createElement('div'); f.className = 'cq-fl ' + (d > 0 ? 'su' : 'giu'); f.textContent = (d > 0 ? '+' : '−') + Math.abs(d); f.style.cssText = `left:${r.left + r.width/2}px;top:${r.bottom}px`; root.append(f); setTimeout(() => f.remove(), 1300); sp[i].classList.add('cq-bump'); });
+  Object.assign(RPREV, cur); }
+function aggiornaUI(){ if (root) root.classList.toggle('vuoto', !S || !!SCELTA); if (!S) return; const F = S.fz[S.io];
   el('cqTit').textContent = FZ[S.io].corto; el('cqStag').textContent = stagione(S.turno) + (S.veloce ? ' · ' + Math.min(S.turno, VEL.stag) + '/' + VEL.stag : '') + (S.dif && S.dif !== 'normale' ? ' · ' + DIFF[S.dif].nome : '');
   { const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); el('cqRis').innerHTML = `<span>${ico('moneta', 2)} ${F.monete}</span><span class="${dc < 0 ? 'meno' : ''}">${ico('castagna', 2)} ${F.cibo}<small>${dc >= 0 ? '+' : ''}${dc}</small></span><span>${ico('albero', 2)} ${F.legna}</span>`; }
-  el('cqMos').innerHTML = '<span class="cq-mt">Mosse</span> ' + Array.from({length:MOSSE}, (_, i) => `<i class="${i < S.mosse ? 'on' : ''}"></i>`).join('');
+  if (!SCELTA) volaNumeri(F); el('cqMos').innerHTML = '<span class="cq-mt">Mosse</span> ' + Array.from({length:MOSSE}, (_, i) => `<i class="${i < S.mosse ? 'on' : ''}"></i>`).join('');
   el('cqFine').disabled = !!GIOCA; el('cqFine').classList.toggle('pronto', S.mosse === 0 && !GIOCA); el('cqDip').disabled = !!GIOCA;
   { const fl = el('cqFlag'), stc = CAS && stemma(CAS.stemma, 1); if (stc){ fl.className = 'cq-flag cq-flagst'; fl.style.background = 'none'; fl.innerHTML = ''; const im = new Image(); im.src = stc.toDataURL(); im.width = 18; im.height = 21; fl.append(im); } else { fl.className = 'cq-flag'; fl.style.background = FZ[S.io].col; } } pannello(); }
 function barraAmic(v){ const [n, c] = livAmic(v); return `<span class="cq-am"><span class="cq-amb"><i style="left:${(v + 100)/2}%;background:${c}"></i></span><em style="color:${c}">${n}</em></span>`; }
@@ -7114,18 +7206,49 @@ function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioc
 let DIFSC = null; const difScelta = () => { if (!DIFSC){ try { DIFSC = localStorage.getItem(KDIF); } catch(e){} } return DIFF[DIFSC] ? DIFSC : 'normale'; };
 const velScelta = () => { try { return localStorage.getItem(KVEL) === '1'; } catch(e){ return false; } };
 const velTesto = () => velScelta() ? `${VEL.stag} stagioni, circa 15 minuti. Si parte più ricchi, la Grande Fiera costa meno e la pace serve per ${VEL.pace} stagioni. Alla fine vince chi ha più punti: terre, borghi, Grande Fiera, alleati e strutture. Gloria ×0,6.` : 'Senza limite di stagioni: vinci con la conquista, la Grande Fiera o la pace.';
-function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){}
-  const o = ov(`<div class="dlg box cq-dlg cq-scegli"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Quale borgo difendi?</h2>${CAS ? `<button type="button" class="cq-casb" id="cqCas">${imgStemma(CAS.stemma, 2)}<span><b>Casata ${CAS.nome}</b><small>${LIVC[livCas(CAS.gloria)][1]} · ${(CAS.gen || 0) + 1}ª generazione</small></span><em>Cronaca ›</em></button>` : ''}<p>Rinforza il tuo borgo, fai amicizie e conquista gli altri due.</p>
-    <div class="cq-dif" role="radiogroup" aria-label="Difficoltà">${Object.keys(DIFF).map(k => `<button type="button" role="radio" data-dif="${k}" aria-checked="${k === difScelta() ? 'true' : 'false'}">${DIFF[k].nome}</button>`).join('')}</div><p class="cq-nota" id="cqDifT">${DIFF[difScelta()].desc}</p>
-    <div class="cq-dif cq-vel" role="radiogroup" aria-label="Durata">${[['lunga', 'Partita lunga'], ['veloce', 'Partita veloce']].map(([k, n]) => `<button type="button" role="radio" data-vel="${k}" aria-checked="${(k === 'veloce') === velScelta() ? 'true' : 'false'}">${n}</button>`).join('')}</div><p class="cq-nota" id="cqVelT">${velTesto()}</p>
-    <div class="cq-list">${Object.keys(FZ).map(f => `<button class="cq-bo" data-f="${f}" style="--c:${FZ[f].col}"><canvas data-sp="${f}"></canvas><span class="cq-bt"><b>${FZ[f].nome}</b><span class="cq-v">${ico('stella', 2)} ${FZ[f].vant}</span><span class="cq-d">${ico('attenzione', 2)} ${FZ[f].diff}</span>${rec[f] ? `<small>Record: vinto in ${rec[f]} stagioni</small>` : ''}</span></button>`).join('')}</div>
-    <button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
-  o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*2.5 + 'px'; c.style.height = im.height*2.5 + 'px'; });
-  o.querySelectorAll('[data-dif]').forEach(b => b.onclick = () => { try { localStorage.setItem(KDIF, b.dataset.dif); } catch(e){} DIFSC = b.dataset.dif; o.querySelectorAll('[data-dif]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqDifT').textContent = DIFF[b.dataset.dif].desc; suona('tocco'); });
-  o.querySelectorAll('[data-vel]').forEach(b => b.onclick = () => { const v = b.dataset.vel === 'veloce'; try { localStorage.setItem(KVEL, v ? '1' : '0'); } catch(e){} o.querySelectorAll('[data-vel]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqVelT').textContent = velTesto(); suona('tocco'); });
-  o.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { suona('banner'); nuova(b.dataset.f, difScelta(), false, velScelta()); chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); }); });
-  const cb = o.querySelector('#cqCas'); if (cb) cb.onclick = () => dlgCasata();
-  o.querySelector('#cqMe').onclick = esci; }
+// la scelta del borgo: la mappa vera dietro, il borgo scelto si illumina e la telecamera ci vola sopra
+let SCELTA = null, VOLO = null;
+const DOVE = {smerillo:'In alto sulla mappa, a nord, sopra la valle del Tenna.', sanmartino:'A sinistra sulla mappa, a ovest, in mezzo ai boschi.', ceresola:'In basso a destra, a sud-est, tra campi e vigne.'};
+function volaSu(f){ const L = IDS.filter(t => S.terre[t].own === f); let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (const t of L){ const T = TERRE[t]; x0 = Math.min(x0, T.x); y0 = Math.min(y0, T.y); x1 = Math.max(x1, T.x); y1 = Math.max(y1, T.y); }
+  const r = el('cqStage').getBoundingClientRect(), b = root.querySelector('#cqOv .cq-scbox'), br = b ? b.getBoundingClientRect() : null, lato = !!br && br.width < r.width*.6;
+  const vis = br ? (lato ? {l: br.right - r.left + 10, t: 10, r: 10, b: 10} : {l: 10, t: 10, r: 10, b: r.bottom - br.top + 10}) : {l:10, t:10, r:10, b:10};
+  const iw = W - vis.l - vis.r, ih = H - vis.t - vis.b, s0 = Math.max(fitS*.9, Math.min(1.1, Math.min(iw/(x1 - x0 + 260), ih/(y1 - y0 + 220))));
+  VOLO = {wx:(x0 + x1)/2, wy:(y0 + y1)/2, s:s0, cx: W/2 - 0, vis}; }
+function passoVolo(dt){ if (!VOLO) return; const V = VOLO, k = Math.min(1, dt*4), cx0 = V.vis.l + (W - V.vis.l - V.vis.r)/2, cy0 = V.vis.t + (H - V.vis.t - V.vis.b)/2;
+  const wx = (cx0 - cam.x)/cam.s, wy = (cy0 - cam.y)/cam.s, nx = wx + (V.wx - wx)*k, ny = wy + (V.wy - wy)*k; cam.s += (V.s - cam.s)*k; cam.x = cx0 - nx*cam.s; cam.y = cy0 - ny*cam.s;
+  if (Math.abs(V.s - cam.s) < .004 && Math.hypot(V.wx - nx, V.wy - ny) < 2) VOLO = null; }
+function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){} leggiCas();
+  if (!SCELTA || !FZ[SCELTA]) SCELTA = 'smerillo'; nuova(SCELTA, difScelta(), true, false); sel = null; root.classList.add('vuoto');
+  const vicine = f => { const fr = new Set(); for (const t of IDS) if (S.terre[t].own === f) for (const v of VIC[t]) if (TERRE[v].fraz && S.terre[v].own !== f) fr.add(TERRE[v].nome); return [...fr]; };
+  const info = f => { const E = S.fz[f].ed, ter = IDS.filter(t => S.terre[t].own === f).length, so = IDS.filter(t => S.terre[t].own === f).reduce((a, t) => a + S.terre[t].sold, 0), vc = vicine(f);
+    return `<div class="cq-scdet" style="--c:${FZ[f].col}"><div class="cq-scnome"><canvas data-sp="${f}"></canvas><span><b>${FZ[f].nome}</b><small>${ico('pin', 2)} ${DOVE[f]}</small></span></div>
+      <div class="cq-scst"><span>${ico('spada', 2)}<b>${so}</b><small>soldati</small></span><span>${ico('mappa', 2)}<b>${ter}</b><small>terre</small></span><span>${ico('scudo', 2)}<b>${E.mura}</b><small>mura</small></span></div>
+      <p class="cq-v">${ico('stella', 2)} ${FZ[f].vant}</p><p class="cq-d">${ico('attenzione', 2)} ${FZ[f].diff}</p>
+      ${vc.length ? `<p class="cq-nota">Frazioni vicine da conquistare: ${vc.join(', ')}.</p>` : ''}${rec[f] ? `<p class="cq-nota">${ico('coppa', 2)} Il tuo record: vinto in ${rec[f]} stagioni.</p>` : ''}</div>`; };
+  const o = ov(`<div class="dlg box cq-dlg cq-scbox"><div class="cq-schead"><span class="kicker">${ico('bandiera', 2)} Conquista</span>${CAS ? `<button type="button" class="cq-casmini" id="cqCas">${imgStemma(CAS.stemma, 1)} Casata ${CAS.nome} <em>›</em></button>` : ''}</div>
+    <h2>Scegli il tuo borgo</h2>
+    <div class="cq-sctab" role="tablist">${Object.keys(FZ).map(f => `<button type="button" role="tab" class="cq-sct" data-t="${f}" style="--c:${FZ[f].col}"><canvas data-sp="${f}"></canvas><span>${FZ[f].corto}</span></button>`).join('')}</div>
+    <div id="cqScDet"></div>
+    <details class="cq-scopt"><summary><span>${ico('altro', 2)} Impostazioni</span><b id="cqOptT"></b></summary>
+      <div class="cq-dif" role="radiogroup" aria-label="Difficoltà">${Object.keys(DIFF).map(k => `<button type="button" role="radio" data-dif="${k}" aria-checked="${k === difScelta() ? 'true' : 'false'}">${DIFF[k].nome}</button>`).join('')}</div><p class="cq-nota" id="cqDifT">${DIFF[difScelta()].desc}</p>
+      <div class="cq-dif cq-vel" role="radiogroup" aria-label="Durata">${[['lunga', 'Partita lunga'], ['veloce', 'Partita veloce']].map(([k, n]) => `<button type="button" role="radio" data-vel="${k}" aria-checked="${(k === 'veloce') === velScelta() ? 'true' : 'false'}">${n}</button>`).join('')}</div><p class="cq-nota" id="cqVelT">${velTesto()}</p></details>
+    <button type="button" class="cq-link" id="cqMe">Torna al menu</button><div class="cq-scvai"><button class="big" id="cqVai"></button></div></div><div class="cq-schip">${ico('pin', 2)} Tocca un borgo sulla mappa</div>`, false);
+  o.classList.add('scelta');
+  const disegnaSp = () => o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp), z = c.closest('.cq-sct') ? 1.6 : 2.2; c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*z + 'px'; c.style.height = im.height*z + 'px'; });
+  const opt = () => { o.querySelector('#cqOptT').textContent = DIFF[difScelta()].nome + ' · ' + (velScelta() ? 'veloce' : 'lunga'); };
+  const mostra = (f, vola = true) => { SCELTA = f; S.io = f; o.querySelectorAll('.cq-sct').forEach(b => { b.classList.toggle('on', b.dataset.t === f); b.setAttribute('aria-selected', b.dataset.t === f); });
+    const d = o.querySelector('#cqScDet'); d.innerHTML = info(f); d.classList.remove('cq-entra'); void d.offsetWidth; d.classList.add('cq-entra');
+    o.querySelector('#cqVai').innerHTML = `Difendi ${FZ[f].corto} ${ico('play', 2)}`; o.querySelector('#cqVai').style.setProperty('--c', FZ[f].col); disegnaSp(); tintKey = ''; if (vola) requestAnimationFrame(() => volaSu(f)); };
+  SCELTA_MOSTRA = f => { suona('tocco'); mostra(f); };
+  o.querySelectorAll('.cq-sct').forEach(b => b.onclick = () => SCELTA_MOSTRA(b.dataset.t));
+  o.querySelectorAll('[data-dif]').forEach(b => b.onclick = () => { try { localStorage.setItem(KDIF, b.dataset.dif); } catch(e){} DIFSC = b.dataset.dif; o.querySelectorAll('[data-dif]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqDifT').textContent = DIFF[b.dataset.dif].desc; opt(); suona('tocco'); });
+  o.querySelectorAll('[data-vel]').forEach(b => b.onclick = () => { const v = b.dataset.vel === 'veloce'; try { localStorage.setItem(KVEL, v ? '1' : '0'); } catch(e){} o.querySelectorAll('[data-vel]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqVelT').textContent = velTesto(); opt(); suona('tocco'); });
+  o.querySelector('#cqVai').onclick = () => { const f = SCELTA; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; suona('banner'); o.classList.remove('scelta'); nuova(f, difScelta(), false, velScelta()); chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); }); };
+  const cb = o.querySelector('#cqCas'); if (cb) cb.onclick = () => { const f = SCELTA; o.classList.remove('scelta'); dlgCasata(); const ok = el('cqOv').querySelector('#cqNo'); if (ok) ok.onclick = () => scegli(); };
+  o.querySelector('#cqMe').onclick = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; S = null; o.classList.remove('scelta'); esci(); };
+  { const dt = o.querySelector('.cq-scopt'); dt.ontoggle = () => { if (dt.open) setTimeout(() => dt.scrollIntoView({block:'end', behavior:'smooth'}), 30); }; }
+  opt(); misura(); centra(); mostra(SCELTA, false); setTimeout(() => volaSu(SCELTA), 350); }
+let SCELTA_MOSTRA = null;
 function dlgAnno(dopo){ const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f => f !== S.io);
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} Comincia una nuova generazione</span><h2>${A.nome}</h2><div class="cq-anno">${ico(A.ic, 4)}<p>${A.desc}</p></div>
     ${S.veloce ? `<p class="cq-ok">${ico('clessidra', 2)} Partita veloce: ${VEL.stag} stagioni. Alla fine vince chi ha più punti: terre, borghi, Grande Fiera, alleati e strutture.</p>` : ''}<p>I tuoi vicini sono ${altri.map(f => '<b>' + FZ[f].nome + '</b>').join(' e ')}. Ognuno ha un <b>carattere</b> (guerriero, mercante, traditore o timoroso), ma ancora non sai quale: lo scoprirai giocando.</p>
@@ -7152,6 +7275,8 @@ function costruisciDom(){ root = document.createElement('section'); root.id = 'c
     <div class="cq-side"><div id="cqPan"></div><nav class="cq-bar"><button class="big alt" id="cqDip">${ico('amici', 2)} Diplomazia</button><button class="big" id="cqFine">Fine stagione ${ico('play', 2)}</button></nav></div>
     <section id="cqOv" class="overlay" hidden></section>`;
   document.body.append(root); cv = el('cqCv'); ctx = cv.getContext('2d'); inputMappa();
+  root.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b || b.disabled || !root.contains(b)) return; const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height)*2.2, sp = document.createElement('span'); sp.className = 'cq-rip'; sp.style.cssText = `left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px;width:${d}px;height:${d}px`; b.append(sp); setTimeout(() => sp.remove(), 520);
+    const bu = document.createElement('div'); bu.className = 'cq-burst'; bu.style.cssText = `left:${e.clientX}px;top:${e.clientY}px`; for (let i = 0; i < 8; i++){ const q = document.createElement('i'), a = i/8*Math.PI*2 + Math.random()*.4, v = 22 + Math.random()*16; q.style.setProperty('--dx', Math.cos(a)*v + 'px'); q.style.setProperty('--dy', Math.sin(a)*v + 'px'); q.style.background = ['#ffd03a', '#ffffff', '#ffe98a'][i % 3]; bu.append(q); } root.append(bu); setTimeout(() => bu.remove(), 560); }, {passive: true});
   el('cqPausa').onclick = pausa; el('cqRis').onclick = dlgBilancio; el('cqDip').onclick = () => dlgDiplomazia(); el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
   el('cqFine').onclick = () => { if (GIOCA || !S) return; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
       o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fineStagione(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fineStagione(); };
@@ -7170,7 +7295,7 @@ function avviaCQ(){ if (!leggiCas()){ root.classList.add('vuoto'); misura(); cen
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
     o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
   else { S = null; aggiornaUI(); scegli(); misura(); centra(); } }
-function esci(){ attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', 'modi'); } catch(e){} mostraMenu(); }
+function esci(){ if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', 'modi'); } catch(e){} mostraMenu(); }
 function tasto(e, k){ const o = el('cqOv');
   if (o && !o.hidden){ if (k === 'Escape'){ e.preventDefault(); const b = o.querySelector('#cqNo, #cqRi'); if (b) b.click(); } else if (k === 'Enter'){ const b = o.querySelector('.big:not(.alt):not(:disabled)'); if (b){ e.preventDefault(); b.click(); } } return; }
   if (k === ' ' || k === 'Enter'){ e.preventDefault(); el('cqFine').click(); } else if (k === 'Escape'){ e.preventDefault(); if (modo){ modo = null; pannello(); } else if (sel){ sel = null; pannello(); } else pausa(); }
