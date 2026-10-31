@@ -5918,7 +5918,7 @@ const perse = t => terreDelBorgo(t).filter(x => S.terre[x].own !== t).length; //
 const puoAssediare = (t, f) => !(TERRE[t].borgo && eBorgo(t)) || perse(t) >= ASSEDIO;
 // strutture da costruire nelle terre conquistate (fuori dal borgo)
 const STR = {
-  fattoria:{nome:'Fattoria', ic:'trifoglio', max:3, costi:[[5,4],[9,7],[14,11]], desc:'+2 cibo ogni stagione per livello.', dove: t => TERRE[t].c > 0 && !TERRE[t].borgo},
+  fattoria:{nome:'Castagneto', ic:'castagna', max:3, costi:[[5,4],[9,7],[14,11]], desc:'Castagni e orto: +2 cibo ogni stagione per livello.', dove: t => TERRE[t].c > 0 && !TERRE[t].borgo},
   segheria:{nome:'Segheria', ic:'albero', max:3, costi:[[5,2],[9,4],[14,7]], desc:'+2 legna ogni stagione per livello.', dove: t => TERRE[t].l > 0 && !TERRE[t].borgo},
   mercato: {nome:'Mercato', ic:'moneta', max:3, costi:[[10,8],[16,12],[24,18]], desc:'+3 monete ogni stagione per livello, e +1 da ogni accordo commerciale.', dove: t => TERRE[t].fraz},
   caserma: {nome:'Caserma', ic:'bandiera', max:1, costi:[[10,10]], desc:'Puoi arruolare soldati anche qui, vicino al fronte.', dove: t => TERRE[t].fraz},
@@ -6090,6 +6090,43 @@ function terraIn(sx, sy){ const [x, y] = aMappa(sx, sy); if (x < 0 || y < 0 || x
   return best || IDS[idx[Math.floor(y/Q)*GW + Math.floor(x/Q)]]; }
 function bersagli(){ if (!modo) return []; if (modo.tipo === 'sposta'){ if (!modo.lista) modo.lista = Object.keys(collegate(S.io, modo.da)).filter(t => t !== modo.da); return modo.lista; } return []; }
 function frame(Tm, dt){ if (!attivo || !ctx || !cB) return; try { disegna(Tm, dt); } catch(e){ console.error(e); } }
+// ogni costruzione ha il suo disegno in pixel, che cresce coi livelli
+const SPRS = {}, NATI = {}; // NATI: quando è stata costruita una cosa (per l'animazione)
+const nasce = (t, k) => { NATI[t + '|' + k] = performance.now(); };
+function spriteStr(k, lv){ const key = k + lv; if (SPRS[key]) return SPRS[key]; const c = document.createElement('canvas'), g = c.getContext('2d'), P = (col, x, y, w = 1, h = 1) => { g.fillStyle = PAL[col] || col; g.fillRect(x, y, w, h); };
+  const albero = (x, y) => { P('B', x + 2, y + 5, 1, 3); P('k', x, y, 5, 5); P('G', x, y + 1, 5, 3); P('g', x + 1, y, 3, 2); P('l', x + 1, y, 1, 1); P('b', x + 3, y + 3, 1, 1); P('b', x + 1, y + 2, 1, 1); };
+  const casetta = (x, y, w, h, tetto) => { P('k', x - 1, y - 3, w + 2, h + 4); P(tetto, x, y - 2, w, 2); P(tetto === 'r' ? 'R' : 'B', x, y - 1, w, 1); P('e', x, y, w, h); P('E', x + w - 1, y, 1, h); P('k', x + 1, y + h - 2, 1, 2); };
+  if (k === 'fattoria'){ const n = [2, 4, 6][lv - 1]; c.width = 30; c.height = 22; // l'orto coi solchi e i castagni
+    P('A', 1, 13, 28, 8); for (let i = 0; i < 4; i++) P('b', 2, 14 + i*2, 26, 1); for (let i = 0; i < 6; i++) P('g', 4 + i*4, 13 + (i % 2)*2, 2, 1);
+    for (let i = 0; i < n; i++) albero(1 + (i % 3)*9 + (i >= 3 ? 4 : 0), i >= 3 ? 1 : 6); if (lv >= 3) casetta(22, 6, 6, 4, 'r'); }
+  else if (k === 'segheria'){ c.width = 28; c.height = 20; casetta(3, 7, 10, 7, 'b'); P('n', 15, 6, 6, 6); P('N', 16, 7, 4, 4); P('k', 17, 8, 2, 2); // la ruota della sega
+    const tronchi = [3, 6, 9][lv - 1]; for (let i = 0; i < tronchi; i++){ const x = 14 + (i % 3)*4, y = 16 - Math.floor(i/3)*3; P('k', x, y, 4, 3); P('b', x, y, 4, 2); P('a', x, y, 1, 2); } }
+  else if (k === 'mercato'){ const n = lv + 1; c.width = 8 + n*8; c.height = 18; // le bancarelle col tendone a righe
+    for (let i = 0; i < n; i++){ const x = 2 + i*8, col = ['r', 'y', 'o', 'p'][i % 4]; P('k', x - 1, 5, 8, 6); for (let j = 0; j < 6; j++) P(j % 2 ? 'w' : col, x + j, 6, 1, 4); P('b', x, 10, 1, 6); P('b', x + 5, 10, 1, 6); P('a', x, 12, 6, 2); P(['y', 'r', 'g'][i % 3], x + 1, 11, 2, 1); } }
+  else if (k === 'caserma'){ c.width = 26; c.height = 24; casetta(3, 12, 14, 8, 'r'); P('k', 2, 18, 16, 3); for (let i = 3; i < 17; i += 2) P('n', i, 19, 1, 1); P('k', 5, 14, 2, 2); P('k', 12, 14, 2, 2); P('B', 9, 15, 2, 4); P('k', 20, 2, 1, 18); P('r', 21, 2, 5, 3); P('R', 21, 4, 5, 1); // la bandiera
+    for (const x of [6, 11]){ P('e', x, 21, 2, 1); P('w', x, 22, 2, 2); } }
+  else if (k === 'torre'){ c.width = 14; c.height = 26; P('k', 2, 4, 10, 22); P('n', 3, 5, 8, 20); P('N', 9, 5, 2, 20); for (let i = 0; i < 3; i++) P('k', 3 + i*3, 2, 2, 3); P('n', 3, 2, 2, 2); P('n', 6, 2, 2, 2); P('n', 9, 2, 2, 2); P('k', 6, 10, 2, 3); P('k', 6, 19, 2, 6); P('B', 6, 20, 2, 5); }
+  else if (k === 'mura'){ c.width = 60; c.height = 12; for (let i = 0; i < 60; i += 6){ P('k', i, 3, 6, 8); P('n', i, 4, 5, 6); P('N', i, 8, 5, 2); if (i % 12 === 0) P('k', i + 1, 1, 3, 3), P('n', i + 2, 2, 1, 2); }
+    if (lv >= 2) for (let i = 0; i < 60; i += 3) P('a', i, 10, 2, 1); if (lv >= 3){ P('k', 25, 0, 10, 11); P('n', 26, 1, 8, 9); P('B', 28, 4, 4, 7); } }
+  else if (k === 'torri'){ c.width = 12; c.height = 20; P('k', 1, 3, 10, 17); P('a', 2, 4, 8, 15); P('A', 8, 4, 2, 15); for (let i = 0; i < 3; i++) P('k', 2 + i*3, 1, 2, 3); P('k', 5, 9, 2, 3); }
+  else if (k === 'armeria'){ c.width = 20; c.height = 18; casetta(2, 8, 11, 7, 'b'); P('n', 14, 12, 5, 2); P('N', 15, 14, 3, 3); P('w', 15, 5, 1, 7); P('w', 18, 5, 1, 7); P('B', 14, 11, 6, 1); }
+  else if (k === 'meccanico'){ c.width = 24; c.height = 14; P('k', 1, 3, 22, 7); P('b', 2, 4, 20, 5); P('B', 2, 7, 20, 1); P('n', 19, 4, 4, 4); for (const x of [4, 15]){ P('k', x, 9, 4, 4); P('B', x + 1, 10, 2, 2); } }
+  else if (k === 'fiera'){ const n = lv*2; c.width = 10 + n*9; c.height = 22; for (let i = 0; i < n; i++){ const x = 3 + i*9, col = ['r', 'y', 'c', 'p', 'o', 'g'][i % 6]; for (let j = 0; j < 7; j++) P(col, x + 3 - Math.floor(j/2), 6 + j, 1 + 2*Math.floor(j/2), 1); P('w', x + 3, 4, 1, 3); P('k', x + 3, 8, 1, 5); }
+    for (let i = 0; i < c.width; i += 3) P(['r', 'y', 'c'][(i/3) % 3], i, 2 + (i % 6 ? 1 : 0), 2, 1); }
+  return SPRS[key] = c; }
+// dove si disegnano le costruzioni rispetto al numero dei soldati (così non si coprono)
+function costruzioni(t, ter){ const T = TERRE[t], st = ter[t], L = []; if (st.str) L.push([st.str, st.sl || 1, 44, 46]);
+  if (T.borgo && st.own === t && S && S.fz[t]){ const E = S.fz[t].ed; if (E.mura) L.push(['mura', E.mura, 0, 66]); if (E.torri){ L.push(['torri', E.torri, -72, 64]); if (E.torri >= 2) L.push(['torri', E.torri, 72, 64]); if (E.torri >= 3) L.push(['torri', E.torri, 0, -40]); }
+    if (E.armeria) L.push(['armeria', E.armeria, -78, 18]); if (E.meccanico) L.push(['meccanico', E.meccanico, 80, 18]); if (S.fz[t].opera) L.push(['fiera', S.fz[t].opera, 70, -34]); }
+  return L; }
+function disegnaCostruzioni(Tm){ const ter = VISTA || S.terre, now = performance.now(), z = cam.s*2;
+  for (const t of IDS){ const T = TERRE[t]; for (const [k, lv, ox, oy] of costruzioni(t, ter)){ const im = spriteStr(k, lv), [sx, sy] = aSchermo(T.x + ox, T.y + oy); if (sx < -80 || sy < -80 || sx > W + 80 || sy > H + 80) continue;
+    const w = im.width*z*1.2, h = im.height*z*1.2, nato = NATI[t + '|' + k], a = nato ? Math.min(1, (now - nato)/700) : 1;
+    if (a < 1){ // nasce: sale dal terreno con un piccolo rimbalzo, polvere e scintille
+      const e = 1 + 2.2*Math.pow(a - 1, 3) + 1.2*Math.pow(a - 1, 2), sc = Math.max(0, e); ctx.save(); ctx.translate(sx, sy); ctx.scale(1, sc); ctx.drawImage(im, -w/2, -h, w, h); ctx.restore();
+      for (let i = 0; i < 8; i++){ const ang = i/8*Math.PI*2, r = (10 + a*28)*z; ctx.globalAlpha = 1 - a; ctx.fillStyle = i % 2 ? '#e8dcc4' : '#b8a98c'; ctx.fillRect(sx + Math.cos(ang)*r - 3, sy + Math.sin(ang)*r*.4 - 3, 6, 6); }
+      ctx.fillStyle = '#ffd03a'; for (let i = 0; i < 6; i++){ const ang = i*1.7 + a*4; ctx.globalAlpha = Math.max(0, 1 - a*1.2); ctx.fillRect(sx + Math.cos(ang)*w*.6, sy - h*a - Math.sin(ang)*10, 3, 3); } ctx.globalAlpha = 1; }
+    else { ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fillRect(sx - w*.45, sy - 2, w*.9, 3*z); ctx.drawImage(im, sx - w/2, sy - h, w, h); } } } }
 const ICOIMG = {}; function icoImg(k){ if (ICOIMG[k]) return ICOIMG[k]; const im = new Image(); const m = /src="([^"]+)"/.exec(ico(k, 1)); if (m) im.src = m[1]; return ICOIMG[k] = im; }
 const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); ctx.fill(); };
 function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
@@ -6104,6 +6141,7 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
   for (const t of bersagli()){ ctx.globalAlpha = .2 + .25*pul; ctx.drawImage(maschera(t, '#ffd03a'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; evid(t, '#ffd03a', pul); }
   if (sel && !modo){ ctx.globalAlpha = .12 + .06*Math.sin(Tm*4); ctx.drawImage(maschera(sel, '#ffffff'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; evid(sel, '#ffffff', .7 + .3*Math.sin(Tm*4)); }
   if (modo && modo.da) evid(modo.da, '#ffd03a', 1);
+  if (cam.s >= .35) disegnaCostruzioni(Tm);
   const u = Math.max(.78, Math.min(1.35, .7 + cam.s*.45));
   for (const t of IDS){ const T = TERRE[t], [px, py] = aSchermo(T.x, T.y), own = ter[t].own;
     if (px < -80 || py < -80 || px > W + 80 || py > H + 80) continue;
@@ -6118,7 +6156,7 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre);
     if (own && own !== S.io && alleati(S.io, own)){ ctx.fillStyle = '#3ed46b'; rr(bx + bw - 4, by - 6, 9, 9, 3); }
     if (T.borgo && eBorgo(t) && S.fz[t].assedio && !VISTA){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('assedio', px, by + bh + F2 + 3); ctx.fillStyle = '#ff9a3a'; ctx.fillText('assedio', px, by + bh + F2 + 3); }
     if (!ter[t].str && !T.borgo && cam.s >= .5 && (T.c || T.l)){ const im = icoImg(T.c >= T.l ? 'castagna' : 'albero'); if (im.complete && im.width){ const w = Math.round(im.width*1.3*u), h = Math.round(im.height*1.3*u); ctx.globalAlpha = .9; ctx.drawImage(im, bx - w - 3, by + (bh - h)/2, w, h); ctx.globalAlpha = 1; } }
-    if (ter[t].str){ const im = icoImg(STR[ter[t].str].ic); if (im.complete && im.width){ const w = Math.round(im.width*1.6*u), h = Math.round(im.height*1.6*u); ctx.fillStyle = '#141433'; rr(bx + bw - 2, by - h + 4, w + 6, h + 6, 4); ctx.fillStyle = '#fff'; rr(bx + bw, by - h + 6, w + 2, h + 2, 3); ctx.drawImage(im, bx + bw + 1, by - h + 7, w, h); } }
+    if (ter[t].str && cam.s < .35){ const im = icoImg(STR[ter[t].str].ic); if (im.complete && im.width){ const w = Math.round(im.width*1.6*u), h = Math.round(im.height*1.6*u); ctx.fillStyle = '#141433'; rr(bx + bw - 2, by - h + 4, w + 6, h + 6, 4); ctx.fillStyle = '#fff'; rr(bx + bw, by - h + 6, w + 2, h + 2, 3); ctx.drawImage(im, bx + bw + 1, by - h + 7, w, h); } }
     if (DF().tregua >= S.turno && T.borgo && eBorgo(t)){ const F2 = Math.round(11*u); ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeText('tregua', px, by + bh + F2 + 3); ctx.fillStyle = '#ffd03a'; ctx.fillText('tregua', px, by + bh + F2 + 3); } }
   // i nomi sopra a tutto (solo borghi e frazioni: i terreni vuoti non hanno nome sulla mappa)
   for (const t of IDS){ const T = TERRE[t]; if (!(T.borgo || T.fraz)) continue; const [px, py] = aSchermo(T.x, T.y); if (px < -120 || py < -80 || px > W + 120 || py > H + 80) continue;
@@ -6227,11 +6265,11 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
   if (F.legna > 25 && F.cibo < 8){ F.legna -= 10; F.cibo += 7; } if (F.cibo > 30 && F.legna < 6){ F.cibo -= 10; F.legna += 7; } if (F.monete > 40 && F.cibo < 5){ F.monete -= 10; F.cibo += 6; } if (F.monete > 40 && F.legna < 5){ F.monete -= 10; F.legna += 6; }
   // 1. la Grande Fiera, se è al sicuro e ha le risorse
   const fase = F.opera || 0; if (mio && fase < 3 && az > 1 && inPace(f)){ const [cm, cl, cc] = OPERA[fase]; if (st0 !== 'guerra' && puoPagare(F, cm + 8, cl, cc + 4) && m < S.terre[f].sold*(st0 === 'economia' || st0 === 'diplofiera' ? 1.2 : .7) && rnd() < (st0 === 'economia' || st0 === 'diplofiera' ? .9 : .35)){ paga(F, cm, cl, cc); F.opera = fase + 1; az--;
-    news({t:'opera', f, testo: F.opera >= 3 ? `${FZ[f].corto} ha finito la Grande Fiera!` : `Attenzione: ${FZ[f].corto} costruisce la Grande Fiera (fase ${F.opera} di 3). Se la finisce, vince.`});
+    news({t:'opera', f, a:f, k:'fiera', testo: F.opera >= 3 ? `${FZ[f].corto} ha finito la Grande Fiera!` : `Attenzione: ${FZ[f].corto} costruisce la Grande Fiera (fase ${F.opera} di 3). Se la finisce, vince.`});
     if (F.opera >= 3){ S.vincitore = f; S.vitt = 'opera'; return; } } }
   // 2. costruire nel borgo
   const ordine = m > difB*.8 ? ['mura', 'torri', 'armeria', 'meccanico'] : rnd() < .5 ? ['armeria', 'mura', 'meccanico', 'torri'] : ['mura', 'armeria', 'torri', 'meccanico'];
-  if (mio && rnd() < (m > difB*.8 ? .9 : .4)) for (const k of ordine){ const c = costo(f, k), cl = costoL(f, k); if (c != null && puoPagare(F, c + 6, cl)){ paga(F, c, cl); F.ed[k]++; az--; news({t:'costr', f, testo:`${FZ[f].corto} costruisce: ${ED[k].nome} livello ${F.ed[k]}`}); break; } }
+  if (mio && rnd() < (m > difB*.8 ? .9 : .4)) for (const k of ordine){ const c = costo(f, k), cl = costoL(f, k); if (c != null && puoPagare(F, c + 6, cl)){ paga(F, c, cl); F.ed[k]++; az--; news({t:'costr', f, a:f, k, testo:`${FZ[f].corto} costruisce: ${ED[k].nome} livello ${F.ed[k]}`}); break; } }
   // 3. arruolare, ma solo i soldati che si possono sfamare
   const casIA = terreDi(f).find(t => S.terre[t].str === 'caserma' && fronte(f, t)), dove = (!mio || (casIA && !assediato(f) && m < S.terre[f].sold)) ? casIA : f;
   const sfama = Math.max(0, (prodCibo(f) + Math.floor(F.cibo/4))*MANGIANO - soldDi(f) + 2);
@@ -6244,7 +6282,7 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
     if (!scelta && !terreDi(f).some(t => S.terre[t].str === 'caserma')) scelta = migl('caserma', fr) || migl('caserma', mie);
     if (!scelta && rnd() < .6) scelta = migl('mercato', dietro) || migl('fattoria', dietro);
     if (!scelta) { const t = fr.find(t => S.terre[t].sold >= 4 && !S.terre[t].str); if (t) scelta = [t, 'torre', 0]; }
-    if (scelta){ const [t, k, lv] = scelta, c = costoStr(f, k, lv); if (c && puoPagare(F, c[0] + 3, c[1])){ paga(F, c[0], c[1]); S.terre[t].str = k; S.terre[t].sl = lv + 1; az--; news({t:'str', f, muto: true, testo:`${FZ[f].corto} costruisce: ${STR[k].nome}${lv ? ' livello ' + (lv + 1) : ''} a ${TERRE[t].nome}`}); } } }
+    if (scelta){ const [t, k, lv] = scelta, c = costoStr(f, k, lv); if (c && puoPagare(F, c[0] + 3, c[1])){ paga(F, c[0], c[1]); S.terre[t].str = k; S.terre[t].sl = lv + 1; az--; news({t:'str', f, a:t, k, muto: true, testo:`${FZ[f].corto} costruisce: ${STR[k].nome}${lv ? ' livello ' + (lv + 1) : ''} a ${TERRE[t].nome}`}); } } }
   // 5. attaccare, oppure portare i soldati al fronte
   let giri = 0; while (az > 0 && giri++ < 8){ let best = null;
     for (const src of terreDi(f)){ const tieni = src === f ? guardiaBorgo(f) : 1, n = S.terre[src].sold - tieni; if (n < 2) continue;
@@ -6312,6 +6350,7 @@ function passo(){ const G = GIOCA; if (!G) return; if (G.i >= G.ev.length){ GIOC
   if (e.t === 'att' && !visibile(e.a)) guarda(e.a);
   if (e.t === 'att'){ const col = FZ[e.f].col; ANIM.push({pts: stradaVerso(e.da, e.a), t:0, dur:.75, col, fine: () => { VISTA = e.snap; FLASH.push({a:e.a, t:0, col: e.ok ? col : '#f8f8f0'}); suona(e.ok ? 'boom' : 'tonfo'); setTimeout(passo, 520); }}); }
   else if (e.t === 'mov'){ if (!visibile(e.a) && !visibile(e.da)){ VISTA = e.snap; setTimeout(passo, 10); return; } ANIM.push({pts: cammino(e.p), t:0, dur:.55, col:FZ[e.f].col, fine: () => { VISTA = e.snap; setTimeout(passo, 120); }}); }
+  else if ((e.t === 'str' || e.t === 'costr' || e.t === 'opera') && e.a && visibile(e.a)){ VISTA = e.snap; nasce(e.a, e.k); suona('costruisci'); setTimeout(passo, 750); }
   else { VISTA = e.snap; if (!e.muto) suona(e.t === 'costr' ? 'costruisci' : e.t === 'regalo' ? 'moneta' : 'flip'); setTimeout(passo, e.muto ? 260 : 700); } }
 const visibile = t => { const [x, y] = aSchermo(TERRE[t].x, TERRE[t].y); return x > INS.l + 20 && x < W - INS.r - 20 && y > INS.t + 20 && y < H - INS.b - 20; };
 function guarda(t){ const T = TERRE[t]; CAMT = {x: INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s, y: INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s}; }
@@ -6362,7 +6401,7 @@ function prodTerra(t){ const T = TERRE[t], st = S.terre[t], c = T.c + (st.str ==
   return [m ? m + ' ' + (m === 1 ? 'moneta' : 'monete') : '', c ? c + ' cibo' : '', l ? l + ' legna' : ''].filter(Boolean).join(', ') + ' a stagione'; }
 function consigli(){ const f = S.io, F = S.fz[f], dc = prodCibo(f, S.turno + 1) - mangia(f), L = [];
   const fo = vivi().find(g => g !== f && (S.fz[g].opera || 0) >= 1); if (fo) L.push(`${ico('attenzione', 2)} ${FZ[fo].corto} costruisce la Grande Fiera (${S.fz[fo].opera}/3): attacca le sue terre per fermarla.`);
-  if (dc < 0) L.push(`${ico('castagna', 2)} Il cibo cala di ${-dc} a stagione. Costruisci una <b>Fattoria</b> su un campo (sulla mappa hanno la castagna) o scambia al mercato.`);
+  if (dc < 0) L.push(`${ico('castagna', 2)} Il cibo cala di ${-dc} a stagione. Pianta un <b>Castagneto</b> su un campo (sulla mappa hanno la castagna) o scambia al mercato.`);
   if (F.legna < 8 && prodLegna(f) < 4) L.push(`${ico('albero', 2)} Ti serve legna: costruisci una <b>Segheria</b> in un bosco (sulla mappa hanno l’albero) o scambia al mercato.`);
   if (F.monete >= 45) L.push(`${ico('moneta', 2)} Hai tante monete: migliora le strutture o costruisci la <b>Grande Fiera</b> nel tuo borgo.`);
   if (!L.length) L.push(`${ico('lampadina', 2)} Tocca una tua terra per costruire, una terra vicina per attaccare. Scambi e patti sono in <b>Diplomazia</b>.`);
@@ -6373,8 +6412,8 @@ function dlgCostruisci(){ const F = S.fz[S.io], fase = F.opera || 0, op = OPERA[
     return `<button class="cq-it" data-k="${k}" ${c == null || !puoPagare(F, c, cl) ? 'disabled' : ''}><span class="cq-ii">${ico(ED[k].ic, 3)}</span><span class="cq-it-t"><b>${ED[k].nome} <small>livello ${l} di ${ED[k].max}</small></b><small>${ED[k].desc}</small></span><span class="cq-pr">${c == null ? 'Max' : prezzo(c, cl)}</span></button>`; }).join('')}
     <button class="cq-it cq-opera" id="cqOp" ${!op || !puoPagare(F, ...op) || !inPace(S.io) ? 'disabled' : ''}><span class="cq-ii">${ico('coppa', 3)}</span><span class="cq-it-t"><b>La Grande Fiera <small>fase ${fase} di 3</small></b><small>Una grande festa che porta gente da tutte le Marche. Quando finisci la fase 3, <b>vinci</b>. Si costruisce solo in pace: ${inPace(S.io) ? 'ora puoi.' : `hai combattuto contro un borgo da poco, aspetta ${PACE_FIERA - (S.turno - S.fz[S.io].guerra)} ${PACE_FIERA - (S.turno - S.fz[S.io].guerra) === 1 ? 'stagione' : 'stagioni'}.`} Gli altri borghi cercheranno di fermarti.</small></span><span class="cq-pr">${op ? prezzo(...op) : 'Fatta'}</span></button></div><button class="big alt" id="cqNo">Indietro</button></div>`);
   o.querySelector('#cqNo').onclick = chiudiOv;
-  o.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const k = b.dataset.k, c = costo(S.io, k), cl = costoL(S.io, k); if (c == null || !puoPagare(F, c, cl)) return; paga(F, c, cl); F.ed[k]++; suona('costruisci'); chiudiOv(); FLASH.push({a:S.io, t:0, col:'#f8d048'}); usaMossa(); toast(`${ED[k].nome}: livello ${F.ed[k]}`); });
-  o.querySelector('#cqOp').onclick = () => { if (!op || !puoPagare(F, ...op) || !inPace(S.io)) return; paga(F, ...op); F.opera = fase + 1; suona('stella2'); chiudiOv(); FLASH.push({a:S.io, t:0, col:'#ffd03a'}); usaMossa();
+  o.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const k = b.dataset.k, c = costo(S.io, k), cl = costoL(S.io, k); if (c == null || !puoPagare(F, c, cl)) return; paga(F, c, cl); F.ed[k]++; nasce(S.io, k); suona('costruisci'); chiudiOv(); FLASH.push({a:S.io, t:0, col:'#f8d048'}); usaMossa(); toast(`${ED[k].nome}: livello ${F.ed[k]}`); });
+  o.querySelector('#cqOp').onclick = () => { if (!op || !puoPagare(F, ...op) || !inPace(S.io)) return; paga(F, ...op); F.opera = fase + 1; nasce(S.io, 'fiera'); suona('stella2'); chiudiOv(); FLASH.push({a:S.io, t:0, col:'#ffd03a'}); usaMossa();
     if (F.opera >= 3){ S.vincitore = S.io; S.vitt = 'opera'; S.fine = 'vinto'; salva(); finePartita(); } else toast(`Grande Fiera: fase ${F.opera} di 3. Gli altri borghi ti tengono d’occhio!`); }; }
 function slider(max, val, min = 1){ return `<div class="cq-sl"><button type="button" class="hbtn" data-d="-1">−</button><input type="range" min="${min}" max="${max}" value="${val}" id="cqN"><button type="button" class="hbtn" data-d="1">+</button><b id="cqNv">${val}</b></div>`; }
 function legaSlider(o, agg){ const r = o.querySelector('#cqN'), f = () => { o.querySelector('#cqNv').textContent = r.value; agg(+r.value); }; r.oninput = f; o.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { r.value = Math.max(+r.min, Math.min(+r.max, +r.value + +b.dataset.d)); f(); }); f(); }
@@ -6387,12 +6426,12 @@ function dlgStruttura(t){ const F = S.fz[S.io], st = S.terre[t], ks = st.str ? [
   const o = ov(`<div class="dlg box cq-dlg"><h2>${st.str ? 'Migliora' : 'Costruisci'} a ${TERRE[t].nome}</h2><p>Hai ${prezzo(F.monete, F.legna)}. ${st.str ? 'Ogni livello produce di più.' : 'In ogni terra c’è posto per una sola struttura, che poi puoi migliorare.'} Se perdi la terra, passa a chi la conquista. Usa 1 mossa.</p><div class="cq-list">${ks.map(k => { const c = costoStr(S.io, k, lv);
     return `<button class="cq-it" data-s="${k}" ${!c || !puoPagare(F, c[0], c[1]) ? 'disabled' : ''}><span class="cq-ii">${ico(STR[k].ic, 3)}</span><span class="cq-it-t"><b>${STR[k].nome}${STR[k].max > 1 ? ` <small>livello ${lv + 1} di ${STR[k].max}</small>` : ''}</b><small>${STR[k].desc}</small><small class="cq-eff">${effetto(k, t)}</small></span><span class="cq-pr">${c ? prezzo(c[0], c[1]) : 'Max'}</span></button>`; }).join('')}</div><button class="big alt" id="cqNo">Indietro</button></div>`);
   o.querySelector('#cqNo').onclick = chiudiOv;
-  o.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { const k = b.dataset.s, c = costoStr(S.io, k, lv); if (!c || !puoPagare(F, c[0], c[1])) return; paga(F, c[0], c[1]); st.str = k; st.sl = lv + 1; suona('costruisci'); chiudiOv(); FLASH.push({a:t, t:0, col:'#f8d048'}); usaMossa(); toast(`${STR[k].nome}${lv ? ' livello ' + (lv + 1) : ''} a ${TERRE[t].nome}`); }); }
+  o.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { const k = b.dataset.s, c = costoStr(S.io, k, lv); if (!c || !puoPagare(F, c[0], c[1])) return; paga(F, c[0], c[1]); st.str = k; st.sl = lv + 1; nasce(t, k); suona('costruisci'); chiudiOv(); FLASH.push({a:t, t:0, col:'#f8d048'}); usaMossa(); toast(`${STR[k].nome}${lv ? ' livello ' + (lv + 1) : ''} a ${TERRE[t].nome}`); }); }
 function dlgAiuto(){ const sez = [
     ['moneta', 'Monete', 'Arrivano dalle terre, dai mercati e dagli accordi. Servono per arruolare soldati e costruire.'],
     ['castagna', 'Cibo', `Viene dai campi, dalle vigne e dalle fattorie. Ogni ${MANGIANO} soldati mangiano 1 cibo a stagione: se finisce, i soldati se ne vanno. In autunno le castagne danno di più, in inverno meno.`],
     ['albero', 'Legna', 'Viene dai boschi e dalle segherie. Serve per mura, torri, strutture e per la Grande Fiera.'],
-    ['martello', 'Costruire nelle terre', 'Tocca una tua terra e premi Costruisci qui. Fattoria sui campi (cibo), Segheria nei boschi (legna), Mercato nelle frazioni (monete). Poi premi Migliora: fino al livello 3.'],
+    ['martello', 'Costruire nelle terre', 'Tocca una tua terra e premi Costruisci qui. Castagneto sui campi (cibo), Segheria nei boschi (legna), Mercato nelle frazioni (monete). Poi premi Migliora: fino al livello 3.'],
     ['casa', 'Le frazioni crescono', `Se una frazione resta in pace per ${CRESCE} stagioni passa da casale a villaggio a paese, e produce più monete e cibo. Se c’è una battaglia, cala.`],
     ['amici', 'Amici e nemici', 'Patto: 8 stagioni senza attaccarvi. Accordo: 3 monete in più e scambi più convenienti. Alleanza: vi aiutate in battaglia. Con questi l’amicizia sale da sola a ogni stagione.'],
     ['stella', 'Reputazione', 'Se rompi un patto o un’alleanza attaccando, la reputazione crolla e nessuno vuole più trattare con te. Aiutare chi te lo chiede la fa salire.'],
@@ -6511,7 +6550,7 @@ function finePartita(){ const vinto = S.fine === 'vinto', vt = S.vitt || 'conqui
 function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioca</h2><div class="how">
     <span>1</span><span>Si gioca a <b>stagioni</b>: hai <b>${MOSSE} mosse</b>, poi premi <b>Fine stagione</b> e muovono gli altri borghi.</span>
     <span>2</span><span>Hai tre risorse: <b>monete</b>, <b>cibo</b> e <b>legna</b>. Ogni ${MANGIANO} soldati mangiano 1 cibo: senza cibo i soldati se ne vanno. Tocca le risorse in alto per il bilancio.</span>
-    <span>3</span><span>Nelle tue terre costruisci e migliori <b>fattorie</b> (cibo), <b>segherie</b> (legna), <b>mercati</b> (monete). In pace le frazioni crescono e rendono di più.</span>
+    <span>3</span><span>Nelle tue terre costruisci e migliori <b>castagneti</b> (cibo), <b>segherie</b> (legna), <b>mercati</b> (monete). In pace le frazioni crescono e rendono di più.</span>
     <span>4</span><span>Avanza <b>una terra alla volta</b> con <b>Attacca</b> e <b>Sposta</b>. Un borgo si attacca quando ha perso ${ASSEDIO} delle sue terre: da lì è sotto assedio.</span>
     <span>5</span><span>In <b>Diplomazia</b>: scambi (senza mosse), regali, patti, accordi e alleanze. Gli altri borghi ti chiederanno aiuto. Se tradisci, la reputazione crolla.</span>
     <span>6</span><span>Tre modi per vincere: <b>conquista</b> tutti i borghi, finisci la <b>Grande Fiera</b> nel tuo borgo, oppure resta <b>alleato di tutti</b> per 8 stagioni.</span></div><button class="big" id="cqOk">Ho capito</button></div>`, false);
@@ -6567,7 +6606,7 @@ function tasto(e, k){ const o = el('cqOv');
   else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
-return {apri, frame, tasto, get attivo(){ return attivo; }, _test:{simula, calcola: ev => calcolaStagione(ev), vai: t => vaiA(t), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {apri, frame, tasto, get attivo(){ return attivo; }, _test:{simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 let last = performance.now(), T = 0;
