@@ -4397,7 +4397,7 @@ function mostraMenu(pannello){
     </div>`;
     // le pagine si scorrono col dito come in un gioco da telefono; la barra in basso dice dove sei
     { const pag = c.querySelector('#crPag'), tabs = [...c.querySelectorAll('.cr-tab')], pgs = [...c.querySelectorAll('.cr-pg')];
-      let auto = false; const vai = (k, liscio) => { const i = pgs.findIndex(s => s.dataset.tab === k); if (i < 0) return; auto = !!liscio; pag.scrollTo({left: i*pag.clientWidth, behavior: liscio ? 'smooth' : 'auto'}); segna(k); try { sessionStorage.setItem('ds-tab', k); } catch(e){} };
+      let auto = false; const vai = (k, liscio) => { const i = pgs.findIndex(s => s.dataset.tab === k); if (i < 0){ if (k !== 'gioca') vai('gioca', liscio); return; } auto = !!liscio; pag.scrollTo({left: i*pag.clientWidth, behavior: liscio ? 'smooth' : 'auto'}); segna(k); try { sessionStorage.setItem('ds-tab', k); } catch(e){} };
       const nav = c.querySelector('.cr-nav'), ind = document.createElement('span'); ind.className = 'cr-ind'; nav.prepend(ind); let ultima = null;
       const segna = (k, anima = true) => { tabs.forEach(b => b.classList.toggle('on', b.dataset.tab === k)); const b = tabs.find(x => x.dataset.tab === k); if (!b) return;
         ind.style.width = b.offsetWidth + 'px'; ind.style.transform = `translateX(${b.offsetLeft}px)`; ind.classList.toggle('oro', k === 'gioca');
@@ -7863,7 +7863,7 @@ function avviaCQ(){ if (APRI_DOPO && leggiCas()){ const k = APRI_DOPO; APRI_DOPO
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
     o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
   else { S = null; aggiornaUI(); scegli(); misura(); centra(); } }
-function esci(tab){ if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', typeof tab === 'string' ? tab : 'modi'); } catch(e){} mostraMenu(); }
+function esci(tab){ if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', typeof tab === 'string' ? tab : 'gioca'); } catch(e){} mostraMenu(); }
 function tasto(e, k){ const o = el('cqOv');
   if (o && !o.hidden){ if (k === 'Escape'){ e.preventDefault(); const b = o.querySelector('#cqNo, #cqRi'); if (b) b.click(); } else if (k === 'Enter'){ const b = o.querySelector('.big:not(.alt):not(:disabled)'); if (b){ e.preventDefault(); b.click(); } } return; }
   if (k === ' ' || k === 'Enter'){ e.preventDefault(); el('cqFine').click(); } else if (k === 'Escape'){ e.preventDefault(); if (modo){ modo = null; pannello(); } else if (sel){ sel = null; pannello(); } else pausa(); }
