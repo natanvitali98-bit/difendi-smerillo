@@ -2010,6 +2010,20 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .acc-in::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 32% at 50% 50%,rgba(11,18,64,.82),rgba(11,18,64,.35) 60%,rgba(11,18,64,0));opacity:0;transition:opacity .4s}
 .acc-in.su::before{opacity:1}
 .acc-in.scopri::before{opacity:0;transition:opacity .2s}
+/* profilo e account insieme */
+.pf-av{position:relative}
+.pf-acc{position:absolute;left:-3px;top:-3px;width:13px;height:13px;border-radius:50%;border:2px solid #141433;background:#9aa0b4;z-index:2}
+.pf-acc[data-s=off]{background:#e04830;animation:accPulse 1.6s ease-in-out infinite}
+.pf-acc[data-s=ok]{background:#3ed46b}.pf-acc[data-s=invio]{background:#ffd03a}.pf-acc[data-s=errore]{background:#ff9a3a}
+.pf-accc{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.07);border:2px solid #3d4aa3}
+.pf-accc .pf-acc{position:static;flex:none;width:14px;height:14px}
+.pf-accc>span:nth-child(2){display:flex;flex-direction:column;flex:1;min-width:0}
+.pf-accc small{font-size:12.5px;color:#c8d0f5;line-height:1.3}
+.pf-accc .big.mini{flex:none;min-height:40px;padding:6px 12px;font-size:15px;width:auto}
+.pf-tx small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button.cr-res{border:0;cursor:pointer;color:#fff}
+#mnToast{position:fixed;left:50%;width:max-content;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,20px);max-width:min(92vw,420px);padding:10px 14px;border-radius:14px;background:#141433;color:#fff;font:700 14px/1.35 var(--f-body,system-ui);text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:100002}
+#mnToast.on{opacity:1;transform:translate(-50%,0)}
 /* ===== tema scuro unico (stile della carta missione) ===== */
 #cqPan,.dlg.box,#title .pan,.acc-box,.acc-card{--carta:#2d3889;--carta2:#232c74;--testo:#ffffff;--grigio:#b8c2f0;--ink:#ffffff;--muted:#b8c2f0;--box:#2d3889;--box-2:#232c74;--th-bord:#141433;
   background:linear-gradient(180deg,#26307e 0%,#1a1f5c 60%,#141845 100%)!important;color:#fff!important;border:3px solid #141433!important;box-shadow:0 6px 0 #141433,inset 0 2px 0 rgba(255,255,255,.1)!important}
@@ -2094,6 +2108,15 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 /* campi dove si scrive: fondo bianco e testo scuro, sempre */
 :is(.dlg.box,#cqPan,#title .pan,#title .cr-pg,.acc-box,.acc-card,#caricamento) :is(input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea,select){background:#fff!important;color:#1c1c3c!important;-webkit-text-fill-color:#1c1c3c!important;caret-color:#2563eb}
 :is(.dlg.box,#cqPan,#title .pan,#title .cr-pg,.acc-box,.acc-card,#caricamento) :is(input,textarea)::placeholder{color:#7a809c!important;-webkit-text-fill-color:#7a809c!important;opacity:1}
+/* profilo: griglie scure come il resto */
+#title .pan .pf-it{background:#232c74!important;border-color:#3d4aa3!important;color:#fff!important}
+#title .pan .pf-it small{color:#c8d0f5!important}
+#title .pan .pf-it.on{background:#ffd03a!important;border-color:#141433!important}
+#title .pan .pf-it.on small{color:#141433!important}
+#title .pan .pf-it:disabled{background:rgba(255,255,255,.05)!important;opacity:.75}
+#title .pan .pf-tit button{background:#232c74;color:#fff;border-color:#3d4aa3}
+#title .pan .pf-tit button.on,#title .pan .pf-tit button[aria-pressed=true]{background:#ffd03a;color:#141433}
+#title .pan h3{color:#fff}
 .pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
 #tb.tb-pan .tbhud{visibility:hidden}
 body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
@@ -4420,7 +4443,7 @@ function mostraMenu(pannello){
     const difs = TB.listaDif().map(d => `<button class="cr-dif ${d.liv ? '' : 'no'}" data-dif="${d.t}" style="--rc:${d.rar.col}"><span class="cr-di"></span><b>${d.liv ? d.nome : '???'}</b><small>${d.liv ? 'liv. ' + d.liv : d.rar.nome}</small></button>`).join('');
     const TABS = [['premi', 'trifoglio', 'Premi', rp || INCn || CQ.missPronte()], ['dif', 'scudo', 'Collezione', false], ['gioca', 'spade', 'Gioca', false], ['amici', 'amici', 'Amici', false], ['classifica', 'coppa', 'Classifica', false]];
     c.innerHTML = `<div class="cr">
-      <header class="cr-top"><div id="hmProf"></div><span class="cr-res" title="Stelle">${TB.ico('stella', 2)} <b>${tot}</b></span><span class="cr-res" title="Talismani">${TB.ico('trifoglio', 2)} <b>${nTal}</b></span>${ACC.btn()}<button class="cr-ing" id="crSnd" aria-label="Musica e suoni">${TB.ico(SUONI.muto ? 'muto' : 'suono', 2)}</button><button class="cr-ing" data-p="altro" aria-label="Altro: salvataggio e impostazioni">${TB.ico('altro', 2)}</button></header>
+      <header class="cr-top"><div id="hmProf"></div><button type="button" class="cr-res" id="crStel" aria-label="Stelle delle missioni: ${tot}">${TB.ico('stella', 2)} <b>${tot}</b></button><button type="button" class="cr-res" id="crTal" aria-label="Talismani: ${nTal}">${TB.ico('trifoglio', 2)} <b>${nTal}</b></button><button class="cr-ing" id="crSnd" aria-label="Musica e suoni">${TB.ico(SUONI.muto ? 'muto' : 'suono', 2)}</button><button class="cr-ing" data-p="altro" aria-label="Altro: salvataggio e impostazioni">${TB.ico('altro', 2)}</button></header>
       ${tester() ? `<button type="button" class="hm-tester" id="tTest">🧪 Pass di prova attivo · tocca per tornare ai tuoi progressi</button>` : ''}
       <div class="cr-pagine" id="crPag">
         <section class="cr-pg" data-tab="premi"><h2 class="cr-h">Premi</h2>
@@ -4456,8 +4479,8 @@ function mostraMenu(pannello){
           </div>
         </section>
         <section class="cr-pg" data-tab="amici"><h2 class="cr-h">Amici</h2>
-          ${card('tAmi', '🌐', 'Gioca con gli amici', 'Insieme contro i nemici, o uno contro l’altro. Ognuno dal suo telefono.')}
-          <p class="cr-p">Crea una stanza e manda il codice a un amico, oppure entra con il suo codice.</p>
+          ${card('tAmi', TB.ico('amici', 3), 'Gioca con gli amici', 'Conquista in 2 o 3, missione insieme o uno contro l’altro. Ognuno dal suo telefono.')}
+          <p class="cr-p">Uno crea la stanza e sceglie a cosa giocare, poi manda il codice. Gli altri toccano <b>Entra con un codice</b>.</p>
           <p class="cr-p">Dopo una vittoria puoi anche <b>sfidare un amico</b> a fare più punti di te nella stessa missione.</p></section>
         <section class="cr-pg" data-tab="classifica"><h2 class="cr-h">Classifica</h2><div id="clBox" class="cl-box"></div></section>
       </div>
@@ -4496,7 +4519,7 @@ function mostraMenu(pannello){
         const RI = TB.righeInc(), bg = c.querySelector('#prIncG'), bi = c.querySelector('#prIncI');
         if (bg) RI.oggi.forEach(x => riga(bg, x)); if (bi) RI.imp.forEach(x => riga(bi, x)); }
       { const rifai = tb => () => { const pg = c.querySelector(`.cr-pg[data-tab="${tb}"]`); RIENTRO = {tab: tb, top: pg ? pg.scrollTop : 0}; mostraMenu('home'); }; try { CQ.menuMissioni(c.querySelector('#prCq'), rifai('premi')); CQ.menuCollezione(c.querySelector('#crCq'), rifai('dif')); } catch(e){ console.error(e); } try { CQ.segmenta(c); } catch(e){ console.error(e); } try { ACC.classifica(c.querySelector('#clBox')); } catch(e){ console.error(e); } }
-      c.querySelectorAll('.acc-btn').forEach(b => b.onclick = () => ACC.apri()); { const sn = c.querySelector('#crSnd'); if (sn) sn.onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('menu'); sn.innerHTML = TB.ico(SUONI.muto ? 'muto' : 'suono', 2); }; }
+      c.querySelectorAll('.acc-btn').forEach(b => b.onclick = () => ACC.apri()); { const s1 = c.querySelector('#crStel'); if (s1) s1.onclick = () => { SUONI.suona('tocco'); toastMenu(`${tot} stelle su ${R.missioni.length*3}: le prendi nelle missioni. Tocca la mappa per vederle.`); }; const s2 = c.querySelector('#crTal'); if (s2) s2.onclick = () => { SUONI.suona('tocco'); toastMenu(`${nTal} talismani: si usano prima di una missione. Li vinci con la ruota e gli incarichi (pagina Premi).`); }; } { const sn = c.querySelector('#crSnd'); if (sn) sn.onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('menu'); sn.innerHTML = TB.ico(SUONI.muto ? 'muto' : 'suono', 2); }; }
       const e2 = c.querySelector('#tEv2'); if (e2) e2.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('evento'); });
       const pa = c.querySelector('#prAv'); if (pa){ const ch = PROF.chip(); pa.append(ch.querySelector('.pf-av') || ch); }
       const tm = c.querySelector('#prTimer'); if (tm){ const agg = () => { if (!document.body.contains(tm)) return clearInterval(iv); const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); const s = Math.max(0, Math.floor((m - d)/1000)); tm.textContent = String(Math.floor(s/3600)).padStart(2,'0') + ':' + String(Math.floor(s%3600/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }; const iv = setInterval(agg, 1000); agg(); } }
@@ -4507,7 +4530,7 @@ function mostraMenu(pannello){
       ${TB.eventoAttivo() ? card('tEv', '🌰', 'Evento: la Castagnata', 'Solo fino al 15 novembre · premio: scrigno d’oro', 'ev') : ''}
       ${card('tSfida', TB.ico('calendario', 3), 'Sfida del giorno', sf2.fatta ? '✓ Fatta oggi · torna domani' : 'Una missione nuova ogni giorno, uguale per tutti', sf2.fatta ? '' : 'nov')}
       ${card('tRun', TB.ico('torre', 3), 'Assedio', (rr ? 'Il tuo record: tappa ' + rr + ' · ' : '') + 'quante tappe resisti?')}
-      ${card('tAmi', '🌐', 'Con gli amici', 'Insieme o uno contro l’altro, online')}
+      ${card('tAmi', TB.ico('amici', 3), 'Con gli amici', 'Conquista, missioni insieme o uno contro l’altro')}
       ${card('tCq', TB.ico('bandiera', 3), 'Conquista', 'Scegli il tuo borgo e conquista gli altri due', 'nov')}
       ${card('tCl', TB.ico('olio', 3), 'Difesa in tempo reale', 'Compra torri e ferma le ondate di nemici')}
       <button class="big alt" data-p="home">Indietro</button></div>`;
@@ -4521,8 +4544,8 @@ function mostraMenu(pannello){
       <button class="big alt" data-p="home">Indietro</button></div>`;
   } else if (pannello === 'altro'){
     c.innerHTML = `<div class="pan"><h2>Altro</h2>
-      <button class="big" onclick="ACC.apri()">Il tuo account</button>
-      <button class="big alt" data-p="salva">💾 Salvataggio</button>
+      <button class="big" data-p="profilo">Profilo e account</button>
+      <button class="big alt" data-p="salva">Salvataggio con codice</button>
       <button class="big alt" data-p="best">I nemici del tempo reale</button>
       ${tester() ? '<button class="big alt" id="tEdit">Correggi la mappa del paese</button>' : ''}
       <button class="big alt" data-p="home">Indietro</button></div>`;
@@ -4806,14 +4829,19 @@ const PROF = (() => {
   function chip(){ const p = leggi(), lv = livello(p.xp), L = lv.L, tt = TITOLI[p.titolo] && sbloccato(TITOLI[p.titolo], p, L) ? TITOLI[p.titolo] : TITOLI.recluta;
     const b = document.createElement('button'); b.className = 'pf-chip'; b.id = 'tProf'; b.setAttribute('aria-label', 'Il tuo profilo, livello ' + L);
     const av = cornice(p, p.avatar, 2); av.insertAdjacentHTML('beforeend', `<span class="pf-lv">${L}</span>`); b.append(av);
-    const tx = document.createElement('span'); tx.className = 'pf-tx'; tx.innerHTML = `<b>${tt.n}</b><span class="pf-bar"><i style="width:${lv.serve ? lv.xp/lv.serve*100 : 100}%"></i></span><small>${lv.serve ? lv.xp + '/' + lv.serve : 'MAX'}</small>`; b.append(tx); return b; }
+    av.insertAdjacentHTML('beforeend', `<span class="pf-acc" data-s="${typeof ACC !== 'undefined' ? ACC.stato() : 'off'}"></span>`); const nm = (typeof ACC !== 'undefined' && ACC.account && ACC.account.nome) || (() => { try { const v = localStorage.getItem('difendi-smerillo-nome'); return v && v !== 'Amico' ? v : ''; } catch(e){ return ''; } })() || 'Il tuo profilo';
+    const tx = document.createElement('span'); tx.className = 'pf-tx'; tx.innerHTML = `<b>${nm.replace(/[<>&]/g, '')}</b><span class="pf-bar"><i style="width:${lv.serve ? lv.xp/lv.serve*100 : 100}%"></i></span><small>${tt.n} · ${lv.serve ? lv.xp + '/' + lv.serve : 'MAX'}</small>`; b.append(tx); return b; }
   function pagina(c, indietro){ const p = leggi(), lv = livello(p.xp), L = lv.L;
-    c.innerHTML = `<div class="pan pf-pan"><h2>Il tuo profilo</h2><div class="pf-top" id="pfTop"></div>
+    c.innerHTML = `<div class="pan pf-pan"><h2>Il tuo profilo</h2><div class="pf-top" id="pfTop"></div><div class="pf-accc" id="pfAcc"></div>
       <p class="pf-xp">Livello <b>${L}</b>${lv.serve ? ` · ${lv.xp}/${lv.serve} punti per il livello ${L + 1}` : ' · livello massimo!'}</p>
       <p class="pf-how">Guadagni punti vincendo le missioni, facendo gli Incarichi, nell’Assedio e nella difesa in tempo reale. Ogni livello sblocca qualcosa.</p>
       <h3>Personaggio</h3><div class="pf-grid" id="pfAv"></div><h3>Cornice</h3><div class="pf-grid" id="pfCo"></div><h3>Titolo</h3><div class="pf-tit" id="pfTi"></div>
       <button class="big alt" id="pfBack">Indietro</button></div>`;
     c.querySelector('#pfTop').append(chip());
+    { const box = c.querySelector('#pfAcc'), a = typeof ACC !== 'undefined' && ACC.account, st = typeof ACC !== 'undefined' ? ACC.stato() : 'off';
+      box.innerHTML = a ? `<span class="pf-acc" data-s="${st}"></span><span><b>Account: ${String(a.nome).replace(/[<>&]/g, '')}</b><small>${st === 'errore' ? 'Ora non riesco a salvare online: riprovo da solo.' : 'I tuoi progressi si salvano online da soli.'}</small></span><button type="button" class="big alt mini" id="pfAccB">Gestisci</button>`
+        : `<span class="pf-acc" data-s="off"></span><span><b>Nessun account</b><small>Crea un account per non perdere i progressi e per entrare in classifica.</small></span><button type="button" class="big mini" id="pfAccB">Crea</button>`;
+      box.querySelector('#pfAccB').onclick = () => ACC.apri(a ? undefined : 'crea'); }
     const ridisegna = () => pagina(c, indietro);
     const gAv = c.querySelector('#pfAv'); for (const [k, v] of Object.entries(AVATAR)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-it' + (p.avatar === k ? ' on' : ''); b.disabled = !ok;
       try { b.append(TB.icona(k, 3)); } catch(e){} b.insertAdjacentHTML('beforeend', `<small>${ok ? v.n : v.leg ? '🍀 Fortuna' : '🔒 Liv. ' + v.liv}</small>`); b.onclick = () => { const q = leggi(); q.avatar = k; scrivi(q); ridisegna(); }; gAv.append(b); }
@@ -8194,7 +8222,7 @@ const ACC = window.ACC = (() => {
       ultimoHash = h; A.ultimo = r.aggiornato; salvaA(); errori = 0; segna('ok'); return true; }
     catch(e){ inviando = false; errori++; segna('errore'); return false; } }
   // ---------- indicatore sul pulsante del menu
-  function segna(s){ stato = s; document.querySelectorAll('.acc-btn').forEach(b => { b.dataset.s = A ? s : 'off'; b.title = A ? (s === 'errore' ? 'Non riesco a salvare online: riprovo da solo' : 'Account: ' + A.nome) : 'Crea un account per non perdere i progressi'; }); }
+  function segna(s){ stato = s; document.querySelectorAll('.acc-btn, .pf-acc').forEach(b => { b.dataset.s = A ? s : 'off'; b.title = A ? (s === 'errore' ? 'Non riesco a salvare online: riprovo da solo' : 'Account: ' + A.nome) : 'Crea un account per non perdere i progressi'; }); }
   const quando = iso => { if (!iso) return 'mai'; const d = new Date(iso), s = Math.round((Date.now() - d)/1000); if (s < 60) return 'pochi secondi fa'; if (s < 3600) return Math.round(s/60) + ' min fa'; if (s < 86400) return Math.round(s/3600) + ' ore fa'; return d.toLocaleDateString('it-IT', {day:'numeric', month:'long'}) + ' alle ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}); };
   // ---------- finestre
   let ov = null;
@@ -8339,7 +8367,8 @@ const ACC = window.ACC = (() => {
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') invia(false, true); });
     addEventListener('pagehide', () => invia(false, true)); }
   const btn = () => `<button class="cr-ing acc-btn" data-s="${A ? stato : 'off'}" aria-label="Il tuo account">${typeof TB !== 'undefined' ? TB.ico('salva', 2) : ''}<i></i></button>`;
-  return {apri, avvia, classifica, btn, segna, cancello, get account(){ return A; }, _test:{dati, riassunto, invia, hash, set A(v){ A = v; salvaA(); }}};
+  const stato_ = () => A ? stato : "off";
+  return {stato: stato_, apri, avvia, classifica, btn, segna, cancello, get account(){ return A; }, _test:{dati, riassunto, invia, hash, set A(v){ A = v; salvaA(); }}};
 })();
 
 // contrasto automatico: nelle finestre scure, ogni scritta che si legge male prende un colore chiaro o scuro a seconda del fondo
@@ -8363,6 +8392,9 @@ const ACC = window.ACC = (() => {
   if (document.body) avvia(); else addEventListener('DOMContentLoaded', avvia);
   window.TH_CONTRASTO = sistema;
 })();
+// un avviso piccolo nel menu (per spiegare stelle e talismani)
+function toastMenu(t){ let d = document.getElementById('mnToast'); if (!d){ d = document.createElement('div'); d.id = 'mnToast'; document.body.append(d); } d.textContent = t; d.classList.add('on'); clearTimeout(toastMenu.tm); toastMenu.tm = setTimeout(() => d.classList.remove('on'), 3200); }
+window.toastMenu = toastMenu;
 
 let last = performance.now(), T = 0;
 function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); last = now; T += dt;
