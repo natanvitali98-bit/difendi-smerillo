@@ -1749,6 +1749,32 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cr-sg[data-s="difensori"]>.cr-sub:first-child,.cr-sg[data-s="casata"]>[data-sg]>.cr-sub:first-child{display:none}
 .cr-sg>[data-sg] > .cq-nota,.cr-sg>[data-sg] > p.cq-nota{color:#eef1ff!important;text-shadow:0 1px 0 #141433,0 0 6px rgba(20,20,51,.9)}
 .cr-sg>[data-sg]{display:flex;flex-direction:column;gap:10px}
+/* home: missione */
+#title .gp-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:14px 14px 14px;border:3px solid #141433;border-radius:22px;background:linear-gradient(180deg,#26307e 0%,#1a1f5c 55%,#141845 100%);box-shadow:0 6px 0 #141433,inset 0 2px 0 rgba(255,255,255,.12);color:#fff;overflow:hidden}
+#title .gp-card::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 2px,transparent 2px),linear-gradient(90deg,rgba(255,255,255,.035) 2px,transparent 2px);background-size:16px 16px;pointer-events:none}
+.gp-top{display:flex;align-items:center;justify-content:space-between;position:relative}
+.gp-k{font:700 13px var(--f-pixel);letter-spacing:2px;text-transform:uppercase;color:#ffd03a}
+.gp-k i{font-style:normal;color:#9aa6e6}
+.gp-st{display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,.28);border-radius:999px;padding:3px 10px 3px 6px;font:400 16px var(--f-big),"Lilita One",sans-serif;color:#ffd03a}
+.gp-st i{font-style:normal;color:#9aa6e6;font-size:13px}
+.gp-t{position:relative;font:400 clamp(26px,8vw,34px)/1.05 var(--f-big),"Lilita One",sans-serif;color:#fff;text-shadow:0 3px 0 #141433}
+.gp-strada{position:relative;display:flex;align-items:center;padding:14px 4px 2px}
+.gp-r{flex:1;height:6px;margin:0 -2px;background:repeating-linear-gradient(90deg,#4a56a8 0 8px,transparent 8px 14px);border-radius:3px}
+.gp-n{position:relative;flex:none;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#2c3577;border:3px solid #141433;color:#8d98d8;font:400 18px var(--f-big),"Lilita One",sans-serif;box-shadow:0 3px 0 #141433}
+.gp-n.ok{background:#ffd03a;color:#141433}
+.gp-n.ora{width:50px;height:50px;border-radius:15px;background:#e04830;color:#fff;animation:gpOra 1.6s ease-in-out infinite}
+.gp-n.ora img,.gp-n.ora canvas{filter:brightness(0) invert(1)}
+.gp-ns{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:-1px;color:#ffd03a;white-space:nowrap;text-shadow:0 1px 0 #141433}
+@keyframes gpOra{50%{box-shadow:0 3px 0 #141433,0 0 0 7px rgba(224,72,48,.35)}}
+#title .gp-go{position:relative;margin-top:4px}
+.gp-row{display:flex;gap:10px}
+.gp-tile{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:62px;padding:8px 12px;border:3px solid #141433;border-radius:18px;background:#fff;box-shadow:0 4px 0 #141433;text-align:left;color:#141433;cursor:pointer}
+.gp-tile.ev{background:#fff1c4}
+.gp-tile span{display:flex;flex-direction:column;min-width:0}
+.gp-tile b{font:400 18px var(--f-big),"Lilita One",sans-serif;line-height:1.1}
+.gp-tile small{font:700 12px var(--f-body,system-ui);color:#6a7090;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gp-tile:active{transform:translateY(3px);box-shadow:0 1px 0 #141433}
+@media (prefers-reduced-motion: reduce){ .gp-n.ora{animation:none} }
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -4219,14 +4245,16 @@ function mostraMenu(pannello){
         <section class="cr-pg cr-arena" data-tab="gioca">
           <h1 class="logo">Difendi<br>Smerillo</h1>
           <div class="cr-luogo">${TB.ico('pin', 2)} ${LUOGO}</div>
-          <section class="hm-card hm-play">
-            <div class="hm-k">Missione ${pm.num} di ${R.missioni.length}</div>
-            <div class="hm-t">${pm.titolo}</div>
-            <div class="hm-path" aria-label="Le missioni: ${tot} stelle su ${R.missioni.length*3}">${passi}</div>
-            <button class="big gioca" id="tGioca">${TB.ico('play', 3)} GIOCA</button>
-            <button class="cr-mappa" id="tMis">${TB.ico('mappa', 2)} Mappa del comune</button>
+          <section class="hm-play gp-card">
+            <div class="gp-top"><span class="gp-k">Missione ${pm.num} <i>di ${R.missioni.length}</i></span><span class="gp-st">${TB.ico('stella', 2)} ${tot}<i>/${R.missioni.length*3}</i></span></div>
+            <div class="gp-t">${pm.titolo}</div>
+            <div class="gp-strada" aria-label="Le missioni: ${tot} stelle su ${R.missioni.length*3}">${(() => { const N = R.missioni.length, a = Math.max(0, Math.min(N - 5, pm.num - 3)); return R.missioni.slice(a, a + 5).map(m => `<span class="gp-n ${m.stelle ? 'ok' : m.num === pm.num ? 'ora' : ''}">${m.stelle ? `<span class="gp-ns">${'★'.repeat(m.stelle)}${'☆'.repeat(3 - m.stelle)}</span>` : ''}<b>${m.num === pm.num && !m.stelle ? TB.ico('spade', 2) : m.num}</b></span>`).join('<i class="gp-r"></i>'); })()}</div>
+            <button class="big gioca gp-go" id="tGioca">${TB.ico('play', 3)} GIOCA</button>
           </section>
-          ${TB.eventoAttivo() ? `<button class="cr-ev" id="tEv">🌰 <b>Evento: la Castagnata</b><small>fino al 15 novembre</small></button>` : ''}
+          <div class="gp-row">
+            <button class="gp-tile" id="tMis">${TB.ico('mappa', 3)}<span><b>Mappa</b><small>tutte le missioni</small></span></button>
+            ${TB.eventoAttivo() ? `<button class="gp-tile ev" id="tEv">${TB.ico('castagna', 3)}<span><b>Castagnata</b><small>${(() => { const g = Math.max(0, Math.ceil((new Date(2026, 10, 15, 23, 59) - Date.now()) / 864e5)); return g <= 1 ? 'ultimo giorno' : 'ancora ' + g + ' giorni'; })()}</small></span></button>` : ''}
+          </div>
         </section>
         <section class="cr-pg" data-tab="amici"><h2 class="cr-h">Amici</h2>
           ${card('tAmi', '🌐', 'Gioca con gli amici', 'Insieme contro i nemici, o uno contro l’altro. Ognuno dal suo telefono.')}
