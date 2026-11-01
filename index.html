@@ -1855,6 +1855,14 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .pr-rit.cq-preso{background:#3ed46b!important;border-color:#141433!important;animation:cqRpop .45s cubic-bezier(.2,1.6,.4,1)}
 .cq-rvia{transition:height .35s ease,opacity .3s ease,margin .35s ease,padding .35s ease;opacity:0;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important}
 @media (prefers-reduced-motion: reduce){ .cq-rpop,.pr-rit.cq-preso{animation:none} .cq-rvia{transition:none} }
+/* conquista in due */
+.cq-mpbtn{margin-top:4px}
+.cq-mpl{display:flex;flex-direction:column;gap:4px;font:700 13px var(--f-body,system-ui);color:#b8c2f0}
+.cq-mpl input,.cq-mpin{font:700 18px var(--f-body,system-ui);padding:10px 12px;border-radius:12px;border:3px solid #141433;width:100%}
+.cq-mpin{text-align:center;letter-spacing:6px;text-transform:uppercase;font-size:24px}
+.cq-mpcod{display:inline-block;padding:2px 12px;border-radius:10px;background:#ffd03a;color:#141433!important;letter-spacing:4px;font-family:var(--f-pixel)}
+.cq-mpst{margin:0;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.07);font-size:14px}
+.cq-mpw b{color:#ffd03a}
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -6509,7 +6517,7 @@ function sfidaDiOggi(){ const g = oggi(), r = leggiRec(); let max = 0; while (ma
 function riepilogo(){ const r = leggiRec(); return {missioni: MISSIONI.map(m => ({num:m.num, titolo:m.titolo, stelle:(r['m' + m.num] || {}).stelle || 0})), sfida: sfidaDiOggi()}; }
 const prossima = () => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + MISSIONI[i].num]) i++; return MISSIONI[i]; };
 const contaDif = () => { const c = leggiCol(); return DIFENSORI.filter(t => c[t]).length + ' di ' + DIFENSORI.length; };
-return {eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE: () => SCENA_CE || (SCENA_CE = CE.crea()), preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
+return {rete: () => ({trasporto, mioNome, dentroClaude}), eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE: () => SCENA_CE || (SCENA_CE = CE.crea()), preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
 })();
 
 // ===== Conquista: scegli il tuo borgo, rinforzalo e conquista gli altri (a turni, contro il computer) =====
@@ -6788,7 +6796,7 @@ const setAmic = (a, b, v) => { S.amic[pk(a, b)] = Math.max(-100, Math.min(100, M
 const alleati = (a, b) => !!S.all[pk(a, b)];
 const stagione = t => STAGIONI[(t - 1) % 4] + ', anno ' + Math.ceil(t/4);
 const livAmic = v => v >= 50 ? ['Amico fidato', '#58c838'] : v >= 15 ? ['Amico', '#98d860'] : v > -15 ? ['Neutrale', '#c8c8d0'] : v > -50 ? ['Ostile', '#f08838'] : ['Nemico', '#e04830'];
-const salva = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} };
+const salva = () => { if (S && S.mp) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} };
 const carica = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 3 && !s.fine ? s : null; } catch(e){ return null; } };
 const terreDi = f => IDS.filter(t => S.terre[t].own === f);
 const soldDi = f => terreDi(f).reduce((a, t) => a + S.terre[t].sold, 0);
@@ -7428,7 +7436,7 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
         let sc = pr.p + (o ? 0 : .12) + TERRE[v].rend*.03 - (o ? amic(f, o)/250 : 0) + (o === 'ceresola' ? .15 : 0) + (o === S.io && terreDi(S.io).length >= IDS.length*(S.dif === 'difficile' ? .18 : S.dif === 'facile' ? .3 : .24) ? (S.dif === 'difficile' ? .2 : S.dif === 'facile' ? .08 : .13) : 0) + (o === S.io ? ESP_IA()*.5 + (ioInTesta() && S.dif !== 'facile' ? .06 : 0) : 0) + (eBorgo(v) ? .1 : 0) + (TERRE[v].di && o === TERRE[v].di ? .05 : 0) + (o && (S.fz[o].opera || 0) >= 1 ? .15*(S.fz[o].opera) : 0) - (o ? .1*(rep(o) < 30 ? -1 : 0) : 0);
         if (pr.p >= (S.turno > 20 ? .48 : S.turno > 10 ? .55 : .6) + (st0 ? {guerra:-.05, economia:.1, pace:0}[st0] || 0 : DF().soglia + CAR(f).soglia) && (!best || sc > best.sc)) best = {sc, src, v, n, all: legato}; } }
     if (best){ const o = S.terre[best.v].own, r = battaglia(f, best.src, best.v, best.n); az--;
-      news({t:'att', f, da:best.src, a:best.v, ok:r.vinto, contro:o, trad:best.all, testo: (best.all ? `Tradimento! ${FZ[f].corto} rompe il patto e attacca ` : `${FZ[f].corto} attacca `) + (o ? (o === S.io ? 'la tua terra ' : '') + TERRE[best.v].nome + (o !== S.io ? ' (di ' + FZ[o].corto + ')' : '') : TERRE[best.v].nome) + (r.vinto ? ': la conquista!' : ': respinto.') + (r.vinto && r.borgo && o ? ` ${FZ[o].nome} è caduto.` : '')});
+      news({t:'att', f, da:best.src, a:best.v, ok:r.vinto, contro:o, trad:best.all, testo: (best.all ? `Tradimento! ${FZ[f].corto} rompe il patto e attacca ` : `${FZ[f].corto} attacca `) + (o ? (o === S.io && !S.mp ? 'la tua terra ' : '') + TERRE[best.v].nome + (o !== S.io ? ' (di ' + FZ[o].corto + ')' : '') : TERRE[best.v].nome) + (r.vinto ? ': la conquista!' : ': respinto.') + (r.vinto && r.borgo && o ? ` ${FZ[o].nome} è caduto.` : '')});
       continue; }
     // nessun attacco buono: radunare l'esercito più grande dietro al fronte, vicino al bersaglio più debole
     let da = null, sur = 0; for (const t of terreDi(f)){ const k = S.terre[t].sold - (t === f ? guardiaBorgo(f) : 1); if (k > sur && (!fronte(f, t) || k >= 3)){ sur = k; da = t; } }
@@ -7439,14 +7447,14 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
     const n = sur, p = percorso(f, da, meta); S.terre[da].sold -= n; S.terre[meta].sold += n; az--; news({t:'mov', f, da, a:meta, p, testo:`${FZ[f].corto} sposta ${n} soldati`, muto:true}); }
   // 6. politica
   for (const g of vivi()){ if (g === f) continue; const k = pk(f, g), fid = amic(f, g) + (rep(g) - 50)/2 + (f === S.io && STRAT ? 0 : CAR(f).dipl);
-    if (!S.all[k] && fid >= 50 && !troppoForte(g) && rnd() < .3 && vivi().length > 2){ if (g === S.io){ if (!S.proposte.some(p => p.f === f && p.tipo === 'all')) S.proposte.push({f, tipo:'all'}); } else { S.all[k] = true; news({t:'all', f, testo:`${FZ[f].corto} e ${FZ[g].corto} fanno un’alleanza`}); } }
-    if (!S.acc[k] && fid >= 10 && rnd() < .3){ if (g === S.io){ if (!S.proposte.some(p => p.f === f && p.tipo === 'acc')) S.proposte.push({f, tipo:'acc'}); } else { S.acc[k] = true; news({t:'acc', f, testo:`${FZ[f].corto} e ${FZ[g].corto} firmano un accordo commerciale`}); } }
-    if (!patto(f, g) && !S.all[k] && fid >= (S.turno <= 6 ? -5 : 0) && rnd() < (S.turno <= 6 && g === S.io ? .35 : .2)){ if (g === S.io){ if (!S.proposte.some(p => p.f === f && p.tipo === 'patto')) S.proposte.push({f, tipo:'patto'}); } else { S.patti[k] = S.turno + 8; news({t:'patto', f, muto:true, testo:`${FZ[f].corto} e ${FZ[g].corto} firmano un patto di non aggressione`}); } }
-    if (g !== S.io && S.acc[k] && amic(f, g) < -10){ delete S.acc[k]; }
-    if (g === S.io && !S.all[k] && soldDi(g) > soldDi(f)*1.4 && amic(f, g) > -40 && rnd() < .25){ setAmic(f, g, amic(f, g) + 12); S.fz[g].monete += 5; news({t:'regalo', f, testo:`${FZ[f].corto} ha paura di te e ti manda un regalo: 5 monete`}); }
+    if (!S.all[k] && fid >= 50 && !troppoForte(g) && rnd() < .3 && vivi().length > 2){ if (g === S.io || umano(g)){ if (!S.proposte.some(p => p.f === f && p.tipo === 'all' && (p.per || S.io) === g)) S.proposte.push({f, tipo:'all', per:g}); } else { S.all[k] = true; news({t:'all', f, testo:`${FZ[f].corto} e ${FZ[g].corto} fanno un’alleanza`}); } }
+    if (!S.acc[k] && fid >= 10 && rnd() < .3){ if (g === S.io || umano(g)){ if (!S.proposte.some(p => p.f === f && p.tipo === 'acc' && (p.per || S.io) === g)) S.proposte.push({f, tipo:'acc', per:g}); } else { S.acc[k] = true; news({t:'acc', f, testo:`${FZ[f].corto} e ${FZ[g].corto} firmano un accordo commerciale`}); } }
+    if (!patto(f, g) && !S.all[k] && fid >= (S.turno <= 6 ? -5 : 0) && rnd() < (S.turno <= 6 && (g === S.io || umano(g)) ? .35 : .2)){ if (g === S.io || umano(g)){ if (!S.proposte.some(p => p.f === f && p.tipo === 'patto' && (p.per || S.io) === g)) S.proposte.push({f, tipo:'patto', per:g}); } else { S.patti[k] = S.turno + 8; news({t:'patto', f, muto:true, testo:`${FZ[f].corto} e ${FZ[g].corto} firmano un patto di non aggressione`}); } }
+    if (g !== S.io && !umano(g) && S.acc[k] && amic(f, g) < -10){ delete S.acc[k]; }
+    if ((g === S.io || umano(g)) && !S.all[k] && soldDi(g) > soldDi(f)*1.4 && amic(f, g) > -40 && rnd() < .25){ setAmic(f, g, amic(f, g) + 12); S.fz[g].monete += 5; news({t:'regalo', f, testo: g === S.io && !S.mp ? `${FZ[f].corto} ha paura di te e ti manda un regalo: 5 monete` : `${FZ[f].corto} ha paura di ${FZ[g].corto} e le manda un regalo: 5 monete`}); }
     if (g !== S.io && rnd() < .2) setAmic(f, g, amic(f, g) + (rnd() < .5 ? 5 : -5)); } }
 function calcolaStagione(ev, tutti = false){
-  const ord = Object.keys(FZ).filter(f => (tutti || f !== S.io) && S.fz[f].vivo).sort(() => rnd() - .5);
+  const ord = Object.keys(FZ).filter(f => (tutti || (f !== S.io && !umano(f))) && S.fz[f].vivo).sort(() => rnd() - .5);
   for (const f of ord){ if (!S.fz[f].vivo || S.vincitore) continue; turnoIA(f, ev); if (!S.fz[S.io].vivo) break; }
   const sn = () => JSON.parse(JSON.stringify(S.terre));
   for (const f of vivi()) if (haStr(f, 'santuario')){ for (const g of vivi()) if (g !== f) setAmic(f, g, amic(f, g) + 2); S.rep[f] = Math.min(100, rep(f) + 1); }
@@ -7511,13 +7519,13 @@ function volaNumeri(F){ const cur = {monete: F.monete, cibo: F.cibo, legna: F.le
   const sp = el('cqRis').querySelectorAll(':scope > span'), ord = ['monete', 'cibo', 'legna']; ord.forEach((k, i) => { const d = cur[k] - RPREV[k]; if (!d || !sp[i]) return; const r = sp[i].getBoundingClientRect(), f = document.createElement('div'); f.className = 'cq-fl ' + (d > 0 ? 'su' : 'giu'); f.textContent = (d > 0 ? '+' : '−') + Math.abs(d); f.style.cssText = `left:${r.left + r.width/2}px;top:${r.bottom}px`; root.append(f); setTimeout(() => f.remove(), 1300); sp[i].classList.add('cq-bump'); });
   Object.assign(RPREV, cur); }
 function aggiornaUI(){ if (root) root.classList.toggle('vuoto', !S || !!SCELTA); if (!S) return; const F = S.fz[S.io];
-  el('cqTit').textContent = FZ[S.io].corto; el('cqStag').textContent = stagione(S.turno) + (S.veloce ? ' · ' + Math.min(S.turno, VEL.stag) + '/' + VEL.stag : '') + (S.dif && S.dif !== 'normale' ? ' · ' + DIFF[S.dif].nome : '');
+  el('cqTit').textContent = FZ[S.io].corto; el('cqStag').textContent = stagione(S.turno) + (S.veloce ? ' · ' + Math.min(S.turno, VEL.stag) + '/' + VEL.stag : '') + (S.dif && S.dif !== 'normale' ? ' · ' + DIFF[S.dif].nome : '') + (S.mp && MPN ? (mpAttesa() ? ' · tocca a ' + MPN.amico : ' · tocca a te') : '');
   { const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); el('cqRis').innerHTML = `<span>${ico('moneta', 2)} ${F.monete}</span><span class="${dc < 0 ? 'meno' : ''}">${ico('castagna', 2)} ${F.cibo}<small>${dc >= 0 ? '+' : ''}${dc}</small></span><span>${ico('albero', 2)} ${F.legna}</span>`; }
   if (!SCELTA){ if (ovAperto() && RPREV && RPREV.s === S){ Object.assign(RPREV, {monete: F.monete, cibo: F.cibo, legna: F.legna}); } else volaNumeri(F); } el('cqMos').innerHTML = '<span class="cq-mt">Mosse</span> ' + Array.from({length:MOSSE_N()}, (_, i) => `<i class="${i < S.mosse ? 'on' : ''}"></i>`).join('');
-  el('cqFine').disabled = !!GIOCA; el('cqFine').classList.toggle('pronto', S.mosse === 0 && !GIOCA); el('cqDip').disabled = !!GIOCA;
+  el('cqFine').disabled = !!GIOCA || mpAttesa(); el('cqFine').classList.toggle('pronto', S.mosse === 0 && !GIOCA); el('cqDip').disabled = !!GIOCA || mpAttesa();
   { const fl = el('cqFlag'), stc = CAS && stemma(CAS.stemma, 1); if (stc){ fl.className = 'cq-flag cq-flagst'; fl.style.background = 'none'; fl.innerHTML = ''; const im = new Image(); im.src = stc.toDataURL(); im.width = 18; im.height = 21; fl.append(im); } else { fl.className = 'cq-flag'; fl.style.background = FZ[S.io].col; } } pannello(); }
 function barraAmic(v){ const [n, c] = livAmic(v); return `<span class="cq-am"><span class="cq-amb"><i style="left:${(v + 100)/2}%;background:${c}"></i></span><em style="color:${c}">${n}</em></span>`; }
-function pannello(){ const p = el('cqPan'); if (!p || !S) return;
+function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()){ p.innerHTML = `<div class="cq-ph cq-mpw"><b>${ico('clessidra', 2)} Tocca a ${S.mp.nomi[MPN.io === 'h' ? 'g' : 'h']}</b><small>Sta giocando la sua stagione con ${FZ[MPN.io === 'h' ? S.mp.g : S.mp.h].corto}. Intanto puoi guardare la mappa: quando finisce tocca a te.</small></div>`; return; }
   if (GIOCA){ p.innerHTML = `<div class="cq-ph"><b>Muovono gli altri borghi…</b></div><button class="big alt cq-salta" id="cqSalta">Salta</button>`; el('cqSalta').onclick = () => { ANIM.length = 0; const G = GIOCA; if (G){ G.i = G.ev.length; passo(); } }; return; }
   if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra (gialla che lampeggia): ci arrivano passando per le tue terre${MP().marcia ? `, al massimo ${MP().marcia} terre più in là` : ''}.</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
   if (!sel){ const n = terreDi(S.io).length, mieB = Object.keys(FZ).filter(f => S.terre[f].own === S.io).length, F0 = S.fz[S.io];
@@ -7626,7 +7634,7 @@ function dlgAttacco(t){ const fonti = VIC[t].filter(v => S.terre[v].own === S.io
   o.querySelector('#cqOk').onclick = () => { const n = +o.querySelector('#cqN').value; chiudiOv(); attaccaIo(da, t, n, capSel); }; }
 function attaccaIo(da, t, n, cap){ const prima = JSON.parse(JSON.stringify(S.terre)), own = S.terre[t].own, trad = own && (alleati(S.io, own) || patto(S.io, own)), r = battaglia(S.io, da, t, n, cap), rc = capDopo(cap, r, t, da); if (r.vinto){ stat('batt'); if (TERRE[t].fraz) stat('fraz'); } S.mosse = Math.max(0, S.mosse - 1);
   let missOk = null; if (r.vinto && own){ const i = (S.missioni || []).findIndex(mi => mi.contro === own); if (i >= 0){ const mi = S.missioni.splice(i, 1)[0]; setAmic(S.io, mi.f, amic(S.io, mi.f) + 25); S.rep[S.io] = Math.min(100, rep(S.io) + 6); S.fz[S.io].monete += 10; missOk = mi.f; } }
-  if (vivi().length === 1) S.fine = 'vinto'; salva();
+  if (vivi().length === 1) S.fine = 'vinto'; if (S.mp) mpAttacco(da, t, own, r, trad); salva();
   prima[da].sold -= n; VISTA = prima; GIOCA = {ev:[], i:0, dopo(){}}; modo = null; aggiornaUI(); suona('carica1');
   ANIM.push({pts: stradaVerso(da, t), t:0, dur:.8, col:FZ[S.io].col, fine: () => { FLASH.push({a:t, t:0, col: r.vinto ? FZ[S.io].col : '#f8f8f0'}); suona(r.vinto ? 'boom' : 'tonfo'); VISTA = null; tintKey = '';
     setTimeout(() => { GIOCA = null; sel = r.vinto ? t : da; aggiornaUI();
@@ -7647,6 +7655,10 @@ function dlgDiplomazia(foc){ const altri = vivi().filter(g => g !== S.io), mr = 
         ${all ? `<button class="big alt mini" data-rom="${g}" ${nm ? 'disabled' : ''}>Rompi l’alleanza</button>` : `<button class="big alt mini" data-all="${g}" ${nm || vivi().length <= 2 ? 'disabled' : ''}>Proponi alleanza</button>`}</div></div>`; }).join('') || '<p>Non c’è più nessuno: hai vinto!</p>'}</div>
     <p class="cq-nota">Ogni azione usa 1 mossa, gli scambi no. ${vivi().length <= 2 ? 'Restano solo due borghi: niente più alleanze.' : ''}</p><button class="big alt" id="cqNo">Indietro</button></div>`);
   o.querySelector('#cqNo').onclick = chiudiOv;
+  if (S.mp){ o.querySelectorAll('[data-mer]').forEach(b => { if (umano(b.dataset.mer)) b.remove(); });
+    o.querySelectorAll('.cq-dip').forEach(d => { const g = (d.querySelector('[data-reg]') || {}).dataset; if (g && umano(g.reg)) d.insertAdjacentHTML('beforeend', `<p class="cq-nota">${ico('amici', 2)} È il borgo di <b>${S.mp.nomi[g.reg === S.mp.h ? 'h' : 'g']}</b>: le proposte gli arrivano nel suo turno e decide lui. Non usano mosse.</p>`); });
+    o.addEventListener('click', e => { const b = e.target.closest('[data-pat],[data-acc],[data-all]'); if (!b) return; const g = b.dataset.pat || b.dataset.acc || b.dataset.all; if (!umano(g)) return; e.stopPropagation(); e.preventDefault();
+      const tipo = b.dataset.pat ? 'patto' : b.dataset.acc ? 'acc' : 'all'; if (!S.proposte.some(x => x.f === S.io && x.per === g && x.tipo === tipo)) S.proposte.push({f:S.io, tipo, per:g}); suona('stella1'); toast(`Proposta mandata: ${S.mp.nomi[g === S.mp.h ? 'h' : 'g']} risponde nel suo turno`); b.disabled = true; }, true); }
   const fid = g => amic(S.io, g) + (rep(S.io) - 50)/2;
   o.querySelectorAll('[data-mer]').forEach(b => b.onclick = () => dlgMercato(b.dataset.mer));
   o.querySelectorAll('[data-reg]').forEach(b => b.onclick = () => { const g = b.dataset.reg; S.fz[S.io].monete -= REGALO; S.fz[g].monete += REGALO; const v = amic(S.io, g); setAmic(S.io, g, v + valRegalo(v)); suona('moneta'); usaMossa(); toast(`${FZ[g].corto} gradisce il regalo`); dlgDiplomazia(g); });
@@ -7712,9 +7724,9 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
       <div class="${dc < 0 ? 'neg' : ''}">${ico('castagna', 3)}<b>${dc >= 0 ? '+' : ''}${dc}</b><small>cibo</small></div>
       <div>${ico('albero', 3)}<b>+${prodLegna(S.io)}</b><small>legna</small></div></div>${nota ? `<div class="cq-nnota">${nota}</div>` : ''}</div>
     ${S.turno === TREGUA() + 1 ? `<p class="cq-warn">La tregua è finita: da ora i borghi si possono attaccare.</p>` : ''}${S.veloce && S.turno > VEL.stag - 4 && S.turno <= VEL.stag ? `<p class="cq-warn">${S.turno === VEL.stag ? 'Ultima stagione!' : 'Mancano ' + (VEL.stag - S.turno + 1) + ' stagioni alla fine.'} Ora vince ${FZ[classifica()[0]].corto} con ${punti(classifica()[0])} punti.</p>` : ''}
-    <button class="big" id="cqOk">Tocca a te: ${MOSSE_N()} mosse ${ico('play', 2)}</button></div>`, false);
-  o.querySelector('#cqOk').onclick = () => { chiudiOv(); proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); }; aggiornaUI(); }
-function proposte(){ let p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
+    <button class="big" id="cqOk">${mpAttesa() ? `Ora gioca ${MPN.amico}` : `Tocca a te: ${MOSSE_N()} mosse`} ${ico('play', 2)}</button></div>`, false);
+  o.querySelector('#cqOk').onclick = () => { chiudiOv(); if (!mpAttesa()) proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); }; aggiornaUI(); }
+function proposte(){ let p; if (S.mp){ const i = S.proposte.findIndex(x => !x.per || x.per === S.io); p = i >= 0 ? S.proposte.splice(i, 1)[0] : null; } else p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
   if (!p){ richieste(); return; }
   if (!S.fz[f].vivo || (p.tipo === 'all' && (vivi().length <= 2 || alleati(S.io, f))) || (p.tipo === 'acc' && accordo(S.io, f)) || (p.tipo === 'patto' && (patto(S.io, f) || alleati(S.io, f)))){ proposte(); return; }
   const T = {acc:['moneta', 'vuole commerciare con te', 'Con l’accordo commerciale guadagnate tutti e due 3 monete in più a stagione e l’amicizia cresce da sola. Se uno attacca l’altro, l’accordo finisce.'],
@@ -7768,7 +7780,7 @@ function evento(){ const E = S.evento; if (!E){ return; } const D = EVENTI[E.k];
     const o2 = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico(D.ic, 2)} ${D.tit}</span><p>${r}</p><button class="big" id="cqOk">Continua</button></div>`, false); o2.querySelector('#cqOk').onclick = chiudiOv; }); }
 function finePartita2(){ ULTIMO_G_SALTA = true; finePartita(); }
 let ULTIMO_G = null, ULTIMO_G_SALTA = false;
-function finePartita(){ let G = chiudiGenerazione(); if (G) ULTIMO_G = G; else if (ULTIMO_G_SALTA) G = ULTIMO_G; ULTIMO_G_SALTA = false; const vinto = S.fine === 'vinto', vt = S.vitt || 'conquista', chi = S.vincitore; let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){}
+function finePartita(){ if (S && S.mp){ const am = (MPN && MPN.amico) || (S.mp.nomi && S.mp.nomi[S.io === S.mp.h ? 'g' : 'h']) || 'il tuo amico', vinto = S.fine === 'vinto'; setTimeout(() => { const h = document.querySelector('#cqOv .dlg h2'); if (h && /tuoi|caduto|vince|perso|vinto/i.test(h.textContent)) h.textContent = vinto ? `Hai battuto ${am}!` : `Ha vinto ${am}`; }, 30); } let G = chiudiGenerazione(); if (G) ULTIMO_G = G; else if (ULTIMO_G_SALTA) G = ULTIMO_G; ULTIMO_G_SALTA = false; const vinto = S.fine === 'vinto', vt = S.vitt || 'conquista', chi = S.vincitore; let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){}
   let nuovo = false; if (vinto && !S.veloce && (!rec[S.io] || S.turno < rec[S.io])){ rec[S.io] = S.turno; nuovo = true; try { localStorage.setItem(KREC, JSON.stringify(rec)); } catch(e){} }
   try { localStorage.removeItem(KEY); } catch(e){}
   try { SUONI.suona(vinto ? 'vinto' : 'perso'); if (vinto) EPICO.coriandoli(140); } catch(e){}
@@ -7882,7 +7894,7 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
       <p class="cq-nota cq-optd" data-v="dif"><span id="cqDifT">${DIFF[difScelta()].desc}</span> <span id="cqMapT">Mappa ${MAPPE[mappaScelta()].nome.toLowerCase()}: ${MAPPE[mappaScelta()].desc}</span> <span id="cqVelT">${velTesto()}</span></p></div>
     <div id="cqScDet"></div>
 
-    <button type="button" class="cq-link" id="cqMe">Torna al menu</button><div class="cq-scvai"><button class="big" id="cqVai"></button></div></div><div class="cq-schip">${ico('pin', 2)} Tocca un borgo sulla mappa</div>`, false);
+    <button type="button" class="big alt cq-mpbtn" id="cqMp">${ico('amici', 2)} Gioca con un amico</button><button type="button" class="cq-link" id="cqMe">Torna al menu</button><div class="cq-scvai"><button class="big" id="cqVai"></button></div></div><div class="cq-schip">${ico('pin', 2)} Tocca un borgo sulla mappa</div>`, false);
   o.classList.add('scelta');
   const disegnaSp = () => o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp), z = c.closest('.cq-sct') ? 1.35 : 1.6; c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*z + 'px'; c.style.height = im.height*z + 'px'; });
   const opt = () => {}; o.querySelectorAll('[data-dif],[data-map],[data-vel]').forEach(b => b.addEventListener('click', () => { o.querySelector('.cq-optd').dataset.v = b.dataset.dif ? 'dif' : b.dataset.map ? 'map' : 'vel'; }));
@@ -7896,6 +7908,7 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   o.querySelectorAll('[data-map]').forEach(b => b.onclick = () => { const m = b.dataset.map; try { localStorage.setItem(KMAPPA, m); } catch(e){} o.querySelectorAll('[data-map]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqMapT').textContent = 'Mappa ' + MAPPE[m].nome.toLowerCase() + ': ' + MAPPE[m].desc; opt(); suona('tocco'); nuova(SCELTA, difScelta(), true, false, m); sel = null; tintKey = ''; });
   o.querySelector('#cqVai').onclick = () => { const f = SCELTA; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; suona('banner'); o.classList.remove('scelta'); nuova(f, difScelta(), false, velScelta()); chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); }); };
   o.querySelector('#cqMe').onclick = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; S = null; o.classList.remove('scelta'); esci(); };
+  o.querySelector('#cqMp').onclick = () => { suona('tocco'); dlgMp(); };
   opt(); misura(); centra(); mostra(SCELTA, false); setTimeout(() => volaSu(SCELTA), 350); }
 let SCELTA_MOSTRA = null;
 function dlgAnno(dopo){ const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f => f !== S.io);
@@ -7929,8 +7942,8 @@ function costruisciDom(){ root = document.createElement('section'); root.id = 'c
   root.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b || b.disabled || !root.contains(b)) return; const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height)*2.2, sp = document.createElement('span'); sp.className = 'cq-rip'; sp.style.cssText = `left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px;width:${d}px;height:${d}px`; b.append(sp); setTimeout(() => sp.remove(), 520);
     const bu = document.createElement('div'); bu.className = 'cq-burst'; bu.style.cssText = `left:${e.clientX}px;top:${e.clientY}px`; for (let i = 0; i < 8; i++){ const q = document.createElement('i'), a = i/8*Math.PI*2 + Math.random()*.4, v = 22 + Math.random()*16; q.style.setProperty('--dx', Math.cos(a)*v + 'px'); q.style.setProperty('--dy', Math.sin(a)*v + 'px'); q.style.background = ['#ffd03a', '#ffffff', '#ffe98a'][i % 3]; bu.append(q); } root.append(bu); setTimeout(() => bu.remove(), 560); }, {passive: true});
   el('cqPausa').onclick = pausa; el('cqRis').onclick = dlgBilancio; el('cqDip').onclick = () => dlgDiplomazia(); el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
-  el('cqFine').onclick = () => { if (GIOCA || !S) return; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
-      o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fineStagione(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fineStagione(); };
+  el('cqFine').onclick = () => { if (GIOCA || !S || mpAttesa()) return; const fs = S.mp ? mpFine : fineStagione; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
+      o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fs(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fs(); };
   new ResizeObserver(() => { if (attivo) misura(); }).observe(el('cqStage')); new ResizeObserver(() => { if (attivo){ insets(); limita(); } }).observe(root.querySelector('.cq-side')); }
 let PRIMA_SNAP = null;
 let APRI_DOPO = null;
@@ -7951,14 +7964,97 @@ function avviaCQ(){ if (APRI_DOPO && leggiCas()){ const k = APRI_DOPO; APRI_DOPO
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
     o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
   else { S = null; aggiornaUI(); scegli(); misura(); centra(); } }
-function esci(tab){ if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', typeof tab === 'string' ? tab : 'gioca'); } catch(e){} mostraMenu(); }
+function esci(tab){ mpChiudi(); if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', typeof tab === 'string' ? tab : 'gioca'); } catch(e){} mostraMenu(); }
 function tasto(e, k){ const o = el('cqOv');
   if (o && !o.hidden){ if (k === 'Escape'){ e.preventDefault(); const b = o.querySelector('#cqNo, #cqRi'); if (b) b.click(); } else if (k === 'Enter'){ const b = o.querySelector('.big:not(.alt):not(:disabled)'); if (b){ e.preventDefault(); b.click(); } } return; }
   if (k === ' ' || k === 'Enter'){ e.preventDefault(); el('cqFine').click(); } else if (k === 'Escape'){ e.preventDefault(); if (modo){ modo = null; pannello(); } else if (sel){ sel = null; pannello(); } else pausa(); }
   else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
-return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+
+// ===== Conquista con un amico: due telefoni, due borghi, il terzo lo muove il computer =====
+let MPN = null; // {conn, stanza, io:'h'|'g', amico, cod, borgoG}
+function umano(f){ return !!(S && S.mp && (f === S.mp.h || f === S.mp.g)); }
+function mpAttesa(){ return !!(S && S.mp && MPN && S.mp.fase !== MPN.io); }
+const mpRete = () => { try { return TB.rete(); } catch(e){ return null; } };
+const mpNome = () => { const r = mpRete(); return r ? r.mioNome() : 'Amico'; };
+const mpAltro = () => MPN.io === 'h' ? 'g' : 'h';
+function mpInvia(m){ try { if (MPN && MPN.conn) MPN.conn.send(JSON.stringify(m)); } catch(e){} }
+function mpChiudi(){ const n = MPN; MPN = null; if (!n) return; try { mpInviaA(n, {t:'esci'}); } catch(e){} try { n.conn && n.conn.close(); } catch(e){} try { n.stanza && n.stanza.chiudi(); } catch(e){} try { n.conn && n.conn.chiudiPeer && n.conn.chiudiPeer(); } catch(e){} }
+function mpInviaA(n, m){ try { n.conn && n.conn.send(JSON.stringify(m)); } catch(e){} }
+function mpEsito(){ if (!S || !S.mp) return; const io = S.io, altro = io === S.mp.h ? S.mp.g : S.mp.h; S.fine = null;
+  if (S.vincitore) S.fine = S.vincitore === io ? 'vinto' : 'perso'; else if (!S.fz[io].vivo) S.fine = 'perso'; else if (!S.fz[altro].vivo || vivi().length === 1){ S.fine = 'vinto'; S.vitt = S.vitt || 'conquista'; } }
+function mpApplica(nS){ if (nS.mappa && nS.mappa !== MAPPA_ATT) impostaMappa(nS.mappa); S = nS; S.io = MPN.io === 'h' ? S.mp.h : S.mp.g; sel = null; modo = null; VISTA = null; tintKey = ''; mpEsito(); }
+function mpAttacco(da, t, own, r, trad){ S.mp.log = S.mp.log || []; const nome = S.mp.nomi[MPN.io];
+  S.mp.log.push({t:'att', f:S.io, da, a:t, ok:r.vinto, contro:own, trad, snap: JSON.parse(JSON.stringify(S.terre)), testo:`${nome} (${FZ[S.io].corto}) attacca ${TERRE[t].nome}${own && own !== S.io ? ' di ' + FZ[own].corto : ''}: ${r.vinto ? 'la conquista!' : 'respinto.'}`});
+  mpEsito(); if (S.fine){ mpInvia({t:'stato', S}); } }
+// premo Fine stagione: passo la mano all'amico, oppure (se sono il secondo) si chiude la stagione
+function mpFine(){ if (!MPN) return; modo = null; sel = null; const secondo = S.mp.fase !== S.mp.primo;
+  if (!secondo){ S.mp.fase = mpAltro(); S.mp.mosseAltro = MOSSE_N(); mpInvia({t:'turno', S}); aggiornaUI(); pannello(); toast(`Ora tocca a ${MPN.amico}`); return; }
+  if (MPN.io === 'g'){ S.mp.fase = 'calc'; mpInvia({t:'fine', S}); aggiornaUI(); pannello(); toast('Si chiude la stagione…'); return; }
+  mpStagione(); }
+// solo chi ha creato la stanza muove il computer e chiude la stagione, poi la manda all'amico
+function mpStagione(){ S.io = S.mp.h; const ev = []; PRIMA_SNAP = JSON.parse(JSON.stringify(S.terre)); const prima = PRIMA_SNAP; S.mp.log = [];
+  calcolaStagione(ev); S.evento = null; S.richieste = []; S.missioni = [];
+  S.mp.primo = S.mp.primo === 'h' ? 'g' : 'h'; S.mp.fase = S.mp.primo; S.mosse = MOSSE_N();
+  const evS = ev.map(e => Object.assign({}, e)); mpInvia({t:'stagione', S, ev: evS, prima});
+  mpEsito(); salva(); riproduciEv(ev, () => { notizie(ev); mpDopoNotizie(); }); }
+function mpDopoNotizie(){ if (!S || !S.mp || S.fine) return; if (!mpAttesa()){ toast('Tocca a te!'); } }
+function mpRicevi(raw){ let m; try { m = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch(e){ return; } if (!MPN) return;
+  if (m.t === 'ciao'){ MPN.amico = m.nome || 'Amico'; const w = el('cqMpSt'); if (w){ w.innerHTML = `${ico('ok', 2)} <b>${MPN.amico}</b> è entrato nella stanza!`; const b = el('cqMpGo'); if (b) b.disabled = false; } suona('stella1'); return; }
+  if (m.t === 'inizia'){ MPN.amico = m.nome || MPN.amico; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; chiudiOv(); mpApplica(m.S); suona('banner'); aggiornaUI(); vaiA(S.io); pannello(); mpBenvenuto(); return; }
+  if (m.t === 'turno'){ const log = (m.S.mp && m.S.mp.log) || []; PRIMA_SNAP = S ? JSON.parse(JSON.stringify(S.terre)) : null; mpApplica(m.S); S.mosse = S.mp.mosseAltro || MOSSE_N(); S.mp.log = [];
+    const dopo = () => { aggiornaUI(); pannello(); if (S.fine){ finePartita(); return; } const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} ${MPN.amico} ha finito</span><h2>Tocca a te!</h2><p>${log.length ? log.map(e => e.testo).join('<br>') : 'Non ha attaccato nessuno in questa stagione.'}</p><p>Hai ${S.mosse} mosse con ${FZ[S.io].corto}.</p><button class="big" id="cqOk">Gioca ${ico('play', 2)}</button></div>`, false); suona('banner'); o.querySelector('#cqOk').onclick = () => { chiudiOv(); proposte(); }; };
+    if (log.length && PRIMA_SNAP) riproduciEv(log, dopo); else dopo(); return; }
+  if (m.t === 'fine'){ if (MPN.io !== 'h') return; const log = (m.S.mp && m.S.mp.log) || []; PRIMA_SNAP = JSON.parse(JSON.stringify(S.terre)); mpApplica(m.S); const vai = () => mpStagione(); if (log.length) riproduciEv(log, vai); else vai(); return; }
+  if (m.t === 'stagione'){ mpApplica(m.S); PRIMA_SNAP = m.prima; riproduciEv(m.ev, () => { notizie(m.ev); mpDopoNotizie(); }); return; }
+  if (m.t === 'stato'){ mpApplica(m.S); aggiornaUI(); pannello(); if (S.fine) finePartita(); return; }
+  if (m.t === 'esci'){ mpVia(); return; } }
+function mpVia(){ if (!MPN) return; const nome = MPN.amico; MPN.conn = null; mpChiudi(); if (!attivo || !S || !S.mp || S.fine) return; const o = ov(`<div class="dlg box cq-dlg"><h2>Partita interrotta</h2><p><b>${nome}</b> è uscito dalla partita o si è scollegato.</p><button class="big" id="cqOk">Torna al menu</button></div>`, false); o.querySelector('#cqOk').onclick = () => esci('gioca'); }
+function mpCollega(conn){ MPN.conn = conn; conn.on('data', mpRicevi); conn.on('close', mpVia); mpInvia({t:'ciao', nome: mpNome()}); }
+function mpBenvenuto(){ const amB = FZ[MPN.io === 'h' ? S.mp.g : S.mp.h], ia = Object.keys(FZ).find(f => !umano(f));
+  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Collegato con ${MPN.amico}</span><h2>Tu difendi ${FZ[S.io].nome}</h2><p><b>${MPN.amico}</b> difende ${amB.nome}. ${FZ[ia].nome} la muove il computer.</p>
+    <p>Si gioca a turni: in ogni stagione prima gioca uno, poi l’altro, poi il computer. Chi comincia cambia a ogni stagione. Vince chi resta in piedi o chi vince per primo.</p><p class="cq-nota">Patti e alleanze con il tuo amico li proponi dalla Diplomazia: decide lui. Questa partita non si salva: se uno esce, finisce.</p>
+    <button class="big" id="cqOk">${mpAttesa() ? 'Aspetto il mio turno' : 'Comincio io'} ${ico('play', 2)}</button></div>`, false); o.querySelector('#cqOk').onclick = () => { chiudiOv(); pannello(); }; }
+function dlgMp(){ const r = mpRete(); if (!r){ toast('Il gioco online non è disponibile'); return; }
+  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Conquista in due</span><h2>Gioca con un amico</h2><p>Ognuno dal suo telefono: voi due prendete due borghi, il terzo lo muove il computer. Si gioca a turni, una stagione per uno.</p>
+    <label class="cq-mpl">Il tuo nome<input id="cqMpN" maxlength="14" value="${(mpNome() || '').replace(/"/g, '')}"></label>
+    <button class="big" id="cqMpC">Crea una stanza</button><button class="big alt" id="cqMpE">Entra con un codice</button><button class="big alt" id="cqNo">Indietro</button></div>`, false);
+  const nome = () => { const v = o.querySelector('#cqMpN').value.trim().slice(0, 14); if (v) try { localStorage.setItem('difendi-smerillo-nome', v); } catch(e){} };
+  o.querySelector('#cqNo').onclick = () => { mpChiudi(); apri(); };
+  o.querySelector('#cqMpC').onclick = () => { nome(); mpCrea(); };
+  o.querySelector('#cqMpE').onclick = () => { nome(); mpEntra(); }; }
+const MPCAR = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', mpCod = () => Array.from({length:5}, () => MPCAR[Math.floor(Math.random()*MPCAR.length)]).join('');
+async function mpCrea(){ const io = SCELTA && FZ[SCELTA] ? SCELTA : 'smerillo', altri = Object.keys(FZ).filter(f => f !== io); MPN = {io:'h', cod: mpCod(), amico:'Amico', borgoH: io, borgoG: altri[0]};
+  const disegna = () => { const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Stanza creata</span><h2>Codice: <span class="cq-mpcod">${MPN.cod}</span></h2><p>Il tuo amico apre Conquista, tocca <b>Gioca con un amico → Entra con un codice</b> e lo scrive.</p>
+      <button class="big alt" id="cqMpSh">Manda il codice</button>
+      <p class="cq-nota">Tu difendi <b>${FZ[io].nome}</b>. Il tuo amico difende:</p><div class="cq-dif cq-vel">${altri.map(f => `<button type="button" role="radio" data-mpg="${f}" aria-checked="${f === MPN.borgoG}">${FZ[f].corto}</button>`).join('')}</div>
+      <p class="cq-nota">Difficoltà ${DIFF[difScelta()].nome.toLowerCase()}, mappa ${MAPPE[mappaScelta()].nome.toLowerCase()}, partita ${velScelta() ? 'veloce' : 'lunga'}.</p>
+      <p class="cq-mpst" id="cqMpSt">${MPN.conn ? `${ico('ok', 2)} <b>${MPN.amico}</b> è entrato nella stanza!` : `${ico('clessidra', 2)} Aspetto il tuo amico…`}</p>
+      <button class="big" id="cqMpGo" ${MPN.conn ? '' : 'disabled'}>Inizia la partita ${ico('play', 2)}</button><button class="big alt" id="cqNo">Annulla</button></div>`, false);
+    o.querySelectorAll('[data-mpg]').forEach(b => b.onclick = () => { MPN.borgoG = b.dataset.mpg; suona('tocco'); disegna(); });
+    o.querySelector('#cqMpSh').onclick = async e => { const t = `Giochiamo a Conquista su Difendi Smerillo! Apri il gioco, vai in Conquista, tocca "Gioca con un amico" → "Entra con un codice" e scrivi: ${MPN.cod}`; try { if (navigator.share){ await navigator.share({text:t}); return; } await navigator.clipboard.writeText(t); e.target.textContent = 'Copiato!'; } catch(er){} };
+    o.querySelector('#cqNo').onclick = () => { mpChiudi(); apri(); };
+    o.querySelector('#cqMpGo').onclick = () => mpInizia(); };
+  disegna();
+  let errore = null; for (let k = 0; k < 3 && MPN; k++){ try { MPN.stanza = await mpRete().trasporto().crea(MPN.cod, conn => { if (!MPN || MPN.conn) return; mpCollega(conn); }); errore = null; break; }
+    catch(e){ errore = e; if (e && e.type === 'unavailable-id' && MPN){ MPN.cod = mpCod(); disegna(); continue; } if (e && e.tipo === 'script') break; await new Promise(r => setTimeout(r, 800)); } }
+  if (errore && MPN){ mpChiudi(); mpErrore(errore); } }
+function mpErrore(e){ const t = e && (e.tipo || e.type) || '', r = mpRete();
+  const perche = r && r.dentroClaude() ? 'Dentro l’app Claude il gioco online non funziona: apri il gioco dal sito nel browser.' : t === 'script' ? 'Non riesco a scaricare il pezzo per il gioco online: controlla internet.' : t === 'peer-unavailable' || t === 'tempo' || t === 'nessuno' ? 'Non trovo la stanza: controlla il codice e che il tuo amico la tenga aperta.' : 'Il collegamento non risponde. Controlla internet (meglio il Wi-Fi) e riprova.';
+  const o = ov(`<div class="dlg box cq-dlg"><h2>Niente collegamento</h2><p>${perche}</p><p class="cq-nota">Codice errore: ${t || 'sconosciuto'}</p><button class="big" id="cqOk">Indietro</button></div>`, false); o.querySelector('#cqOk').onclick = () => dlgMp(); }
+function mpEntra(){ const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Conquista in due</span><h2>Entra con un codice</h2><p>Scrivi il codice che ti ha mandato il tuo amico.</p><input id="cqMpC2" class="cq-mpin" maxlength="5" autocapitalize="characters" autocomplete="off" placeholder="ABCDE"><p class="cq-mpst" id="cqMpSt"></p><button class="big" id="cqMpGo">Entra</button><button class="big alt" id="cqNo">Indietro</button></div>`, false);
+  o.querySelector('#cqNo').onclick = () => { mpChiudi(); dlgMp(); };
+  o.querySelector('#cqMpGo').onclick = async () => { const cod = o.querySelector('#cqMpC2').value.trim().toUpperCase(), st = o.querySelector('#cqMpSt'); if (cod.length !== 5){ st.textContent = 'Il codice ha 5 lettere o numeri.'; return; }
+    st.textContent = 'Mi collego…'; MPN = {io:'g', cod, amico:'Amico'};
+    try { const conn = await mpRete().trasporto().entra(cod); if (!MPN) return; mpCollega(conn); st.innerHTML = `${ico('ok', 2)} Collegato! Aspetto che il tuo amico faccia partire la partita…`; o.querySelector('#cqMpGo').disabled = true; }
+    catch(e){ MPN = null; mpErrore(e); } }; }
+function mpInizia(){ if (!MPN || !MPN.conn) return; const h = MPN.borgoH, g = MPN.borgoG; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; chiudiOv();
+  nuova(h, difScelta(), false, velScelta(), mappaScelta());
+  if (S.esp){ for (const f in FZ) if (f !== h && S.terre[f]) S.terre[f].sold = Math.max(1, S.terre[f].sold - Math.round(S.esp*10)); S.esp = 0; } // in due niente rivali rinforzati dalla casata
+  S.capNews = null; S.mp = {h, g, nomi:{h: mpNome(), g: MPN.amico}, fase:'h', primo:'h', log:[]};
+  mpInvia({t:'inizia', S, nome: mpNome()}); suona('banner'); aggiornaUI(); vaiA(S.io); pannello(); mpBenvenuto(); }
+return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{get MPN(){ return MPN; }, mpFine: () => mpFine(), EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 // ===== account: i progressi salvati online, per ritrovarli su ogni telefono =====
