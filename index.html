@@ -1730,6 +1730,25 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-nris small{font-size:11.5px;color:#c8d0f0}
 .cq-nnota{margin-top:7px;font-size:12.5px;color:#c8d0f0;text-align:center}
 .cq-notizie #cqOk{margin-top:12px}
+
+/* schede dentro le pagine del menu */
+.cr-seg{position:sticky;top:0;z-index:5;display:flex;gap:4px;padding:4px;margin:2px 0 12px;background:rgba(20,20,51,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:2px solid #141433;border-radius:16px;box-shadow:0 4px 0 rgba(20,20,51,.35)}
+.cr-seg button{flex:1;position:relative;font:400 17px var(--f-big),"Lilita One",sans-serif;color:#cfd6ff;background:none;border:0;border-radius:12px;padding:9px 4px;cursor:pointer;transition:background .15s,color .15s}
+.cr-seg button.on{background:#ffd03a;color:#141433;box-shadow:inset 0 -3px 0 #e0a500}
+.cr-seg button i{position:absolute;top:-6px;right:4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#e04830;color:#fff;border:2px solid #141433;font:700 11px/16px var(--f-body,system-ui);font-style:normal}
+.cr-sg{display:flex;flex-direction:column;gap:12px}
+.cr-sg[hidden]{display:none!important}
+.cr-sg>.cr-sub:first-child{margin-top:0}
+.cr-fatti{margin-top:6px}
+.cr-fatti summary{cursor:pointer;font:700 13px var(--f-body,system-ui);color:#6a7090;padding:8px 2px;list-style:none}
+.cr-fatti summary::before{content:"\25B8  "}
+.cr-fatti[open] summary::before{content:"\25BE  "}
+.cr-fatti .pr-q{opacity:.75}
+.cr-sg .cr-sub{color:#fff!important;text-shadow:0 2px 0 #141433,0 0 8px rgba(20,20,51,.8)!important}
+.cr-sg .cr-sub small{color:#ffd03a!important}
+.cr-sg[data-s="difensori"]>.cr-sub:first-child,.cr-sg[data-s="casata"]>[data-sg]>.cr-sub:first-child{display:none}
+.cr-sg>[data-sg] > .cq-nota,.cr-sg>[data-sg] > p.cq-nota{color:#eef1ff!important;text-shadow:0 1px 0 #141433,0 0 6px rgba(20,20,51,.9)}
+.cr-sg>[data-sg]{display:flex;flex-direction:column;gap:10px}
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -4254,7 +4273,7 @@ function mostraMenu(pannello){
           if (x.stato === 'pronto') b.onclick = () => { const pg = b.closest('.cr-pg'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.ritiraInc(x.k, x.id); }; d.querySelector('.pr-qr').append(b); box.append(d); };
         const RI = TB.righeInc(), bg = c.querySelector('#prIncG'), bi = c.querySelector('#prIncI');
         if (bg) RI.oggi.forEach(x => riga(bg, x)); if (bi) RI.imp.forEach(x => riga(bi, x)); }
-      { const rifai = tb => () => { const pg = c.querySelector(`.cr-pg[data-tab="${tb}"]`); RIENTRO = {tab: tb, top: pg ? pg.scrollTop : 0}; mostraMenu('home'); }; try { CQ.menuMissioni(c.querySelector('#prCq'), rifai('premi')); CQ.menuCollezione(c.querySelector('#crCq'), rifai('dif')); } catch(e){ console.error(e); } }
+      { const rifai = tb => () => { const pg = c.querySelector(`.cr-pg[data-tab="${tb}"]`); RIENTRO = {tab: tb, top: pg ? pg.scrollTop : 0}; mostraMenu('home'); }; try { CQ.menuMissioni(c.querySelector('#prCq'), rifai('premi')); CQ.menuCollezione(c.querySelector('#crCq'), rifai('dif')); } catch(e){ console.error(e); } try { CQ.segmenta(c); } catch(e){ console.error(e); } }
       c.querySelectorAll('.acc-btn').forEach(b => b.onclick = () => ACC.apri()); { const sn = c.querySelector('#crSnd'); if (sn) sn.onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('menu'); sn.innerHTML = TB.ico(SUONI.muto ? 'muto' : 'suono', 2); }; }
       const e2 = c.querySelector('#tEv2'); if (e2) e2.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('evento'); });
       const pa = c.querySelector('#prAv'); if (pa){ const ch = PROF.chip(); pa.append(ch.querySelector('.pf-av') || ch); }
@@ -6506,22 +6525,47 @@ function menuCollezione(box, rifai){ if (!box) return; leggiCas();
   initSt(); syncSbl(); const l = livCas(CAS.gloria), pro = LIVC[l + 1], perc = pro ? Math.round(100*(CAS.gloria - LIVC[l][0])/(pro[0] - LIVC[l][0])) : 100;
   const skins = Object.keys(SKIN).map(k => { const ok = k === 'base' || haPremio('skin:' + k), m = missDi('skin:' + k); return `<button type="button" class="cq-sk ${CAS.skin === k ? 'on' : ''}" data-sk="${k}" ${ok ? '' : 'disabled'}><canvas data-skin="${k}" width="60" height="44"></canvas><b>${SKIN[k].nome}</b><small>${ok ? SKIN[k].desc : ico('lucchetto', 2) + ' Missione: ' + (m ? m.nome : '')}</small></button>`; }).join('');
   const sbl = MISS.filter(m => ['sim', 'col', 'for'].includes(m.premio[0])).map(m => `<span class="${haPremio(premioK(m.premio)) ? 'ok' : ''}" title="${haPremio(premioK(m.premio)) ? '' : 'Missione: ' + m.nome}">${haPremio(premioK(m.premio)) ? '' : ico('lucchetto', 1)}${icoPremio(m.premio)}${m.premio[2].replace(/^(Simbolo|Colore|Forma) /, '')}</span>`).join('');
-  box.innerHTML = `<h3 class="cr-sub">${ico('bandiera', 2)} La tua casata <small>Conquista</small></h3>
+  box.innerHTML = `<div data-sg="casata"><h3 class="cr-sub">${ico('bandiera', 2)} La tua casata <small>Conquista</small></h3>
     <div class="cq-mcas"><div class="cq-gh">${imgStemma(CAS.stemma, 4)}<span><span class="kicker">${LIVC[l][1]}</span><b class="cq-mcn">Casata ${CAS.nome}</b></span></div>
       <div class="cq-glb"><i style="width:${perc}%"></i></div><small class="cq-nota">Gloria ${CAS.gloria}${pro ? ` · prossimo titolo “${pro[1]}” a ${pro[0]}` : ' · il titolo più alto'}</small>
       <div class="cq-cst"><span><b>${CAS.gen || 0}</b><small>generazioni</small></span><span><b>${CAS.vittorie || 0}</b><small>vittorie</small></span><span><b>${MISS.filter(m => CAS.miss[m.id]).length}/${MISS.length}</b><small>missioni</small></span></div>
       <div class="cq-mbt"><button type="button" class="big alt" id="cqmSt">Cambia stemma o nome</button><button type="button" class="big alt" id="cqmCr">Leggi la cronaca</button></div></div>
     <h3 class="cr-sub">${ico('spade', 2)} Capitani</h3>${(CAS.cap || []).length ? CAS.cap.map(c => capCard(c, `<span class="cq-capr">partite giocate: ${c.gen || 0} di ${CAPGEN}</span>`)).join('') : '<p class="cq-mvuoto">Il primo capitano arriva all’inizio della prossima partita.</p>'}
     ${capSlot() < 3 ? `<p class="cq-nota">${ico('lucchetto', 2)} Un altro capitano arriva con il titolo “${LIVC[capSlot() + 1][1]}”.</p>` : ''}${CAS.leggende && CAS.leggende.length ? `<p class="cq-nota"><b>Leggende:</b> ${CAS.leggende.map(x => `${x.nome} (${x.vinte} vittorie)`).join(', ')}</p>` : ''}
-    <h3 class="cr-sub">${ico('spada', 2)} Skin dei soldati</h3><div class="cq-skl">${skins}</div>
+    <h3 class="cr-sub">${ico('mappa', 2)} Segni sulla mappa</h3>${CAS.segni && CAS.segni.length ? CAS.segni.map(g => `<div class="cq-ric"><img class="cq-sgi" src="${spriteSegno(g.k).toDataURL()}" alt=""><span><b>${SEGNI[g.k]}${g.n > 1 ? ' ×' + g.n : ''} · ${TERRE[g.t].nome}</b><small>${g.txt[0]}</small></span></div>`).join('') : '<p class="cq-mvuoto">Ogni vittoria lascia un segno sulla mappa: una lapide, un arco, un ulivo.</p>'}</div>
+    <div data-sg="sbl"><h3 class="cr-sub">${ico('spada', 2)} Skin dei soldati</h3><div class="cq-skl">${skins}</div>
     <button type="button" class="cq-corn ${CAS.cornice ? 'on' : ''}" id="cqmCorn" ${haPremio('cornice:oro') ? '' : 'disabled'}>${haPremio('cornice:oro') ? (CAS.cornice ? 'Cornice d’oro sulle tue terre: attiva' : 'Cornice d’oro: spenta, tocca per attivarla') : ico('lucchetto', 2) + ' Cornice d’oro · Missione: ' + missDi('cornice:oro').nome}</button>
     <h3 class="cr-sub">${ico('martello', 2)} Edifici speciali</h3><div class="cq-sbll">${Object.keys(STR).filter(k => STR[k].sbl).map(k => { const ok = (CAS.sbl || []).includes(k); return `<div class="cq-sblr ${ok ? 'ok' : ''}">${ico(ok ? STR[k].ic : 'lucchetto', 2)}<span><b>${STR[k].nome}</b><small>${ok ? STR[k].desc : STR[k].sblT}</small></span></div>`; }).join('')}</div>
-    <h3 class="cr-sub">${ico('bandiera', 2)} Per lo stemma</h3><div class="cq-psb">${sbl}</div>
-    <h3 class="cr-sub">${ico('mappa', 2)} Segni sulla mappa</h3>${CAS.segni && CAS.segni.length ? CAS.segni.map(g => `<div class="cq-ric"><img class="cq-sgi" src="${spriteSegno(g.k).toDataURL()}" alt=""><span><b>${SEGNI[g.k]}${g.n > 1 ? ' ×' + g.n : ''} · ${TERRE[g.t].nome}</b><small>${g.txt[0]}</small></span></div>`).join('') : '<p class="cq-mvuoto">Ogni vittoria lascia un segno sulla mappa: una lapide, un arco, un ulivo.</p>'}`;
+    <h3 class="cr-sub">${ico('bandiera', 2)} Per lo stemma</h3><div class="cq-psb">${sbl}</div></div>`;
   disegnaSkin(box);
-  box.querySelectorAll('[data-sk]:not([disabled])').forEach(b => b.onclick = () => { CAS.skin = b.dataset.sk; salvaCas(); try { SUONI.suona('tocco'); } catch(e){} box.querySelectorAll('[data-sk]').forEach(x => x.classList.toggle('on', x === b)); });
+  box.querySelectorAll('[data-sk]:not([disabled])').forEach(b => b.onclick = () => { CAS.skin = b.dataset.sk; salvaCas(); try { SUONI.suona('tocco'); } catch(e){} b.closest('.cq-skl').querySelectorAll('[data-sk]').forEach(x => x.classList.toggle('on', x === b)); });
   const cn = box.querySelector('#cqmCorn'); if (cn && !cn.disabled) cn.onclick = () => { CAS.cornice = !CAS.cornice; salvaCas(); cn.classList.toggle('on', CAS.cornice); cn.textContent = CAS.cornice ? 'Cornice d’oro sulle tue terre: attiva' : 'Cornice d’oro: spenta, tocca per attivarla'; };
   box.querySelector('#cqmSt').onclick = () => apri('stemma'); box.querySelector('#cqmCr').onclick = () => apri('cronaca'); }
+// menu: divide le pagine lunghe in schede piccole
+const SEG = {premi:'oggi', dif:'difensori'};
+function segmenta(c){
+  const conta = el => el ? el.querySelectorAll('.pr-rit:not([disabled])').length : 0;
+  const compatta = box => { if (!box) return; const righe = [...box.children].filter(x => x.classList.contains('pr-q')); const pronte = righe.filter(x => x.querySelector('.pr-rit:not([disabled])')), fatte = righe.filter(x => x.classList.contains('ok'));
+    pronte.reverse().forEach(x => box.prepend(x)); if (fatte.length){ const d = document.createElement('details'); d.className = 'cr-fatti'; d.innerHTML = `<summary>Già ritirate (${fatte.length})</summary>`; fatte.forEach(x => d.append(x)); box.append(d); } };
+  const costruisci = (pg, nome, schede) => { if (!pg || pg.querySelector('.cr-seg')) return; const h = pg.querySelector('.cr-h');
+    const bar = document.createElement('div'); bar.className = 'cr-seg'; const gr = {};
+    schede.forEach(([k, t, els]) => { const g = document.createElement('div'); g.className = 'cr-sg'; g.dataset.s = k; els.filter(Boolean).forEach(e => g.append(e)); gr[k] = g;
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.s = k; const n = conta(g); b.innerHTML = t + (n ? `<i>${n}</i>` : ''); bar.append(b); });
+    h.after(bar); let prima = bar; schede.forEach(([k]) => { prima.after(gr[k]); prima = gr[k]; });
+    const mostra = (k, suono) => { SEG[nome] = k; bar.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.s === k)); for (const x in gr) gr[x].hidden = x !== k; if (suono){ try { SUONI.suona('tocco'); } catch(e){} pg.scrollTop = 0; } };
+    bar.querySelectorAll('button').forEach(b => b.onclick = () => mostra(b.dataset.s, true)); mostra(gr[SEG[nome]] ? SEG[nome] : schede[0][0]); };
+  const pp = c.querySelector('.cr-pg[data-tab="premi"]');
+  if (pp && !pp.querySelector('.cr-seg')){ const bi = pp.querySelector('#prIncI'), bh2 = pp.querySelector('.pr-bh2'), q = s => pp.querySelector(s), boxDi = s => q(s) && q(s).closest('.pr-box');
+    const boxInc = boxDi('#prIncG'), boxCq = boxDi('#prCq'), boxTal = boxDi('.pr-tal');
+    let boxImp = null; if (bi && bh2){ boxImp = document.createElement('div'); boxImp.className = 'pr-box'; bh2.classList.remove('pr-bh2'); boxImp.append(bh2, bi); }
+    compatta(q('#prIncG')); compatta(bi); compatta(q('#prCq'));
+    const prof = q('#tProf2'); if (prof) prof.remove();
+    costruisci(pp, 'premi', [['oggi', 'Oggi', [q('#prRuota'), boxInc, boxTal]], ['imprese', 'Imprese', [boxImp]], ['conquista', 'Conquista', [boxCq]]]); }
+  const pd = c.querySelector('.cr-pg[data-tab="dif"]');
+  if (pd && !pd.querySelector('.cr-seg')){ const cq = pd.querySelector('#crCq'), part = k => cq && cq.querySelector(`[data-sg="${k}"]`);
+    const cas = part('casata'), sb = part('sbl');
+    costruisci(pd, 'dif', [['difensori', 'Difensori', [pd.querySelector('.cr-sub'), pd.querySelector('.cr-difs'), pd.querySelector('#tDif')]], ['casata', 'Casata', [cas || cq]]].concat(sb ? [['sbl', 'Sblocchi', [sb]]] : []));
+    if (cq && cas){ cq.remove(); } } }
 const missPronte = () => { try { leggiCas(); return CAS ? missDaRitirare() : 0; } catch(e){ return 0; } };
 // la cronaca della partita: i fatti importanti, scritti come in un libro
 function cron(txt, imp = 1){ if (!S || S.sim) return; S.cron = S.cron || []; S.cron.push({t:S.turno, txt, imp}); }
@@ -7669,7 +7713,7 @@ function tasto(e, k){ const o = el('cqOv');
   else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
-return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, get attivo(){ return attivo; }, _test:{EVENTI, notizie: ev => notizie(ev), dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{EVENTI, notizie: ev => notizie(ev), dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 // ===== account: i progressi salvati online, per ritrovarli su ogni telefono =====
