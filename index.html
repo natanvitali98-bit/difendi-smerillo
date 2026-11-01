@@ -1664,6 +1664,40 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-mban b{font-family:var(--f-big);font-weight:400;font-size:17px;color:#141433}
 .cq-mban em{font-style:normal;font-size:12px;color:#5a6070}
 @keyframes cqMban{from{transform:translate(-50%,-30px) scale(.8);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+/* ===== Conquista nel menu principale ===== */
+.cr-sub{margin:14px 0 6px;font-family:var(--f-big);font-weight:400;font-size:20px;color:#fff;display:flex;align-items:center;gap:8px;text-shadow:0 2px 0 #141433}
+.cr-sub small{font-family:var(--f-body);font-size:13px;font-weight:700;color:#cfe0ff;text-shadow:none}
+.cr-sub img{filter:drop-shadow(0 2px 0 #141433)}
+.cr-cq{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.cr-cq .cq-cap,.cr-cq .cq-ric,.cr-cq .cq-sblr{background:var(--carta,#fff);border:3px solid #141433;box-shadow:0 3px 0 #141433}
+.cr-cq .cq-sblr{opacity:1}
+.cr-cq .cq-sblr:not(.ok){background:#e4e7f0;color:#5a6070}
+.cr-cq .cq-nota{color:#e8eeff;margin:0}
+.cr-cq .cq-psb span{background:#fff;opacity:.6;border:2px solid #141433}
+.cr-cq .cq-psb span.ok{opacity:1;background:#ddf7e3}
+.cr-cq .cq-sk{background:#fff;border-color:#141433}
+.cr-cq .cq-sk.on{background:#fff3c4;box-shadow:0 0 0 3px #ffd03a,0 3px 0 #141433}
+.cr-cq .cq-corn{background:#fff;border-color:#141433}
+.cq-mcas{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:18px;background:#fff6d6;border:3px solid #141433;box-shadow:0 4px 0 #141433;color:var(--testo,#141433)}
+.cq-mcas .cq-nota{color:var(--grigio,#5a6070)!important}
+.cq-mcas .cq-cst span{background:#fff}
+.cq-mcn{font-family:var(--f-big);font-weight:400;font-size:22px}
+.cq-mbt{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cq-mbt .big{font-size:15px;min-height:46px;padding:4px 8px}
+.cq-mvuoto{margin:0;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.92);color:#141433;font-size:14px;line-height:1.4}
+.cq-mq2{flex-wrap:wrap}
+.cq-mqd{display:block;font-size:12px;font-weight:600;color:#5a6070;margin-top:1px}
+.cq-mqp{flex-basis:100%;font-size:11.5px;font-weight:700;color:#8a6a10;margin-top:2px}
+.cq-prit .cq-pico{display:inline-flex;align-items:center;justify-content:center}
+.cq-prit .cq-pskin{width:24px;height:24px}
+.cq-prit.pronto{background:#ffd03a!important;color:#141433!important;animation:cqPulsa 1.4s ease-in-out infinite}
+.cq-castag{pointer-events:none}
+.cq-mq2 .pr-qt{display:block!important}
+.cq-mq2 .pr-qt .cq-mqd{display:block;color:#5a6070!important;font-size:12px;font-weight:600;margin-top:2px;letter-spacing:0}
+.cq-mq2 .pr-qt img{vertical-align:-3px;margin-right:4px}
+.cr-cq .cq-psb span{filter:grayscale(1);opacity:.55}
+.cr-cq .cq-psb span.ok{filter:none;opacity:1}
+.cq-mbt .big{font-size:14px}
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -3985,7 +4019,7 @@ function mostraMenu(pannello){
     const tal = TB.talismani(), nTal = Object.values(tal).reduce((s, v) => s + (v || 0), 0), INCn = INC.daRitirare, rp = TB.ruotaPronta(), [fa, ft] = PROF.quantiFortunati();
     const card = (id, ic, tit, sub, extra = '') => `<button class="hm-card hm-modo ${extra}" id="${id}"><span class="hm-ic">${ic}</span><span class="hm-sx"><b>${tit}</b><small>${sub}</small></span></button>`;
     const difs = TB.listaDif().map(d => `<button class="cr-dif ${d.liv ? '' : 'no'}" data-dif="${d.t}" style="--rc:${d.rar.col}"><span class="cr-di"></span><b>${d.liv ? d.nome : '???'}</b><small>${d.liv ? 'liv. ' + d.liv : d.rar.nome}</small></button>`).join('');
-    const TABS = [['premi', 'trifoglio', 'Premi', rp || INCn], ['dif', 'scudo', 'Difensori', false], ['gioca', 'spade', 'Gioca', false], ['amici', 'amici', 'Amici', false], ['modi', 'torre', 'Modalità', TB.eventoAttivo() || !sf.fatta]];
+    const TABS = [['premi', 'trifoglio', 'Premi', rp || INCn || CQ.missPronte()], ['dif', 'scudo', 'Collezione', false], ['gioca', 'spade', 'Gioca', false], ['amici', 'amici', 'Amici', false], ['modi', 'torre', 'Modalità', TB.eventoAttivo() || !sf.fatta]];
     c.innerHTML = `<div class="cr">
       <header class="cr-top"><div id="hmProf"></div><span class="cr-res" title="Stelle">${TB.ico('stella', 2)} <b>${tot}</b></span><span class="cr-res" title="Talismani">${TB.ico('trifoglio', 2)} <b>${nTal}</b></span><button class="cr-ing" id="crSnd" aria-label="Musica e suoni">${TB.ico(SUONI.muto ? 'muto' : 'suono', 2)}</button><button class="cr-ing" data-p="altro" aria-label="Altro: salvataggio e impostazioni">${TB.ico('altro', 2)}</button></header>
       ${tester() ? `<button type="button" class="hm-tester" id="tTest">🧪 Pass di prova attivo · tocca per tornare ai tuoi progressi</button>` : ''}
@@ -4000,13 +4034,14 @@ function mostraMenu(pannello){
           </div>
           <div class="pr-box"><div class="pr-bh">${TB.ico('pergamena', 2)}<b>Incarichi di oggi</b><small>cambiano a mezzanotte</small></div><div id="prIncG"></div>
             <div class="pr-bh pr-bh2">${TB.ico('coppa', 2)}<b>Imprese</b><small>per sempre</small></div><div id="prIncI"></div></div>
+          <div class="pr-box"><div class="pr-bh">${TB.ico('bandiera', 2)}<b>Missioni della Conquista</b><small>premi per la casata</small></div><div id="prCq"></div></div>
           <div class="pr-box"><div class="pr-bh">${TB.ico('trifoglio', 2)}<b>I tuoi talismani</b><small>da usare in missione</small></div>
             <div class="pr-tal">${Object.entries(TB.TAL).map(([k, v]) => `<span class="${tal[k] ? '' : 'zero'}">${TB.ico(v.ic, 3)}<b>×${tal[k] || 0}</b><small>${v.n}</small></span>`).join('')}</div></div>
           <button class="pr-prof" id="tProf2"><span id="prAv"></span><span class="pr-rt"><b>Il tuo profilo</b><small>Personaggi, cornici e titoli</small>
             <span class="pr-fort">${TB.ico('trifoglio')} Premi fortunati <span class="pr-bar"><i style="width:${fa/ft*100}%"></i><em>${fa}/${ft}</em></span></span></span></button>
         </section>
-        <section class="cr-pg" data-tab="dif"><h2 class="cr-h">Difensori <small>${TB.contaDif()}</small></h2><div class="cr-difs">${difs}</div>
-          <button class="big alt" id="tDif">Livelli e specialità</button></section>
+        <section class="cr-pg" data-tab="dif"><h2 class="cr-h">Collezione</h2><h3 class="cr-sub">${TB.ico('scudo', 2)} Difensori <small>${TB.contaDif()}</small></h3><div class="cr-difs">${difs}</div>
+          <button class="big alt" id="tDif">Livelli e specialità</button><div class="cr-cq" id="crCq"></div></section>
         <section class="cr-pg cr-arena" data-tab="gioca">
           <h1 class="logo">Difendi<br>Smerillo</h1>
           <div class="cr-luogo">${TB.ico('pin', 2)} ${LUOGO}</div>
@@ -4064,6 +4099,7 @@ function mostraMenu(pannello){
           if (x.stato === 'pronto') b.onclick = () => { const pg = b.closest('.cr-pg'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.ritiraInc(x.k, x.id); }; d.querySelector('.pr-qr').append(b); box.append(d); };
         const RI = TB.righeInc(), bg = c.querySelector('#prIncG'), bi = c.querySelector('#prIncI');
         if (bg) RI.oggi.forEach(x => riga(bg, x)); if (bi) RI.imp.forEach(x => riga(bi, x)); }
+      { const rifai = tb => () => { const pg = c.querySelector(`.cr-pg[data-tab="${tb}"]`); RIENTRO = {tab: tb, top: pg ? pg.scrollTop : 0}; mostraMenu('home'); }; try { CQ.menuMissioni(c.querySelector('#prCq'), rifai('premi')); CQ.menuCollezione(c.querySelector('#crCq'), rifai('dif')); } catch(e){ console.error(e); } }
       { const sn = c.querySelector('#crSnd'); if (sn) sn.onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('menu'); sn.innerHTML = TB.ico(SUONI.muto ? 'muto' : 'suono', 2); }; }
       const e2 = c.querySelector('#tEv2'); if (e2) e2.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('evento'); });
       const pa = c.querySelector('#prAv'); if (pa){ const ch = PROF.chip(); pa.append(ch.querySelector('.pf-av') || ch); }
@@ -6258,7 +6294,7 @@ function stat(k, inc = 1){ if (!S || S.sim || SCELTA || !initSt()) return; CAS.s
 function controllaMiss(live){ if (!initSt()) return []; const nuove = []; for (let giro = 0; giro < 2; giro++) for (const m of MISS){ if (CAS.miss[m.id]) continue; if (m.val(CAS.st) >= m.n){ CAS.miss[m.id] = 'fatta'; nuove.push(m); } }
   if (nuove.length){ salvaCas(); if (live) nuove.forEach((m, i) => setTimeout(() => bannerMiss(m), i*2800)); } return nuove; }
 const missDaRitirare = () => initSt() ? MISS.filter(m => CAS.miss[m.id] === 'fatta').length : 0;
-function bannerMiss(m){ if (!root) return; const b = document.createElement('div'); b.className = 'cq-mban'; b.innerHTML = `${ico('coppa', 3)}<span><small>Missione completata!</small><b>${m.nome}</b><em>Premio: ${m.premio[2]} · ritiralo in Missioni</em></span>`; root.append(b); try { suona('stella2'); } catch(e){} setTimeout(() => b.classList.add('via'), 2600); setTimeout(() => b.remove(), 3100); }
+function bannerMiss(m){ if (!root) return; const b = document.createElement('div'); b.className = 'cq-mban'; b.innerHTML = `${ico('coppa', 3)}<span><small>Missione completata!</small><b>${m.nome}</b><em>Premio: ${m.premio[2]} · ritiralo nel menu, pagina Premi</em></span>`; root.append(b); try { suona('stella2'); } catch(e){} setTimeout(() => b.classList.add('via'), 2600); setTimeout(() => b.remove(), 3100); }
 // il soldatino: usato sulla mappa (in marcia) e nell'anteprima delle skin
 function omino(g, X, Y, z, col, skin, ph, bandiera){ const P = (c, x, y, w, h) => { g.fillStyle = c; g.fillRect(X + x*z, Y + y*z, w*z, h*z); };
   P('rgba(0,0,0,.3)', -3, 4, 6, 2); P('#101420', -3, -6, 6, 11);
@@ -6293,6 +6329,39 @@ function dlgMissioni(tab = 'miss', dopo){ if (!initSt()){ if (dopo) dopo(); retu
   o.querySelectorAll('[data-sk]').forEach(b => b.onclick = () => { CAS.skin = b.dataset.sk; salvaCas(); suona('tocco'); dlgMissioni('premi', dopo); });
   const cn = o.querySelector('#cqCorn'); if (cn) cn.onclick = () => { CAS.cornice = !CAS.cornice; salvaCas(); dlgMissioni('premi', dopo); };
   o.querySelector('#cqNo').onclick = () => { if (dopo) dopo(); else chiudiOv(); }; }
+
+// ===== nel menu principale: missioni (pagina Premi) e collezione della casata (pagina Collezione)
+const icoPremio = p => p[0] === 'sim' ? ico(p[1], 2) : p[0] === 'col' ? `<i class="cq-pcol" style="background:${(SCOL.find(c => c[0] === p[1]) || [0, '#888'])[1]}"></i>` : p[0] === 'for' ? `<img src="${stemma({c1: CAS.stemma.c1, c2: CAS.stemma.c2, f: p[1], sim: CAS.stemma.sim}, 1).toDataURL()}" width="18" height="21" alt="">` : p[0] === 'skin' ? `<canvas class="cq-pskin" data-skin="${p[1]}" width="16" height="16"></canvas>` : ico('stella', 2);
+const disegnaSkin = box => box.querySelectorAll('canvas[data-skin]').forEach(c => { const g = c.getContext('2d'), big = c.width > 20; g.imageSmoothingEnabled = false; const col = CAS && CAS.stemma ? SCOL[CAS.stemma.c1][1] : FZ.smerillo.col; g.clearRect(0, 0, c.width, c.height); if (big){ omino(g, 20, 30, 2, col, c.dataset.skin, 0, true); omino(g, 42, 32, 2, col, c.dataset.skin, 1, false); } else omino(g, 6, 11, 1, col, c.dataset.skin, 0, false); });
+function ritiraMiss(id){ const m = MISS.find(x => x.id === id); if (!m || !initSt() || CAS.miss[id] !== 'fatta') return null; CAS.miss[id] = 'ritirata'; const k = premioK(m.premio); if (!CAS.premi.includes(k)) CAS.premi.push(k); if (m.premio[0] === 'skin') CAS.skin = m.premio[1]; if (m.premio[0] === 'cornice') CAS.cornice = true; salvaCas(); for (const q in STM) delete STM[q]; controllaMiss(false); return m; }
+function menuMissioni(box, rifai){ if (!box) return; if (!initSt()){ box.innerHTML = `<p class="cq-mvuoto">Gioca una partita di <b>Conquista</b> (pagina Modalità) per fondare la tua casata: qui compariranno le sue missioni.</p>`; return; } controllaMiss(false);
+  box.innerHTML = MISS.map(m => { const v = Math.min(m.n, m.val(CAS.st)), s = CAS.miss[m.id];
+    return `<div class="pr-q cq-mq2 ${s === 'ritirata' ? 'ok' : ''}"><span class="pr-qt">${s === 'ritirata' ? ico('ok', 2) : ''}${m.nome}<small class="cq-mqd">${m.desc}</small></span><span class="pr-qr"><span class="pr-bar"><i style="width:${Math.min(100, v/m.n*100)}%"></i><em>${m.id === 'nobile' ? v + '/' + m.n : v + '/' + m.n}</em></span>
+      <button type="button" class="pr-rit cq-prit ${s === 'fatta' ? 'pronto' : ''}" data-rit="${m.id}" ${s === 'fatta' ? '' : 'disabled'} title="${m.premio[2]}">${s === 'ritirata' ? '✓' : s === 'fatta' ? 'Ritira!' : `<span class="cq-pico">${icoPremio(m.premio)}</span>`}</button></span><small class="cq-mqp">Premio: ${m.premio[2]}</small></div>`; }).join('');
+  disegnaSkin(box);
+  box.querySelectorAll('[data-rit]:not([disabled])').forEach(b => b.onclick = () => { const m = ritiraMiss(b.dataset.rit); if (!m) return; try { SUONI.suona('leggenda'); EPICO.coriandoli(80); } catch(e){} if (rifai) setTimeout(rifai, 700); }); }
+function menuCollezione(box, rifai){ if (!box) return; leggiCas();
+  if (!CAS){ box.innerHTML = `<h3 class="cr-sub">${ico('bandiera', 2)} La tua casata</h3><p class="cq-mvuoto">Fonda la tua casata giocando a <b>Conquista</b> (pagina Modalità). Qui vedrai stemma, capitani, skin e tutto quello che sblocchi.</p>`; return; }
+  initSt(); syncSbl(); const l = livCas(CAS.gloria), pro = LIVC[l + 1], perc = pro ? Math.round(100*(CAS.gloria - LIVC[l][0])/(pro[0] - LIVC[l][0])) : 100;
+  const skins = Object.keys(SKIN).map(k => { const ok = k === 'base' || haPremio('skin:' + k), m = missDi('skin:' + k); return `<button type="button" class="cq-sk ${CAS.skin === k ? 'on' : ''}" data-sk="${k}" ${ok ? '' : 'disabled'}><canvas data-skin="${k}" width="60" height="44"></canvas><b>${SKIN[k].nome}</b><small>${ok ? SKIN[k].desc : ico('lucchetto', 2) + ' Missione: ' + (m ? m.nome : '')}</small></button>`; }).join('');
+  const sbl = MISS.filter(m => ['sim', 'col', 'for'].includes(m.premio[0])).map(m => `<span class="${haPremio(premioK(m.premio)) ? 'ok' : ''}" title="${haPremio(premioK(m.premio)) ? '' : 'Missione: ' + m.nome}">${haPremio(premioK(m.premio)) ? '' : ico('lucchetto', 1)}${icoPremio(m.premio)}${m.premio[2].replace(/^(Simbolo|Colore|Forma) /, '')}</span>`).join('');
+  box.innerHTML = `<h3 class="cr-sub">${ico('bandiera', 2)} La tua casata <small>Conquista</small></h3>
+    <div class="cq-mcas"><div class="cq-gh">${imgStemma(CAS.stemma, 4)}<span><span class="kicker">${LIVC[l][1]}</span><b class="cq-mcn">Casata ${CAS.nome}</b></span></div>
+      <div class="cq-glb"><i style="width:${perc}%"></i></div><small class="cq-nota">Gloria ${CAS.gloria}${pro ? ` · prossimo titolo “${pro[1]}” a ${pro[0]}` : ' · il titolo più alto'}</small>
+      <div class="cq-cst"><span><b>${CAS.gen || 0}</b><small>generazioni</small></span><span><b>${CAS.vittorie || 0}</b><small>vittorie</small></span><span><b>${MISS.filter(m => CAS.miss[m.id]).length}/${MISS.length}</b><small>missioni</small></span></div>
+      <div class="cq-mbt"><button type="button" class="big alt" id="cqmSt">Cambia stemma o nome</button><button type="button" class="big alt" id="cqmCr">Leggi la cronaca</button></div></div>
+    <h3 class="cr-sub">${ico('spade', 2)} Capitani</h3>${(CAS.cap || []).length ? CAS.cap.map(c => capCard(c, `<span class="cq-capr">partite giocate: ${c.gen || 0} di ${CAPGEN}</span>`)).join('') : '<p class="cq-mvuoto">Il primo capitano arriva all’inizio della prossima partita.</p>'}
+    ${capSlot() < 3 ? `<p class="cq-nota">${ico('lucchetto', 2)} Un altro capitano arriva con il titolo “${LIVC[capSlot() + 1][1]}”.</p>` : ''}${CAS.leggende && CAS.leggende.length ? `<p class="cq-nota"><b>Leggende:</b> ${CAS.leggende.map(x => `${x.nome} (${x.vinte} vittorie)`).join(', ')}</p>` : ''}
+    <h3 class="cr-sub">${ico('spada', 2)} Skin dei soldati</h3><div class="cq-skl">${skins}</div>
+    <button type="button" class="cq-corn ${CAS.cornice ? 'on' : ''}" id="cqmCorn" ${haPremio('cornice:oro') ? '' : 'disabled'}>${haPremio('cornice:oro') ? (CAS.cornice ? 'Cornice d’oro sulle tue terre: attiva' : 'Cornice d’oro: spenta, tocca per attivarla') : ico('lucchetto', 2) + ' Cornice d’oro · Missione: ' + missDi('cornice:oro').nome}</button>
+    <h3 class="cr-sub">${ico('martello', 2)} Edifici speciali</h3><div class="cq-sbll">${Object.keys(STR).filter(k => STR[k].sbl).map(k => { const ok = (CAS.sbl || []).includes(k); return `<div class="cq-sblr ${ok ? 'ok' : ''}">${ico(ok ? STR[k].ic : 'lucchetto', 2)}<span><b>${STR[k].nome}</b><small>${ok ? STR[k].desc : STR[k].sblT}</small></span></div>`; }).join('')}</div>
+    <h3 class="cr-sub">${ico('bandiera', 2)} Per lo stemma</h3><div class="cq-psb">${sbl}</div>
+    <h3 class="cr-sub">${ico('mappa', 2)} Segni sulla mappa</h3>${CAS.segni && CAS.segni.length ? CAS.segni.map(g => `<div class="cq-ric"><img class="cq-sgi" src="${spriteSegno(g.k).toDataURL()}" alt=""><span><b>${SEGNI[g.k]}${g.n > 1 ? ' ×' + g.n : ''} · ${TERRE[g.t].nome}</b><small>${g.txt[0]}</small></span></div>`).join('') : '<p class="cq-mvuoto">Ogni vittoria lascia un segno sulla mappa: una lapide, un arco, un ulivo.</p>'}`;
+  disegnaSkin(box);
+  box.querySelectorAll('[data-sk]:not([disabled])').forEach(b => b.onclick = () => { CAS.skin = b.dataset.sk; salvaCas(); try { SUONI.suona('tocco'); } catch(e){} box.querySelectorAll('[data-sk]').forEach(x => x.classList.toggle('on', x === b)); });
+  const cn = box.querySelector('#cqmCorn'); if (cn && !cn.disabled) cn.onclick = () => { CAS.cornice = !CAS.cornice; salvaCas(); cn.classList.toggle('on', CAS.cornice); cn.textContent = CAS.cornice ? 'Cornice d’oro sulle tue terre: attiva' : 'Cornice d’oro: spenta, tocca per attivarla'; };
+  box.querySelector('#cqmSt').onclick = () => apri('stemma'); box.querySelector('#cqmCr').onclick = () => apri('cronaca'); }
+const missPronte = () => { try { leggiCas(); return CAS ? missDaRitirare() : 0; } catch(e){ return 0; } };
 // la cronaca della partita: i fatti importanti, scritti come in un libro
 function cron(txt, imp = 1){ if (!S || S.sim) return; S.cron = S.cron || []; S.cron.push({t:S.turno, txt, imp}); }
 let S = null, attivo = false, root = null, cv = null, ctx = null, dpr = 1, W = 0, H = 0;
@@ -7248,7 +7317,7 @@ function finePartita(){ let G = chiudiGenerazione(); if (G) ULTIMO_G = G; else i
       <ul>${G.voci.map(([t, v]) => `<li><span>${t}</span><b>+${v}</b></li>`).join('')}</ul>
       <div class="cq-glb"><i id="cqGlb" style="width:${G.pPrima}%"></i></div><small id="cqGlt">${LIVC[G.livPrima][1]}</small></div>` : ''}
     ${G && G.segno ? `<div class="cq-premio"><img class="cq-sgi" src="${spriteSegno(G.segno.k).toDataURL()}" alt=""><span><b>${SEGNI[G.segno.k]}</b><small>Resta per sempre sulla mappa, a ${TERRE[G.segno.t].nome}: lo vedrai in tutte le prossime partite.</small></span></div>` : ''}
-    ${G && G.missN && G.missN.length ? G.missN.map(m => `<div class="cq-premio">${ico('coppa', 3)}<span><b>Missione completata: ${m.nome}</b><small>Premio: ${m.premio[2]}. Ritiralo in “Missioni e premi”.</small></span></div>`).join('') : ''}
+    ${G && G.missN && G.missN.length ? G.missN.map(m => `<div class="cq-premio">${ico('coppa', 3)}<span><b>Missione completata: ${m.nome}</b><small>Premio: ${m.premio[2]}. Ritiralo nel menu principale, pagina Premi.</small></span></div>`).join('') : ''}
     ${G && G.sblN && G.sblN.length ? G.sblN.map(k => `<div class="cq-premio">${ico(STR[k].ic, 3)}<span><b>Sbloccato: ${STR[k].nome}!</b><small>${STR[k].desc} Da ora puoi costruirlo in tutte le partite.</small></span></div>`).join('') : ''}
     <button class="big" id="cqAg">Nuova generazione</button><button class="big alt" id="cqCr">Leggi la cronaca</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
   if (G){ const lab = o.querySelector('#cqGl'), t0 = performance.now(); const anima = () => { if (!document.body.contains(lab)) return; const k = Math.min(1, (performance.now() - t0)/1400); lab.textContent = '+' + Math.round(G.tot*k);
@@ -7339,7 +7408,7 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
       <div class="cq-scst"><span>${ico('spada', 2)}<b>${so}</b><small>soldati</small></span><span>${ico('mappa', 2)}<b>${ter}</b><small>terre</small></span><span>${ico('scudo', 2)}<b>${E.mura}</b><small>mura</small></span></div>
       <p class="cq-v">${ico('stella', 2)} ${FZ[f].vant}</p><p class="cq-d">${ico('attenzione', 2)} ${FZ[f].diff}</p>
       ${vc.length ? `<p class="cq-nota">Frazioni vicine da conquistare: ${vc.join(', ')}.</p>` : ''}${rec[f] ? `<p class="cq-nota">${ico('coppa', 2)} Il tuo record: vinto in ${rec[f]} stagioni.</p>` : ''}</div>`; };
-  const o = ov(`<div class="dlg box cq-dlg cq-scbox"><div class="cq-schead"><span class="kicker">${ico('bandiera', 2)} Conquista</span><span class="cq-schb"><button type="button" class="cq-casmini cq-missb" id="cqMis">${ico('coppa', 1)} Missioni${missDaRitirare() ? ` <em class="cq-nb">${missDaRitirare()}</em>` : ''}</button>${CAS ? `<button type="button" class="cq-casmini" id="cqCas">${imgStemma(CAS.stemma, 1)} ${CAS.nome} <em>›</em></button>` : ''}</span></div>
+  const o = ov(`<div class="dlg box cq-dlg cq-scbox"><div class="cq-schead"><span class="kicker">${ico('bandiera', 2)} Conquista</span>${CAS ? `<span class="cq-casmini cq-castag">${imgStemma(CAS.stemma, 1)} Casata ${CAS.nome}</span>` : ''}</div>
     <h2>Scegli il tuo borgo</h2>
     <div class="cq-sctab" role="tablist">${Object.keys(FZ).map(f => `<button type="button" role="tab" class="cq-sct" data-t="${f}" style="--c:${FZ[f].col}"><canvas data-sp="${f}"></canvas><span>${FZ[f].corto}</span></button>`).join('')}</div>
     <div id="cqScDet"></div>
@@ -7358,8 +7427,6 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   o.querySelectorAll('[data-dif]').forEach(b => b.onclick = () => { try { localStorage.setItem(KDIF, b.dataset.dif); } catch(e){} DIFSC = b.dataset.dif; o.querySelectorAll('[data-dif]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqDifT').textContent = DIFF[b.dataset.dif].desc; opt(); suona('tocco'); });
   o.querySelectorAll('[data-vel]').forEach(b => b.onclick = () => { const v = b.dataset.vel === 'veloce'; try { localStorage.setItem(KVEL, v ? '1' : '0'); } catch(e){} o.querySelectorAll('[data-vel]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqVelT').textContent = velTesto(); opt(); suona('tocco'); });
   o.querySelector('#cqVai').onclick = () => { const f = SCELTA; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; suona('banner'); o.classList.remove('scelta'); nuova(f, difScelta(), false, velScelta()); chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); }); };
-  o.querySelector('#cqMis').onclick = () => { o.classList.remove('scelta'); dlgMissioni('miss', () => scegli()); };
-  const cb = o.querySelector('#cqCas'); if (cb) cb.onclick = () => { const f = SCELTA; o.classList.remove('scelta'); dlgCasata(); const ok = el('cqOv').querySelector('#cqNo'); if (ok) ok.onclick = () => scegli(); };
   o.querySelector('#cqMe').onclick = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; S = null; o.classList.remove('scelta'); esci(); };
   { const dt = o.querySelector('.cq-scopt'); dt.ontoggle = () => { if (dt.open) setTimeout(() => dt.scrollIntoView({block:'end', behavior:'smooth'}), 30); }; }
   opt(); misura(); centra(); mostra(SCELTA, false); setTimeout(() => volaSu(SCELTA), 350); }
@@ -7378,8 +7445,8 @@ function nuova(io, dif = 'normale', sim = false, veloce = false){ S = {v:3, io, 
   S.capNews = null; if (!sim){ leggiCas(); cron(`${NomeCas()}${CAS ? ', alla ' + (CAS.gen + 1) + 'ª generazione,' : ''} prende ${FZ[io].nome}. È ${ANNI[S.anno].nome.charAt(0).toLowerCase() + ANNI[S.anno].nome.slice(1)}.`, 3); S.capNews = capInizio(); }
   sel = io; modo = null; VISTA = null; tintKey = ''; if (!sim) salva(); vaiA(io); aggiornaUI(); }
 function pausa(){ const o = ov(`<div class="dlg box cq-dlg"><h2>Pausa</h2><p>La partita si salva da sola: puoi uscire e riprenderla quando vuoi.</p><button type="button" class="tbaudio" id="cqAud">${SUONI.muto ? 'Suoni spenti' : 'Suoni accesi'}</button>
-    <button class="big" id="cqRi">Riprendi</button><button class="big alt" id="cqMi">Missioni e premi${missDaRitirare() ? ` <em class="cq-nb">${missDaRitirare()}</em>` : ''}</button><button class="big alt" id="cqCs">La casata e la cronaca</button><button class="big alt" id="cqGu">Come funziona</button><button class="big alt" id="cqNu">Ricomincia (scegli il borgo)</button><button class="big alt" id="cqMe">Torna al menu</button></div>`);
-  o.querySelector('#cqRi').onclick = chiudiOv; o.querySelector('#cqCs').onclick = () => dlgCasata(); o.querySelector('#cqMi').onclick = () => dlgMissioni('miss', pausa); o.querySelector('#cqGu').onclick = () => dlgAiuto(); o.querySelector('#cqMe').onclick = esci;
+    <button class="big" id="cqRi">Riprendi</button><button class="big alt" id="cqCs">La cronaca</button><button class="big alt" id="cqGu">Come funziona</button><button class="big alt" id="cqNu">Ricomincia (scegli il borgo)</button><button class="big alt" id="cqMe">Torna al menu</button></div>`);
+  o.querySelector('#cqRi').onclick = chiudiOv; o.querySelector('#cqCs').onclick = () => dlgCasata(); o.querySelector('#cqGu').onclick = () => dlgAiuto(); o.querySelector('#cqMe').onclick = esci;
   o.querySelector('#cqAud').onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('sm'); o.querySelector('#cqAud').textContent = SUONI.muto ? 'Suoni spenti' : 'Suoni accesi'; };
   o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; }
 function costruisciDom(){ root = document.createElement('section'); root.id = 'cq'; root.hidden = true;
@@ -7397,27 +7464,32 @@ function costruisciDom(){ root = document.createElement('section'); root.id = 'c
       o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fineStagione(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fineStagione(); };
   new ResizeObserver(() => { if (attivo) misura(); }).observe(el('cqStage')); new ResizeObserver(() => { if (attivo){ insets(); limita(); } }).observe(root.querySelector('.cq-side')); }
 let PRIMA_SNAP = null;
-function apri(){ if (!root) costruisciDom(); root.hidden = false; attivo = true; try { SUONI.musica('sm'); } catch(e){}
+let APRI_DOPO = null;
+function apri(dopo){ APRI_DOPO = dopo || null; if (!root) costruisciDom(); root.hidden = false; attivo = true; try { SUONI.musica('sm'); } catch(e){}
   if (!cB){ root.classList.add('vuoto'); ov(`<div class="dlg box cq-dlg cq-load"><span class="kicker">${ico('mappa', 2)} Conquista</span><h2>Disegno la mappa dei borghi…</h2><div class="cq-pbar"><i class="cq-carica" style="width:2%"></i></div></div>`, false);
     const gen = generaMondo(), bar = el('cqOv').querySelector('.cq-pbar i'); bar.classList.remove('cq-carica'); bar.style.background = 'var(--giallo)';
     const pezzo = () => { if (!attivo) return; let r; try { const t0 = performance.now(); do { r = gen.next(); } while (!r.done && performance.now() - t0 < 40); } catch(e){ console.error(e); r = {done:true}; }
       if (!r.done){ bar.style.width = Math.round((r.value || 0)*100) + '%'; setTimeout(pezzo, 0); } else { chiudiOv(); avviaCQ(); } };
     setTimeout(pezzo, 60); return; }
   avviaCQ(); }
-function avviaCQ(){ if (!leggiCas()){ root.classList.add('vuoto'); misura(); centra(); dlgStemma(() => avviaCQ()); return; }
+function avviaCQ(){ if (APRI_DOPO && leggiCas()){ const k = APRI_DOPO; APRI_DOPO = null; S = null; SCELTA = null; root.classList.add('vuoto'); misura(); centra(); const torna = () => esci('dif');
+    if (k === 'stemma'){ dlgStemma(torna); const no = el('cqOv').querySelector('#cqNo'); if (no) no.onclick = torna; }
+    else { dlgCasata(); const o = el('cqOv'), no = o.querySelector('#cqNo'), st = o.querySelector('#cqStC'); if (no) no.onclick = torna; if (st) st.onclick = () => { dlgStemma(torna); const n2 = el('cqOv').querySelector('#cqNo'); if (n2) n2.onclick = torna; }; }
+    return; }
+  APRI_DOPO = null; if (!leggiCas()){ root.classList.add('vuoto'); misura(); centra(); dlgStemma(() => avviaCQ()); return; }
   requestAnimationFrame(() => { misura(); if (S) vaiA(S.io); else centra(); });
   const c = carica(); if (c){ S = c; for (const k of ['acc', 'patti', 'rep']) if (!S[k]) S[k] = {}; for (const k of ['proposte', 'richieste', 'missioni', 'cron', 'eventi']) if (!S[k]) S[k] = []; if (!S.car){ S.car = {}; S.noto = {}; const ks = Object.keys(CARATTERI).sort(() => rnd() - .5); Object.keys(FZ).filter(f => f !== S.io).forEach((f, i) => { S.car[f] = ks[i]; }); } if (!S.noto) S.noto = {}; if (!S.anno) S.anno = 'calmo'; sel = S.io; misura(); vaiA(S.io); aggiornaUI();
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
     o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
   else { S = null; aggiornaUI(); scegli(); misura(); centra(); } }
-function esci(){ if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', 'modi'); } catch(e){} mostraMenu(); }
+function esci(tab){ if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', typeof tab === 'string' ? tab : 'modi'); } catch(e){} mostraMenu(); }
 function tasto(e, k){ const o = el('cqOv');
   if (o && !o.hidden){ if (k === 'Escape'){ e.preventDefault(); const b = o.querySelector('#cqNo, #cqRi'); if (b) b.click(); } else if (k === 'Enter'){ const b = o.querySelector('.big:not(.alt):not(:disabled)'); if (b){ e.preventDefault(); b.click(); } } return; }
   if (k === ' ' || k === 'Enter'){ e.preventDefault(); el('cqFine').click(); } else if (k === 'Escape'){ e.preventDefault(); if (modo){ modo = null; pannello(); } else if (sel){ sel = null; pannello(); } else pausa(); }
   else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
-return {apri, frame, tasto, get attivo(){ return attivo; }, _test:{EVENTI, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, get attivo(){ return attivo; }, _test:{EVENTI, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 let last = performance.now(), T = 0;
