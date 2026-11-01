@@ -7276,19 +7276,31 @@ function strada(a, b){ const A = TERRE[a], B = TERRE[b], mx = (A.x + B.x)/2, my 
 const SPRB = {};
 function spriteBorgo(t){ if (SPRB[t]) return SPRB[t]; const c = document.createElement('canvas'), x = c.getContext('2d'), P = (k, a, b, w = 1, h = 1) => { x.fillStyle = PAL[k] || k; x.fillRect(a, b, w, h); };
   const casa = (a, b, w, h, tetto = 'r') => { P('k', a - 1, b - 3, w + 2, h + 4); P(tetto, a, b - 2, w, 2); P(tetto === 'r' ? 'R' : 'B', a, b - 1, w, 1); P('e', a, b, w, h); P('E', a + w - 1, b, 1, h); P('k', a + 1, b + 1, 1, 1); if (w > 3) P('k', a + w - 3, b + h - 2, 1, 2); };
-  if (FZ[t]){ c.width = 26; c.height = 26;
-    if (t === 'smerillo'){ // la Rocca col cassero, in cima allo sperone
-      casa(2, 16, 5, 4); casa(17, 17, 6, 4); casa(9, 20, 5, 4);
-      P('k', 9, 1, 8, 18); P('a', 10, 2, 6, 16); P('A', 14, 2, 2, 16); for (let i = 0; i < 3; i++) P('k', 10 + i*2, 1, 1, 2); P('k', 12, 7, 2, 3); P('k', 12, 14, 2, 4); P('B', 12, 15, 2, 3);
-      P('k', 4, 9, 6, 9); P('a', 5, 10, 4, 7); P('A', 8, 10, 1, 7); P('k', 6, 12, 1, 2); }
-    else if (t === 'sanmartino'){ // la chiesetta di San Vincenzo Ferrer, col campaniletto a vela
-      casa(1, 18, 6, 4); casa(18, 16, 6, 4); casa(9, 21, 6, 3);
-      P('k', 6, 7, 13, 12); P('e', 7, 10, 11, 8); P('E', 15, 10, 3, 8); P('k', 8, 6, 9, 1); P('R', 7, 7, 11, 3); P('r', 8, 7, 9, 2); P('k', 11, 13, 3, 5); P('B', 12, 14, 1, 4);
-      P('k', 10, 1, 5, 6); P('e', 11, 2, 3, 4); P('k', 12, 3, 1, 2); P('y', 12, 4, 1, 1); }
-    else { // Ceresola: la Chiesa di San Nicola col campanile
-      casa(1, 17, 6, 4); casa(17, 19, 7, 4); casa(8, 21, 5, 3);
-      P('k', 5, 9, 12, 11); P('E', 6, 11, 10, 8); P('e', 6, 11, 7, 8); P('k', 6, 8, 10, 1); P('R', 6, 9, 10, 2); P('k', 9, 14, 3, 5); P('B', 10, 15, 1, 4);
-      P('k', 16, 2, 6, 18); P('e', 17, 3, 4, 16); P('E', 20, 3, 1, 16); P('k', 17, 5, 1, 2); P('k', 19, 5, 1, 2); P('y', 18, 6, 1, 1); P('R', 16, 1, 6, 1); P('k', 18, 0, 2, 1); } }
+  if (FZ[t]){ c.width = 40; c.height = 34;
+    const K = '#202028', casa2 = (a, b, w, h, tt = '#c8462e', tb = '#8a2c1e') => { P(K, a - 1, b - 4, w + 2, h + 5); P(tt, a, b - 3, w, 2); P(tb, a, b - 1, w, 1); P('#f4dcb4', a, b, w, h); P('#d6b486', a + w - 2, b, 2, h); P(K, a + 1, b + 1, 1, 2); if (w > 4) P(K, a + w - 4, b + h - 3, 2, 3); };
+    const albero = (a, b, r, c1, c2, c3) => { P(K, a - 2, b + r - 1, 4, 5); P('#7a7a84', a - 1, b + r - 1, 2, 4); // il faggio: tronco liscio grigio e chioma tonda
+      for (let j = -r - 1; j <= r + 1; j++) for (let i = -r - 1; i <= r + 1; i++){ const d = Math.hypot(i + .5, j + .5); if (d > r + 1.2) continue; const X = a + i, Y = b + j; if (d > r + .2){ P(K, X, Y); continue; } P(d < r*.55 && i < 0 && j < 0 ? c2 : (i > 0 && j > 0) || d > r - .6 && i > 0 ? c3 : c1, X, Y); } P(c2, a - Math.ceil(r/2), b - Math.ceil(r/2), 2, 1); };
+    if (t === 'smerillo'){ // il castello sullo sperone: la rupe, le mura con la porta, le case, il cassero e la croce di ferro in cima
+      P(K, 3, 24, 34, 10); P('#8a7a66', 4, 25, 32, 9); P('#6c5e4e', 4, 29, 32, 5); P('#a89880', 6, 25, 10, 2); P('#a89880', 22, 26, 8, 2); P('#4e8a34', 4, 25, 4, 2); P('#4e8a34', 31, 25, 5, 3); P(K, 14, 30, 3, 1); P(K, 26, 28, 2, 1);
+      casa2(7, 14, 6, 5); casa2(15, 12, 6, 6); casa2(28, 15, 6, 4);
+      P(K, 22, 3, 8, 19); P('#c8b08a', 23, 4, 6, 17); P('#a48a62', 27, 4, 2, 17); P(K, 22, 2, 2, 2); P(K, 25, 1, 2, 3); P(K, 28, 3, 2, 1); P('#c8b08a', 23, 3, 1, 1); P('#c8b08a', 26, 2, 1, 1); P(K, 25, 8, 1, 3); P(K, 25, 14, 1, 3); P('#a48a62', 23, 11, 2, 1);
+      P(K, 13, 0, 1, 10); P(K, 11, 2, 5, 1); P('#5a5a64', 13, 1, 1, 8);
+      P(K, 4, 19, 32, 6); P('#bca07a', 5, 20, 30, 4); P('#987c56', 5, 23, 30, 1); for (let i = 5; i < 35; i += 3) P(K, i, 18, 2, 2); for (let i = 7; i < 35; i += 6) P('#987c56', i, 21, 3, 1);
+      P(K, 16, 20, 5, 5); P('#3a2a1c', 17, 21, 3, 4); P('#5c3818', 17, 21, 3, 1); }
+    else if (t === 'sanmartino'){ // la chiesetta di San Vincenzo Ferrer col campanile a vela, tra i faggi del bosco
+      P(K, 1, 27, 38, 7); P('#5ea83e', 2, 28, 36, 6); P('#468a30', 2, 31, 36, 3); P('#8ed060', 5, 28, 8, 1); P('#8ed060', 26, 29, 6, 1);
+      albero(7, 15, 6, '#3f8a32', '#5fb446', '#2c6626'); albero(33, 18, 4, '#3f8a32', '#5fb446', '#2c6626');
+      casa2(27, 23, 7, 4);
+      P(K, 12, 11, 15, 17); P('#f2e2c4', 13, 14, 13, 13); P('#d8c29c', 22, 14, 4, 13); P(K, 12, 10, 15, 1); P(K, 13, 9, 13, 1); P('#c8462e', 13, 10, 13, 3); P('#8a2c1e', 13, 12, 13, 1); P(K, 14, 8, 11, 1); P(K, 16, 7, 7, 1);
+      P(K, 17, 18, 5, 9); P('#4a2e18', 18, 19, 3, 8); P('#6c4424', 18, 19, 3, 1); P(K, 18, 15, 3, 2); P('#a8e0f8', 19, 15, 1, 1);
+      P(K, 16, 1, 7, 8); P('#f2e2c4', 17, 2, 5, 6); P(K, 18, 3, 3, 4); P('#f8d048', 19, 4, 1, 2); P(K, 18, 0, 3, 1); P('#d8c29c', 21, 2, 1, 6); }
+    else { // Ceresola: la Chiesa di San Nicola col suo campanile, in mezzo ai campi
+      P(K, 1, 27, 38, 7); P('#d8c25a', 2, 28, 36, 6); for (let i = 3; i < 37; i += 4) P('#b49a3e', i, 28, 2, 6); P('#5ea83e', 2, 31, 12, 3); for (let i = 3; i < 14; i += 3) P('#2f6e2a', i, 31, 1, 3);
+      casa2(3, 22, 7, 5); casa2(30, 23, 6, 4);
+      P(K, 10, 13, 16, 15); P('#f2e2c4', 11, 16, 14, 11); P('#d8c29c', 21, 16, 4, 11); P(K, 10, 12, 16, 1); P(K, 11, 11, 14, 1); P('#c8462e', 11, 12, 14, 3); P('#8a2c1e', 11, 14, 14, 1); P(K, 13, 10, 10, 1);
+      P(K, 15, 20, 5, 8); P('#4a2e18', 16, 21, 3, 7); P(K, 16, 17, 3, 2); P('#f8d048', 17, 17, 1, 1);
+      P(K, 26, 2, 8, 26); P('#ecd6b0', 27, 5, 6, 22); P('#cfb48a', 31, 5, 2, 22); P(K, 26, 4, 8, 1); P(K, 28, 7, 4, 5); P('#3a2a1c', 29, 8, 2, 4); P('#f8d048', 29, 10, 2, 1); P(K, 29, 15, 2, 3); P(K, 29, 21, 2, 3);
+      P(K, 27, 1, 6, 1); P('#c8462e', 27, 2, 6, 2); P(K, 28, 0, 4, 1); P('#8a2c1e', 28, 3, 4, 1); P(K, 30, 0, 1, 1); } }
   else { c.width = 18; c.height = 14; // un casale coi suoi alberi
     casa(5, 7, 7, 5, t === 'tenna' ? 'r' : 'r'); P('k', 0, 6, 5, 6); P('G', 1, 7, 3, 3); P('g', 1, 7, 2, 2); P('B', 2, 10, 1, 2); P('k', 13, 5, 5, 7); P('G', 14, 6, 3, 3); P('l', 14, 6, 1, 1); P('B', 15, 9, 1, 3);
     if (t === 'tenna'){ P('y', 13, 12, 4, 2); P('o', 13, 13, 4, 1); } if (t === 'vallecupa'){ P('d', 0, 2, 4, 4); P('G', 1, 3, 2, 2); } }
@@ -7852,7 +7864,7 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
 
     <button type="button" class="cq-link" id="cqMe">Torna al menu</button><div class="cq-scvai"><button class="big" id="cqVai"></button></div></div><div class="cq-schip">${ico('pin', 2)} Tocca un borgo sulla mappa</div>`, false);
   o.classList.add('scelta');
-  const disegnaSp = () => o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp), z = c.closest('.cq-sct') ? 1.6 : 2.2; c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*z + 'px'; c.style.height = im.height*z + 'px'; });
+  const disegnaSp = () => o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp), z = c.closest('.cq-sct') ? 1.35 : 1.6; c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*z + 'px'; c.style.height = im.height*z + 'px'; });
   const opt = () => {}; o.querySelectorAll('[data-dif],[data-map],[data-vel]').forEach(b => b.addEventListener('click', () => { o.querySelector('.cq-optd').dataset.v = b.dataset.dif ? 'dif' : b.dataset.map ? 'map' : 'vel'; }));
   const mostra = (f, vola = true) => { SCELTA = f; S.io = f; o.querySelectorAll('.cq-sct').forEach(b => { b.classList.toggle('on', b.dataset.t === f); b.setAttribute('aria-selected', b.dataset.t === f); });
     const d = o.querySelector('#cqScDet'); d.innerHTML = info(f); d.classList.remove('cq-entra'); void d.offsetWidth; d.classList.add('cq-entra');
@@ -8119,8 +8131,8 @@ const ACC = window.ACC = (() => {
         const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none') continue; if (e.disabled || e.closest('button:disabled')) continue;
         const f = col(cs.color), b = fondo(e); if (!f || b == null) continue; const cr = contr(f.l, b);
         if (cr < 3.6){ e.style.setProperty('color', b > .35 ? '#1c1c3c' : '#eef1ff', 'important'); e.setAttribute('data-ac', ''); } } } }
-  let t = null; const pianifica = () => { if (t) return; t = setTimeout(() => { t = null; try { sistema(); } catch(er){} }, 60); };
-  const avvia = () => { new MutationObserver(ms => { for (const m of ms){ if (m.type === 'attributes' && m.attributeName === 'data-ac') continue; if (m.type === 'attributes' && m.attributeName === 'style' && m.target.hasAttribute && m.target.hasAttribute('data-ac')) continue; pianifica(); return; } }).observe(document.body, {subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'aria-checked', 'aria-pressed', 'aria-selected', 'hidden', 'disabled']}); pianifica(); };
+  let t = null, t2 = null; const pianifica = () => { if (!t) t = setTimeout(() => { t = null; try { sistema(); } catch(er){} }, 60); clearTimeout(t2); t2 = setTimeout(() => { try { sistema(); } catch(er){} }, 450); }; // un secondo giro dopo le transizioni
+  const avvia = () => { new MutationObserver(ms => { for (const m of ms){ if (m.type === 'attributes' && m.attributeName === 'data-ac') continue; if (m.type === 'attributes' && m.attributeName === 'style' && m.target.hasAttribute && m.target.hasAttribute('data-ac')) continue; pianifica(); return; } }).observe(document.body, {subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'aria-checked', 'aria-pressed', 'aria-selected', 'hidden', 'disabled']}); pianifica(); document.addEventListener('transitionend', e => { if (e.target.closest && e.target.closest(SEL)) pianifica(); }, true); document.addEventListener('animationend', e => { if (e.target.closest && e.target.closest(SEL)) pianifica(); }, true); };
   if (document.body) avvia(); else addEventListener('DOMContentLoaded', avvia);
   window.TH_CONTRASTO = sistema;
 })();
