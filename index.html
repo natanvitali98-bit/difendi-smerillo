@@ -1698,6 +1698,41 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cr-cq .cq-psb span{filter:grayscale(1);opacity:.55}
 .cr-cq .cq-psb span.ok{filter:none;opacity:1}
 .cq-mbt .big{font-size:14px}
+/* ===== account ===== */
+.acc-btn{position:relative}
+.acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
+.acc-btn[data-s=off] i{background:#e04830;animation:accPulse 1.6s ease-in-out infinite}
+.acc-btn[data-s=ok] i{background:#3ed46b}
+.acc-btn[data-s=invio] i{background:#ffd03a}
+.acc-btn[data-s=errore] i{background:#ff9a3a}
+@keyframes accPulse{50%{transform:scale(1.3)}}
+#accOv{position:fixed;inset:0;z-index:90;background:rgba(14,22,70,.6);display:flex;align-items:flex-end;justify-content:center;padding:12px 10px calc(12px + env(safe-area-inset-bottom));overflow-y:auto}
+#accOv[hidden]{display:none}
+.acc-box{width:100%;max-width:440px;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
+@keyframes accIn{from{transform:translateY(30px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.acc-box h2{margin:0;font-family:var(--f-big,system-ui);font-weight:400;font-size:26px}
+.acc-box p{margin:0;line-height:1.4;font-size:15px}
+.acc-sub{color:#4a5070}
+.acc-ic{width:56px;height:56px;border-radius:16px;background:#ffd03a;border:3px solid #141433;box-shadow:0 3px 0 #141433;position:relative}
+.acc-ic::before{content:'';position:absolute;left:12px;top:18px;width:26px;height:16px;border-radius:9px;background:#fff;border:3px solid #141433}
+.acc-ic::after{content:'';position:absolute;left:20px;top:10px;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid #141433}
+.acc-ic.ok{background:#3ed46b}
+.acc-tab{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.acc-tab button{min-height:44px;border-radius:12px;border:3px solid #141433;background:#fff;font-weight:700;font-size:14px;color:#141433}
+.acc-tab button.on{background:#ffd03a;box-shadow:0 3px 0 #141433}
+.acc-f{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:14px;color:#4a5070}
+.acc-f input{font:700 18px var(--f-body,system-ui);padding:11px 12px;border-radius:12px;border:3px solid #141433;color:#141433;background:#fff;min-width:0}
+.acc-nota{font-size:13px!important;color:#6a7090}
+.acc-err{padding:8px 10px;border-radius:12px;background:#ffe8e3;border:2px solid #ff4d4d;color:#7a1d10;font-weight:700;font-size:14px!important}
+.acc-sc{display:flex;flex-direction:column;gap:3px;text-align:left;padding:12px 14px;border-radius:14px;border:3px solid #141433;background:#f2f4fb;box-shadow:0 3px 0 #141433;color:#141433}
+.acc-sc b{font-family:var(--f-big,system-ui);font-weight:400;font-size:19px}
+.acc-sc small{color:#4a5070;font-size:13px;line-height:1.3}
+.acc-st{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:#ddf7e3;font-size:14px}
+.acc-st span{width:12px;height:12px;border-radius:50%;background:#3ed46b;border:2px solid #141433;flex:none}
+.acc-st[data-s=errore]{background:#fff1e0}.acc-st[data-s=errore] span{background:#ff9a3a}
+.acc-toast{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%);z-index:95;max-width:calc(100% - 32px);padding:10px 16px;border-radius:14px;background:#141433;color:#fff;font-weight:700;font-size:14px;text-align:center;transition:opacity .4s}
+.acc-toast.via{opacity:0}
+@media (min-width:860px){ #accOv{align-items:center} }
 .pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
 #tb.tb-pan .tbhud{visibility:hidden}
 body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
@@ -4024,7 +4059,7 @@ function mostraMenu(pannello){
     const difs = TB.listaDif().map(d => `<button class="cr-dif ${d.liv ? '' : 'no'}" data-dif="${d.t}" style="--rc:${d.rar.col}"><span class="cr-di"></span><b>${d.liv ? d.nome : '???'}</b><small>${d.liv ? 'liv. ' + d.liv : d.rar.nome}</small></button>`).join('');
     const TABS = [['premi', 'trifoglio', 'Premi', rp || INCn || CQ.missPronte()], ['dif', 'scudo', 'Collezione', false], ['gioca', 'spade', 'Gioca', false], ['amici', 'amici', 'Amici', false], ['modi', 'torre', 'Modalità', TB.eventoAttivo() || !sf.fatta]];
     c.innerHTML = `<div class="cr">
-      <header class="cr-top"><div id="hmProf"></div><span class="cr-res" title="Stelle">${TB.ico('stella', 2)} <b>${tot}</b></span><span class="cr-res" title="Talismani">${TB.ico('trifoglio', 2)} <b>${nTal}</b></span><button class="cr-ing" id="crSnd" aria-label="Musica e suoni">${TB.ico(SUONI.muto ? 'muto' : 'suono', 2)}</button><button class="cr-ing" data-p="altro" aria-label="Altro: salvataggio e impostazioni">${TB.ico('altro', 2)}</button></header>
+      <header class="cr-top"><div id="hmProf"></div><span class="cr-res" title="Stelle">${TB.ico('stella', 2)} <b>${tot}</b></span><span class="cr-res" title="Talismani">${TB.ico('trifoglio', 2)} <b>${nTal}</b></span>${ACC.btn()}<button class="cr-ing" id="crSnd" aria-label="Musica e suoni">${TB.ico(SUONI.muto ? 'muto' : 'suono', 2)}</button><button class="cr-ing" data-p="altro" aria-label="Altro: salvataggio e impostazioni">${TB.ico('altro', 2)}</button></header>
       ${tester() ? `<button type="button" class="hm-tester" id="tTest">🧪 Pass di prova attivo · tocca per tornare ai tuoi progressi</button>` : ''}
       <div class="cr-pagine" id="crPag">
         <section class="cr-pg" data-tab="premi"><h2 class="cr-h">Premi</h2>
@@ -4103,7 +4138,7 @@ function mostraMenu(pannello){
         const RI = TB.righeInc(), bg = c.querySelector('#prIncG'), bi = c.querySelector('#prIncI');
         if (bg) RI.oggi.forEach(x => riga(bg, x)); if (bi) RI.imp.forEach(x => riga(bi, x)); }
       { const rifai = tb => () => { const pg = c.querySelector(`.cr-pg[data-tab="${tb}"]`); RIENTRO = {tab: tb, top: pg ? pg.scrollTop : 0}; mostraMenu('home'); }; try { CQ.menuMissioni(c.querySelector('#prCq'), rifai('premi')); CQ.menuCollezione(c.querySelector('#crCq'), rifai('dif')); } catch(e){ console.error(e); } }
-      { const sn = c.querySelector('#crSnd'); if (sn) sn.onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('menu'); sn.innerHTML = TB.ico(SUONI.muto ? 'muto' : 'suono', 2); }; }
+      c.querySelectorAll('.acc-btn').forEach(b => b.onclick = () => ACC.apri()); { const sn = c.querySelector('#crSnd'); if (sn) sn.onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('menu'); sn.innerHTML = TB.ico(SUONI.muto ? 'muto' : 'suono', 2); }; }
       const e2 = c.querySelector('#tEv2'); if (e2) e2.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('evento'); });
       const pa = c.querySelector('#prAv'); if (pa){ const ch = PROF.chip(); pa.append(ch.querySelector('.pf-av') || ch); }
       const tm = c.querySelector('#prTimer'); if (tm){ const agg = () => { if (!document.body.contains(tm)) return clearInterval(iv); const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); const s = Math.max(0, Math.floor((m - d)/1000)); tm.textContent = String(Math.floor(s/3600)).padStart(2,'0') + ':' + String(Math.floor(s%3600/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }; const iv = setInterval(agg, 1000); agg(); } }
@@ -4128,6 +4163,7 @@ function mostraMenu(pannello){
       <button class="big alt" data-p="home">Indietro</button></div>`;
   } else if (pannello === 'altro'){
     c.innerHTML = `<div class="pan"><h2>Altro</h2>
+      <button class="big" onclick="ACC.apri()">Il tuo account</button>
       <button class="big alt" data-p="salva">💾 Salvataggio</button>
       <button class="big alt" data-p="best">I nemici del tempo reale</button>
       ${tester() ? '<button class="big alt" id="tEdit">Correggi la mappa del paese</button>' : ''}
@@ -4136,7 +4172,7 @@ function mostraMenu(pannello){
     PROF.pagina(c, () => mostraMenu('home')); return;
   } else if (pannello === 'salva'){
     c.innerHTML = `<div class="pan"><h2>Salvataggio</h2>
-      <p class="sv-t">Il gioco salva da solo su questo telefono. Per portare i progressi su un altro telefono o un altro link, copia il codice e incollalo di là.</p>
+      <p class="sv-t"><b>Consiglio:</b> crea un account, così i progressi si salvano online da soli. <button type="button" class="big" style="margin-top:8px" onclick="ACC.apri()">Il tuo account</button></p><p class="sv-t">Il gioco salva da solo su questo telefono. Per portare i progressi su un altro telefono o un altro link, copia il codice e incollalo di là.</p>
       <button class="big" id="svCopia">📋 Copia il mio codice</button>
       <textarea id="svCod" class="sv-cod" rows="4" placeholder="Incolla qui il codice"></textarea>
       <button class="big alt" id="svCarica">📥 Carica il codice incollato</button>
@@ -7071,7 +7107,7 @@ function volaNumeri(F){ const cur = {monete: F.monete, cibo: F.cibo, legna: F.le
 function aggiornaUI(){ if (root) root.classList.toggle('vuoto', !S || !!SCELTA); if (!S) return; const F = S.fz[S.io];
   el('cqTit').textContent = FZ[S.io].corto; el('cqStag').textContent = stagione(S.turno) + (S.veloce ? ' · ' + Math.min(S.turno, VEL.stag) + '/' + VEL.stag : '') + (S.dif && S.dif !== 'normale' ? ' · ' + DIFF[S.dif].nome : '');
   { const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); el('cqRis').innerHTML = `<span>${ico('moneta', 2)} ${F.monete}</span><span class="${dc < 0 ? 'meno' : ''}">${ico('castagna', 2)} ${F.cibo}<small>${dc >= 0 ? '+' : ''}${dc}</small></span><span>${ico('albero', 2)} ${F.legna}</span>`; }
-  if (!SCELTA) volaNumeri(F); el('cqMos').innerHTML = '<span class="cq-mt">Mosse</span> ' + Array.from({length:MOSSE}, (_, i) => `<i class="${i < S.mosse ? 'on' : ''}"></i>`).join('');
+  if (!SCELTA){ if (ovAperto() && RPREV && RPREV.s === S){ Object.assign(RPREV, {monete: F.monete, cibo: F.cibo, legna: F.legna}); } else volaNumeri(F); } el('cqMos').innerHTML = '<span class="cq-mt">Mosse</span> ' + Array.from({length:MOSSE}, (_, i) => `<i class="${i < S.mosse ? 'on' : ''}"></i>`).join('');
   el('cqFine').disabled = !!GIOCA; el('cqFine').classList.toggle('pronto', S.mosse === 0 && !GIOCA); el('cqDip').disabled = !!GIOCA;
   { const fl = el('cqFlag'), stc = CAS && stemma(CAS.stemma, 1); if (stc){ fl.className = 'cq-flag cq-flagst'; fl.style.background = 'none'; fl.innerHTML = ''; const im = new Image(); im.src = stc.toDataURL(); im.width = 18; im.height = 21; fl.append(im); } else { fl.className = 'cq-flag'; fl.style.background = FZ[S.io].col; } } pannello(); }
 function barraAmic(v){ const [n, c] = livAmic(v); return `<span class="cq-am"><span class="cq-amb"><i style="left:${(v + 100)/2}%;background:${c}"></i></span><em style="color:${c}">${n}</em></span>`; }
@@ -7495,6 +7531,90 @@ function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, 
 return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, get attivo(){ return attivo; }, _test:{EVENTI, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
+// ===== account: i progressi salvati online, per ritrovarli su ogni telefono =====
+const ACC = window.ACC = (() => {
+  const URL = 'https://zzadfutpjykwwcjjtpqq.supabase.co/rest/v1/rpc/', KEY = 'sb_publishable_um6p_YzXZ8C73FcfLJS0AA_WgfNgceF', LK = 'ds-account';
+  let A = null, ultimoHash = '', stato = 'off', inviando = false, errori = 0;
+  try { A = JSON.parse(localStorage.getItem(LK)); } catch(e){}
+  const salvaA = () => { try { if (A) localStorage.setItem(LK, JSON.stringify(A)); else localStorage.removeItem(LK); } catch(e){} };
+  const provaAttiva = () => { try { return localStorage.getItem('difendi-smerillo-tester') === '1'; } catch(e){ return false; } };
+  async function rpc(fn, body, keep){ const r = await fetch(URL + fn, {method:'POST', keepalive: !!keep, headers:{apikey:KEY, Authorization:'Bearer ' + KEY, 'Content-Type':'application/json'}, body: JSON.stringify(body)}); if (!r.ok) throw new Error('http ' + r.status); return r.json(); }
+  // i dati del gioco: tutte le chiavi difendi-smerillo, tranne il pass di prova
+  function dati(){ const d = {}; try { for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (k && k.startsWith('difendi-smerillo') && k !== 'difendi-smerillo-tester') d[k] = localStorage.getItem(k); } } catch(e){} return d; }
+  const hash = d => { const s = JSON.stringify(Object.keys(d).sort().map(k => [k, d[k]])); let h = 0; for (let i = 0; i < s.length; i++) h = (h*31 + s.charCodeAt(i)) | 0; return s.length + ':' + h; };
+  function riassunto(d){ const j = k => { try { return JSON.parse(d[k] || 'null'); } catch(e){ return null; } }; const mis = j('difendi-smerillo-missioni') || {}, pr = j('difendi-smerillo-profilo') || {}, cas = j('difendi-smerillo-casata');
+    const stelle = Object.values(mis).reduce((a, m) => a + ((m && m.stelle) || 0), 0); const v = [];
+    v.push(`${stelle} stelle nelle missioni`); if (pr.xp) v.push(`${pr.xp} punti esperienza`); if (cas) v.push(`casata ${cas.nome}: ${cas.gloria || 0} gloria`); return {testo: v.join(' · '), peso: stelle*10 + (pr.xp || 0)/10 + ((cas && cas.gloria) || 0) + Object.keys(d).length}; }
+  function applica(d){ try { const via = []; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (k && k.startsWith('difendi-smerillo') && k !== 'difendi-smerillo-tester') via.push(k); } via.forEach(k => localStorage.removeItem(k)); for (const k in d) if (k.startsWith('difendi-smerillo')) localStorage.setItem(k, d[k]); } catch(e){} ultimoHash = hash(dati()); location.reload(); }
+  const dispositivo = () => { const u = navigator.userAgent; return /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android' : /Mac/.test(u) ? 'Mac' : /Windows/.test(u) ? 'PC Windows' : 'computer'; };
+  async function invia(forza, keep){ if (!A || inviando || provaAttiva()) return false; const d = dati(), h = hash(d); if (!forza && h === ultimoHash) return true;
+    const body = {p_token: A.token, p_dati: d, p_dispositivo: dispositivo()}; if (keep && JSON.stringify(body).length > 60000) keep = false;
+    inviando = true; segna('invio');
+    try { const r = await rpc('ds_salva', body, keep); inviando = false;
+      if (r.errore === 'sessione'){ A = null; salvaA(); segna('off'); avviso('La sessione è scaduta: entra di nuovo nel tuo account.'); return false; }
+      if (r.errore){ segna('errore'); return false; }
+      ultimoHash = h; A.ultimo = r.aggiornato; salvaA(); errori = 0; segna('ok'); return true; }
+    catch(e){ inviando = false; errori++; segna('errore'); return false; } }
+  // ---------- indicatore sul pulsante del menu
+  function segna(s){ stato = s; document.querySelectorAll('.acc-btn').forEach(b => { b.dataset.s = A ? s : 'off'; b.title = A ? (s === 'errore' ? 'Non riesco a salvare online: riprovo da solo' : 'Account: ' + A.nome) : 'Crea un account per non perdere i progressi'; }); }
+  const quando = iso => { if (!iso) return 'mai'; const d = new Date(iso), s = Math.round((Date.now() - d)/1000); if (s < 60) return 'pochi secondi fa'; if (s < 3600) return Math.round(s/60) + ' min fa'; if (s < 86400) return Math.round(s/3600) + ' ore fa'; return d.toLocaleDateString('it-IT', {day:'numeric', month:'long'}) + ' alle ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}); };
+  // ---------- finestre
+  let ov = null;
+  function finestra(html){ if (!ov){ ov = document.createElement('div'); ov.id = 'accOv'; document.body.append(ov); ov.addEventListener('click', e => { if (e.target === ov) chiudi(); }); } ov.innerHTML = `<div class="acc-box">${html}</div>`; ov.hidden = false; try { SUONI.suona('tocco'); } catch(e){} return ov.firstElementChild; }
+  function chiudi(){ if (ov){ ov.hidden = true; ov.innerHTML = ''; } }
+  function avviso(t){ const b = document.createElement('div'); b.className = 'acc-toast'; b.textContent = t; document.body.append(b); setTimeout(() => b.classList.add('via'), 2600); setTimeout(() => b.remove(), 3100); }
+  function apri(tab){ if (provaAttiva()){ const b = finestra(`<h2>Il tuo account</h2><p>Adesso è attivo il pass di prova: i progressi non sono i tuoi veri. Esci dal pass di prova, poi torna qui.</p><button class="big" data-x>Ok</button>`); b.querySelector('[data-x]').onclick = chiudi; return; }
+    if (A) return pagina(); tab = tab || 'crea';
+    const b = finestra(`<div class="acc-ic"></div><h2>Il tuo account</h2><p class="acc-sub">Salva i progressi online: li ritrovi su ogni telefono o computer, anche se cancelli i dati del browser.</p>
+      <div class="acc-tab"><button type="button" data-t="crea" class="${tab === 'crea' ? 'on' : ''}">Crea account</button><button type="button" data-t="entra" class="${tab === 'entra' ? 'on' : ''}">Ho già un account</button></div>
+      <label class="acc-f">Nome del giocatore<input id="accN" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="es. Natan"></label>
+      <label class="acc-f">Parola segreta<input id="accS" type="password" maxlength="64" autocomplete="${tab === 'crea' ? 'new-password' : 'current-password'}" placeholder="almeno 4 caratteri"></label>
+      ${tab === 'crea' ? '<label class="acc-f">Ripeti la parola segreta<input id="accS2" type="password" maxlength="64" autocomplete="new-password"></label><p class="acc-nota">Non usare la password di altri siti. Se la dimentichi non si può recuperare.</p>' : ''}
+      <p class="acc-err" id="accE" hidden></p>
+      <button class="big" id="accOk">${tab === 'crea' ? 'Crea e salva i progressi' : 'Entra'}</button><button class="big alt" data-x>Più tardi</button>`);
+    b.querySelectorAll('[data-t]').forEach(x => x.onclick = () => apri(x.dataset.t)); b.querySelector('[data-x]').onclick = chiudi;
+    const err = t => { const e = b.querySelector('#accE'); e.textContent = t; e.hidden = !t; }, ok = b.querySelector('#accOk');
+    const vai = async () => { const n = b.querySelector('#accN').value.trim(), s = b.querySelector('#accS').value;
+      if (n.length < 3) return err('Il nome deve avere almeno 3 lettere.'); if (!/^[A-Za-z0-9_ àèéìòùÀÈÉÌÒÙ.\-]+$/.test(n)) return err('Nel nome usa solo lettere, numeri e spazi.'); if (s.length < 4) return err('La parola segreta deve avere almeno 4 caratteri.');
+      if (tab === 'crea' && s !== b.querySelector('#accS2').value) return err('Le due parole segrete non sono uguali.');
+      ok.disabled = true; ok.textContent = 'Un attimo…'; err('');
+      try { const r = await rpc(tab === 'crea' ? 'ds_registra' : 'ds_entra', {p_nome: n, p_segreto: s}); ok.disabled = false; ok.textContent = tab === 'crea' ? 'Crea e salva i progressi' : 'Entra';
+        if (r.errore){ return err({nome:'Nome non valido: da 3 a 16 caratteri.', segreto:'Parola segreta non valida.', preso:'Questo nome è già usato: scegline un altro.', sbagliato:'Nome o parola segreta sbagliati.', bloccato:`Troppi tentativi sbagliati: riprova tra ${r.minuti} minuti.`}[r.errore] || 'Qualcosa non va, riprova.'); }
+        A = {token: r.token, nome: r.nome, ultimo: r.aggiornato}; salvaA(); dopoAccesso(r.aggiornato, tab === 'crea'); }
+      catch(e){ ok.disabled = false; ok.textContent = tab === 'crea' ? 'Crea e salva i progressi' : 'Entra'; err('Non riesco a collegarmi. Controlla internet e riprova.'); } };
+    ok.onclick = vai; b.querySelectorAll('input').forEach(i => i.onkeydown = e => { if (e.key === 'Enter') vai(); }); setTimeout(() => b.querySelector('#accN').focus(), 80); }
+  async function dopoAccesso(online, nuovo){ const loc = dati(), rl = riassunto(loc);
+    if (!online){ await invia(true); const b = finestra(`<div class="acc-ic ok"></div><h2>Fatto, ${A.nome}!</h2><p>Da ora i tuoi progressi si salvano online da soli. Su un altro telefono premi il pulsante dell’account e scegli “Ho già un account”.</p><button class="big" data-x>Gioca</button>`); b.querySelector('[data-x]').onclick = chiudi; try { SUONI.suona('stella2'); EPICO.coriandoli(60); } catch(e){} segna('ok'); return; }
+    const b0 = finestra(`<h2>Carico i progressi…</h2>`);
+    let r; try { r = await rpc('ds_carica', {p_token: A.token}); } catch(e){ const b = finestra(`<h2>Non riesco a scaricare</h2><p>Controlla internet e riprova.</p><button class="big" data-x>Ok</button>`); b.querySelector('[data-x]').onclick = chiudi; return; }
+    if (!r || !r.dati){ await invia(true); chiudi(); segna('ok'); return; }
+    const ro = riassunto(r.dati);
+    if (rl.peso <= 12 || hash(r.dati) === hash(loc)){ applica(r.dati); return; }
+    const b = finestra(`<h2>Quali progressi tieni?</h2><p class="acc-sub">Sul tuo account ci sono già dei progressi, e anche su questo telefono.</p>
+      <button class="acc-sc" data-c="on"><b>Quelli online</b><small>Salvati ${quando(r.aggiornato)}${r.dispositivo ? ' da ' + r.dispositivo : ''}</small><small>${ro.testo}</small></button>
+      <button class="acc-sc" data-c="loc"><b>Quelli di questo telefono</b><small>${rl.testo}</small><small>Prendono il posto di quelli online</small></button>
+      <button class="big alt" data-x>Decido dopo</button>`);
+    b.querySelector('[data-c=on]').onclick = () => applica(r.dati);
+    b.querySelector('[data-c=loc]').onclick = async () => { await invia(true); chiudi(); avviso('Fatto: online ora ci sono i progressi di questo telefono.'); };
+    b.querySelector('[data-x]').onclick = () => { A = null; salvaA(); segna('off'); chiudi(); }; }
+  function pagina(){ const b = finestra(`<div class="acc-ic ok"></div><h2>Ciao, ${A.nome}!</h2><p class="acc-sub">I tuoi progressi si salvano online da soli.</p>
+      <div class="acc-st" data-s="${stato}"><span></span><b id="accStT">${stato === 'errore' ? 'Ultimo tentativo non riuscito: riprovo da solo' : 'Ultimo salvataggio: ' + quando(A.ultimo)}</b></div>
+      <button class="big" id="accSv">Salva adesso</button><button class="big alt" id="accRi">Scarica i progressi online</button><button class="big alt" id="accEsci">Esci da questo telefono</button><button class="big alt" data-x>Chiudi</button>`);
+    b.querySelector('[data-x]').onclick = chiudi;
+    b.querySelector('#accSv').onclick = async e => { e.target.disabled = true; e.target.textContent = 'Salvo…'; const ok = await invia(true); if (!document.body.contains(b)) return; e.target.disabled = false; e.target.textContent = 'Salva adesso'; b.querySelector('#accStT').textContent = ok ? 'Ultimo salvataggio: ' + quando(A && A.ultimo) : 'Non riesco a salvare: controlla internet'; };
+    b.querySelector('#accRi').onclick = async () => { const c = finestra(`<h2>Scaricare i progressi online?</h2><p>Prendono il posto di quelli su questo telefono.</p><button class="big" id="accSi">Sì, scarica</button><button class="big alt" data-x>Annulla</button>`); c.querySelector('[data-x]').onclick = pagina;
+      c.querySelector('#accSi').onclick = async () => { try { const r = await rpc('ds_carica', {p_token: A.token}); if (r && r.dati) applica(r.dati); else { avviso('Online non c’è ancora niente.'); pagina(); } } catch(e){ avviso('Non riesco a collegarmi.'); } }; };
+    b.querySelector('#accEsci').onclick = async () => { const c = finestra(`<h2>Uscire da questo telefono?</h2><p>I progressi restano salvati online: per ritrovarli ti basta rientrare con nome e parola segreta.</p><button class="big" id="accSi">Esci</button><button class="big alt" data-x>Annulla</button>`); c.querySelector('[data-x]').onclick = pagina;
+      c.querySelector('#accSi').onclick = async () => { await invia(true); try { rpc('ds_esci', {p_token: A.token}); } catch(e){} A = null; salvaA(); segna('off'); chiudi(); avviso('Sei uscito dall’account.'); }; }; }
+  // ---------- salvataggio automatico
+  function avvia(){ if (A){ ultimoHash = ''; segna('ok'); rpc('ds_stato', {p_token: A.token}).then(r => { if (r && r.errore === 'sessione'){ A = null; salvaA(); segna('off'); } else invia(false); }).catch(() => segna('errore')); } else segna('off');
+    setInterval(() => { if (A && document.visibilityState === 'visible') invia(false); }, errori > 3 ? 60000 : 20000);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') invia(false, true); });
+    addEventListener('pagehide', () => invia(false, true)); }
+  const btn = () => `<button class="cr-ing acc-btn" data-s="${A ? stato : 'off'}" aria-label="Il tuo account">${typeof TB !== 'undefined' ? TB.ico('salva', 2) : ''}<i></i></button>`;
+  return {apri, avvia, btn, segna, get account(){ return A; }, _test:{dati, riassunto, invia, hash, set A(v){ A = v; salvaA(); }}};
+})();
+
 let last = performance.now(), T = 0;
 function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); last = now; T += dt;
   if (S && !S.fine && !S.attesaCarta && !S.pausa) update(dt * S.vel);
@@ -7531,7 +7651,7 @@ document.addEventListener('keydown', e => {
   else if (k === 'Escape'){ e.preventDefault(); if (S.modo){ S.modo = null; costruisciTorri(); ui(); } else if (NEG){ NEG = false; ui(); } else if (S.sel !== null){ S.sel = null; ui(); } else clic('#bPausa'); }
   else if (k === '+' || k === '=') clic('#zIn'); else if (k === '-') clic('#zOut');
 });
-fit(); mostraMenu(); requestAnimationFrame(loop);
+fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){ console.error(e); }
 // caricamento: disegno subito il paese e aspetto i caratteri, poi tolgo la schermata (fino ad allora i tocchi sono bloccati)
 (async () => { const ld = document.getElementById('caricamento'); if (!ld) return; const bar = document.getElementById('ldBar'), tx = document.getElementById('ldTxt');
   const perc = document.getElementById('ldPerc'), corre = document.getElementById('ldCorre'); try { corre.append(TB.icona('lanciere', 3)); } catch(e){}
