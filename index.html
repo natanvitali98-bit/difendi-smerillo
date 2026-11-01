@@ -1775,6 +1775,41 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .gp-tile small{font:700 12px var(--f-body,system-ui);color:#6a7090;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gp-tile:active{transform:translateY(3px);box-shadow:0 1px 0 #141433}
 @media (prefers-reduced-motion: reduce){ .gp-n.ora{animation:none} }
+/* classifica */
+.cl-box{display:flex;flex-direction:column;gap:10px}
+.cl-seg button{font-size:15px!important;padding:9px 2px!important}
+.cl-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border:3px solid #141433;border-radius:18px;background:linear-gradient(180deg,#26307e,#1a1f5c);box-shadow:0 5px 0 #141433;color:#fff}
+.cl-card>span:nth-child(2),.cl-card.off>span:first-child{display:flex;flex-direction:column;flex:1;min-width:0}
+.cl-card b{font:400 20px var(--f-big),"Lilita One",sans-serif}
+.cl-card small{font:700 12.5px var(--f-body,system-ui);color:#b8c2f0}
+.cl-card .cl-v b{color:#ffd03a}
+.cl-acc{font:400 16px var(--f-big),"Lilita One",sans-serif;background:#ffd03a;color:#141433;border:3px solid #141433;border-radius:12px;padding:8px 12px;box-shadow:0 3px 0 #141433;white-space:nowrap}
+.cl-pos.big{width:auto!important;min-width:56px;height:56px!important;font-size:24px!important;border-radius:14px!important;background:#ffd03a!important;color:#141433!important}
+.cl-lista{display:flex;flex-direction:column;gap:6px;background:#fff;border:3px solid #141433;border-radius:18px;box-shadow:0 5px 0 #141433;padding:8px}
+.cl-r{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:12px;color:#141433}
+.cl-r:nth-child(even){background:#f2f4fb}
+.cl-r.io{background:#fff1c4;box-shadow:inset 0 0 0 2px #e0a500}
+.cl-pos{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font:400 17px var(--f-big),"Lilita One",sans-serif;background:#e3e8f7;color:#5a6290}
+.cl-r.p1 .cl-pos{background:#ffd03a;color:#141433;box-shadow:inset 0 0 0 2px #141433}
+.cl-r.p2 .cl-pos{background:#d6dbe8;color:#141433;box-shadow:inset 0 0 0 2px #141433}
+.cl-r.p3 .cl-pos{background:#e4a26a;color:#141433;box-shadow:inset 0 0 0 2px #141433}
+.cl-av{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#dfe6ff;overflow:hidden}
+.cl-av img,.cl-av canvas{max-width:30px;max-height:30px;image-rendering:pixelated}
+.cl-n{flex:1;min-width:0;font:700 15px var(--f-body,system-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-v{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1;flex:none}
+.cl-v b{font:400 17px var(--f-big),"Lilita One",sans-serif}
+.cl-v small{font:700 11px var(--f-body,system-ui);color:#6a7090}
+.cl-vuoto{margin:0;padding:14px;text-align:center;font:700 14px var(--f-body,system-ui);color:#5a6290}
+.cl-rip{margin:0 8px 8px}
+/* scelta modalità: sfide speciali */
+.mo-h{margin:6px 2px 0;font:400 17px var(--f-big),"Lilita One",sans-serif;color:var(--testo,#141433)}
+.mo-sf{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.mo-c{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;border:3px solid #141433;border-radius:16px;background:#fff;box-shadow:0 4px 0 #141433;color:#141433;cursor:pointer;text-align:center}
+.mo-c b{font:400 16px var(--f-big),"Lilita One",sans-serif;line-height:1.1}
+.mo-c small{font:700 11.5px var(--f-body,system-ui);color:#6a7090}
+.mo-c.ev{background:#fff1c4}
+.mo-c.nov::after{content:'';position:absolute;top:-6px;right:-6px;width:14px;height:14px;border-radius:50%;background:#d93636;border:2px solid #141433}
+.mo-c:active{transform:translateY(3px);box-shadow:0 1px 0 #141433}
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -4219,7 +4254,7 @@ function mostraMenu(pannello){
     const tal = TB.talismani(), nTal = Object.values(tal).reduce((s, v) => s + (v || 0), 0), INCn = INC.daRitirare, rp = TB.ruotaPronta(), [fa, ft] = PROF.quantiFortunati();
     const card = (id, ic, tit, sub, extra = '') => `<button class="hm-card hm-modo ${extra}" id="${id}"><span class="hm-ic">${ic}</span><span class="hm-sx"><b>${tit}</b><small>${sub}</small></span></button>`;
     const difs = TB.listaDif().map(d => `<button class="cr-dif ${d.liv ? '' : 'no'}" data-dif="${d.t}" style="--rc:${d.rar.col}"><span class="cr-di"></span><b>${d.liv ? d.nome : '???'}</b><small>${d.liv ? 'liv. ' + d.liv : d.rar.nome}</small></button>`).join('');
-    const TABS = [['premi', 'trifoglio', 'Premi', rp || INCn || CQ.missPronte()], ['dif', 'scudo', 'Collezione', false], ['gioca', 'spade', 'Gioca', false], ['amici', 'amici', 'Amici', false], ['modi', 'torre', 'Modalità', TB.eventoAttivo() || !sf.fatta]];
+    const TABS = [['premi', 'trifoglio', 'Premi', rp || INCn || CQ.missPronte()], ['dif', 'scudo', 'Collezione', false], ['gioca', 'spade', 'Gioca', false], ['amici', 'amici', 'Amici', false], ['classifica', 'coppa', 'Classifica', false]];
     c.innerHTML = `<div class="cr">
       <header class="cr-top"><div id="hmProf"></div><span class="cr-res" title="Stelle">${TB.ico('stella', 2)} <b>${tot}</b></span><span class="cr-res" title="Talismani">${TB.ico('trifoglio', 2)} <b>${nTal}</b></span>${ACC.btn()}<button class="cr-ing" id="crSnd" aria-label="Musica e suoni">${TB.ico(SUONI.muto ? 'muto' : 'suono', 2)}</button><button class="cr-ing" data-p="altro" aria-label="Altro: salvataggio e impostazioni">${TB.ico('altro', 2)}</button></header>
       ${tester() ? `<button type="button" class="hm-tester" id="tTest">🧪 Pass di prova attivo · tocca per tornare ai tuoi progressi</button>` : ''}
@@ -4260,12 +4295,7 @@ function mostraMenu(pannello){
           ${card('tAmi', '🌐', 'Gioca con gli amici', 'Insieme contro i nemici, o uno contro l’altro. Ognuno dal suo telefono.')}
           <p class="cr-p">Crea una stanza e manda il codice a un amico, oppure entra con il suo codice.</p>
           <p class="cr-p">Dopo una vittoria puoi anche <b>sfidare un amico</b> a fare più punti di te nella stessa missione.</p></section>
-        <section class="cr-pg" data-tab="modi"><h2 class="cr-h">Modalità</h2>
-          ${TB.eventoAttivo() ? card('tEv2', '🌰', 'Evento: la Castagnata', 'Solo fino al 15 novembre · premio: scrigno d’oro', 'ev') : ''}
-          ${card('tSfida', TB.ico('calendario', 3), 'Sfida del giorno', sf.fatta ? '✓ Fatta oggi · torna domani' : 'Una missione nuova ogni giorno, uguale per tutti', sf.fatta ? '' : 'nov')}
-          ${card('tRun', TB.ico('torre', 3), 'Assedio', (runRec ? 'Record: tappa ' + runRec + ' · ' : '') + 'quante tappe resisti?')}
-          ${card('tCq', TB.ico('bandiera', 3), 'Conquista', 'Scegli il tuo borgo e conquista gli altri due', 'nov')}
-          ${card('tCl', TB.ico('olio', 3), 'Difesa in tempo reale', 'Compra torri e ferma le ondate di nemici')}</section>
+        <section class="cr-pg" data-tab="classifica"><h2 class="cr-h">Classifica</h2><div id="clBox" class="cl-box"></div></section>
       </div>
       <nav class="cr-nav">${TABS.map(([k, ic, n, nov]) => `<button class="cr-tab ${nov ? 'nov' : ''}" data-tab="${k}" aria-label="${n}"><span class="cr-ti">${TB.ico(ic, 3)}</span><span class="cr-tn">${n}</span></button>`).join('')}</nav>
     </div>`;
@@ -4301,7 +4331,7 @@ function mostraMenu(pannello){
           if (x.stato === 'pronto') b.onclick = () => { const pg = b.closest('.cr-pg'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.ritiraInc(x.k, x.id); }; d.querySelector('.pr-qr').append(b); box.append(d); };
         const RI = TB.righeInc(), bg = c.querySelector('#prIncG'), bi = c.querySelector('#prIncI');
         if (bg) RI.oggi.forEach(x => riga(bg, x)); if (bi) RI.imp.forEach(x => riga(bi, x)); }
-      { const rifai = tb => () => { const pg = c.querySelector(`.cr-pg[data-tab="${tb}"]`); RIENTRO = {tab: tb, top: pg ? pg.scrollTop : 0}; mostraMenu('home'); }; try { CQ.menuMissioni(c.querySelector('#prCq'), rifai('premi')); CQ.menuCollezione(c.querySelector('#crCq'), rifai('dif')); } catch(e){ console.error(e); } try { CQ.segmenta(c); } catch(e){ console.error(e); } }
+      { const rifai = tb => () => { const pg = c.querySelector(`.cr-pg[data-tab="${tb}"]`); RIENTRO = {tab: tb, top: pg ? pg.scrollTop : 0}; mostraMenu('home'); }; try { CQ.menuMissioni(c.querySelector('#prCq'), rifai('premi')); CQ.menuCollezione(c.querySelector('#crCq'), rifai('dif')); } catch(e){ console.error(e); } try { CQ.segmenta(c); } catch(e){ console.error(e); } try { ACC.classifica(c.querySelector('#clBox')); } catch(e){ console.error(e); } }
       c.querySelectorAll('.acc-btn').forEach(b => b.onclick = () => ACC.apri()); { const sn = c.querySelector('#crSnd'); if (sn) sn.onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('menu'); sn.innerHTML = TB.ico(SUONI.muto ? 'muto' : 'suono', 2); }; }
       const e2 = c.querySelector('#tEv2'); if (e2) e2.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('evento'); });
       const pa = c.querySelector('#prAv'); if (pa){ const ch = PROF.chip(); pa.append(ch.querySelector('.pf-av') || ch); }
@@ -4353,6 +4383,9 @@ function mostraMenu(pannello){
       <button class="hm-card hm-modo" id="mTurni"><span class="hm-ic">${TB.ico('scudo', 3)}</span><span class="hm-sx"><b>Missioni a turni</b><small>Muovi i tuoi difensori uno alla volta, come a scacchi. Missione ${pm.num}: ${pm.titolo}</small></span></button>
       <button class="hm-card hm-modo" data-p="cmis"><span class="hm-ic">${TB.ico('torre', 3)}</span><span class="hm-sx"><b>Difesa in tempo reale</b><small>Compra torri nel negozio e mettile lungo la strada. I nemici arrivano a ondate.</small></span></button>
       <button class="hm-card hm-modo" id="tCq"><span class="hm-ic">${TB.ico('bandiera', 3)}</span><span class="hm-sx"><b>Conquista</b><small>Scegli il tuo borgo: costruisci, commercia, fai alleanze e conquista Smerillo, San Martino e Ceresola.</small></span></button>
+      <h3 class="mo-h">Sfide speciali</h3><div class="mo-sf">
+      ${(() => { const sfx = TB.riepilogo().sfida; let rr = 0; try { rr = +localStorage.getItem('difendi-smerillo-assedio') || 0; } catch(e){} const k = (id, ic, tit, sub, x = '') => `<button class="mo-c ${x}" id="${id}">${ic}<b>${tit}</b><small>${sub}</small></button>`;
+        return k('tSfida', TB.ico('calendario', 3), 'Sfida del giorno', sfx.fatta ? 'Fatta oggi' : 'Nuova ogni giorno', sfx.fatta ? 'fatta' : 'nov') + k('tRun', TB.ico('torre', 3), 'Assedio', rr ? 'Record: tappa ' + rr : 'Quante tappe resisti?') + (TB.eventoAttivo() ? k('tEv', TB.ico('castagna', 3), 'Castagnata', 'Evento fino al 15/11', 'ev') : ''); })()}</div>
       <button class="big alt" data-p="home">Indietro</button></div>`;
   } else if (pannello === 'cmis'){
     const aperta2 = Object.keys(DIFF).some(d => rec[d] && rec[d].stelle);
@@ -7885,12 +7918,37 @@ const ACC = window.ACC = (() => {
     b.querySelector('#accEsci').onclick = async () => { const c = finestra(`<h2>Uscire da questo telefono?</h2><p>I progressi restano salvati online: per ritrovarli ti basta rientrare con nome e parola segreta.</p><button class="big" id="accSi">Esci</button><button class="big alt" data-x>Annulla</button>`); c.querySelector('[data-x]').onclick = pagina;
       c.querySelector('#accSi').onclick = async () => { await invia(true); try { rpc('ds_esci', {p_token: A.token}); } catch(e){} A = null; salvaA(); segna('off'); chiudi(); avviso('Sei uscito dall’account.'); }; }; }
   // ---------- salvataggio automatico
+
+  // classifica online
+  const CL = {tipo:'livello', cache:{}};
+  const CLT = {livello:['Livello', 'stella', 'esperienza'], stelle:['Stelle', 'stella', 'stelle'], assedio:['Assedio', 'torre', 'tappa'], gloria:['Conquista', 'bandiera', 'gloria']};
+  const livDa = xp => { let L = 1; while (L < 30 && xp >= 60 + 40*(L - 1)){ xp -= 60 + 40*(L - 1); L++; } return L; };
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
+  const valore = (tipo, v) => tipo === 'livello' ? `<b>Liv. ${livDa(v)}</b><small>${v} esp.</small>` : tipo === 'assedio' ? `<b>Tappa ${v}</b>` : tipo === 'stelle' ? `<b>${v}</b><small>stelle</small>` : `<b>${v}</b><small>gloria</small>`;
+  function classifica(box){ if (!box) return;
+    box.innerHTML = `<div class="cr-seg cl-seg">${Object.keys(CLT).map(k => `<button type="button" data-cl="${k}" class="${CL.tipo === k ? 'on' : ''}">${CLT[k][0]}</button>`).join('')}</div><div class="cl-io" id="clIo"></div><div class="cl-lista" id="clL"></div>`;
+    box.querySelectorAll('[data-cl]').forEach(b => b.onclick = () => { CL.tipo = b.dataset.cl; try { SUONI.suona('tocco'); } catch(e){} box.querySelectorAll('[data-cl]').forEach(x => x.classList.toggle('on', x === b)); carica(box); });
+    carica(box); }
+  async function carica(box){ const tipo = CL.tipo, L = box.querySelector('#clL'), io = box.querySelector('#clIo'); if (!L) return;
+    const disegna = r => { if (CL.tipo !== tipo) return;
+      if (!A) io.innerHTML = `<div class="cl-card off"><span><b>Non sei in classifica</b><small>Crea un account per sfidare gli altri giocatori.</small></span><button type="button" class="cl-acc" id="clAcc">Crea account</button></div>`;
+      else if (r.mia) io.innerHTML = `<div class="cl-card"><span class="cl-pos big">${r.mia.pos}°</span><span><b>${esc(A.nome)}</b><small>la tua posizione su ${r.totale} giocatori</small></span><span class="cl-v">${valore(tipo, r.mia.v)}</span></div>`;
+      else io.innerHTML = `<div class="cl-card"><span><b>${esc(A.nome)}</b><small>${tipo === 'gloria' ? 'Gioca a Conquista per entrare in questa classifica.' : tipo === 'assedio' ? 'Gioca ad Assedio per entrare in questa classifica.' : 'Gioca una missione per entrare in classifica.'}</small></span></div>`;
+      const b = io.querySelector('#clAcc'); if (b) b.onclick = () => apri('crea');
+      L.innerHTML = r.righe.length ? r.righe.map(x => `<div class="cl-r ${x.io ? 'io' : ''} ${x.pos <= 3 ? 'p' + x.pos : ''}"><span class="cl-pos">${x.pos}</span><span class="cl-av" data-av="${esc(x.av)}"></span><b class="cl-n">${esc(x.nome)}</b><span class="cl-v">${valore(tipo, x.v)}</span></div>`).join('')
+        : `<p class="cl-vuoto">Ancora nessuno in questa classifica. Puoi essere il primo!</p>`;
+      L.querySelectorAll('[data-av]').forEach(e => { try { e.append(TB.icona(e.dataset.av, 2)); } catch(er){ try { e.append(TB.icona('lanciere', 2)); } catch(e2){} } }); };
+    const c = CL.cache[tipo]; if (c && Date.now() - c.t < 60000){ disegna(c.r); return; }
+    L.innerHTML = '<p class="cl-vuoto">Carico la classifica...</p>'; io.innerHTML = '';
+    try { if (A) await invia(false); } catch(e){}
+    try { const r = await rpc('ds_classifica', {p_tipo: tipo, p_token: A ? A.token : null}); if (r.errore) throw 0; CL.cache[tipo] = {t: Date.now(), r}; disegna(r); }
+    catch(e){ if (CL.tipo === tipo) L.innerHTML = `<p class="cl-vuoto">${rete().replace('Controlla internet e riprova.', 'Controlla internet.')}</p><button type="button" class="big alt cl-rip">Riprova</button>`; const rb = L.querySelector('.cl-rip'); if (rb) rb.onclick = () => carica(box); } }
   function avvia(){ if (A){ ultimoHash = ''; segna('ok'); rpc('ds_stato', {p_token: A.token}).then(r => { if (r && r.errore === 'sessione'){ A = null; salvaA(); segna('off'); } else invia(false); }).catch(() => segna('errore')); } else segna('off');
     setInterval(() => { if (A && document.visibilityState === 'visible') invia(false); }, errori > 3 ? 60000 : 20000);
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') invia(false, true); });
     addEventListener('pagehide', () => invia(false, true)); }
   const btn = () => `<button class="cr-ing acc-btn" data-s="${A ? stato : 'off'}" aria-label="Il tuo account">${typeof TB !== 'undefined' ? TB.ico('salva', 2) : ''}<i></i></button>`;
-  return {apri, avvia, btn, segna, cancello, get account(){ return A; }, _test:{dati, riassunto, invia, hash, set A(v){ A = v; salvaA(); }}};
+  return {apri, avvia, classifica, btn, segna, cancello, get account(){ return A; }, _test:{dati, riassunto, invia, hash, set A(v){ A = v; salvaA(); }}};
 })();
 
 let last = performance.now(), T = 0;
