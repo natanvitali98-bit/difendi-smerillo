@@ -1810,6 +1810,34 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .mo-c.ev{background:#fff1c4}
 .mo-c.nov::after{content:'';position:absolute;top:-6px;right:-6px;width:14px;height:14px;border-radius:50%;background:#d93636;border:2px solid #141433}
 .mo-c:active{transform:translateY(3px);box-shadow:0 1px 0 #141433}
+/* scelta della modalità */
+#title .pan.mo-pan{background:linear-gradient(180deg,#26307e 0%,#1a1f5c 60%,#141845 100%);color:#fff;border:3px solid #141433;box-shadow:0 6px 0 #141433;gap:12px;padding:14px}
+#title .mo-pan h2{color:#fff;font-size:26px;text-shadow:0 3px 0 #141433;margin:0;line-height:1.05}
+.mo-top{display:flex;align-items:center;gap:12px}
+.mo-top>span{display:flex;flex-direction:column}
+.mo-k{font:700 12px var(--f-pixel);letter-spacing:2px;text-transform:uppercase;color:#ffd03a}
+#title .mo-pan .mo-back{flex:none;width:44px;height:44px;padding:0;border-radius:14px;border:3px solid #141433;background:#ffd03a;color:#141433;font:400 30px/1 var(--f-big),"Lilita One",sans-serif;box-shadow:0 3px 0 #141433;display:grid;place-items:center;margin:0}
+.mo-m{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px 10px 10px;border:3px solid #141433;border-radius:20px;background:#2d3889;box-shadow:0 5px 0 #141433;color:#fff;text-align:left;cursor:pointer;transition:transform .12s}
+.mo-m:active{transform:translateY(3px);box-shadow:0 2px 0 #141433}
+.mo-m.turni{background:linear-gradient(180deg,#ffd84f,#ffc21a);color:#141433}
+.mo-art{flex:none;width:64px;height:64px;border-radius:16px;display:grid;place-items:center;border:3px solid #141433;box-shadow:inset 0 -5px 0 rgba(0,0,0,.18)}
+.mo-m.turni .mo-art{background:#fff3c2}
+.mo-m.reale .mo-art{background:linear-gradient(180deg,#5fcf7a,#2f9e52)}
+.mo-m.cq .mo-art{background:linear-gradient(180deg,#ff8a6a,#d9452f)}
+.mo-art img,.mo-art canvas{image-rendering:pixelated}
+.mo-tx{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.mo-tx b{font:400 20px/1.05 var(--f-big),"Lilita One",sans-serif}
+.mo-tx small{font:400 13.5px/1.3 var(--f-body,system-ui);opacity:.85}
+.mo-chip{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;margin-top:3px;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.22);font:700 11.5px var(--f-body,system-ui);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mo-m.turni .mo-chip{background:#141433;color:#ffd03a}
+.mo-fr{flex:none;font:400 30px var(--f-big),"Lilita One",sans-serif;opacity:.6}
+#title .mo-pan .mo-h{margin:6px 2px -2px;font:700 12px var(--f-pixel);letter-spacing:2px;text-transform:uppercase;color:#aab4e8}
+#title .mo-pan .mo-c{background:#232c74;color:#fff;border-color:#141433}
+#title .mo-pan .mo-c small{color:#b8c2f0}
+#title .mo-pan .mo-c.ev{background:#5a3a1c}
+#title .mo-pan .mo-c.ev small{color:#ffd9a8}
+#title .mo-pan .mo-c.fatta{opacity:.7}
+.mo-ci{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.1);margin-bottom:2px}
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -4379,14 +4407,14 @@ function mostraMenu(pannello){
     c.querySelector('#svCarica').onclick = () => { const cc = ta.value.trim().toUpperCase(); if (cc === 'TESTER'){ const ok = attivaTester(); msg(ok ? '🧪 Pass attivo! Tutto sbloccato. Per tornare ai tuoi progressi scrivi FINETEST.' : 'Non riesco a salvare su questo telefono.'); if (ok) setTimeout(() => location.reload(), 1200); return; } if (cc === 'FINETEST'){ const ok = fineTester(); msg(ok ? 'Fatto! Sono tornati i tuoi progressi.' : 'Errore.'); if (ok) setTimeout(() => location.reload(), 1000); return; } const ok = importaSalvataggio(ta.value); msg(ok ? 'Fatto! Progressi caricati.' : 'Codice non valido. Controlla di averlo copiato tutto.'); if (ok) setTimeout(() => location.reload(), 900); };
   } else if (pannello === 'modo'){
     const pm = TB.prossima();
-    c.innerHTML = `<div class="pan"><h2>Come vuoi giocare?</h2>
-      <button class="hm-card hm-modo" id="mTurni"><span class="hm-ic">${TB.ico('scudo', 3)}</span><span class="hm-sx"><b>Missioni a turni</b><small>Muovi i tuoi difensori uno alla volta, come a scacchi. Missione ${pm.num}: ${pm.titolo}</small></span></button>
-      <button class="hm-card hm-modo" data-p="cmis"><span class="hm-ic">${TB.ico('torre', 3)}</span><span class="hm-sx"><b>Difesa in tempo reale</b><small>Compra torri nel negozio e mettile lungo la strada. I nemici arrivano a ondate.</small></span></button>
-      <button class="hm-card hm-modo" id="tCq"><span class="hm-ic">${TB.ico('bandiera', 3)}</span><span class="hm-sx"><b>Conquista</b><small>Scegli il tuo borgo: costruisci, commercia, fai alleanze e conquista Smerillo, San Martino e Ceresola.</small></span></button>
-      <h3 class="mo-h">Sfide speciali</h3><div class="mo-sf">
-      ${(() => { const sfx = TB.riepilogo().sfida; let rr = 0; try { rr = +localStorage.getItem('difendi-smerillo-assedio') || 0; } catch(e){} const k = (id, ic, tit, sub, x = '') => `<button class="mo-c ${x}" id="${id}">${ic}<b>${tit}</b><small>${sub}</small></button>`;
-        return k('tSfida', TB.ico('calendario', 3), 'Sfida del giorno', sfx.fatta ? 'Fatta oggi' : 'Nuova ogni giorno', sfx.fatta ? 'fatta' : 'nov') + k('tRun', TB.ico('torre', 3), 'Assedio', rr ? 'Record: tappa ' + rr : 'Quante tappe resisti?') + (TB.eventoAttivo() ? k('tEv', TB.ico('castagna', 3), 'Castagnata', 'Evento fino al 15/11', 'ev') : ''); })()}</div>
-      <button class="big alt" data-p="home">Indietro</button></div>`;
+    c.innerHTML = `<div class="pan mo-pan">
+      <div class="mo-top"><button type="button" class="indietro mo-back" data-p="home" aria-label="Indietro">‹</button><span><span class="mo-k">Gioca</span><h2>Come vuoi giocare?</h2></span></div>
+      <button class="mo-m turni" id="mTurni"><span class="mo-art">${TB.ico('scudo', 4)}</span><span class="mo-tx"><b>Missioni a turni</b><small>Muovi i difensori uno alla volta, come a scacchi.</small><span class="mo-chip">${TB.ico('play', 1)} Missione ${pm.num}: ${pm.titolo}</span></span><span class="mo-fr">›</span></button>
+      <button class="mo-m reale" data-p="cmis"><span class="mo-art">${TB.ico('torre', 4)}</span><span class="mo-tx"><b>Difesa in tempo reale</b><small>Metti le torri sulla strada e ferma le ondate.</small><span class="mo-chip">Azione veloce</span></span><span class="mo-fr">›</span></button>
+      <button class="mo-m cq" id="tCq"><span class="mo-art">${TB.ico('bandiera', 4)}</span><span class="mo-tx"><b>Conquista</b><small>Scegli il tuo borgo e conquista gli altri due.</small><span class="mo-chip">Strategia · alleanze · commercio</span></span><span class="mo-fr">›</span></button>
+      <div class="mo-h">Sfide speciali</div><div class="mo-sf">
+      ${(() => { const sfx = TB.riepilogo().sfida; let rr = 0; try { rr = +localStorage.getItem('difendi-smerillo-assedio') || 0; } catch(e){} const k = (id, ic, tit, sub, x = '') => `<button class="mo-c ${x}" id="${id}"><span class="mo-ci">${ic}</span><b>${tit}</b><small>${sub}</small></button>`;
+        return k('tSfida', TB.ico('calendario', 3), 'Sfida del giorno', sfx.fatta ? 'Fatta, torna domani' : 'Nuova oggi', sfx.fatta ? 'fatta' : 'nov') + k('tRun', TB.ico('torre', 3), 'Assedio', rr ? 'Record: tappa ' + rr : 'Quante tappe resisti?') + (TB.eventoAttivo() ? k('tEv', TB.ico('castagna', 3), 'Castagnata', 'Fino al 15 novembre', 'ev') : ''); })()}</div></div>`;
   } else if (pannello === 'cmis'){
     const aperta2 = Object.keys(DIFF).some(d => rec[d] && rec[d].stelle);
     const st = k => Object.keys(DIFF).map(d => { const r = rec[(k >= 2 ? 'm' + k : '') + d]; return r && r.stelle ? `${DIFF[d].nome} ${'★'.repeat(r.stelle)}` : ''; }).filter(Boolean).join(' · ') || 'Non ancora vinta';
