@@ -1699,6 +1699,37 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cr-cq .cq-psb span{filter:grayscale(1);opacity:.55}
 .cr-cq .cq-psb span.ok{filter:none;opacity:1}
 .cq-mbt .big{font-size:14px}
+
+/* notizie della stagione, ordinate */
+.cq-notizie h2{margin-bottom:2px}
+.cq-nbody{display:flex;flex-direction:column;gap:12px;max-height:44vh;overflow-y:auto;margin:6px -4px 0;padding:0 4px}
+.cq-nsez{display:flex;flex-direction:column;gap:6px}
+.cq-nh{display:flex;align-items:center;gap:6px;font:400 17px var(--f-big),"Lilita One",sans-serif;color:var(--testo,#141433)}
+.cq-nconto{margin-left:auto;display:flex;gap:5px}
+.cq-nconto i{font:700 12px var(--f-body,system-ui);font-style:normal;padding:3px 8px;border-radius:999px}
+.cq-nconto i.ok{background:#ddf7e3;color:#1d6b33}.cq-nconto i.ko{background:#ffe3de;color:#a3281a}
+.cq-natt{background:var(--carta2,#f2f2f7);border-radius:14px;padding:8px 10px;display:flex;flex-direction:column;gap:5px}
+.cq-nchi{display:flex;align-items:center;gap:8px;font-size:13px;color:#5a6080}
+.cq-ntag{display:inline-flex;align-items:center;gap:6px;font:700 14px var(--f-body,system-ui);color:#141433}
+.cq-ntag::before{content:"";width:12px;height:12px;border-radius:3px;background:var(--c);box-shadow:0 0 0 2px #141433}
+.cq-ntrad{font:700 12px var(--f-body,system-ui);color:#a3281a;background:#ffe3de;padding:2px 7px;border-radius:999px}
+.cq-nrow{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border-radius:10px;padding:7px 10px;font-size:14.5px;border-left:5px solid #3cae5c}
+.cq-nrow b{font:700 12.5px var(--f-body,system-ui);padding:3px 9px;border-radius:999px;background:#ddf7e3;color:#1d6b33;white-space:nowrap}
+.cq-nrow.ko{border-left-color:#e04830}.cq-nrow.ko b{background:#e04830;color:#fff}
+.cq-nmsg{padding:8px 11px;border-radius:12px;font-size:14px;line-height:1.35;background:#ddf7e3;color:#173d22}
+.cq-nmsg.ko{background:#ffe3de;color:#5a1a10}.cq-nmsg.info{background:#e3ecff;color:#1b2a5a}
+.cq-naltro{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.35;color:#5a6080;padding:2px 2px}
+.cq-naltro .cq-dot{margin-top:3px;flex:none}
+.cq-naltro.warn{color:#8a4a00;font-weight:700}
+.cq-nent{margin-top:12px;background:#141433;border-radius:16px;padding:10px 12px 12px;color:#fff}
+.cq-nent-t{font:700 12px var(--f-body,system-ui);text-transform:uppercase;letter-spacing:1px;color:#aab4e8;text-align:center;margin-bottom:6px}
+.cq-nris{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cq-nris>div{display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(255,255,255,.08);border-radius:12px;padding:6px 4px}
+.cq-nris b{font:400 22px var(--f-big),"Lilita One",sans-serif;color:#9be27a;line-height:1.1}
+.cq-nris .neg b{color:#ff8a70}
+.cq-nris small{font-size:11.5px;color:#c8d0f0}
+.cq-nnota{margin-top:7px;font-size:12.5px;color:#c8d0f0;text-align:center}
+.cq-notizie #cqOk{margin-top:12px}
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -7373,12 +7404,31 @@ function dlgMercato(g, scelta){ const F = S.fz[S.io], G = S.fz[g], v = amic(S.io
   o.querySelector('#cqSc').onclick = () => { if ((S.scambi || 0) >= 4 || F[sc.d] < n || G[sc.a] < r) return; F[sc.d] -= n; G[sc.d] += n; F[sc.a] += r; G[sc.a] -= r; S.scambi = (S.scambi || 0) + 1; setAmic(S.io, g, amic(S.io, g) + 2); suona('moneta'); salva(); aggiornaUI(); stat('scambi'); dlgMercato(g, {a:sc.a, d:sc.d, fatto:{n, r, a:sc.a, d:sc.d}}); }; }
 function toast(t){ const x = el('cqToast'); x.textContent = t; x.className = 'cq-toast on'; clearTimeout(toast.tm); toast.tm = setTimeout(() => { x.className = 'cq-toast'; }, 1800); }
 function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePartita(); return; }
-  const mie = ev.filter(e => !e.muto), entrate = rendita(S.io);
-  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} ${stagione(S.turno)}</span><h2>Notizie dai borghi</h2>
-    <ul class="cq-news">${mie.length ? mie.map(e => `<li class="${e.t === 'att' && e.contro === S.io ? (e.ok ? 'male' : 'bene') : e.trad || e.t === 'opera' || e.t === 'miss' || ((e.t === 'assedio' || e.t === 'fame') && e.f === S.io) ? 'male' : e.t === 'cresce' ? 'bene' : e.t === 'carattere' || e.t === 'neve' ? 'info' : ''}"><span class="cq-dot" style="background:${FZ[e.f].col}"></span>${e.testo}</li>`).join('') : '<li>Una stagione tranquilla: nessuno ha attaccato.</li>'}</ul>
-    <p>Entrate: ${ico('moneta', 2)} <b>+${entrate}</b> · ${ico('castagna', 2)} <b>${prodCibo(S.io, S.turno) - mangia(S.io) >= 0 ? '+' : ''}${prodCibo(S.io, S.turno) - mangia(S.io)}</b> · ${ico('albero', 2)} <b>+${prodLegna(S.io)}</b>${(S.turno - 1) % 4 === 2 ? ' (in autunno le castagne danno più cibo)' : (S.turno - 1) % 4 === 3 ? ' (in inverno si raccoglie poco cibo)' : ''}. Hai ${MOSSE} mosse.</p>
+  const mie = ev.filter(e => !e.muto), entrate = rendita(S.io), dc = prodCibo(S.io, S.turno) - mangia(S.io), q = (S.turno - 1) % 4;
+  const tag = f => `<span class="cq-ntag" style="--c:${FZ[f].col}">${FZ[f].corto}</span>`;
+  const contro = mie.filter(e => e.t === 'att' && e.contro === S.io), gruppi = {};
+  contro.forEach(e => { (gruppi[e.f] = gruppi[e.f] || []).push(e); });
+  const io = mie.filter(e => e.t !== 'att' && e.f === S.io || e.t === 'miss' || ((e.t === 'opera') && e.f === S.io));
+  const altri = mie.filter(e => !contro.includes(e) && !io.includes(e));
+  const persa = contro.filter(e => e.ok).length, tenute = contro.length - persa;
+  let h = '';
+  if (contro.length){
+    h += `<div class="cq-nsez"><div class="cq-nh">${ico('spade', 2)} Ti hanno attaccato <span class="cq-nconto">${tenute ? `<i class="ok">${tenute} ${tenute === 1 ? 'difesa' : 'difese'}</i>` : ''}${persa ? `<i class="ko">${persa} ${persa === 1 ? 'persa' : 'perse'}</i>` : ''}</span></div>`;
+    for (const f in gruppi){ h += `<div class="cq-natt"><div class="cq-nchi">${tag(f)}${gruppi[f].some(e => e.trad) ? '<b class="cq-ntrad">ha rotto il patto</b>' : ''}</div>`;
+      h += gruppi[f].map(e => `<div class="cq-nrow ${e.ok ? 'ko' : 'ok'}"><span>${TERRE[e.a] ? TERRE[e.a].nome : ''}</span><b>${e.ok ? 'Persa' : 'Difesa'}</b></div>`).join('') + '</div>'; }
+    h += '</div>'; }
+  if (io.length) h += `<div class="cq-nsez"><div class="cq-nh">${ico('bandiera', 2)} Il tuo borgo</div>${io.map(e => `<div class="cq-nmsg ${e.t === 'cresce' ? 'ok' : e.t === 'neve' || e.t === 'carattere' ? 'info' : 'ko'}">${e.testo}</div>`).join('')}</div>`;
+  if (altri.length) h += `<div class="cq-nsez"><div class="cq-nh">${ico('mappa', 2)} Negli altri borghi</div>${altri.map(e => `<div class="cq-naltro ${e.t === 'opera' ? 'warn' : ''}"><span class="cq-dot" style="background:${FZ[e.f].col}"></span><span>${e.testo}</span></div>`).join('')}</div>`;
+  if (!h) h = `<div class="cq-nmsg info">Una stagione tranquilla: nessuno ha attaccato.</div>`;
+  const nota = q === 2 ? 'In autunno le castagne danno più cibo.' : q === 3 ? 'In inverno si raccoglie poco cibo.' : '';
+  const o = ov(`<div class="dlg box cq-dlg cq-notizie"><span class="kicker">${ico('pergamena', 2)} ${stagione(S.turno)}</span><h2>Notizie dai borghi</h2>
+    <div class="cq-nbody">${h}</div>
+    <div class="cq-nent"><div class="cq-nent-t">Entrate di questa stagione</div><div class="cq-nris">
+      <div>${ico('moneta', 3)}<b>+${entrate}</b><small>monete</small></div>
+      <div class="${dc < 0 ? 'neg' : ''}">${ico('castagna', 3)}<b>${dc >= 0 ? '+' : ''}${dc}</b><small>cibo</small></div>
+      <div>${ico('albero', 3)}<b>+${prodLegna(S.io)}</b><small>legna</small></div></div>${nota ? `<div class="cq-nnota">${nota}</div>` : ''}</div>
     ${S.turno === TREGUA() + 1 ? `<p class="cq-warn">La tregua è finita: da ora i borghi si possono attaccare.</p>` : ''}${S.veloce && S.turno > VEL.stag - 4 && S.turno <= VEL.stag ? `<p class="cq-warn">${S.turno === VEL.stag ? 'Ultima stagione!' : 'Mancano ' + (VEL.stag - S.turno + 1) + ' stagioni alla fine.'} Ora vince ${FZ[classifica()[0]].corto} con ${punti(classifica()[0])} punti.</p>` : ''}
-    <button class="big" id="cqOk">Tocca a te ${ico('play', 2)}</button></div>`, false);
+    <button class="big" id="cqOk">Tocca a te: ${MOSSE} mosse ${ico('play', 2)}</button></div>`, false);
   o.querySelector('#cqOk').onclick = () => { chiudiOv(); proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); }; aggiornaUI(); }
 function proposte(){ let p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
   if (!p){ richieste(); return; }
@@ -7619,7 +7669,7 @@ function tasto(e, k){ const o = el('cqOv');
   else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
-return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, get attivo(){ return attivo; }, _test:{EVENTI, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, get attivo(){ return attivo; }, _test:{EVENTI, notizie: ev => notizie(ev), dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 // ===== account: i progressi salvati online, per ritrovarli su ogni telefono =====
