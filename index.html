@@ -1875,6 +1875,9 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-mpg{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.07)}
 .cq-mpg span{font-size:12px;color:#b8c2f0}
 .cq-mpg em,.cq-mpg button{font:400 15px var(--f-big),"Lilita One",sans-serif;font-style:normal;padding:5px 10px;border-radius:10px;background:var(--c);color:#fff;border:2px solid #141433;text-shadow:0 1px 0 #141433}
+.ol-cq{display:flex!important;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(180deg,#ffd84f,#ffc21a)!important}
+.ol-cq small{font:700 12.5px var(--f-body,system-ui);color:#3a3a5c;text-shadow:none}
+.ol-h{margin:8px 0 -2px;font:700 12px var(--f-pixel);letter-spacing:1px;text-transform:uppercase;color:#aab4e8}
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -6482,11 +6485,13 @@ function disegnaOnline(){ if (!online() || !S || V || NET.modo !== 'vs' || NET.r
 // schermate: crea / entra
 const CODCAR = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function amici(){ chiudiNet();
-  const o = overlay(`<div class="dlg box"><h2>🌐 Gioca con gli amici</h2><p>Ognuno dal suo telefono o PC, anche lontani. Serve internet.</p>${dentroClaude() && !/prova=bc/.test(location.search) ? '<p class="olavv">⚠️ Dentro l’app Claude il gioco online di solito non funziona. Apri il gioco dal <b>sito</b> (difendi-smerillo.netlify.app) in Safari o Chrome.</p>' : ''}
+  const o = overlay(`<div class="dlg box"><h2>${ico('amici', 3)} Gioca con gli amici</h2><p>Ognuno dal suo telefono o PC, anche lontani. Serve internet.</p>${dentroClaude() && !/prova=bc/.test(location.search) ? '<p class="olavv">⚠️ Dentro l’app Claude il gioco online di solito non funziona. Apri il gioco dal <b>sito</b> (difendi-smerillo.netlify.app) in Safari o Chrome.</p>' : ''}
+    <button class="big ol-cq" id="olCq">${ico('bandiera', 2)} Conquista con gli amici<small>2 o 3 giocatori: ognuno difende un borgo</small></button>
+    <h3 class="ol-h">Missioni: insieme o uno contro l’altro</h3>
     <label class="olnome">Il tuo nome <input id="olNome" maxlength="14" value="${mioNome().replace(/"/g, '')}"></label>
     <button class="big" id="olCrea">Crea una stanza</button><button class="big alt" id="olEntra">Entra con un codice</button><button class="big alt" id="olNo">Indietro</button></div>`);
   const salvaNome = () => { const v = o.querySelector('#olNome').value.trim().slice(0, 14); if (v) try { localStorage.setItem(NOMEKEY, v); } catch(e){} };
-  o.querySelector('#olCrea').onclick = () => { salvaNome(); creaStanza(); };
+  o.querySelector('#olCq').onclick = () => { salvaNome(); chiudiOv(); esci(); setTimeout(() => { const t = document.getElementById('title'); if (t) t.hidden = true; CQ.apri('amici'); }, 0); }; o.querySelector('#olCrea').onclick = () => { salvaNome(); creaStanza(); };
   o.querySelector('#olEntra').onclick = () => { salvaNome(); entraStanza(); };
   o.querySelector('#olNo').onclick = () => { chiudiOv(); esci(); }; }
 function creaStanza(){ let modo = 'coop', ruolo = 'd', mi = 0; const r = leggiRec();
@@ -7975,7 +7980,8 @@ function apri(dopo){ APRI_DOPO = dopo || null; if (!root) costruisciDom(); root.
       if (!r.done){ bar.style.width = Math.round((r.value || 0)*100) + '%'; setTimeout(pezzo, 0); } else { chiudiOv(); avviaCQ(); } };
     setTimeout(pezzo, 60); return; }
   avviaCQ(); }
-function avviaCQ(){ if (APRI_DOPO && leggiCas()){ const k = APRI_DOPO; APRI_DOPO = null; S = null; SCELTA = null; root.classList.add('vuoto'); misura(); centra(); const torna = () => esci('dif');
+function avviaCQ(){ if (APRI_DOPO === 'amici'){ APRI_DOPO = null; S = null; aggiornaUI(); scegli(); misura(); centra(); setTimeout(dlgMp, 60); return; }
+  if (APRI_DOPO && leggiCas()){ const k = APRI_DOPO; APRI_DOPO = null; S = null; SCELTA = null; root.classList.add('vuoto'); misura(); centra(); const torna = () => esci('dif');
     if (k === 'stemma'){ dlgStemma(torna); const no = el('cqOv').querySelector('#cqNo'); if (no) no.onclick = torna; }
     else { dlgCasata(); const o = el('cqOv'), no = o.querySelector('#cqNo'), st = o.querySelector('#cqStC'); if (no) no.onclick = torna; if (st) st.onclick = () => { dlgStemma(torna); const n2 = el('cqOv').querySelector('#cqNo'); if (n2) n2.onclick = torna; }; }
     return; }
