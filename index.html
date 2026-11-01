@@ -7595,6 +7595,7 @@ return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, get attivo
 // ===== account: i progressi salvati online, per ritrovarli su ogni telefono =====
 const ACC = window.ACC = (() => {
   const URL = 'https://zzadfutpjykwwcjjtpqq.supabase.co/rest/v1/rpc/', KEY = 'sb_publishable_um6p_YzXZ8C73FcfLJS0AA_WgfNgceF', LK = 'ds-account';
+  const rete = () => /github\.io$/.test(location.hostname) || /^(localhost|127\.0\.0\.1|local\.test)$/.test(location.hostname) ? 'Non riesco a collegarmi. Controlla internet e riprova.' : 'Da questa pagina l’account non può collegarsi. Apri il gioco dal sito: natanvitali98-bit.github.io/difendi-smerillo';
   let A = null, ultimoHash = '', stato = 'off', inviando = false, errori = 0;
   try { A = JSON.parse(localStorage.getItem(LK)); } catch(e){}
   const salvaA = () => { try { if (A) localStorage.setItem(LK, JSON.stringify(A)); else localStorage.removeItem(LK); } catch(e){} };
@@ -7640,7 +7641,7 @@ const ACC = window.ACC = (() => {
         A = {token: r.token, nome: r.nome, ultimo: r.aggiornato}; salvaA();
         if (r.codice) mostraCodice(r.codice, tab === 'recupera' ? 'Parola segreta cambiata! Ecco il tuo nuovo codice di recupero: quello vecchio non vale più.' : 'Questo codice serve se dimentichi la parola segreta. Salvalo adesso: fai uno screenshot o scrivilo da qualche parte.', () => dopoAccesso(r.aggiornato, tab === 'crea'));
         else dopoAccesso(r.aggiornato, tab === 'crea'); }
-      catch(e){ ok.disabled = false; ok.textContent = testoOk; err('Non riesco a collegarmi. Controlla internet e riprova.'); } };
+      catch(e){ ok.disabled = false; ok.textContent = testoOk; err(rete()); } };
     ok.onclick = vai; b.querySelectorAll('input').forEach(i => i.onkeydown = e => { if (e.key === 'Enter') vai(); }); }
   const campi = tab => tab === 'recupera' ? `<div class="acc-tab"><button type="button" data-t="entra">‹ Indietro</button><button type="button" class="on">Recupera</button></div>
       <p class="acc-nota">Scrivi il nome e il codice di recupero che hai ricevuto quando hai creato l’account, poi scegli una parola segreta nuova.</p>
