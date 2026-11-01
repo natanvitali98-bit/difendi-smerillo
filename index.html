@@ -1850,6 +1850,11 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-optd{margin:2px 0 0!important;font-size:12.5px!important;line-height:1.35}
 .cq-optd span{display:none}
 .cq-optd[data-v=dif] #cqDifT,.cq-optd[data-v=map] #cqMapT,.cq-optd[data-v=vel] #cqVelT{display:inline}
+.cq-rpop{animation:cqRpop .5s cubic-bezier(.2,1.4,.4,1);box-shadow:inset 0 0 0 3px #3ed46b!important}
+@keyframes cqRpop{40%{transform:scale(1.03)}}
+.pr-rit.cq-preso{background:#3ed46b!important;border-color:#141433!important;animation:cqRpop .45s cubic-bezier(.2,1.6,.4,1)}
+.cq-rvia{transition:height .35s ease,opacity .3s ease,margin .35s ease,padding .35s ease;opacity:0;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important}
+@media (prefers-reduced-motion: reduce){ .cq-rpop,.pr-rit.cq-preso{animation:none} .cq-rvia{transition:none} }
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -6703,7 +6708,19 @@ function menuMissioni(box, rifai){ if (!box) return; if (!initSt()){ box.innerHT
     return `<div class="pr-q cq-mq2 ${s === 'ritirata' ? 'ok' : ''}"><span class="pr-qt">${s === 'ritirata' ? ico('ok', 2) : ''}${m.nome}<small class="cq-mqd">${m.desc}</small></span><span class="pr-qr"><span class="pr-bar"><i style="width:${Math.min(100, v/m.n*100)}%"></i><em>${m.id === 'nobile' ? v + '/' + m.n : v + '/' + m.n}</em></span>
       <button type="button" class="pr-rit cq-prit ${s === 'fatta' ? 'pronto' : ''}" data-rit="${m.id}" ${s === 'fatta' ? '' : 'disabled'} title="${m.premio[2]}">${s === 'ritirata' ? '✓' : s === 'fatta' ? 'Ritira!' : `<span class="cq-pico">${icoPremio(m.premio)}</span>`}</button></span><small class="cq-mqp">Premio: ${m.premio[2]}</small></div>`; }).join('');
   disegnaSkin(box);
-  box.querySelectorAll('[data-rit]:not([disabled])').forEach(b => b.onclick = () => { const m = ritiraMiss(b.dataset.rit); if (!m) return; try { SUONI.suona('leggenda'); EPICO.coriandoli(80); } catch(e){} if (rifai) setTimeout(rifai, 700); }); }
+  box.querySelectorAll('[data-rit]:not([disabled])').forEach(b => b.onclick = () => { const m = ritiraMiss(b.dataset.rit); if (!m) return; try { SUONI.suona('leggenda'); EPICO.coriandoli(80); } catch(e){} ritiratoQui(b, box, rifai); }); }
+// il premio si ritira sul posto: niente menu ricostruito, la riga si chiude e va tra le già ritirate
+function ritiratoQui(b, box, rifai){ const riga = b.closest('.pr-q'); if (!riga){ if (rifai) setTimeout(rifai, 700); return; }
+  b.disabled = true; b.classList.remove('pronto'); b.classList.add('cq-preso'); b.innerHTML = ico('ok', 2); riga.classList.add('cq-rpop');
+  const pg = box.closest('.cr-pg'), seg = pg && pg.querySelector('.cr-seg button.on i');
+  if (seg){ const n = (+seg.textContent || 1) - 1; if (n > 0) seg.textContent = n; else seg.remove(); }
+  if (pg && !pg.querySelector('.pr-rit:not([disabled])')){ const gi = pg.querySelector('#prGira'); if (!gi || gi.disabled){ const t = document.querySelector('.cr-tab[data-tab="premi"]'); if (t) t.classList.remove('nov'); } }
+  // la Collezione si aggiorna in silenzio (skin, simboli, cornice appena sbloccati)
+  try { const tmp = document.createElement('div'); menuCollezione(tmp, rifai); for (const k of ['casata', 'sbl']){ const vecchio = document.querySelector(`.cr-pg[data-tab="dif"] [data-sg="${k}"]`), nuovo = tmp.querySelector(`[data-sg="${k}"]`); if (vecchio && nuovo) vecchio.replaceWith(nuovo); } } catch(e){}
+  setTimeout(() => { const h = riga.offsetHeight; riga.style.height = h + 'px'; riga.style.overflow = 'hidden'; void riga.offsetHeight; riga.classList.add('cq-rvia'); riga.style.height = '0px';
+    setTimeout(() => { riga.classList.remove('cq-rpop', 'cq-rvia'); riga.classList.add('ok'); riga.style.height = ''; riga.style.overflow = ''; riga.querySelector('.pr-qt').insertAdjacentHTML('afterbegin', ico('ok', 2));
+      let d = box.querySelector('.cr-fatti'); if (!d){ d = document.createElement('details'); d.className = 'cr-fatti'; d.innerHTML = '<summary></summary>'; box.append(d); } d.append(riga); d.querySelector('summary').textContent = `Già ritirate (${d.querySelectorAll('.pr-q').length})`; }, 380); }, 900); }
+
 function menuCollezione(box, rifai){ if (!box) return; leggiCas();
   if (!CAS){ box.innerHTML = `<h3 class="cr-sub">${ico('bandiera', 2)} La tua casata</h3><p class="cq-mvuoto">Fonda la tua casata giocando a <b>Conquista</b> (pagina Modalità). Qui vedrai stemma, capitani, skin e tutto quello che sblocchi.</p>`; return; }
   initSt(); syncSbl(); const l = livCas(CAS.gloria), pro = LIVC[l + 1], perc = pro ? Math.round(100*(CAS.gloria - LIVC[l][0])/(pro[0] - LIVC[l][0])) : 100;
