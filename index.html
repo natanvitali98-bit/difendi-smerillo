@@ -1840,6 +1840,16 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .mo-ci{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.1);margin-bottom:2px}
 .cq-esp{margin:0;padding:8px 10px;border-radius:12px;background:rgba(224,72,48,.18);border:2px solid #e04830;font-size:13.5px;line-height:1.35;color:#ffe2dc}
 .cq-esp b{color:#fff}
+/* impostazioni sempre in vista nella scelta del borgo */
+.cq-opts{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.06);border:2px solid #3d4aa3}
+.cq-or{display:grid;grid-template-columns:76px 1fr;align-items:center;gap:8px}
+.cq-or>span{font:700 12px var(--f-pixel);letter-spacing:1px;text-transform:uppercase;color:#ffd03a}
+.cq-opts .cq-dif{gap:5px}
+.cq-opts .cq-dif.cq-vel{grid-template-columns:repeat(2,1fr)}
+.cq-opts .cq-dif button{min-height:36px;font-size:15px;border-radius:10px}
+.cq-optd{margin:2px 0 0!important;font-size:12.5px!important;line-height:1.35}
+.cq-optd span{display:none}
+.cq-optd[data-v=dif] #cqDifT,.cq-optd[data-v=map] #cqMapT,.cq-optd[data-v=vel] #cqVelT{display:inline}
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -6992,7 +7002,7 @@ function insets(){ const st = el('cqStage'); if (!st || !root) return; const r =
 const ZMAX = 5;
 function misura(){ const st = el('cqStage'); if (!st) return; const r = st.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = Math.max(1, r.width); H = Math.max(1, r.height);
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); insets();
-  fitS = Math.max(.1, Math.min((W - INS.l - INS.r)/WW, (H - INS.t - INS.b)/WH)); cam.s = Math.max(fitS, Math.min(ZMAX, cam.s)); limita(); }
+  fitS = Math.max(.1, Math.min((W - INS.l - INS.r)/WW, Math.max((H - INS.t - INS.b)/WH, (W - INS.l - INS.r)/WW*.8))); cam.s = Math.max(fitS, Math.min(ZMAX, cam.s)); limita(); }
 function centra(){ CAMT = null; cam.s = fitS; cam.x = INS.l + (W - INS.l - INS.r - WW*cam.s)/2; cam.y = INS.t + (H - INS.t - INS.b - WH*cam.s)/2; }
 function vaiA(t, s){ CAMT = null; const T = TERRE[t]; cam.s = Math.max(fitS, Math.min(ZMAX, s || Math.max(fitS*2.2, Math.min(.9, (W - INS.l - INS.r)/700)))); cam.x = INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s; cam.y = INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s; limita(); }
 function limita(){ const mw = WW*cam.s, mh = WH*cam.s, iw = W - INS.l - INS.r, ih = H - INS.t - INS.b;
@@ -7218,9 +7228,12 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre); passoVolo(dt);
   if (SCELTA){ for (const t of IDS){ const o = ter[t].own; if (o === SCELTA){ ctx.globalAlpha = .06 + .08*pul; ctx.drawImage(maschera(t, '#ffffff'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; evid(t, '#ffffff', .6 + .4*pul); } else { ctx.globalAlpha = .28; ctx.drawImage(maschera(t, '#0c1420'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; } } }
   if (cam.s >= .35) disegnaCostruzioni(Tm);
   nuvole(Tm);
-  const u = Math.max(.78, Math.min(1.35, .7 + cam.s*.45));
+  const u = Math.max(.78, Math.min(1.35, .7 + cam.s*.45)), mini = cam.s*MP().passo < 64;
   for (const t of IDS){ const T = TERRE[t], [px, py] = aSchermo(T.x, T.y), own = ter[t].own;
     if (px < -80 || py < -80 || px > W + 80 || py > H + 80) continue;
+    // mappa affollata (molto lontana o mappa grande): le terre piccole diventano pallini col numero
+    if (mini && !T.borgo && !T.fraz && t !== sel){ const n = String(ter[t].sold), r = Math.round((n.length > 1 ? 9 : 8)*Math.max(.9, u*.9)); ctx.beginPath(); ctx.arc(px, py, r + 2, 0, 7); ctx.fillStyle = '#141433'; ctx.fill(); ctx.beginPath(); ctx.arc(px, py, r, 0, 7); ctx.fillStyle = own ? FZ[own].col : '#d9d4c4'; ctx.fill();
+      ctx.font = `400 ${Math.round(r*1.25)}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#141433'; ctx.strokeText(n, px, py + r*.45); ctx.fillStyle = '#fff'; ctx.fillText(n, px, py + r*.45); continue; }
     const n = String(ter[t].sold), bh = Math.round(18*u), bw = Math.round((20 + n.length*8)*u), bx = Math.round(px - bw/2), by = Math.round(py - bh/2);
     // bandierina + numero dei soldati
     const mioB = S && own === S.io && !SCELTA; ctx.fillStyle = mioB && CAS && CAS.cornice ? '#e0b030' : '#141433'; rr(bx - 2, by - 2, bw + 4, bh + 4, 7*u); if (mioB && CAS && CAS.cornice){ ctx.fillStyle = '#141433'; rr(bx - 1, by - 1, bw + 2, bh + 2, 6*u); } ctx.fillStyle = own ? FZ[own].col : (T.vuota ? '#7a8466' : '#8088a8'); rr(bx, by, bw, bh, 5*u);
@@ -7830,15 +7843,17 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   const o = ov(`<div class="dlg box cq-dlg cq-scbox"><div class="cq-schead"><span class="kicker">${ico('bandiera', 2)} Conquista</span>${CAS ? `<span class="cq-casmini cq-castag">${imgStemma(CAS.stemma, 1)} Casata ${CAS.nome}</span>` : ''}</div>
     <h2>Scegli il tuo borgo</h2>
     <div class="cq-sctab" role="tablist">${Object.keys(FZ).map(f => `<button type="button" role="tab" class="cq-sct" data-t="${f}" style="--c:${FZ[f].col}"><canvas data-sp="${f}"></canvas><span>${FZ[f].corto}</span></button>`).join('')}</div>
+    <div class="cq-opts">
+      <div class="cq-or"><span>Difficoltà</span><div class="cq-dif" role="radiogroup" aria-label="Difficoltà">${Object.keys(DIFF).map(k => `<button type="button" role="radio" data-dif="${k}" aria-checked="${k === difScelta() ? 'true' : 'false'}">${DIFF[k].nome}</button>`).join('')}</div></div>
+      <div class="cq-or"><span>Mappa</span><div class="cq-dif cq-map" role="radiogroup" aria-label="Grandezza della mappa">${Object.keys(MAPPE).map(k => `<button type="button" role="radio" data-map="${k}" aria-checked="${k === mappaScelta() ? 'true' : 'false'}">${MAPPE[k].nome}</button>`).join('')}</div></div>
+      <div class="cq-or"><span>Durata</span><div class="cq-dif cq-vel" role="radiogroup" aria-label="Durata">${[['lunga', 'Lunga'], ['veloce', 'Veloce']].map(([k, n]) => `<button type="button" role="radio" data-vel="${k}" aria-checked="${(k === 'veloce') === velScelta() ? 'true' : 'false'}">${n}</button>`).join('')}</div></div>
+      <p class="cq-nota cq-optd" data-v="dif"><span id="cqDifT">${DIFF[difScelta()].desc}</span> <span id="cqMapT">Mappa ${MAPPE[mappaScelta()].nome.toLowerCase()}: ${MAPPE[mappaScelta()].desc}</span> <span id="cqVelT">${velTesto()}</span></p></div>
     <div id="cqScDet"></div>
-    <details class="cq-scopt"><summary><span>${ico('altro', 2)} Impostazioni</span><b id="cqOptT"></b></summary>
-      <div class="cq-dif" role="radiogroup" aria-label="Difficoltà">${Object.keys(DIFF).map(k => `<button type="button" role="radio" data-dif="${k}" aria-checked="${k === difScelta() ? 'true' : 'false'}">${DIFF[k].nome}</button>`).join('')}</div><p class="cq-nota" id="cqDifT">${DIFF[difScelta()].desc}</p>
-      <div class="cq-dif cq-vel" role="radiogroup" aria-label="Durata">${[['lunga', 'Partita lunga'], ['veloce', 'Partita veloce']].map(([k, n]) => `<button type="button" role="radio" data-vel="${k}" aria-checked="${(k === 'veloce') === velScelta() ? 'true' : 'false'}">${n}</button>`).join('')}</div><p class="cq-nota" id="cqVelT">${velTesto()}</p>
-      <div class="cq-dif cq-map" role="radiogroup" aria-label="Grandezza della mappa">${Object.keys(MAPPE).map(k => `<button type="button" role="radio" data-map="${k}" aria-checked="${k === mappaScelta() ? 'true' : 'false'}">${MAPPE[k].nome}</button>`).join('')}</div><p class="cq-nota" id="cqMapT">Mappa ${MAPPE[mappaScelta()].nome.toLowerCase()}: ${MAPPE[mappaScelta()].desc}</p></details>
+
     <button type="button" class="cq-link" id="cqMe">Torna al menu</button><div class="cq-scvai"><button class="big" id="cqVai"></button></div></div><div class="cq-schip">${ico('pin', 2)} Tocca un borgo sulla mappa</div>`, false);
   o.classList.add('scelta');
   const disegnaSp = () => o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp), z = c.closest('.cq-sct') ? 1.6 : 2.2; c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*z + 'px'; c.style.height = im.height*z + 'px'; });
-  const opt = () => { o.querySelector('#cqOptT').textContent = DIFF[difScelta()].nome + ' · ' + (velScelta() ? 'veloce' : 'lunga') + ' · mappa ' + MAPPE[mappaScelta()].nome.toLowerCase(); };
+  const opt = () => {}; o.querySelectorAll('[data-dif],[data-map],[data-vel]').forEach(b => b.addEventListener('click', () => { o.querySelector('.cq-optd').dataset.v = b.dataset.dif ? 'dif' : b.dataset.map ? 'map' : 'vel'; }));
   const mostra = (f, vola = true) => { SCELTA = f; S.io = f; o.querySelectorAll('.cq-sct').forEach(b => { b.classList.toggle('on', b.dataset.t === f); b.setAttribute('aria-selected', b.dataset.t === f); });
     const d = o.querySelector('#cqScDet'); d.innerHTML = info(f); d.classList.remove('cq-entra'); void d.offsetWidth; d.classList.add('cq-entra');
     o.querySelector('#cqVai').innerHTML = `Difendi ${FZ[f].corto} ${ico('play', 2)}`; o.querySelector('#cqVai').style.setProperty('--c', FZ[f].col); disegnaSp(); tintKey = ''; if (vola) requestAnimationFrame(() => volaSu(f)); };
@@ -7849,7 +7864,6 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   o.querySelectorAll('[data-map]').forEach(b => b.onclick = () => { const m = b.dataset.map; try { localStorage.setItem(KMAPPA, m); } catch(e){} o.querySelectorAll('[data-map]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqMapT').textContent = 'Mappa ' + MAPPE[m].nome.toLowerCase() + ': ' + MAPPE[m].desc; opt(); suona('tocco'); nuova(SCELTA, difScelta(), true, false, m); sel = null; tintKey = ''; });
   o.querySelector('#cqVai').onclick = () => { const f = SCELTA; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; suona('banner'); o.classList.remove('scelta'); nuova(f, difScelta(), false, velScelta()); chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); }); };
   o.querySelector('#cqMe').onclick = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; S = null; o.classList.remove('scelta'); esci(); };
-  { const dt = o.querySelector('.cq-scopt'); dt.ontoggle = () => { if (dt.open) setTimeout(() => dt.scrollIntoView({block:'end', behavior:'smooth'}), 30); }; }
   opt(); misura(); centra(); mostra(SCELTA, false); setTimeout(() => volaSu(SCELTA), 350); }
 let SCELTA_MOSTRA = null;
 function dlgAnno(dopo){ const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f => f !== S.io);
