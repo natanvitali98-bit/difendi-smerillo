@@ -1698,6 +1698,9 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cr-cq .cq-psb span{filter:grayscale(1);opacity:.55}
 .cr-cq .cq-psb span.ok{filter:none;opacity:1}
 .cq-mbt .big{font-size:14px}
+.pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
+#tb.tb-pan .tbhud{visibility:hidden}
+body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -5929,12 +5932,12 @@ function menuPausa(){
   const ist = o.querySelector('#tbIst'); if (ist) ist.onclick = () => { chiudiOv(); guida = 0; try { localStorage.removeItem(GUIDAKEY); } catch(e){} avvia(false); };
   o.querySelector('#tbSc').onclick = () => { chiudiOv(); scelta(); }; o.querySelector('#tbEsci2').onclick = esci;
 }
-function avvia(conIntro = true){ SUONI.musica(M.evento ? 'festa' : M.luogo === 'sm' || M.luogo === 'ce' ? 'sm' : 'smerillo'); moneteViste = null; S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; fx = []; coda = []; ev = null; nuovoTempo(); aggiornaAnteprima(); if (conIntro) intro(); render(); }
+function avvia(conIntro = true){ root.classList.remove('tb-pan'); SUONI.musica(M.evento ? 'festa' : M.luogo === 'sm' || M.luogo === 'ce' ? 'sm' : 'smerillo'); moneteViste = null; S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; fx = []; coda = []; ev = null; nuovoTempo(); aggiornaAnteprima(); if (conIntro) intro(); render(); }
 function giocaSfida(){ const sf = sfidaDiOggi(); SFIDA = sf; SEME_FISSO = sf.giorno * 7919 + sf.mi; SQUADRA = squadraDi(sf.mi); caricaMissione(sf.mi); el('tbTit').textContent = `Sfida: ${M.titolo}`; fitCam(); avvia(true); }
 function prepara(i){ SFIDA = null; SEME_FISSO = null; if (i === 0 && !leggiRec().m1){ SQUADRA = null; gioca(0); } else { SQUADRA = squadraDi(i); gioca(i); } } // si gioca subito con l'ultima squadra: la cambi dall'intro
 function gioca(i){ caricaMissione(i); el('tbTit')._h = null; el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); avvia(true); }
 let provenienza = 'menu';
-function apri(modo){ provenienza = 'menu'; root.hidden = false; attivo = true; requestAnimationFrame(() => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + (i + 1)]) i++; caricaMissione(i); el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); S = nuovo(); aggiornaAnteprima(); render(); RUN = null; SFIDA = null; SEME_FISSO = null; if (modo === 'gioca') prepara(i); else if (modo === 'sfida') giocaSfida(); else if (modo === 'collezione') collezione(); else if (modo === 'incarichi') incarichi(); else if (modo === 'amici') amici(); else if (modo === 'assedio') assedio(); else if (modo === 'evento') giocaEvento(); else if (modo === 'ruota') ruota(); else if (modo && modo.amico) sfidaAmico(modo.amico); else scelta(); }); }
+function apri(modo){ provenienza = 'menu'; root.hidden = false; root.classList.toggle('tb-pan', !modo || modo === 'missioni' || modo === 'collezione' || modo === 'amici' || modo === 'incarichi' || modo === 'ruota'); attivo = true; requestAnimationFrame(() => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + (i + 1)]) i++; caricaMissione(i); el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); S = nuovo(); aggiornaAnteprima(); render(); RUN = null; SFIDA = null; SEME_FISSO = null; if (modo === 'gioca') prepara(i); else if (modo === 'sfida') giocaSfida(); else if (modo === 'collezione') collezione(); else if (modo === 'incarichi') incarichi(); else if (modo === 'amici') amici(); else if (modo === 'assedio') assedio(); else if (modo === 'evento') giocaEvento(); else if (modo === 'ruota') ruota(); else if (modo && modo.amico) sfidaAmico(modo.amico); else scelta(); }); }
 function premiaSopra(tipo){ root.classList.add('sopra'); root.hidden = false; attivo = false; RUN = null; mostraScrigno(tipo, () => esci()); }
 function righeInc(){ const d = leggiInc(), q = incDiOggi(), col = leggiCol(), out = {oggi:[], imp:[]};
   for (const x of q){ const v = d.oggi.c[x.k] || 0, preso = d.oggi.presi.includes(x.id); out.oggi.push({k:'g', id:x.id, t:x.t, v, n:x.n, premio:'legno', stato: preso ? 'preso' : v >= x.n ? 'pronto' : 'no'}); }
@@ -6040,7 +6043,7 @@ function iniziaOnline(){ prev = []; caricaMissione(NET.mi); RUN = null; SFIDA = 
   else { s.nem = []; s.coda = []; s.vs = {turni:10}; s.pa = 3; s.piazzati = 0; s.legname = (s.legname || 0) + 1; s.fase = 'a'; }
   NET.pronto = true; invia({t:'inizia', modo:NET.modo, ruoloG: NET.modo === 'vs' ? (NET.ruolo === 'd' ? 'a' : 'd') : null, mi:NET.mi, S:s, nome:mioNome()});
   partitaOnline(NET.mi, s); }
-function partitaOnline(mi, s){ ULTIMO = {ruolo: NET.modo === 'vs' ? NET.ruolo : null, amico: nomeAmico(NET.amico)}; ultimoAnn = ''; caricaMissione(mi); RUN = null; SFIDA = null; el('tbTit')._h = null; el('tbTit').textContent = `${NET.modo === 'vs' ? '⚔️' : '🤝'} ${M.titolo} · con ${NET.amico}`; S = s; V = null; prev = []; storia = []; sel = null; fx = []; coda = []; ev = null; NET.attTipo = null; fitCam();
+function partitaOnline(mi, s){ root.classList.remove('tb-pan'); ULTIMO = {ruolo: NET.modo === 'vs' ? NET.ruolo : null, amico: nomeAmico(NET.amico)}; ultimoAnn = ''; caricaMissione(mi); RUN = null; SFIDA = null; el('tbTit')._h = null; el('tbTit').textContent = `${NET.modo === 'vs' ? '⚔️' : '🤝'} ${M.titolo} · con ${NET.amico}`; S = s; V = null; prev = []; storia = []; sel = null; fx = []; coda = []; ev = null; NET.attTipo = null; fitCam();
   if (ovAperto) chiudiOv(); aggiornaAnteprima(); render(); SUONI.suona('vinto');
   const io = NET.modo === 'vs' ? (NET.ruolo === 'd' ? 'Tu <b>difendi</b> Smerillo. Resisti per 10 turni!' : 'Tu <b>comandi i cavalieri</b>: ogni turno spendi i punti per mandare nemici. Fai cadere ' + M.metaNome + ' entro 10 turni!') : 'Difendete insieme. Tu muovi i difensori col <b>cerchio giallo</b>, ' + NET.amico + ' quelli col <b>cerchio azzurro</b>.';
   const o = overlay(`<div class="dlg box"><span class="kicker">Collegato con ${NET.amico}!</span><h2>${M.titolo}</h2><p>${io}</p><p>Quando hai finito la tua parte tocca il bottone in basso a destra: passa il turno all’altro.</p><button class="big" id="olGo">Iniziamo ${ico('play')}</button></div>`);
