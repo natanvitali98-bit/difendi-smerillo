@@ -8103,6 +8103,28 @@ const ACC = window.ACC = (() => {
   return {apri, avvia, classifica, btn, segna, cancello, get account(){ return A; }, _test:{dati, riassunto, invia, hash, set A(v){ A = v; salvaA(); }}};
 })();
 
+// contrasto automatico: nelle finestre scure, ogni scritta che si legge male prende un colore chiaro o scuro a seconda del fondo
+(() => {
+  const SEL = '.dlg.box, #cqPan, #title .pan, #title .cr-pg, .acc-box, .acc-card, .cq-ph';
+  const col = c => { const m = c && c.match(/[\d.]+/g); if (!m) return null; const [r, g, b] = m.slice(0, 3).map(v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v + .055)/1.055, 2.4); }); return {l: .2126*r + .7152*g + .0722*b, a: m[3] === undefined ? 1 : +m[3]}; };
+  const fondo = e => { while (e && e !== document.documentElement){ const cs = getComputedStyle(e); const c = col(cs.backgroundColor); if (c && c.a > .55) return c.l; const bi = cs.backgroundImage; if (bi && bi !== 'none'){ const m = bi.match(/rgba?\([^)]*\)|#[0-9a-f]{3,6}/i); if (m && /gradient/.test(bi)){ const c2 = col(m[0].startsWith('#') ? hexRgb(m[0]) : m[0]); if (c2 && c2.a > .55) return c2.l; } else if (/url/.test(bi)) return null; } e = e.parentElement; } return null; };
+  const hexRgb = h => { h = h.slice(1); if (h.length === 3) h = h.split('').map(x => x + x).join(''); return `rgb(${parseInt(h.slice(0, 2), 16)},${parseInt(h.slice(2, 4), 16)},${parseInt(h.slice(4, 6), 16)})`; };
+  const contr = (a, b) => (Math.max(a, b) + .05)/(Math.min(a, b) + .05);
+  function sistema(){ const cont = document.querySelectorAll(SEL); if (!cont.length) return;
+    for (const c of cont){ if (!c.offsetParent && getComputedStyle(c).position !== 'fixed') continue;
+      // prima togli i colori messi da noi, poi ricalcola
+      for (const e of c.querySelectorAll('[data-ac]')){ e.style.removeProperty('color'); e.removeAttribute('data-ac'); }
+      for (const e of c.querySelectorAll('*')){ if (e.tagName === 'INPUT' || e.tagName === 'TEXTAREA' || e.tagName === 'CANVAS' || e.tagName === 'IMG' || e.tagName === 'svg') continue;
+        let testo = false; for (const n of e.childNodes) if (n.nodeType === 3 && n.textContent.trim()){ testo = true; break; } if (!testo) continue;
+        const cs = getComputedStyle(e); if (cs.visibility === 'hidden' || cs.display === 'none') continue; if (e.disabled || e.closest('button:disabled')) continue;
+        const f = col(cs.color), b = fondo(e); if (!f || b == null) continue; const cr = contr(f.l, b);
+        if (cr < 3.6){ e.style.setProperty('color', b > .35 ? '#1c1c3c' : '#eef1ff', 'important'); e.setAttribute('data-ac', ''); } } } }
+  let t = null; const pianifica = () => { if (t) return; t = setTimeout(() => { t = null; try { sistema(); } catch(er){} }, 60); };
+  const avvia = () => { new MutationObserver(ms => { for (const m of ms){ if (m.type === 'attributes' && m.attributeName === 'data-ac') continue; if (m.type === 'attributes' && m.attributeName === 'style' && m.target.hasAttribute && m.target.hasAttribute('data-ac')) continue; pianifica(); return; } }).observe(document.body, {subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'aria-checked', 'aria-pressed', 'aria-selected', 'hidden', 'disabled']}); pianifica(); };
+  if (document.body) avvia(); else addEventListener('DOMContentLoaded', avvia);
+  window.TH_CONTRASTO = sistema;
+})();
+
 let last = performance.now(), T = 0;
 function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); last = now; T += dt;
   if (S && !S.fine && !S.attesaCarta && !S.pausa) update(dt * S.vel);
