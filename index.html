@@ -5507,6 +5507,10 @@ function mossePer(S, d){
 }
 // una spia si vede solo se un difensore le è accanto (o se chi guarda “vede le spie”)
 const visibileNem = (S, x, d) => !TIPI[x.tipo].nascosto || (d && stat(d.tipo).vede) || S.dif.some(q => gdist(q.nodo, x.nodo) <= 1);
+// quando un nemico è sul bordo della rupe e un Lanciere lo può colpire, il gioco lo dice (una volta per turno)
+let RUPE_T = -1; function consiglioRupe(){ try { if (!S || S.esito || ev || (coda && coda.length) || guida >= 0 || !mioTurno() || RUPE_T === S.turno + '|' + MI) return;
+  for (const d of S.dif){ if (d.tipo !== 'lanciere' || d.agito || (typeof puoComandare === 'function' && !puoComandare(d))) continue; const b = bersagli(S, d).find(x => { const n = S.nem.find(e => e.id === x.id); return n && NODI[n.nodo] && NODI[n.nodo].rupe && !TIPI[n.tipo].pesante; });
+    if (b){ RUPE_T = S.turno + '|' + MI; const n = S.nem.find(e => e.id === b.id); setTimeout(() => suggerisci(`${TIPI[n.tipo].nome} è sul bordo della rupe: colpiscilo con i Lancieri e cade giù!`), 400); return; } } } catch(e){} }
 function bersagli(S, d){
   if (d.agito) return [];
   if (TIPI[d.tipo].costruisce) return S.legname > 0 ? ADJ[d.nodo].filter(c => !occ(S, c) && c !== META && !ARRIVO.has(c)).map(c => ({k:'costruisci', nodo:c})) : [];
@@ -5729,7 +5733,7 @@ function disegnaUnita(u, k, T){
   pips(x, Math.round(y - h - 6 + bob), u.hp, u.max || (TIPI[u.tipo] ? TIPI[u.tipo].hp : 2), k === 'nem' ? '#ff5a3c' : k === 'bar' ? '#d6aa6a' : '#58c838');
 }
 function render(T = performance.now()/1000){
-  if (!attivo) return;
+  if (!attivo) return; consiglioRupe();
   g.setTransform(dpr, 0, 0, dpr, 0, 0); g.imageSmoothingEnabled = false;
   // personaggi più piccoli quando le fermate sono vicine sullo schermo (così non si coprono)
   if (ARCHI.length){ const L = ARCHI.map(([a,c]) => { const [x1,y1] = scrN(a), [x2,y2] = scrN(c); return Math.hypot(x2-x1, y2-y1); }).sort((p, q) => p - q); const tip = L[Math.floor(L.length*.2)], h0 = 11*K*sc*1.1; scalaU = Math.max(.62, Math.min(1, tip*1.05/h0)); }
@@ -6234,7 +6238,7 @@ function intro(){
 const OBI = {1:['rupe:1','persi'], 2:['intatto','veloce:13'], 3:['lontano:9','nobar'], 4:['persi','veloce:13'], 5:['veloce:14','intatto'], 6:['intatto','persi'], 7:['lontano:14','rupe:2'], 8:['lontano:16','nobar'],
   9:['lontano:11','persi'], 10:['intatto','veloce:22'], 11:['rupe:1','persi'], 12:['intatto','rupe:1'], 13:['lontano:12','nobar'], 14:['rupe:2','persi'], 15:['intatto','lontano:12']};
 function obiettivo(spec){ const [k, v] = spec.split(':'), n = +v, st = k2 => (S && S.st && S.st[k2]) || 0;
-  if (k === 'rupe') return {t:`Butta giù ${n === 1 ? '1 nemico' : n + ' nemici'} dalla rupe`, ic:'rupe', ok:() => st('rupe') >= n};
+  if (k === 'rupe') return {t:`Butta giù ${n === 1 ? '1 nemico' : n + ' nemici'} dalla rupe: colpiscilo con un Lanciere quando è su un punto con l’icona della rupe`, ic:'rupe', ok:() => st('rupe') >= n};
   if (k === 'nobar') return {t:'Vinci senza costruire barricate', ic:'martello', ok:() => !st('bar')};
   if (k === 'veloce') return {t:`Vinci entro il turno ${n}`, ic:'clessidra', ok:() => S.turno - 1 <= n};
   const daM = s => /^il /i.test(s) ? 'dal ' + s.slice(3) : /^la /i.test(s) ? 'dalla ' + s.slice(3) : /^lo /i.test(s) ? 'dallo ' + s.slice(3) : /^l[’']/i.test(s) ? 'dall’' + s.slice(2) : 'da ' + s;
