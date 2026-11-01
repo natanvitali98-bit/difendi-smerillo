@@ -1789,6 +1789,36 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 #caricamento.acc-rec .ld-su{opacity:0;transition:opacity .3s}
 #caricamento.acc-gate-on .ld-giu{max-height:calc(100% - 16px);overflow-y:auto;padding-top:8px}
 @media (max-height:760px){ #caricamento.acc-gate-on:not(.acc-entrando) .ld-su{transform:scale(.8);transform-origin:top center} }
+
+/* ingresso nel gioco: zoom sulla mappa, nome, pixel che coprono e scoprono */
+#caricamento.acc-entrando{transition:transform 1.9s cubic-bezier(.3,0,.2,1),filter 1.9s!important;transform:scale(1.18);filter:brightness(.55) saturate(1.2)}
+#caricamento.acc-entrando.via{opacity:1!important}
+.acc-portale{display:none!important}
+.acc-in{position:fixed;inset:0;z-index:200000;pointer-events:none;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.acc-in-griglia{position:absolute;inset:0}
+.acc-in-griglia i{position:absolute;width:calc(var(--l) + 1px);height:calc(var(--l) + 1px);background:#141433;transform:scale(0);transition:transform .32s cubic-bezier(.5,0,.6,1.3);transition-delay:calc((1 - var(--d)) * .28s)}
+.acc-in-griglia i.b{background:#17193f}
+.acc-in-griglia i.o{background:#1f2360}
+.acc-in.copri .acc-in-griglia i{transform:scale(1)}
+.acc-in.scopri .acc-in-griglia i{transform:scale(0);transition:transform .3s cubic-bezier(.5,-.3,.6,1);transition-delay:calc(var(--d) * .38s)}
+.acc-in-testo{position:relative;z-index:2;text-align:center;transform:translateY(10px);opacity:0;transition:opacity .25s,transform .4s cubic-bezier(.2,1.3,.4,1)}
+.acc-in.su .acc-in-testo{opacity:1;transform:none}
+.acc-in-et{font:700 15px "Pixelify Sans",monospace;letter-spacing:4px;text-transform:uppercase;color:#cfe0ff;text-shadow:2px 2px 0 #141433;margin-bottom:6px;opacity:0;transform:translateY(8px);transition:all .3s .1s}
+.acc-in.su .acc-in-et{opacity:1;transform:none}
+.acc-in-nome{font:400 min(clamp(52px,17vw,90px),calc(160vw / var(--n)))/1 "Lilita One","Arial Black",sans-serif;color:#ffd03a;-webkit-text-stroke:2.5px #141433;paint-order:stroke fill;text-shadow:0 6px 0 #141433,0 0 40px rgba(255,208,58,.45);white-space:nowrap}
+.acc-in-nome span{display:inline-block;opacity:0;transform:translateY(-60px) scale(.6)}
+.acc-in.su .acc-in-nome span{animation:accLett .5s cubic-bezier(.2,1.6,.4,1) forwards;animation-delay:calc(.2s + var(--i) * .05s)}
+@keyframes accLett{to{opacity:1;transform:none}}
+.acc-in-riga{height:5px;margin:14px auto 0;width:0;background:#ffd03a;box-shadow:0 3px 0 #141433;transition:width .5s cubic-bezier(.3,0,.2,1) .55s}
+.acc-in.su .acc-in-riga{width:min(70%,260px)}
+.acc-in-testo b{position:absolute;left:50%;top:50%;width:8px;height:8px;box-shadow:0 0 0 2px #141433;opacity:0}
+.acc-in.su .acc-in-testo b{animation:accScint .75s ease-out var(--t) forwards}
+@keyframes accScint{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.4)}}
+.acc-in.scopri .acc-in-testo{opacity:0;transform:scale(1.25);transition:opacity .3s,transform .4s ease-in}
+@media (prefers-reduced-motion: reduce){ .acc-in *{animation-duration:.01s!important;transition-duration:.05s!important;transition-delay:0s!important} }
+.acc-in::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 32% at 50% 50%,rgba(11,18,64,.82),rgba(11,18,64,.35) 60%,rgba(11,18,64,0));opacity:0;transition:opacity .4s}
+.acc-in.su::before{opacity:1}
+.acc-in.scopri::before{opacity:0;transition:opacity .2s}
 .pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
 #tb.tb-pan .tbhud{visibility:hidden}
 body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
@@ -7674,11 +7704,25 @@ const ACC = window.ACC = (() => {
       c.querySelector('[data-x]').onclick = chiudi; c.querySelector('#accSi').onclick = () => vai(null); }; }
   // l'ingresso: si apre il portale e ci si entra dentro
   function entraAnim(ld, nome, fine){ try { SUONI.suona('banner'); } catch(e){}
-    const p = document.createElement('div'); p.className = 'acc-portale'; p.innerHTML = `<div class="acc-arco"><div class="acc-luce"></div></div>${nome ? `<div class="acc-benv">Benvenuto, <b>${String(nome).replace(/[<>&]/g, '')}</b></div>` : ''}`; ld.append(p);
-    for (let i = 0; i < 40; i++){ const q = document.createElement('i'), a = Math.random()*Math.PI*2, d = 140 + Math.random()*260; q.style.setProperty('--dx', Math.cos(a)*d + 'px'); q.style.setProperty('--dy', Math.sin(a)*d + 'px'); q.style.background = ['#ffd03a', '#fff3a8', '#ffffff', '#e04830', '#7ccf6a'][i % 5]; q.style.animationDelay = (.35 + Math.random()*.3) + 's'; p.append(q); }
+    const piano = matchMedia('(prefers-reduced-motion: reduce)').matches, T = piano ? .35 : 1;
+    const W = innerWidth, H = innerHeight, L = Math.max(36, Math.ceil(Math.min(W, H) / 11)), C = Math.ceil(W / L), R = Math.ceil(H / L);
+    const ov = document.createElement('div'); ov.className = 'acc-in'; ov.style.setProperty('--l', L + 'px');
+    const n = nome ? String(nome).replace(/[<>&"]/g, '') : '';
+    const lettere = (n || 'Smerillo').split('').map((c, i) => `<span style="--i:${i}">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
+    ov.innerHTML = `<div class="acc-in-griglia"></div><div class="acc-in-testo"><div class="acc-in-et">${n ? 'Bentornato' : 'Si parte per'}</div><div class="acc-in-nome" style="--n:${Math.max(6, (n || 'Smerillo').length)}">${lettere}</div><div class="acc-in-riga"></div></div>`;
+    const g = ov.firstElementChild, cx = (C - 1) / 2, cy = (R - 1) / 2, dmax = Math.hypot(cx, cy) || 1, fr = document.createDocumentFragment(), celle = [];
+    for (let y = 0; y < R; y++) for (let x = 0; x < C; x++){ const q = document.createElement('i'), d = Math.hypot(x - cx, y - cy) / dmax;
+      q.style.left = x * L + 'px'; q.style.top = y * L + 'px'; q.style.setProperty('--d', d.toFixed(3)); if ((x + y) % 2) q.className = 'b'; if (Math.random() < .06) q.className = 'o'; fr.append(q); celle.push(q); }
+    g.append(fr);
+    const tx = ov.querySelector('.acc-in-testo');
+    for (let i = 0; i < 26; i++){ const q = document.createElement('b'), a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 170; q.style.setProperty('--dx', Math.cos(a) * d + 'px'); q.style.setProperty('--dy', Math.sin(a) * d * .7 + 'px'); q.style.setProperty('--t', (.5 + Math.random() * .25) + 's'); q.style.background = ['#ffd03a', '#fff3a8', '#ffffff', '#7ccf6a'][i % 4]; tx.append(q); }
+    document.body.append(ov);
     ld.classList.add('acc-entrando');
-    setTimeout(() => { try { SUONI.suona('stella2'); } catch(e){} p.classList.add('apri'); }, 900);
-    setTimeout(() => { fine(); }, 1700); }
+    requestAnimationFrame(() => ov.classList.add('su'));
+    setTimeout(() => { ov.classList.add('copri'); }, 1250 * T);
+    setTimeout(() => { fine(); }, 1750 * T);
+    setTimeout(() => { try { SUONI.suona('stella2'); } catch(e){} ov.classList.add('scopri'); }, 1850 * T);
+    setTimeout(() => ov.remove(), 2750 * T); }
   function mostraCodice(c, testo, dopo){ const b = finestra(`<div class="acc-ic key"></div><h2>Il tuo codice di recupero</h2><p class="acc-sub">${testo}</p>
       <div class="acc-cod">${c}</div><button class="big alt" id="accCp">Copia il codice</button><p class="acc-nota">Senza questo codice, se dimentichi la parola segreta i progressi non si possono recuperare. Non mandarlo a nessuno.</p>
       <button class="big" id="accOkC">L’ho salvato</button>`);
