@@ -2056,6 +2056,9 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 :is(.dlg.box,#cqPan,.cr-pg) .cq-sblr:not(.ok){background:rgba(255,255,255,.06)!important;color:#d6ddff!important}
 .dlg.box.cq-esito.ok h2{color:#6fe08a}
 .dlg.box.cq-esito.no h2{color:#ff7a66}
+/* campi dove si scrive: fondo bianco e testo scuro, sempre */
+:is(.dlg.box,#cqPan,#title .pan,#title .cr-pg,.acc-box,.acc-card,#caricamento) :is(input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea,select){background:#fff!important;color:#1c1c3c!important;-webkit-text-fill-color:#1c1c3c!important;caret-color:#2563eb}
+:is(.dlg.box,#cqPan,#title .pan,#title .cr-pg,.acc-box,.acc-card,#caricamento) :is(input,textarea)::placeholder{color:#7a809c!important;-webkit-text-fill-color:#7a809c!important;opacity:1}
 .pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
 #tb.tb-pan .tbhud{visibility:hidden}
 body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
