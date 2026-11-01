@@ -6497,7 +6497,7 @@ return {eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE
 // ===== Conquista: scegli il tuo borgo, rinforzalo e conquista gli altri (a turni, contro il computer) =====
 const CQ = (() => {
 const KEY = 'difendi-smerillo-conquista', KREC = 'difendi-smerillo-conquista-rec', KGUIDA = 'difendi-smerillo-conquista-guida';
-const MOSSE = 4, COSTO_SOLD = 3, REGALO = 8;
+const MOSSE_B = 4, MOSSE_N = () => MOSSE_B + (S && S.mappa === 'grande' ? 1 : 0), COSTO_SOLD = 3, REGALO = 8;
 // livelli di difficoltà: cambiano solo i borghi del computer
 const DIFF = {
   facile:   {nome:'Facile', desc:'Gli altri borghi guadagnano meno e attaccano con prudenza. Tregua di 4 stagioni.', rend:.75, soglia:.08, tregua:4},
@@ -6854,18 +6854,34 @@ const TERRE = {
   durano:    {nome:'Durano', x:1330, y:600, fraz:true, rend:4, guar:5, desc:'Una frazione sul versante a nord-est.'},
   tenna:     {nome:'Val di Tenna', x:330, y:210, fraz:true, rend:4, guar:5, desc:'Giù nella valle del fiume Tenna.'},
   vallecupa: {nome:'Valle Cupa', x:760, y:1700, fraz:true, rend:4, guar:4, desc:'Una valle stretta in fondo.'}};
-// e i terreni vuoti tra un posto e l'altro: campi, prati e boschi da conquistare
-(() => { const fissi = Object.values(TERRE); let n = 0;
-  for (let y = 120; y < WH - 60; y += 170) for (let x = 90 + ((y/170) % 2)*85; x < WW - 60; x += 170){ const jx = x + (hash(x, y, 41) - .5)*90, jy = y + (hash(x, y, 43) - .5)*90;
-    if ([...fissi, ...Object.values(TERRE)].some(T => Math.hypot(T.x - jx, T.y - jy) < (T.borgo ? 230 : T.di || T.fraz ? 185 : 175))) continue;
-    TERRE['v' + (n++)] = {nome:'', x:Math.round(jx), y:Math.round(jy), vuota:true, rend:1, guar:1 + Math.floor(hash(x, y, 47)*3)}; } })();
-const IDS = Object.keys(TERRE);
-for (const t of IDS){ const T = TERRE[t]; if (!T.vuota) continue; let m = null, md = 1e9; for (const u of IDS){ const U = TERRE[u]; if (!(U.borgo || U.fraz)) continue; const d = Math.hypot(U.x - T.x, U.y - T.y); if (d < md){ md = d; m = U; } }
+// e i terreni vuoti tra un posto e l'altro: campi, prati e boschi da conquistare. Quanti dipende dalla grandezza della mappa
+const FISSE = Object.keys(TERRE), IDS = [];
+function riempiTerre(P){ const k = P/170; for (const t of Object.keys(TERRE)) if (TERRE[t].vuota) delete TERRE[t]; const fissi = FISSE.map(t => TERRE[t]); let n = 0;
+  for (let y = 120; y < WH - 60; y += P) for (let x = 90 + ((y/P) % 2)*P/2; x < WW - 60; x += P){ const jx = x + (hash(x, y, 41) - .5)*90*k, jy = y + (hash(x, y, 43) - .5)*90*k;
+    if ([...fissi, ...Object.values(TERRE)].some(T => Math.hypot(T.x - jx, T.y - jy) < (T.borgo ? Math.max(150, 230*k) : T.di || T.fraz ? Math.max(125, 185*k) : 175*k))) continue;
+    TERRE['v' + (n++)] = {nome:'', x:Math.round(jx), y:Math.round(jy), vuota:true, rend:1, guar:1 + Math.floor(hash(x, y, 47)*3)}; }
+  IDS.length = 0; IDS.push(...Object.keys(TERRE));
+
+  for (const t of IDS){ const T = TERRE[t]; if (!T.vuota) continue; let m = null, md = 1e9; for (const u of IDS){ const U = TERRE[u]; if (!(U.borgo || U.fraz)) continue; const d = Math.hypot(U.x - T.x, U.y - T.y); if (d < md){ md = d; m = U; } }
   T.nome = ['Campi', 'Prati', 'Bosco', 'Pascoli', 'Vigne', 'Oliveto'][Math.floor(hash(T.x, T.y, 61)*6)] + ' verso ' + (m.borgo ? FZ[m.borgo].corto : m.nome); }
 // cosa produce ogni terra: [cibo, legna]. San Martino ha i boschi, Ceresola i campi, Smerillo poca campagna
 { const RIS = {smerillo:[1,1], sm_n:[3,0], sm_o:[0,1], sm_e:[2,0], sm_s:[0,3], sanmartino:[1,2], sa_n:[0,4], sa_e:[0,3], sa_s:[3,0], sa_c:[1,0], ceresola:[2,1], ce_n:[0,3], ce_e:[2,0], ce_v:[2,0], ce_s:[2,0], castorano:[2,1], durano:[2,1], tenna:[4,0], vallecupa:[0,3]};
   const TIPO = {Campi:[3,0], Prati:[2,0], Pascoli:[2,0], Vigne:[1,0], Oliveto:[1,0], Bosco:[0,3]};
   for (const t of IDS){ const T = TERRE[t]; const r = RIS[t] || TIPO[T.nome.split(' ')[0]] || [1,0]; T.c = r[0]; T.l = r[1]; if (T.vuota && /^(Vigne|Oliveto)/.test(T.nome)) T.rend = 2; } }
+}
+riempiTerre(170);
+// grandezza della mappa: piccola (poche terre grandi), media (la classica), grande (tante terre piccole, marce corte e rifornimenti)
+const MAPPE = {piccola:{nome:'Piccola', passo:250, marcia:0, desc:'Poche terre grandi: partite più corte e dirette.'},
+  media:{nome:'Media', passo:170, marcia:0, desc:'La mappa classica.'},
+  grande:{nome:'Grande', passo:100, marcia:4, desc:'Tante terre piccole. Hai 5 mosse a stagione, ma i soldati si spostano al massimo di 4 terre per volta e lontano dalle tue basi combattono peggio: servono avamposti e strategia.'}};
+const KMAPPA = 'difendi-smerillo-conquista-mappa'; let MAPPA_ATT = 'media';
+const mappaScelta = () => { try { const m = localStorage.getItem(KMAPPA); return MAPPE[m] ? m : 'media'; } catch(e){ return 'media'; } };
+const MP = () => MAPPE[(S && S.mappa) || MAPPA_ATT] || MAPPE.media;
+function impostaMappa(m){ if (!MAPPE[m]) m = 'media'; if (m === MAPPA_ATT) return; MAPPA_ATT = m; riempiTerre(MAPPE[m].passo);
+  if (idx){ creaTerre(); for (const k in MASK) delete MASK[k]; for (const k in CMURA) delete CMURA[k]; for (const k in SPOT) delete SPOT[k]; for (const k in MURA) delete MURA[k]; if (cB) analizzaMappa(); } tintKey = ''; }
+// sulla mappa grande: quante terre ci sono tra una terra e la base più vicina (il borgo o una terra con una struttura)
+function lontananza(f, da){ const base = t => S.terre[t].own === f && (t === f || !!S.terre[t].str); if (base(da)) return 0; const d = {[da]: 0}, q = [da];
+  while (q.length){ const t = q.shift(); if (d[t] >= 8) continue; for (const v of VIC[t]){ if (v in d || S.terre[v].own !== f) continue; d[v] = d[t] + 1; if (base(v)) return d[v]; q.push(v); } } return 9; }
 const fiumeY = x => 44 + 16*Math.sin(x/170) + 6*Math.sin(x/47 + 1);
 // le strade principali: escono dalle mappe vere e vanno alle frazioni (come nella realtà, più o meno)
 // le strade: solo quelle vere (Provincia di Fermo), unite alle uscite delle tre mappe; i sentieri di campagna sono marroni
@@ -6891,8 +6907,11 @@ const HEX = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), pars
 // le terre: zone di Voronoi storte (seguono fossi e crinali), calcolate su una griglia di 4x4 pixel
 function creaTerre(){ const N1 = griglia(60, 31), N2 = griglia(60, 37), N3 = griglia(22, 33), N4 = griglia(22, 39);
   idx = new Uint8Array(GW*GH); const L = IDS.map(t => TERRE[t]);
+  // per andare veloce: per ogni blocco di 16x16 celle si guardano solo le terre vicine
+  const BLK = 16, CAND = []; for (let bj = 0; bj < GH; bj += BLK) for (let bi = 0; bi < GW; bi += BLK){ const cx = (bi + BLK/2)*Q, cy = (bj + BLK/2)*Q, ds = L.map(T => Math.hypot(cx - T.x, cy - T.y)), mn = Math.min(...ds); CAND[(bj/BLK)*Math.ceil(GW/BLK) + bi/BLK] = L.map((T, k) => k).filter(k => ds[k] <= mn + 650); }
   for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++){ const x = i*Q + 2, y = j*Q + 2, wx = x + (N1(x, y) - .5)*110 + (N3(x, y) - .5)*12, wy = y + (N2(x, y) - .5)*110 + (N4(x, y) - .5)*12; let b = 0, bd = 1e12;
-    for (let k = 0; k < L.length; k++){ const T = L[k], d = ((wx - T.x)*(T.ax || 1))**2 + ((wy - T.y)*(T.ay || 1))**2 - (T.borgo ? 15000 : T.fraz ? 2500 : 0); if (d < bd){ bd = d; b = k; } } idx[j*GW + i] = b; }
+    const CL = CAND[((j/BLK) | 0)*Math.ceil(GW/BLK) + ((i/BLK) | 0)];
+    for (let kk = 0; kk < CL.length; kk++){ const k = CL[kk], T = L[k], d = ((wx - T.x)*(T.ax || 1))**2 + ((wy - T.y)*(T.ay || 1))**2 - (T.borgo ? 15000 : T.fraz ? 2500 : 0); if (d < bd){ bd = d; b = k; } } idx[j*GW + i] = b; }
   // niente isolette staccate: ogni terra resta un pezzo unico (i pezzi piccoli passano alla terra che li circonda)
   { const comp = new Int32Array(GW*GH).fill(-1), pezzi = []; for (let p = 0; p < GW*GH; p++){ if (comp[p] >= 0) continue; const id = idx[p], st = [p], celle = []; comp[p] = pezzi.length;
       while (st.length){ const c = st.pop(); celle.push(c); const x = c % GW, y = (c / GW) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= GW || Y >= GH) continue; const q = Y*GW + X; if (comp[q] < 0 && idx[q] === id){ comp[q] = pezzi.length; st.push(q); } } }
@@ -7102,7 +7121,8 @@ function analizzaMappa(){ const D = cB.getContext('2d').getImageData(0, 0, WW, W
   // un margine intorno alle case e ai numeri dei soldati
   const O2 = OCC.slice(); for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) if (OCC[j*GW + i]) for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const X = i + dx, Y = j + dy; if (X >= 0 && Y >= 0 && X < GW && Y < GH) O2[Y*GW + X] = 1; }
   OCC = O2; for (const t of IDS){ const T = TERRE[t]; for (let j = -14; j <= 6; j++) for (let i = -16; i <= 16; i++){ const X = Math.floor(T.x/Q) + i, Y = Math.floor(T.y/Q) + j; if (X >= 0 && Y >= 0 && X < GW && Y < GH) OCC[Y*GW + X] = 2; } }
-  const USATO = new Uint8Array(GW*GH), ti = IDS.indexOf.bind(IDS);
+  const USATO = new Uint8Array(GW*GH), TI = {}; IDS.forEach((t, k) => TI[t] = k); const ti = t => TI[t];
+  const BB = IDS.map(() => [1e9, 1e9, -1, -1]); for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++){ const b = BB[idx[j*GW + i]]; if (i < b[0]) b[0] = i; if (j < b[1]) b[1] = j; if (i > b[2]) b[2] = i; if (j > b[3]) b[3] = j; }
   let MODO = 0; // 0: tutto libero; 1: può toccare un pezzetto di strada (mai case, mai le terre degli altri)
   const libero = (t, x, y, w, h) => { const i0 = Math.floor((x - w/2)/Q), i1 = Math.floor((x + w/2)/Q), j0 = Math.floor((y - h)/Q), j1 = Math.floor(y/Q), it = ti(t); let bos = 0, occ = 0, n = (i1 - i0 + 1)*(j1 - j0 + 1);
     if (i0 < 0 || j0 < 0 || i1 >= GW || j1 >= GH) return -1; for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++){ const k = j*GW + i; if (OCC[k] === 2 || USATO[k] || CASA[k] || idx[k] !== it) return -1; if (OCC[k]) occ++; bos += BOS[k]; }
@@ -7111,7 +7131,7 @@ function analizzaMappa(){ const D = cB.getContext('2d').getImageData(0, 0, WW, W
   // si prova prima a grandezza piena, poi più piccolo se la terra è stretta
   const cerca = (t, k, w, h, dentro = t) => { for (const sc of [SCALA_STR, 1.3, 1.05, .85]) for (MODO = 0; MODO < 3; MODO++){ const r = cerca1(t, k, w*sc, h*sc, dentro); if (r){ r.s = sc; r.w = w*sc; r.h = h*sc; return r; } } return null; };
   const cerca1 = (t, k, w, h, dentro) => { const T = TERRE[t], it = ti(dentro); let best = null, bs = -1e9;
-    for (let j = 0; j < GH; j += 2) for (let i = 0; i < GW; i += 2){ if (idx[j*GW + i] !== it) continue; const x = i*Q + 2, y = j*Q + 2, bos = libero(dentro, x, y, w, h); if (bos < 0) continue; const d = Math.hypot(x - T.x, y - T.y);
+    const bb = BB[it] || [0, 0, GW - 1, GH - 1]; for (let j = bb[1] & ~1; j <= bb[3]; j += 2) for (let i = bb[0] & ~1; i <= bb[2]; i += 2){ if (idx[j*GW + i] !== it) continue; const x = i*Q + 2, y = j*Q + 2, bos = libero(dentro, x, y, w, h); if (bos < 0) continue; const d = Math.hypot(x - T.x, y - T.y);
       let sc = -Math.abs(d - 80)*.5; if (k === 'fattoria') sc -= bos*80; if (k === 'segheria') sc += vicinoBosco(x, y)*.8 - bos*60; if (k === 'mercato' || k === 'caserma' || ED[k] || k === 'fiera') sc = -d - bos*40; if (k === 'torre') sc = -d*.3; if (k === 'segno') sc = -Math.abs(d - 50) - bos*30;
       sc += hash(i, j, 99)*3; if (sc > bs){ bs = sc; best = {x, y}; } }
     return best; };
@@ -7282,6 +7302,7 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
   const kill = borgo && Ed.torri ? Math.min(n - 1, Math.round(n*.12*Ed.torri*(sp ? .5 : 1))) : 0, A = n - kill; if (kill) voci.push(`Le torri abbattono ${kill} dei tuoi prima della battaglia`);
   let att = A*(1 + .2*Ef.armeria); if (f === S.io && S.spia && S.spia.f === df && S.turno <= S.spia.fino){ att *= 1.15; voci.push('La tua spia conosce le loro difese: +15%'); } if (Ef.armeria) voci.push(`La tua armeria: +${20*Ef.armeria}%`);
   if (da && S.terre[da].str === 'scuderia'){ att *= 1.2; voci.push('Partono dalla scuderia: +20%'); }
+  if (da && MP().marcia){ const lo = lontananza(f, da); if (lo > 4){ const m = Math.max(.76, 1 - .08*(lo - 4)); att *= m; voci.push(`Lontano dalle basi (${lo > 8 ? 'nessuna vicina' : lo + ' terre'}): −${Math.round((1 - m)*100)}%. Una struttura più vicina fa da avamposto`); } }
   if (cap){ let b = 1.05 + .04*(capLiv(cap) - 1); if (haAb(cap, 'fiero')) b *= 1.12; if (!df && haAb(cap, 'volpe')) b *= 1.25; att *= b; voci.push(`${capNome(cap)} guida l’attacco: +${Math.round((b - 1)*100)}%`); if (sp) voci.push(`${cap.nome} conosce le mura: 1 livello in meno, torri a metà`); }
   { const am = vivi().find(h => h !== f && h !== df && alleati(h, f) && VIC[t].some(v => S.terre[v].own === h)); if (am){ att *= 1.15; voci.push(`${FZ[am].corto} è tua alleata e ti aiuta: +15%`); } }
   let mult = df ? 1 + .2*Ed.armeria : 1; if (df && Ed.armeria) voci.push(`La loro armeria: +${20*Ed.armeria}%`);
@@ -7309,7 +7330,7 @@ function diplomaziaAttacco(f, g){ if (!g) return false; const k = pk(f, g), trad
   if (trad){ S.rep[f] = Math.max(0, rep(f) - 35); delete S.all[k]; delete S.patti[k]; } if (S.acc) delete S.acc[k]; return trad; }
 // ===== il computer =====
 // strade tra le proprie terre: si può spostare l'esercito lungo terre tue collegate (in una mossa)
-function collegate(f, da){ const vis = {[da]: null}, q = [da]; while (q.length){ const t = q.shift(); for (const v of VIC[t]) if (!(v in vis) && S.terre[v].own === f){ vis[v] = t; q.push(v); } } return vis; }
+function collegate(f, da){ const max = MP().marcia || 999, dist = {[da]: 0}, vis = {[da]: null}, q = [da]; while (q.length){ const t = q.shift(); if (dist[t] >= max) continue; for (const v of VIC[t]) if (!(v in vis) && S.terre[v].own === f){ vis[v] = t; dist[v] = dist[t] + 1; q.push(v); } } return vis; }
 function percorso(f, da, a){ const vis = collegate(f, da); if (!(a in vis)) return null; const p = [a]; let t = a; while (vis[t] != null){ t = vis[t]; p.unshift(t); } return p; }
 function cammino(p){ return curva(p.map(t => [TERRE[t].x, TERRE[t].y])); }
 const nemico = (f, o) => o !== f && !(o && alleati(f, o));
@@ -7319,7 +7340,7 @@ function minaccia(f){ let m = 0; const vicine = new Set(VIC[f]); for (const v of
   for (const v of vicine){ const o = S.terre[v].own; if (o && o !== f && !alleati(f, o)) m = Math.max(m, S.terre[v].sold*(1 + .2*S.fz[o].ed.armeria)); } return m; }
 const guardiaBorgo = f => S.terre[f].own !== f ? 1 : Math.max(2, Math.ceil(minaccia(f)*.75*(f === S.io && STRAT ? 1 : CAR(f).guardia)/((1 + .3*S.fz[f].ed.mura)*(f === 'smerillo' ? 1.25 : 1))));
 let STRAT = null; // solo per le prove automatiche: come gioca il 'giocatore'
-function diploIO(){ const io = S.io, F = S.fz[io]; let az = MOSSE, usate = 0; const altri = vivi().filter(g => g !== io); const fid = g => amic(io, g) + (rep(io) - 50)/2;
+function diploIO(){ const io = S.io, F = S.fz[io]; let az = MOSSE_N(), usate = 0; const altri = vivi().filter(g => g !== io); const fid = g => amic(io, g) + (rep(io) - 50)/2;
   for (const g of altri){ if (az <= 1) break; const k = pk(io, g);
     for (let i = 0; i < 2; i++){ if (F.legna >= 6 && S.fz[g].cibo >= 5){ F.legna -= 6; F.cibo += 5; S.fz[g].legna += 6; S.fz[g].cibo -= 5; setAmic(io, g, amic(io, g) + 2); } else if (F.cibo >= 6 && S.fz[g].legna >= 7){ F.cibo -= 6; F.legna += 7; S.fz[g].cibo += 6; S.fz[g].legna -= 7; setAmic(io, g, amic(io, g) + 2); } }
     if (!S.all[k] && fid(g) >= 50 && !troppoForte(io) && vivi().length > 2){ S.all[k] = true; az--; usate++; continue; }
@@ -7328,7 +7349,7 @@ function diploIO(){ const io = S.io, F = S.fz[io]; let az = MOSSE, usate = 0; co
     if (fid(g) < 50 && F.monete >= REGALO + 6){ F.monete -= REGALO; S.fz[g].monete += REGALO; setAmic(io, g, amic(io, g) + valRegalo(amic(io, g))); az--; usate++; } }
   return usate; }
 let AZ_IO = null;
-function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null ? AZ_IO : MOSSE; const st0 = f === S.io ? STRAT : null;
+function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null ? AZ_IO : MOSSE_N(); const st0 = f === S.io ? STRAT : null;
   const snap = () => JSON.parse(JSON.stringify(S.terre)), news = (o) => { o.snap = snap(); ev.push(o); };
   const m = minaccia(f), difB = S.terre[f].sold*(1 + .2*F.ed.armeria)*(1 + .3*F.ed.mura)*(f === 'smerillo' ? 1.25 : 1), mio = S.terre[f].own === f;
   // 0. scambi col mercato (senza mosse): chi ha troppo di una cosa la cambia
@@ -7394,7 +7415,7 @@ function calcolaStagione(ev, tutti = false){
   // le missioni d'aiuto scadute
   S.missioni = (S.missioni || []).filter(mi => { if (S.turno < mi.scade || !S.fz[mi.f].vivo) return S.fz[mi.f].vivo; setAmic(S.io, mi.f, amic(S.io, mi.f) - 10); S.rep[S.io] = Math.max(0, rep(S.io) - 3); ev.push({t:'miss', f:mi.f, snap: sn(), testo:`Non hai aiutato ${FZ[mi.f].corto} contro ${FZ[mi.contro].corto}: è delusa`}); return false; });
   // la stagione nuova: entrate, cibo per i soldati, legna
-  S.turno++; S.mosse = MOSSE; S.scambi = 0;
+  S.turno++; S.mosse = MOSSE_N(); S.scambi = 0;
   for (const f of vivi()){ const F = S.fz[f]; F.monete += rendita(f); F.legna += prodLegna(f); F.cibo += prodCibo(f) - mangia(f);
     if (F.cibo < 0){ let manca = -F.cibo, persi = 0; F.cibo = 0; while (manca > 0){ const t = terreDi(f).filter(x => S.terre[x].sold > 1).sort((a, b) => S.terre[b].sold - S.terre[a].sold)[0]; if (!t) break; S.terre[t].sold--; manca--; persi++; }
       if (persi && f === S.io && !S.cron.some(x => /fame/.test(x.txt))) cron(`Arriva la fame: i soldati ${diCas()} se ne vanno.`, 1);
@@ -7421,7 +7442,7 @@ function calcolaStagione(ev, tutti = false){
 function fineStagione(){ if (GIOCA) return; modo = null; sel = null; const ev = []; PRIMA_SNAP = JSON.parse(JSON.stringify(S.terre));
   calcolaStagione(ev); salva(); riproduciEv(ev, () => { notizie(ev); }); }
 // prova automatica: il computer gioca anche per te, per controllare che le partite finiscano e siano equilibrate
-function simula(io, max = 80, dif = 'normale', strat = null, veloce = false){ STRAT = strat; nuova(io, dif, true, veloce); const ST = {}; let fame = 0; let t = 0, amS = 0, amN = 0, attIO = 0, attPatto = 0; while (vivi().length > 1 && !S.vincitore && t++ < max){ const ev = []; AZ_IO = (strat === 'diplo' || strat === 'diplofiera') ? MOSSE - diploIO() : null; if ((strat === 'diplo' || strat === 'diplofiera')){ for (const g of vivi()) if (g !== S.io){ amS += amic(S.io, g); amN++; } } const pattiPrima = {...S.patti}, allPrima = {...S.all}; calcolaStagione(ev, true); AZ_IO = null;
+function simula(io, max = 80, dif = 'normale', strat = null, veloce = false){ STRAT = strat; nuova(io, dif, true, veloce); const ST = {}; let fame = 0; let t = 0, amS = 0, amN = 0, attIO = 0, attPatto = 0; while (vivi().length > 1 && !S.vincitore && t++ < max){ const ev = []; AZ_IO = (strat === 'diplo' || strat === 'diplofiera') ? MOSSE_N() - diploIO() : null; if ((strat === 'diplo' || strat === 'diplofiera')){ for (const g of vivi()) if (g !== S.io){ amS += amic(S.io, g); amN++; } } const pattiPrima = {...S.patti}, allPrima = {...S.all}; calcolaStagione(ev, true); AZ_IO = null;
     for (const e of ev) if (e.t === 'att' && e.contro === S.io){ attIO++; const k = pk(e.f, S.io); if (pattiPrima[k] >= S.turno - 1 || allPrima[k]) attPatto++; } for (const e of ev){ const k = e.t + (e.t === 'att' && e.trad ? '_trad' : ''); ST[k] = (ST[k] || 0) + 1; } fame += ev.filter(e => e.t === 'fame').length; if (strat === 'pace' || strat === 'diplo' || strat === 'diplofiera') S.proposte.forEach(p => { if (p.tipo === 'acc') S.acc[pk(S.io, p.f)] = true; else if (p.tipo === 'patto') S.patti[pk(S.io, p.f)] = S.turno + 8; else if (vivi().length > 2) S.all[pk(S.io, p.f)] = true; }); S.proposte.forEach(p => { if (rnd() < .5){ if (p.tipo === 'acc') S.acc[pk(S.io, p.f)] = true; else if (p.tipo === 'patto') S.patti[pk(S.io, p.f)] = S.turno + 8; else if (vivi().length > 2) S.all[pk(S.io, p.f)] = true; } }); S.proposte = []; S.richieste = []; }
   const carV = S.car ? {...S.car} : {}, annoV = S.anno; STRAT = null; const vinc = S.vincitore || (vivi().length === 1 ? vivi()[0] : null), r = {car: carV, anno: annoV, amMed: amN ? Math.round(amS/amN) : null, attIO, attPatto, ST, strutture: IDS.filter(t => S.terre[t].str).length, io, fine: vinc ? 'fatto' : 'pari', vinc, vitt: S.vitt || (vinc ? 'conquista' : null), turni: S.turno, vivi: vivi(), terre: Object.fromEntries(Object.keys(FZ).map(f => [f, terreDi(f).length]))}; try { localStorage.removeItem(KEY); } catch(e){} return r; }
 function passo(){ const G = GIOCA; if (!G) return; if (G.i >= G.ev.length){ GIOCA = null; VISTA = null; tintKey = ''; aggiornaUI(); G.dopo(); return; }
@@ -7447,13 +7468,13 @@ function volaNumeri(F){ const cur = {monete: F.monete, cibo: F.cibo, legna: F.le
 function aggiornaUI(){ if (root) root.classList.toggle('vuoto', !S || !!SCELTA); if (!S) return; const F = S.fz[S.io];
   el('cqTit').textContent = FZ[S.io].corto; el('cqStag').textContent = stagione(S.turno) + (S.veloce ? ' · ' + Math.min(S.turno, VEL.stag) + '/' + VEL.stag : '') + (S.dif && S.dif !== 'normale' ? ' · ' + DIFF[S.dif].nome : '');
   { const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); el('cqRis').innerHTML = `<span>${ico('moneta', 2)} ${F.monete}</span><span class="${dc < 0 ? 'meno' : ''}">${ico('castagna', 2)} ${F.cibo}<small>${dc >= 0 ? '+' : ''}${dc}</small></span><span>${ico('albero', 2)} ${F.legna}</span>`; }
-  if (!SCELTA){ if (ovAperto() && RPREV && RPREV.s === S){ Object.assign(RPREV, {monete: F.monete, cibo: F.cibo, legna: F.legna}); } else volaNumeri(F); } el('cqMos').innerHTML = '<span class="cq-mt">Mosse</span> ' + Array.from({length:MOSSE}, (_, i) => `<i class="${i < S.mosse ? 'on' : ''}"></i>`).join('');
+  if (!SCELTA){ if (ovAperto() && RPREV && RPREV.s === S){ Object.assign(RPREV, {monete: F.monete, cibo: F.cibo, legna: F.legna}); } else volaNumeri(F); } el('cqMos').innerHTML = '<span class="cq-mt">Mosse</span> ' + Array.from({length:MOSSE_N()}, (_, i) => `<i class="${i < S.mosse ? 'on' : ''}"></i>`).join('');
   el('cqFine').disabled = !!GIOCA; el('cqFine').classList.toggle('pronto', S.mosse === 0 && !GIOCA); el('cqDip').disabled = !!GIOCA;
   { const fl = el('cqFlag'), stc = CAS && stemma(CAS.stemma, 1); if (stc){ fl.className = 'cq-flag cq-flagst'; fl.style.background = 'none'; fl.innerHTML = ''; const im = new Image(); im.src = stc.toDataURL(); im.width = 18; im.height = 21; fl.append(im); } else { fl.className = 'cq-flag'; fl.style.background = FZ[S.io].col; } } pannello(); }
 function barraAmic(v){ const [n, c] = livAmic(v); return `<span class="cq-am"><span class="cq-amb"><i style="left:${(v + 100)/2}%;background:${c}"></i></span><em style="color:${c}">${n}</em></span>`; }
 function pannello(){ const p = el('cqPan'); if (!p || !S) return;
   if (GIOCA){ p.innerHTML = `<div class="cq-ph"><b>Muovono gli altri borghi…</b></div><button class="big alt cq-salta" id="cqSalta">Salta</button>`; el('cqSalta').onclick = () => { ANIM.length = 0; const G = GIOCA; if (G){ G.i = G.ev.length; passo(); } }; return; }
-  if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra (gialla che lampeggia): ci arrivano passando per le tue terre.</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
+  if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra (gialla che lampeggia): ci arrivano passando per le tue terre${MP().marcia ? `, al massimo ${MP().marcia} terre più in là` : ''}.</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
   if (!sel){ const n = terreDi(S.io).length, mieB = Object.keys(FZ).filter(f => S.terre[f].own === S.io).length, F0 = S.fz[S.io];
     p.innerHTML = `<div class="cq-ph"><b>Tocca una terra sulla mappa</b><small>Hai ${n} ${n === 1 ? 'terra' : 'terre'} e ${sol(soldDi(S.io))}.${S.mosse === 0 ? ' Hai finito le mosse: premi <b>Fine stagione</b>.' : ''}</small></div>
       <div class="cq-annop">${ico(ANNI[ANNO()].ic, 2)} <b>${ANNI[ANNO()].nome}</b>: ${ANNI[ANNO()].desc}</div>
@@ -7646,7 +7667,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
       <div class="${dc < 0 ? 'neg' : ''}">${ico('castagna', 3)}<b>${dc >= 0 ? '+' : ''}${dc}</b><small>cibo</small></div>
       <div>${ico('albero', 3)}<b>+${prodLegna(S.io)}</b><small>legna</small></div></div>${nota ? `<div class="cq-nnota">${nota}</div>` : ''}</div>
     ${S.turno === TREGUA() + 1 ? `<p class="cq-warn">La tregua è finita: da ora i borghi si possono attaccare.</p>` : ''}${S.veloce && S.turno > VEL.stag - 4 && S.turno <= VEL.stag ? `<p class="cq-warn">${S.turno === VEL.stag ? 'Ultima stagione!' : 'Mancano ' + (VEL.stag - S.turno + 1) + ' stagioni alla fine.'} Ora vince ${FZ[classifica()[0]].corto} con ${punti(classifica()[0])} punti.</p>` : ''}
-    <button class="big" id="cqOk">Tocca a te: ${MOSSE} mosse ${ico('play', 2)}</button></div>`, false);
+    <button class="big" id="cqOk">Tocca a te: ${MOSSE_N()} mosse ${ico('play', 2)}</button></div>`, false);
   o.querySelector('#cqOk').onclick = () => { chiudiOv(); proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); }; aggiornaUI(); }
 function proposte(){ let p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
   if (!p){ richieste(); return; }
@@ -7777,7 +7798,7 @@ function dlgCasata(daFine){ leggiCas(); if (!CAS){ dlgStemma(() => dlgCasata());
     <button class="big" id="cqNo">${daFine ? 'Indietro' : 'Ok'}</button><button class="big alt" id="cqStC">Cambia stemma o nome</button></div>`);
   o.querySelector('#cqNo').onclick = () => { if (daFine && S && S.chiusa) finePartita2(); else chiudiOv(); }; o.querySelector('#cqStC').onclick = () => dlgStemma(() => dlgCasata(daFine)); }
 function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioca</h2><div class="how">
-    <span>1</span><span>Si gioca a <b>stagioni</b>: hai <b>${MOSSE} mosse</b>, poi premi <b>Fine stagione</b> e muovono gli altri borghi.</span>
+    <span>1</span><span>Si gioca a <b>stagioni</b>: hai <b>${MOSSE_N()} mosse</b>, poi premi <b>Fine stagione</b> e muovono gli altri borghi.</span>
     <span>2</span><span>Hai tre risorse: <b>monete</b>, <b>cibo</b> e <b>legna</b>. Ogni ${MANGIANO} soldati mangiano 1 cibo: senza cibo i soldati se ne vanno. Tocca le risorse in alto per il bilancio.</span>
     <span>3</span><span>Nelle tue terre costruisci e migliori <b>castagneti</b> (cibo), <b>segherie</b> (legna), <b>mercati</b> (monete). In pace le frazioni crescono e rendono di più.</span>
     <span>4</span><span>Avanza <b>una terra alla volta</b> con <b>Attacca</b> e <b>Sposta</b>. Un borgo si attacca quando ha perso ${ASSEDIO} delle sue terre: da lì è sotto assedio.</span>
@@ -7799,7 +7820,7 @@ function passoVolo(dt){ if (!VOLO) return; const V = VOLO, k = Math.min(1, dt*4)
   const wx = (cx0 - cam.x)/cam.s, wy = (cy0 - cam.y)/cam.s, nx = wx + (V.wx - wx)*k, ny = wy + (V.wy - wy)*k; cam.s += (V.s - cam.s)*k; cam.x = cx0 - nx*cam.s; cam.y = cy0 - ny*cam.s;
   if (Math.abs(V.s - cam.s) < .004 && Math.hypot(V.wx - nx, V.wy - ny) < 2) VOLO = null; }
 function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){} leggiCas();
-  if (!SCELTA || !FZ[SCELTA]) SCELTA = 'smerillo'; nuova(SCELTA, difScelta(), true, false); sel = null; root.classList.add('vuoto');
+  if (!SCELTA || !FZ[SCELTA]) SCELTA = 'smerillo'; nuova(SCELTA, difScelta(), true, false, mappaScelta()); sel = null; root.classList.add('vuoto');
   const vicine = f => { const fr = new Set(); for (const t of IDS) if (S.terre[t].own === f) for (const v of VIC[t]) if (TERRE[v].fraz && S.terre[v].own !== f) fr.add(TERRE[v].nome); return [...fr]; };
   const info = f => { const E = S.fz[f].ed, ter = IDS.filter(t => S.terre[t].own === f).length, so = IDS.filter(t => S.terre[t].own === f).reduce((a, t) => a + S.terre[t].sold, 0), vc = vicine(f);
     return `<div class="cq-scdet" style="--c:${FZ[f].col}"><div class="cq-scnome"><canvas data-sp="${f}"></canvas><span><b>${FZ[f].nome}</b><small>${ico('pin', 2)} ${DOVE[f]}</small></span></div>
@@ -7812,11 +7833,12 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
     <div id="cqScDet"></div>
     <details class="cq-scopt"><summary><span>${ico('altro', 2)} Impostazioni</span><b id="cqOptT"></b></summary>
       <div class="cq-dif" role="radiogroup" aria-label="Difficoltà">${Object.keys(DIFF).map(k => `<button type="button" role="radio" data-dif="${k}" aria-checked="${k === difScelta() ? 'true' : 'false'}">${DIFF[k].nome}</button>`).join('')}</div><p class="cq-nota" id="cqDifT">${DIFF[difScelta()].desc}</p>
-      <div class="cq-dif cq-vel" role="radiogroup" aria-label="Durata">${[['lunga', 'Partita lunga'], ['veloce', 'Partita veloce']].map(([k, n]) => `<button type="button" role="radio" data-vel="${k}" aria-checked="${(k === 'veloce') === velScelta() ? 'true' : 'false'}">${n}</button>`).join('')}</div><p class="cq-nota" id="cqVelT">${velTesto()}</p></details>
+      <div class="cq-dif cq-vel" role="radiogroup" aria-label="Durata">${[['lunga', 'Partita lunga'], ['veloce', 'Partita veloce']].map(([k, n]) => `<button type="button" role="radio" data-vel="${k}" aria-checked="${(k === 'veloce') === velScelta() ? 'true' : 'false'}">${n}</button>`).join('')}</div><p class="cq-nota" id="cqVelT">${velTesto()}</p>
+      <div class="cq-dif cq-map" role="radiogroup" aria-label="Grandezza della mappa">${Object.keys(MAPPE).map(k => `<button type="button" role="radio" data-map="${k}" aria-checked="${k === mappaScelta() ? 'true' : 'false'}">${MAPPE[k].nome}</button>`).join('')}</div><p class="cq-nota" id="cqMapT">Mappa ${MAPPE[mappaScelta()].nome.toLowerCase()}: ${MAPPE[mappaScelta()].desc}</p></details>
     <button type="button" class="cq-link" id="cqMe">Torna al menu</button><div class="cq-scvai"><button class="big" id="cqVai"></button></div></div><div class="cq-schip">${ico('pin', 2)} Tocca un borgo sulla mappa</div>`, false);
   o.classList.add('scelta');
   const disegnaSp = () => o.querySelectorAll('canvas[data-sp]').forEach(c => { const im = spriteBorgo(c.dataset.sp), z = c.closest('.cq-sct') ? 1.6 : 2.2; c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*z + 'px'; c.style.height = im.height*z + 'px'; });
-  const opt = () => { o.querySelector('#cqOptT').textContent = DIFF[difScelta()].nome + ' · ' + (velScelta() ? 'veloce' : 'lunga'); };
+  const opt = () => { o.querySelector('#cqOptT').textContent = DIFF[difScelta()].nome + ' · ' + (velScelta() ? 'veloce' : 'lunga') + ' · mappa ' + MAPPE[mappaScelta()].nome.toLowerCase(); };
   const mostra = (f, vola = true) => { SCELTA = f; S.io = f; o.querySelectorAll('.cq-sct').forEach(b => { b.classList.toggle('on', b.dataset.t === f); b.setAttribute('aria-selected', b.dataset.t === f); });
     const d = o.querySelector('#cqScDet'); d.innerHTML = info(f); d.classList.remove('cq-entra'); void d.offsetWidth; d.classList.add('cq-entra');
     o.querySelector('#cqVai').innerHTML = `Difendi ${FZ[f].corto} ${ico('play', 2)}`; o.querySelector('#cqVai').style.setProperty('--c', FZ[f].col); disegnaSp(); tintKey = ''; if (vola) requestAnimationFrame(() => volaSu(f)); };
@@ -7824,6 +7846,7 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   o.querySelectorAll('.cq-sct').forEach(b => b.onclick = () => SCELTA_MOSTRA(b.dataset.t));
   o.querySelectorAll('[data-dif]').forEach(b => b.onclick = () => { try { localStorage.setItem(KDIF, b.dataset.dif); } catch(e){} DIFSC = b.dataset.dif; o.querySelectorAll('[data-dif]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqDifT').textContent = DIFF[b.dataset.dif].desc; opt(); suona('tocco'); });
   o.querySelectorAll('[data-vel]').forEach(b => b.onclick = () => { const v = b.dataset.vel === 'veloce'; try { localStorage.setItem(KVEL, v ? '1' : '0'); } catch(e){} o.querySelectorAll('[data-vel]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqVelT').textContent = velTesto(); opt(); suona('tocco'); });
+  o.querySelectorAll('[data-map]').forEach(b => b.onclick = () => { const m = b.dataset.map; try { localStorage.setItem(KMAPPA, m); } catch(e){} o.querySelectorAll('[data-map]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqMapT').textContent = 'Mappa ' + MAPPE[m].nome.toLowerCase() + ': ' + MAPPE[m].desc; opt(); suona('tocco'); nuova(SCELTA, difScelta(), true, false, m); sel = null; tintKey = ''; });
   o.querySelector('#cqVai').onclick = () => { const f = SCELTA; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; suona('banner'); o.classList.remove('scelta'); nuova(f, difScelta(), false, velScelta()); chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); }); };
   o.querySelector('#cqMe').onclick = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; S = null; o.classList.remove('scelta'); esci(); };
   { const dt = o.querySelector('.cq-scopt'); dt.ontoggle = () => { if (dt.open) setTimeout(() => dt.scrollIntoView({block:'end', behavior:'smooth'}), 30); }; }
@@ -7835,7 +7858,7 @@ function dlgAnno(dopo){ const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f
     ${CAS && CAS.cap && CAS.cap.length ? `<h3 class="cq-h3">${ico('spade', 2)} I tuoi capitani</h3>${S.capNews && S.capNews.ritirati.length ? `<p class="cq-nota">${S.capNews.ritirati.map(capNome).join(' e ')} ${S.capNews.ritirati.length > 1 ? 'si sono ritirati' : 'si è ritirato'}: ora ${S.capNews.ritirati.length > 1 ? 'sono leggende' : 'è una leggenda'} della casata.</p>` : ''}${CAS.cap.map(c => capCard(c, S.capNews && S.capNews.nuovi.includes(c) ? '<span class="cq-capr"><b class="cq-nuovo">nuovo capitano!</b></span>' : '')).join('')}<p class="cq-nota">Quando attacchi scegli chi guida: ogni capitano può guidare un attacco a stagione, fa esperienza e sale di livello. Resta con la casata anche nelle prossime partite.</p>` : ''}
     <button class="big" id="cqOk">Si comincia ${ico('play', 2)}</button></div>`, false);
   o.querySelector('#cqOk').onclick = () => { chiudiOv(); suona('banner'); if (dopo) dopo(); }; }
-function nuova(io, dif = 'normale', sim = false, veloce = false){ S = {v:3, io, dif, sim, veloce, turno:1, mosse:MOSSE, fz:{}, terre:{}, amic:{}, all:{}, acc:{}, patti:{}, rep:{}, proposte:[], richieste:[], missioni:[], scambi:0, fine:null, cron:[]};
+function nuova(io, dif = 'normale', sim = false, veloce = false, mappa = null){ impostaMappa(mappa || (sim ? MAPPA_ATT : mappaScelta())); S = {v:3, io, dif, sim, veloce, mappa: MAPPA_ATT, turno:1, mosse:MOSSE_N(), fz:{}, terre:{}, amic:{}, all:{}, acc:{}, patti:{}, rep:{}, proposte:[], richieste:[], missioni:[], scambi:0, fine:null, cron:[]};
   for (const f in FZ){ S.fz[f] = {monete: veloce ? 30 : 15, cibo: veloce ? 16 : 10, legna: (f === 'sanmartino' ? 14 : 8) + (veloce ? 12 : 0), opera:0, vivo:true, ed:{mura: f === 'sanmartino' ? 0 : 1, torri:0, armeria:0, meccanico:0}}; S.rep[f] = 50; }
   const ks = Object.keys(CARATTERI).sort(() => rnd() - .5); S.car = {}; S.noto = {}; Object.keys(FZ).filter(f => f !== io).forEach((f, i) => { S.car[f] = ks[i]; });
   const an = Object.keys(ANNI); S.anno = rnd() < .2 ? 'calmo' : an[1 + Math.floor(rnd()*(an.length - 1))]; S.eventi = [];
@@ -7878,7 +7901,7 @@ function avviaCQ(){ if (APRI_DOPO && leggiCas()){ const k = APRI_DOPO; APRI_DOPO
     return; }
   APRI_DOPO = null; if (!leggiCas()){ root.classList.add('vuoto'); misura(); centra(); dlgStemma(() => avviaCQ()); return; }
   requestAnimationFrame(() => { misura(); if (S) vaiA(S.io); else centra(); });
-  const c = carica(); if (c){ S = c; for (const k of ['acc', 'patti', 'rep']) if (!S[k]) S[k] = {}; for (const k of ['proposte', 'richieste', 'missioni', 'cron', 'eventi']) if (!S[k]) S[k] = []; if (!S.car){ S.car = {}; S.noto = {}; const ks = Object.keys(CARATTERI).sort(() => rnd() - .5); Object.keys(FZ).filter(f => f !== S.io).forEach((f, i) => { S.car[f] = ks[i]; }); } if (!S.noto) S.noto = {}; if (!S.anno) S.anno = 'calmo'; sel = S.io; misura(); vaiA(S.io); aggiornaUI();
+  const c = carica(); if (c){ S = c; impostaMappa(S.mappa || 'media'); for (const k of ['acc', 'patti', 'rep']) if (!S[k]) S[k] = {}; for (const k of ['proposte', 'richieste', 'missioni', 'cron', 'eventi']) if (!S[k]) S[k] = []; if (!S.car){ S.car = {}; S.noto = {}; const ks = Object.keys(CARATTERI).sort(() => rnd() - .5); Object.keys(FZ).filter(f => f !== S.io).forEach((f, i) => { S.car[f] = ks[i]; }); } if (!S.noto) S.noto = {}; if (!S.anno) S.anno = 'calmo'; sel = S.io; misura(); vaiA(S.io); aggiornaUI();
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
     o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
   else { S = null; aggiornaUI(); scegli(); misura(); centra(); } }
@@ -7889,7 +7912,7 @@ function tasto(e, k){ const o = el('cqOv');
   else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
-return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{EVENTI, notizie: ev => notizie(ev), dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: ev => calcolaStagione(ev), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 // ===== account: i progressi salvati online, per ritrovarli su ogni telefono =====
