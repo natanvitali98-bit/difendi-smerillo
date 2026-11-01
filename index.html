@@ -1779,6 +1779,16 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .acc-luce{animation-delay:.35s!important}
 .acc-card .acc-h{font:400 28px var(--f-big),"Lilita One","Arial Black",sans-serif;color:#141433}
 .acc-benv{font:700 22px var(--f-body,system-ui);color:#fff}
+.acc-cod{font:800 30px ui-monospace,Menlo,Consolas,monospace;letter-spacing:3px;text-align:center;padding:18px 8px;border-radius:14px;background:#141433;color:#ffd03a;border:3px solid #141433;box-shadow:0 4px 0 #0b0b20;user-select:all;-webkit-user-select:all;word-break:break-all}
+.acc-cod-in{font-family:ui-monospace,monospace!important;letter-spacing:2px;text-transform:uppercase}
+.acc-dim{background:none;border:0;color:#2f5fb8;font:700 14px var(--f-body,system-ui);text-decoration:underline;align-self:flex-start;padding:2px 0;min-height:32px}
+.acc-warn{padding:8px 10px;border-radius:12px;background:#fff1e0;border:2px solid #ff9a3a;font-weight:700;font-size:13.5px!important}
+.acc-due{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acc-due .big{font-size:15px;padding:8px 6px}
+.acc-ic.key{background:#a878e0}
+#caricamento.acc-rec .ld-su{opacity:0;transition:opacity .3s}
+#caricamento.acc-gate-on .ld-giu{max-height:calc(100% - 16px);overflow-y:auto;padding-top:8px}
+@media (max-height:760px){ #caricamento.acc-gate-on:not(.acc-entrando) .ld-su{transform:scale(.8);transform-origin:top center} }
 .pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
 #tb.tb-pan .tbhud{visibility:hidden}
 body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
@@ -7619,34 +7629,44 @@ const ACC = window.ACC = (() => {
   function form(b, tab, rifai){
     b.querySelectorAll('[data-t]').forEach(x => x.onclick = () => rifai(x.dataset.t));
     const err = t => { const e = b.querySelector('#accE'); e.textContent = t; e.hidden = !t; }, ok = b.querySelector('#accOk'), testoOk = ok.textContent;
-    const vai = async () => { const n = b.querySelector('#accN').value.trim(), s = b.querySelector('#accS').value;
+    const dim = b.querySelector('#accDim'); if (dim) dim.onclick = () => rifai('recupera');
+    const vai = async () => { const n = b.querySelector('#accN').value.trim(), s = b.querySelector('#accS').value, cod = tab === 'recupera' ? b.querySelector('#accC').value : '';
+      if (tab === 'recupera' && cod.replace(/[^A-Za-z0-9]/g, '').length !== 12) return err('Il codice di recupero ha 12 lettere e numeri, come ABCD-EFGH-JKLM.');
       if (n.length < 3) return err('Il nome deve avere almeno 3 lettere.'); if (!/^[A-Za-z0-9_ àèéìòùÀÈÉÌÒÙ.\-]+$/.test(n)) return err('Nel nome usa solo lettere, numeri e spazi.'); if (s.length < 4) return err('La parola segreta deve avere almeno 4 caratteri.');
-      if (tab === 'crea' && s !== b.querySelector('#accS2').value) return err('Le due parole segrete non sono uguali.');
+      if ((tab === 'crea' || tab === 'recupera') && s !== b.querySelector('#accS2').value) return err('Le due parole segrete non sono uguali.');
       ok.disabled = true; ok.textContent = 'Un attimo…'; err('');
-      try { const r = await rpc(tab === 'crea' ? 'ds_registra' : 'ds_entra', {p_nome: n, p_segreto: s}); ok.disabled = false; ok.textContent = testoOk;
-        if (r.errore){ try { SUONI.suona('tonfo'); } catch(e){} b.classList.remove('acc-scuoti'); void b.offsetWidth; b.classList.add('acc-scuoti'); return err({nome:'Nome non valido: da 3 a 16 caratteri.', segreto:'Parola segreta non valida.', preso:'Questo nome è già usato: scegline un altro.', sbagliato:'Nome o parola segreta sbagliati.', bloccato:`Troppi tentativi sbagliati: riprova tra ${r.minuti} minuti.`}[r.errore] || 'Qualcosa non va, riprova.'); }
-        A = {token: r.token, nome: r.nome, ultimo: r.aggiornato}; salvaA(); dopoAccesso(r.aggiornato, tab === 'crea'); }
+      try { const r = tab === 'recupera' ? await rpc('ds_recupera', {p_nome: n, p_codice: cod, p_nuovo: s}) : await rpc(tab === 'crea' ? 'ds_registra' : 'ds_entra', {p_nome: n, p_segreto: s}); ok.disabled = false; ok.textContent = testoOk;
+        if (r.errore){ try { SUONI.suona('tonfo'); } catch(e){} b.classList.remove('acc-scuoti'); void b.offsetWidth; b.classList.add('acc-scuoti'); return err({nome:'Nome non valido: da 3 a 16 caratteri.', segreto:'Parola segreta non valida.', preso:'Questo nome è già usato: scegline un altro.', sbagliato:'Nome o parola segreta sbagliati.', codice:'Nome o codice di recupero sbagliati.', bloccato:`Troppi tentativi sbagliati: riprova tra ${r.minuti} minuti.`}[r.errore] || 'Qualcosa non va, riprova.'); }
+        A = {token: r.token, nome: r.nome, ultimo: r.aggiornato}; salvaA();
+        if (r.codice) mostraCodice(r.codice, tab === 'recupera' ? 'Parola segreta cambiata! Ecco il tuo nuovo codice di recupero: quello vecchio non vale più.' : 'Questo codice serve se dimentichi la parola segreta. Salvalo adesso: fai uno screenshot o scrivilo da qualche parte.', () => dopoAccesso(r.aggiornato, tab === 'crea'));
+        else dopoAccesso(r.aggiornato, tab === 'crea'); }
       catch(e){ ok.disabled = false; ok.textContent = testoOk; err('Non riesco a collegarmi. Controlla internet e riprova.'); } };
     ok.onclick = vai; b.querySelectorAll('input').forEach(i => i.onkeydown = e => { if (e.key === 'Enter') vai(); }); }
-  const campi = tab => `<div class="acc-tab"><button type="button" data-t="crea" class="${tab === 'crea' ? 'on' : ''}">Nuovo giocatore</button><button type="button" data-t="entra" class="${tab === 'entra' ? 'on' : ''}">Ho già un account</button></div>
+  const campi = tab => tab === 'recupera' ? `<div class="acc-tab"><button type="button" data-t="entra">‹ Indietro</button><button type="button" class="on">Recupera</button></div>
+      <p class="acc-nota">Scrivi il nome e il codice di recupero che hai ricevuto quando hai creato l’account, poi scegli una parola segreta nuova.</p>
+      <label class="acc-f">Nome del giocatore<input id="accN" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false"></label>
+      <label class="acc-f">Codice di recupero<input id="accC" maxlength="16" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="ABCD-EFGH-JKLM" class="acc-cod-in"></label>
+      <label class="acc-f">Nuova parola segreta<input id="accS" type="password" maxlength="64" autocomplete="new-password" placeholder="almeno 4 caratteri"></label>
+      <label class="acc-f">Ripeti la nuova parola segreta<input id="accS2" type="password" maxlength="64" autocomplete="new-password"></label>
+      <p class="acc-err" id="accE" hidden></p>` : `<div class="acc-tab"><button type="button" data-t="crea" class="${tab === 'crea' ? 'on' : ''}">Nuovo giocatore</button><button type="button" data-t="entra" class="${tab === 'entra' ? 'on' : ''}">Ho già un account</button></div>
       <label class="acc-f">Nome del giocatore<input id="accN" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="es. Natan"></label>
       <label class="acc-f">Parola segreta<input id="accS" type="password" maxlength="64" autocomplete="${tab === 'crea' ? 'new-password' : 'current-password'}" placeholder="almeno 4 caratteri"></label>
-      ${tab === 'crea' ? '<label class="acc-f">Ripeti la parola segreta<input id="accS2" type="password" maxlength="64" autocomplete="new-password"></label><p class="acc-nota">Non usare la password di altri siti. Se la dimentichi non si può recuperare.</p>' : ''}
+      ${tab === 'crea' ? '<label class="acc-f">Ripeti la parola segreta<input id="accS2" type="password" maxlength="64" autocomplete="new-password"></label><p class="acc-nota">Non usare la password di altri siti. Dopo ti diamo un codice per recuperarla se la dimentichi.</p>' : '<button type="button" class="acc-dim" id="accDim">Hai dimenticato la parola segreta?</button>'}
       <p class="acc-err" id="accE" hidden></p>`;
   function apri(tab){ if (provaAttiva()){ const b = finestra(`<h2>Il tuo account</h2><p>Adesso è attivo il pass di prova: i progressi non sono i tuoi veri. Esci dal pass di prova, poi torna qui.</p><button class="big" data-x>Ok</button>`); b.querySelector('[data-x]').onclick = chiudi; return; }
     if (A) return pagina(); tab = tab || 'crea';
     const b = finestra(`<div class="acc-ic"></div><h2>Il tuo account</h2><p class="acc-sub">Salva i progressi online: li ritrovi su ogni telefono o computer, anche se cancelli i dati del browser.</p>
-      ${campi(tab)}<button class="big" id="accOk">${tab === 'crea' ? 'Crea e salva i progressi' : 'Entra'}</button><button class="big alt" data-x>Più tardi</button>`);
+      ${campi(tab)}<button class="big" id="accOk">${tab === 'crea' ? 'Crea e salva i progressi' : tab === 'recupera' ? 'Cambia la parola segreta' : 'Entra'}</button><button class="big alt" data-x>Più tardi</button>`);
     b.querySelector('[data-x]').onclick = chiudi; form(b, tab, apri); setTimeout(() => b.querySelector('#accN').focus(), 80); }
   // ---------- il cancello: la schermata d'ingresso prima del menu
   let CANC = null;
   function cancello(ld, entra){ const giu = ld.querySelector('.ld-giu'); if (!giu){ entra(); return; } CANC = {ld, giu, entra}; ld.classList.add('acc-gate-on'); disegnaCancello(A ? 'dentro' : 'crea'); }
-  function disegnaCancello(tab){ const {giu, entra} = CANC; giu.querySelectorAll('.acc-gate').forEach(x => x.remove());
+  function disegnaCancello(tab){ const {giu, entra} = CANC; giu.querySelectorAll('.acc-gate').forEach(x => x.remove()); CANC.ld.classList.toggle('acc-rec', tab === 'recupera');
     const g = document.createElement('div'); g.className = 'acc-gate'; giu.append(g);
     const vai = nome => { FINE = null; chiudi(); entraAnim(CANC.ld, nome, entra); };
     if (tab === 'dentro' && A){ g.innerHTML = `<div class="acc-bt">Bentornato,</div><div class="acc-nome">${A.nome.replace(/[<>&]/g, '')}</div><button class="acc-entra" id="accGo">Entra nel portale</button><button type="button" class="acc-link" id="accAltro">Non sei tu? Cambia giocatore</button>`;
       g.querySelector('#accGo').onclick = () => vai(A.nome); g.querySelector('#accAltro').onclick = () => { A = null; salvaA(); segna('off'); disegnaCancello('entra'); }; return; }
-    g.innerHTML = `<div class="acc-card"><div class="acc-h">Entra nel portale</div><p class="acc-sub">Con il tuo account i progressi si salvano online e li ritrovi su ogni telefono.</p>${campi(tab)}<button class="big" id="accOk">${tab === 'crea' ? 'Crea il giocatore' : 'Entra'}</button></div>
+    g.innerHTML = `<div class="acc-card"><div class="acc-h">Entra nel portale</div><p class="acc-sub">Con il tuo account i progressi si salvano online e li ritrovi su ogni telefono.</p>${campi(tab)}<button class="big" id="accOk">${tab === 'crea' ? 'Crea il giocatore' : tab === 'recupera' ? 'Cambia la parola segreta' : 'Entra'}</button></div>
       <button type="button" class="acc-link" id="accOspite">Gioca senza account</button>`;
     const card = g.querySelector('.acc-card'); FINE = () => vai(A && A.nome); form(card, tab, t => disegnaCancello(t));
     g.querySelector('#accOspite').onclick = () => { const c = finestra(`<h2>Giocare senza account?</h2><p>I progressi restano solo su questo telefono: se cancelli i dati del browser o cambi telefono li perdi. Puoi creare l’account quando vuoi dal pulsante in alto nel menu.</p><button class="big" id="accSi">Gioca lo stesso</button><button class="big alt" data-x>Crea l’account</button>`);
@@ -7658,6 +7678,12 @@ const ACC = window.ACC = (() => {
     ld.classList.add('acc-entrando');
     setTimeout(() => { try { SUONI.suona('stella2'); } catch(e){} p.classList.add('apri'); }, 900);
     setTimeout(() => { fine(); }, 1700); }
+  function mostraCodice(c, testo, dopo){ const b = finestra(`<div class="acc-ic key"></div><h2>Il tuo codice di recupero</h2><p class="acc-sub">${testo}</p>
+      <div class="acc-cod">${c}</div><button class="big alt" id="accCp">Copia il codice</button><p class="acc-nota">Senza questo codice, se dimentichi la parola segreta i progressi non si possono recuperare. Non mandarlo a nessuno.</p>
+      <button class="big" id="accOkC">L’ho salvato</button>`);
+    try { SUONI.suona('stella1'); } catch(e){}
+    b.querySelector('#accCp').onclick = async e => { try { await navigator.clipboard.writeText(c); e.target.textContent = 'Copiato!'; } catch(er){ const r = document.createRange(); r.selectNodeContents(b.querySelector('.acc-cod')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); e.target.textContent = 'Selezionato: copialo'; } };
+    b.querySelector('#accOkC').onclick = () => dopo(); }
   async function dopoAccesso(online, nuovo){ const loc = dati(), rl = riassunto(loc);
     if (!online){ await invia(true); const b = finestra(`<div class="acc-ic ok"></div><h2>Fatto, ${A.nome}!</h2><p>Da ora i tuoi progressi si salvano online da soli. Su un altro telefono premi il pulsante dell’account e scegli “Ho già un account”.</p><button class="big" data-x>Gioca</button>`); b.querySelector('[data-x]').onclick = finito; try { SUONI.suona('stella2'); EPICO.coriandoli(60); } catch(e){} segna('ok'); return; }
     const b0 = finestra(`<h2>Carico i progressi…</h2>`);
@@ -7674,7 +7700,17 @@ const ACC = window.ACC = (() => {
     b.querySelector('[data-x]').onclick = () => { A = null; salvaA(); segna('off'); if (CANC && FINE){ FINE = null; chiudi(); disegnaCancello('entra'); } else chiudi(); }; }
   function pagina(){ const b = finestra(`<div class="acc-ic ok"></div><h2>Ciao, ${A.nome}!</h2><p class="acc-sub">I tuoi progressi si salvano online da soli.</p>
       <div class="acc-st" data-s="${stato}"><span></span><b id="accStT">${stato === 'errore' ? 'Ultimo tentativo non riuscito: riprovo da solo' : 'Ultimo salvataggio: ' + quando(A.ultimo)}</b></div>
-      <button class="big" id="accSv">Salva adesso</button><button class="big alt" id="accRi">Scarica i progressi online</button><button class="big alt" id="accEsci">Esci da questo telefono</button><button class="big alt" data-x>Chiudi</button>`);
+      <p class="acc-warn" id="accNoC" hidden>Non hai ancora un codice di recupero: crealo, così non perdi l’account se dimentichi la parola segreta.</p>
+      <button class="big" id="accSv">Salva adesso</button><button class="big alt" id="accRi">Scarica i progressi online</button>
+      <div class="acc-due"><button class="big alt" id="accPw">Cambia parola segreta</button><button class="big alt" id="accCod">Codice di recupero</button></div>
+      <button class="big alt" id="accEsci">Esci da questo telefono</button><button class="big alt" data-x>Chiudi</button>`);
+    rpc('ds_stato', {p_token: A.token}).then(r => { const w = b.querySelector('#accNoC'); if (w && r && r.ha_codice === false) w.hidden = false; }).catch(() => {});
+    b.querySelector('#accPw').onclick = () => { const c = finestra(`<h2>Cambia parola segreta</h2><label class="acc-f">Nuova parola segreta<input id="accS" type="password" maxlength="64" autocomplete="new-password" placeholder="almeno 4 caratteri"></label><label class="acc-f">Ripetila<input id="accS2" type="password" maxlength="64" autocomplete="new-password"></label><p class="acc-err" id="accE" hidden></p><button class="big" id="accSi">Cambia</button><button class="big alt" data-x>Annulla</button>`);
+      c.querySelector('[data-x]').onclick = pagina; const err = t => { const e = c.querySelector('#accE'); e.textContent = t; e.hidden = !t; };
+      c.querySelector('#accSi').onclick = async () => { const s = c.querySelector('#accS').value; if (s.length < 4) return err('Almeno 4 caratteri.'); if (s !== c.querySelector('#accS2').value) return err('Le due parole segrete non sono uguali.');
+        try { const r = await rpc('ds_cambia_segreto', {p_token: A.token, p_nuovo: s}); if (r.errore) return err('Non riesco a cambiarla, riprova.'); avviso('Parola segreta cambiata. Sugli altri telefoni dovrai rientrare.'); pagina(); } catch(e){ err('Non riesco a collegarmi.'); } }; };
+    b.querySelector('#accCod').onclick = () => { const c = finestra(`<h2>Nuovo codice di recupero?</h2><p>Ti do un codice nuovo: quello vecchio non varrà più.</p><button class="big" id="accSi">Crea il codice</button><button class="big alt" data-x>Annulla</button>`); c.querySelector('[data-x]').onclick = pagina;
+      c.querySelector('#accSi').onclick = async () => { try { const r = await rpc('ds_nuovo_codice', {p_token: A.token}); if (r.codice) mostraCodice(r.codice, 'Ecco il tuo nuovo codice di recupero. Salvalo adesso.', pagina); else avviso('Non riesco, riprova.'); } catch(e){ avviso('Non riesco a collegarmi.'); } }; };
     b.querySelector('[data-x]').onclick = chiudi;
     b.querySelector('#accSv').onclick = async e => { e.target.disabled = true; e.target.textContent = 'Salvo…'; const ok = await invia(true); if (!document.body.contains(b)) return; e.target.disabled = false; e.target.textContent = 'Salva adesso'; b.querySelector('#accStT').textContent = ok ? 'Ultimo salvataggio: ' + quando(A && A.ultimo) : 'Non riesco a salvare: controlla internet'; };
     b.querySelector('#accRi').onclick = async () => { const c = finestra(`<h2>Scaricare i progressi online?</h2><p>Prendono il posto di quelli su questo telefono.</p><button class="big" id="accSi">Sì, scarica</button><button class="big alt" data-x>Annulla</button>`); c.querySelector('[data-x]').onclick = pagina;
