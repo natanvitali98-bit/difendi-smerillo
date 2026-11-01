@@ -1958,6 +1958,74 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .acc-in::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 32% at 50% 50%,rgba(11,18,64,.82),rgba(11,18,64,.35) 60%,rgba(11,18,64,0));opacity:0;transition:opacity .4s}
 .acc-in.su::before{opacity:1}
 .acc-in.scopri::before{opacity:0;transition:opacity .2s}
+/* ===== tema scuro unico (stile della carta missione) ===== */
+#cqPan,.dlg.box,#title .pan,.acc-box,.acc-card{--carta:#2d3889;--carta2:#232c74;--testo:#ffffff;--grigio:#b8c2f0;--ink:#ffffff;--muted:#b8c2f0;--box:#2d3889;--box-2:#232c74;--th-bord:#141433;
+  background:linear-gradient(180deg,#26307e 0%,#1a1f5c 60%,#141845 100%)!important;color:#fff!important;border:3px solid #141433!important;box-shadow:0 6px 0 #141433,inset 0 2px 0 rgba(255,255,255,.1)!important}
+:is(.dlg.box,#title .pan,.acc-box,.acc-card) p,:is(.dlg.box,#title .pan,.acc-box,.acc-card) .acc-sub,:is(.dlg.box,#title .pan,.acc-box,.acc-card) .acc-nota{color:#d6ddff!important}
+:is(.dlg.box,#title .pan,.acc-box,.acc-card) label,.acc-box .acc-f{color:#b8c2f0!important}
+:is(.dlg.box,#title .pan,.acc-box,.acc-card) .kicker,:is(.dlg.box,#title .pan) .mis-n{color:#ffd03a!important}
+:is(.dlg.box,#title .pan) .how span:nth-child(odd){color:#ffd03a!important}
+:is(.dlg.box,#title .pan) .lu-st{color:#9fc0ff!important}
+#title .pan .hm-card{background:#2d3889!important;color:#fff!important;border-color:#141433!important}
+#title .pan .hm-card.ev{background:#5a3a1c!important}
+#title .pan .hm-card.cm.chiusa,#title .pan .hm-card:disabled{background:#232a63!important;opacity:.8}
+#title .pan .hm-card small{color:#c8d0f5!important}
+#title .pan #mTurni{background:linear-gradient(180deg,#ffd84f,#ffc21a)!important;color:#141433!important}
+#title .pan #mTurni small{color:#3a3a5c!important}
+.dlg.box .mis-dlg{background:rgba(255,255,255,.08)!important}
+.dlg.box .mis-dlg .dlg-tx,.dlg.box .mis-dlg .dlg-tx b{color:#e6ebff!important}
+.dlg.box .mis-dlg .dlg-tx b{color:#ffd03a!important}
+.dlg.box .mis-obi .mo{background:rgba(255,255,255,.08)!important;color:#fff!important}
+.dlg.box .mis-pg{background:#36429a}
+.dlg.box .mis-pg.nem{background:#7a3150}
+.dlg.box .mis-x{color:#fff!important;text-shadow:0 1px 0 #141433}
+.dlg.box .tbspsel button{background:#232c74;border-color:#3d4aa3;color:#fff}
+.dlg.box .tbspsel button[aria-pressed="true"]{background:#ffd03a;color:#141433}
+.dlg.box .mis-tip{color:#d6ddff!important}
+.dlg.box .tbev{background:#5a3a1c!important;border-color:#141433!important}
+.dlg.box .tbev b{color:#fff!important}.dlg.box .tbev small{color:#ffd9a8!important}
+/* carte nelle pagine del menu */
+#title .cr-pg :is(.pr-box,.hm-card,.cl-lista,.cq-mcas,.cr-dif,.cq-sk,.cq-corn,.cq-sblr,.cq-ric,.cq-cap,.pr-prof){--carta:#2d3889;--carta2:#232c74;--testo:#ffffff;--grigio:#b8c2f0;--ink:#fff;--muted:#b8c2f0;background:#2d3889!important;color:#fff!important}
+#title .cr-pg :is(.pr-box,.hm-card,.cl-lista,.cq-mcas,.cq-corn,.cq-ric,.cq-cap){border-color:#141433!important}
+#title .cr-pg .cl-r:nth-child(even){background:rgba(255,255,255,.05)}
+#title .cr-pg .cl-r{color:#fff}
+#title .cr-pg .cl-r.io{background:rgba(255,208,58,.18)}
+#title .cr-pg .cl-pos{background:#3b4799;color:#dfe5ff}
+#title .cr-pg .cl-v small,#title .cr-pg .cl-vuoto{color:#b8c2f0}
+#title .cr-pg .cl-av{background:#3b4799}
+#title .cr-pg .cr-p{color:#e6ebff}
+#title .cr-pg .cq-mqd{color:#b8c2f0!important}
+#title .cr-pg .cq-mqp{color:#ffd03a!important}
+#title .cr-pg .cq-mcas .kicker{color:#ffd03a!important}
+#title .cr-pg .cq-cst span{background:rgba(255,255,255,.08)!important;color:#fff!important}
+#title .cr-pg .cq-cst small,#title .cr-pg .cq-mcas .cq-nota{color:#b8c2f0!important}
+#title .cr-pg .pr-bar,#title .cr-pg .cq-capx{background:#1a1f5c!important}
+#title .cr-pg .pr-bar em{color:#fff;text-shadow:0 1px 0 #141433}
+#title .cr-pg .cq-cap small{color:#b8c2f0}
+.acc-card .acc-h,#caricamento .acc-card .acc-h{color:#fff!important;text-shadow:0 3px 0 #141433}
+/* testi blu sul fondo scuro */
+:is(.dlg.box,#title .pan,.cr-pg,#cqPan) :is(.cq-aiuto,.cq-fr,.cq-it-t b small,.cq-bt small,.cq-casb em,.cq-come summary b,.cq-capt > b small,.cq-mx i,.cq-link,.mis-top,.tbslot .sn,.lu-st){color:#9fbaff!important}
+/* riquadri crema: diventano dorati trasparenti */
+:is(.dlg.box,#cqPan) :is(.cq-anno,.cq-annop,.cq-gloria,.cq-casb,.cq-premio,.cq-mr.io,.cq-punti span.io,.cq-casmini,.cq-mi.pronta,.cq-opera){background:rgba(255,208,58,.14)!important;border-color:#e0a500!important;color:#fff!important}
+/* elementi scelti: giallo pieno con testo scuro */
+:is(.dlg.box,#cqPan) :is(.cq-sct.on,.cq-fo.on,.cq-stg button.on,.cq-cch.on,.cq-mch button.on,.cq-dif button[aria-checked=true],.cq-mtab button.on){background:#ffd03a!important;color:#141433!important}
+:is(.dlg.box,#cqPan) :is(.cq-sct.on,.cq-fo.on,.cq-stg button.on,.cq-cch.on,.cq-mch button.on,.cq-dif button[aria-checked=true],.cq-mtab button.on) *{color:#141433!important}
+/* bottoni e caselle bianche */
+:is(.dlg.box,#cqPan) :is(.cq-dif button,.cq-mtab button,.cq-scst span,.cq-mch button,.cq-cch,.cq-fo,.cq-stg button){background:#232c74;color:#fff;border-color:#3d4aa3}
+:is(.dlg.box,#cqPan) :is(.cq-dif button,.cq-mtab button){border-color:#141433}
+/* riquadri chiusi */
+:is(.dlg.box,#cqPan,.cr-pg) :is(.cq-chiuso,.cq-sblr,.cq-prl){background:rgba(255,255,255,.06)!important;border-color:#4a56a8!important;color:#d6ddff!important}
+:is(.dlg.box,#cqPan) .cq-ric{background:rgba(255,255,255,.07)}
+.dlg.box .cq-naltro{color:#c8d0f5}.dlg.box .cq-naltro.warn{color:#ffcc66}
+.dlg.box .cq-nh{color:#fff}
+.dlg.box .cq-glb{background:#1a1f5c}
+.dlg.box .cq-cst span{background:rgba(255,255,255,.08)!important}
+.dlg.box .cq-warn{color:#7a1d10!important}
+.dlg.box .cq-pr,#cqPan .cq-pr{color:#141433!important}
+.dlg.box li{color:#e6ebff}
+.dlg.box .cq-warn li,.dlg.box .cq-news li{color:inherit}
+#cqPan p,#cqPan small{color:#d6ddff}
+#cqPan b{color:inherit}
 .pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
 #tb.tb-pan .tbhud{visibility:hidden}
 body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
