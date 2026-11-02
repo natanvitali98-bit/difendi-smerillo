@@ -1894,6 +1894,13 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-feed span{font-size:13px;line-height:1.3;background:rgba(255,255,255,.07);border-radius:8px;padding:6px 8px;opacity:.75}
 .cq-feed span.nuovo{opacity:1;border-left:3px solid #ffd03a;animation:cqFeed .4s ease-out}
 @keyframes cqFeed{from{transform:translateX(-10px);opacity:0}to{transform:none}}
+.cq-zoom{display:none}
+@media (min-width:860px) and (min-aspect-ratio:1/1){
+  .cq-centra{right:auto;left:14px;top:auto;bottom:14px}
+  .cq-zoom{display:flex;flex-direction:column;gap:6px;position:absolute;left:14px;bottom:66px;z-index:4}
+  .cq-zoom button{width:44px;height:44px;border-radius:14px;background:rgba(20,20,51,.82);color:#fff;font:900 24px/1 var(--f-big);border:0;cursor:pointer}
+  .cq-zoom button:hover,.cq-centra:hover{background:rgba(40,48,120,.95)}
+}
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -7272,7 +7279,7 @@ function insets(){ const st = el('cqStage'); if (!st || !root) return; const r =
 const ZMAX = 5;
 function misura(){ const st = el('cqStage'); if (!st) return; const r = st.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = Math.max(1, r.width); H = Math.max(1, r.height);
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); insets();
-  fitS = Math.max(.1, Math.min((W - INS.l - INS.r)/WW, Math.max((H - INS.t - INS.b)/WH, (W - INS.l - INS.r)/WW*.8))); cam.s = Math.max(fitS, Math.min(ZMAX, cam.s)); limita(); }
+  const fw = (W - INS.l - INS.r)/WW, fh = (H - INS.t - INS.b)/WH; fitS = Math.max(.1, W > H*1.1 ? Math.min(fw, fh) : Math.min(fw, Math.max(fh, fw*.8))); cam.s = Math.max(fitS, Math.min(ZMAX, cam.s)); limita(); }
 function centra(){ CAMT = null; cam.s = fitS; cam.x = INS.l + (W - INS.l - INS.r - WW*cam.s)/2; cam.y = INS.t + (H - INS.t - INS.b - WH*cam.s)/2; }
 function vaiA(t, s){ CAMT = null; const T = TERRE[t]; cam.s = Math.max(fitS, Math.min(ZMAX, s || Math.max(fitS*2.2, Math.min(.9, (W - INS.l - INS.r)/700)))); cam.x = INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s; cam.y = INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s; limita(); }
 function limita(){ const mw = WW*cam.s, mh = WH*cam.s, iw = W - INS.l - INS.r, ih = H - INS.t - INS.b;
@@ -7488,11 +7495,9 @@ const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRec
 let cFog = null;
 function sfondo(){ const mw = WW*cam.s, mh = WH*cam.s; if (cam.x <= 0 && cam.y <= 0 && cam.x + mw >= W && cam.y + mh >= H) return;
   if (!cFog || cFog.src !== cB){ cFog = document.createElement('canvas'); cFog.width = 40; cFog.height = 45; cFog.src = cB; const g = cFog.getContext('2d'); g.drawImage(cB, 0, 0, 40, 45); g.fillStyle = 'rgba(12,30,18,.5)'; g.fillRect(0, 0, 40, 45); }
-  const ex = Math.max(W, H)*1.2; ctx.imageSmoothingEnabled = true;
-  ctx.drawImage(cFog, 0, 0, 1, 45, cam.x - ex, cam.y, ex, mh); ctx.drawImage(cFog, 39, 0, 1, 45, cam.x + mw, cam.y, ex, mh);
-  ctx.drawImage(cFog, 0, 0, 40, 1, cam.x, cam.y - ex, mw, ex); ctx.drawImage(cFog, 0, 44, 40, 1, cam.x, cam.y + mh, mw, ex);
-  ctx.drawImage(cFog, 0, 0, 1, 1, cam.x - ex, cam.y - ex, ex, ex); ctx.drawImage(cFog, 39, 0, 1, 1, cam.x + mw, cam.y - ex, ex, ex);
-  ctx.drawImage(cFog, 0, 44, 1, 1, cam.x - ex, cam.y + mh, ex, ex); ctx.drawImage(cFog, 39, 44, 1, 1, cam.x + mw, cam.y + mh, ex, ex); }
+  // fuori dalla mappa: la stessa mappa sfocata e scura dietro, invece dei bordi tirati (che facevano le righe)
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; const cx = cam.x + mw/2, cy = cam.y + mh/2, k = Math.max(W/40, H/45, mw/40, mh/45)*1.25;
+  ctx.globalAlpha = .85; ctx.drawImage(cFog, cx - 20*k, cy - 22.5*k, 40*k, 45*k); ctx.globalAlpha = 1; ctx.fillStyle = 'rgba(10,18,40,.45)'; ctx.fillRect(0, 0, W, H); }
 function bordoMondo(){ const mw = WW*cam.s, mh = WH*cam.s, d = 26; if (cam.x <= 0 && cam.y <= 0 && cam.x + mw >= W && cam.y + mh >= H) return;
   const lin = (x0, y0, x1, y1, x, y, w, h) => { const g = ctx.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, 'rgba(8,20,12,.55)'); g.addColorStop(1, 'rgba(8,20,12,0)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); };
   if (cam.x > 0) lin(cam.x, 0, cam.x + d, 0, cam.x, cam.y, d, mh); if (cam.x + mw < W) lin(cam.x + mw, 0, cam.x + mw - d, 0, cam.x + mw - d, cam.y, d, mh);
@@ -7595,7 +7600,7 @@ function spriteBorgo(t){ if (SPRB[t]) return SPRB[t]; const c = document.createE
 
 // ===== tocchi: trascina, pizzica, rotella =====
 const PT = new Map(); let gesto = null;
-function inputMappa(){ cv.addEventListener('pointerdown', e => { CAMT = null; cv.setPointerCapture(e.pointerId); PT.set(e.pointerId, [e.clientX, e.clientY]);
+function inputMappa(){ tastiMappa(); cv.addEventListener('pointerdown', e => { CAMT = null; cv.setPointerCapture(e.pointerId); PT.set(e.pointerId, [e.clientX, e.clientY]);
     if (PT.size === 1) gesto = {x:e.clientX, y:e.clientY, cx:cam.x, cy:cam.y, mosso:false}; else if (PT.size === 2){ const [a, b] = [...PT.values()]; gesto = {pinch:true, d:Math.hypot(a[0] - b[0], a[1] - b[1]), s:cam.s, mx:(a[0] + b[0])/2, my:(a[1] + b[1])/2, cx:cam.x, cy:cam.y, mosso:true}; } });
   cv.addEventListener('pointermove', e => { if (!PT.has(e.pointerId) || !gesto) return; PT.set(e.pointerId, [e.clientX, e.clientY]); const r = cv.getBoundingClientRect();
     if (gesto.pinch && PT.size >= 2){ const [a, b] = [...PT.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), mx = (a[0] + b[0])/2, my = (a[1] + b[1])/2, ns = Math.max(fitS, Math.min(fitS*3.2, gesto.s*d/gesto.d));
@@ -7604,7 +7609,22 @@ function inputMappa(){ cv.addEventListener('pointerdown', e => { CAMT = null; cv
   const su = e => { if (!PT.has(e.pointerId)) return; PT.delete(e.pointerId); if (gesto && !gesto.mosso && PT.size === 0 && e.type === 'pointerup'){ const r = cv.getBoundingClientRect(); tocca(e.clientX - r.left, e.clientY - r.top); }
     if (PT.size === 0) gesto = null; else if (gesto && gesto.pinch){ const [a] = [...PT.values()]; gesto = {x:a[0], y:a[1], cx:cam.x, cy:cam.y, mosso:true}; } };
   cv.addEventListener('pointerup', su); cv.addEventListener('pointercancel', su);
-  cv.addEventListener('wheel', e => { e.preventDefault(); CAMT = null; const r = cv.getBoundingClientRect(), lx = e.clientX - r.left, ly = e.clientY - r.top, ns = Math.max(fitS, Math.min(fitS*3.2, cam.s*(e.deltaY < 0 ? 1.15 : 1/1.15))), wx = (lx - cam.x)/cam.s, wy = (ly - cam.y)/cam.s; cam.s = ns; cam.x = lx - wx*ns; cam.y = ly - wy*ns; limita(); }, {passive:false}); }
+  cv.addEventListener('wheel', e => { e.preventDefault(); CAMT = null; const r = cv.getBoundingClientRect(), lx = e.clientX - r.left, ly = e.clientY - r.top;
+    const k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1, dx = e.deltaX*k, dy = e.deltaY*k, touchpad = !e.ctrlKey && (Math.abs(dx) > 0.5 || (e.deltaMode === 0 && Math.abs(dy) < 50 && dy % 1 !== 0) || (e.deltaMode === 0 && Math.abs(dy) < 16));
+    if (touchpad){ cam.x -= dx; cam.y -= dy; limita(); return; }
+    const f = e.ctrlKey ? Math.exp(-dy*0.01) : (dy < 0 ? 1.18 : 1/1.18); zoomIn(f, lx, ly); }, {passive:false}); }
+function zoomIn(f, lx, ly){ CAMT = null; if (lx == null){ lx = INS.l + (W - INS.l - INS.r)/2; ly = INS.t + (H - INS.t - INS.b)/2; } const ns = Math.max(fitS, Math.min(ZMAX, cam.s*f)), wx = (lx - cam.x)/cam.s, wy = (ly - cam.y)/cam.s; cam.s = ns; cam.x = lx - wx*ns; cam.y = ly - wy*ns; limita(); }
+// tastiera sul PC: frecce o WASD per spostarsi, + e - per ingrandire
+const TASTI = new Set(); let tastiAvviati = false;
+function tastiMappa(){ if (tastiAvviati) return; tastiAvviati = true;
+  const libero = e => attivo && root && !root.hidden && !ovAperto() && !(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName));
+  addEventListener('keydown', e => { if (!libero(e)) return; const k = e.key.toLowerCase();
+    if (['arrowleft', 'arrowright', 'arrowup', 'arrowdown', 'w', 'a', 's', 'd'].includes(k)){ TASTI.add(k); e.preventDefault(); }
+    else if (k === '+' || k === '=') { zoomIn(1.2); e.preventDefault(); } else if (k === '-' || k === '_') { zoomIn(1/1.2); e.preventDefault(); } });
+  addEventListener('keyup', e => TASTI.delete(e.key.toLowerCase())); addEventListener('blur', () => TASTI.clear());
+  let ult = 0; const giro = t => { const dt = Math.min(50, t - (ult || t)); ult = t; if (TASTI.size){ const v = dt*0.9; let dx = 0, dy = 0;
+      if (TASTI.has('arrowleft') || TASTI.has('a')) dx += v; if (TASTI.has('arrowright') || TASTI.has('d')) dx -= v; if (TASTI.has('arrowup') || TASTI.has('w')) dy += v; if (TASTI.has('arrowdown') || TASTI.has('s')) dy -= v;
+      CAMT = null; cam.x += dx; cam.y += dy; limita(); } requestAnimationFrame(giro); }; requestAnimationFrame(giro); }
 function tocca(sx, sy){ if (SCELTA && SCELTA_MOSTRA){ const t = terraIn(sx, sy); if (!t) return; const f = FZ[S.terre[t].own] ? S.terre[t].own : TERRE[t].di; if (f && FZ[f]) SCELTA_MOSTRA(f); return; } if (GIOCA || ovAperto()) return; const t = terraIn(sx, sy); if (!t) return;
   if (modo && modo.tipo === 'sposta'){ if (t !== modo.da && bersagli().includes(t)){ const da = modo.da; modo = null; dlgSposta(da, t); return; } if (t === modo.da){ modo = null; pannello(); return; } }
   modo = null; sel = t; suona('tocco'); TAPS.push({x: sx, y: sy, t: 0}); pannello(); const pn = el('cqPan'); pn.classList.remove('cq-panin'); void pn.offsetWidth; pn.classList.add('cq-panin'); }
@@ -8203,13 +8223,13 @@ function costruisciDom(){ root = document.createElement('section'); root.id = 'c
   root.innerHTML = `<div id="cqStage"><canvas id="cqCv" aria-label="Mappa dei borghi"></canvas></div>
     <header class="cq-hud"><div class="cq-r1"><div class="cq-hl"><b><span class="cq-flag" id="cqFlag"></span><span id="cqTit"></span></b><small id="cqStag"></small></div><button id="cqPausa" aria-label="Pausa">II</button></div>
       <div class="cq-r2"><button type="button" class="cq-pill cq-ris" id="cqRis" aria-label="Le tue risorse: tocca per il bilancio"></button><span class="cq-pill cq-mos" id="cqMos"></span></div></header>
-    <div id="cqToast" class="cq-toast" aria-live="polite"></div><button class="cq-centra" id="cqCentra" aria-label="Rivedi tutta la mappa">${ico('centra', 2)}</button>
+    <div id="cqToast" class="cq-toast" aria-live="polite"></div><div class="cq-zoom"><button type="button" id="cqZin" aria-label="Ingrandisci">+</button><button type="button" id="cqZout" aria-label="Rimpicciolisci">−</button></div><button class="cq-centra" id="cqCentra" aria-label="Rivedi tutta la mappa">${ico('centra', 2)}</button>
     <div class="cq-side"><div id="cqPan"></div><nav class="cq-bar"><button class="big alt" id="cqDip">${ico('amici', 2)} Diplomazia</button><button class="big" id="cqFine">Fine stagione ${ico('play', 2)}</button></nav></div>
     <section id="cqOv" class="overlay" hidden></section>`;
   document.body.append(root); cv = el('cqCv'); ctx = cv.getContext('2d'); inputMappa();
   root.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b || b.disabled || !root.contains(b)) return; const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height)*2.2, sp = document.createElement('span'); sp.className = 'cq-rip'; sp.style.cssText = `left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px;width:${d}px;height:${d}px`; b.append(sp); setTimeout(() => sp.remove(), 520);
     const bu = document.createElement('div'); bu.className = 'cq-burst'; bu.style.cssText = `left:${e.clientX}px;top:${e.clientY}px`; for (let i = 0; i < 8; i++){ const q = document.createElement('i'), a = i/8*Math.PI*2 + Math.random()*.4, v = 22 + Math.random()*16; q.style.setProperty('--dx', Math.cos(a)*v + 'px'); q.style.setProperty('--dy', Math.sin(a)*v + 'px'); q.style.background = ['#ffd03a', '#ffffff', '#ffe98a'][i % 3]; bu.append(q); } root.append(bu); setTimeout(() => bu.remove(), 560); }, {passive: true});
-  el('cqPausa').onclick = pausa; el('cqRis').onclick = dlgBilancio; el('cqDip').onclick = () => dlgDiplomazia(); el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
+  el('cqZin').onclick = () => zoomIn(1.3); el('cqZout').onclick = () => zoomIn(1/1.3); el('cqPausa').onclick = pausa; el('cqRis').onclick = dlgBilancio; el('cqDip').onclick = () => dlgDiplomazia(); el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
   el('cqFine').onclick = () => { if (GIOCA || !S || mpAttesa()) return; const fs = S.mp ? mpFine : fineStagione; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
       o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fs(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fs(); };
   new ResizeObserver(() => { if (attivo) misura(); }).observe(el('cqStage')); new ResizeObserver(() => { if (attivo){ insets(); limita(); } }).observe(root.querySelector('.cq-side')); }
@@ -8641,7 +8661,7 @@ function toastMenu(t){ let d = document.getElementById('mnToast'); if (!d){ d = 
 window.toastMenu = toastMenu;
 
 // ---------- versione nuova: GitHub tiene in memoria la pagina per qualche minuto. Se online c'è una versione più nuova, lo dico e si aggiorna con un tocco.
-(() => { const MIA = '20261102223128'; window.DS_VER = MIA; let visto = false;
+(() => { const MIA = '20261102225911'; window.DS_VER = MIA; let visto = false;
   async function controlla(){ if (visto || !/^https?:/.test(location.protocol) || /prova=/.test(location.search)) return;
     try { const r = await fetch(location.pathname + '?v=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const t = await r.text(); const m = t.match(/const MIA = '(\d{8,})'/); if (!m || !(m[1] > MIA)) return; visto = true;
       const b = document.createElement('div'); b.id = 'dsNuova'; b.innerHTML = '<span><b>C’è una versione nuova del gioco</b><small>Aggiorna per avere le ultime correzioni.</small></span><button type="button">Aggiorna</button>';
