@@ -1890,6 +1890,10 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .ol-modo small{font:400 13px/1.3 var(--f-body,system-ui);opacity:.85}
 .ol-modo:active{transform:translateY(3px);box-shadow:0 1px 0 #141433}
 .ol-passi span{display:block}.ol-passi span b{color:#ffd03a}
+.cq-feed{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.cq-feed span{font-size:13px;line-height:1.3;background:rgba(255,255,255,.07);border-radius:8px;padding:6px 8px;opacity:.75}
+.cq-feed span.nuovo{opacity:1;border-left:3px solid #ffd03a;animation:cqFeed .4s ease-out}
+@keyframes cqFeed{from{transform:translateX(-10px);opacity:0}to{transform:none}}
 /* ===== account ===== */
 .acc-btn{position:relative}
 .acc-btn i{position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid #141433;background:#9aa0b4}
@@ -2163,6 +2167,16 @@ button.cr-res{border:0;cursor:pointer;color:#fff}
 #dsNuova{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:99999;display:flex;align-items:center;gap:12px;background:#1d2266;color:#fff;border:3px solid #ffd03a;border-radius:16px;padding:12px 14px;box-shadow:0 8px 0 rgba(0,0,0,.35);font-family:var(--f-body,system-ui)}
 #dsNuova span{flex:1;display:flex;flex-direction:column;gap:2px}#dsNuova small{opacity:.85}
 #dsNuova button{flex:none;background:#ffd03a;color:#141433;border:0;border-radius:12px;padding:10px 14px;font-weight:900;font-size:15px;font-family:inherit}
+.olchi{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:16px}
+.olchi b{color:#ffd03a}
+/* schermata di caricamento */
+.ld2 .ld2-in{display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 28px;text-align:center;max-width:420px}
+.ld2 .ld2-t,.ld2 .ld2-bar,.ld2 .ld2-tip{opacity:0;transition:opacity .25s}
+.ld2.ld2-vedi .ld2-t,.ld2.ld2-vedi .ld2-bar,.ld2.ld2-vedi .ld2-tip{opacity:1}
+.ld2 .ld2-t{font-family:var(--f-big);font-size:24px;color:#fff;text-shadow:0 3px 0 #141433;letter-spacing:.3px}
+.ld2 .ld2-bar{display:block;width:220px;height:18px;background:#141433;border:3px solid #141433;box-shadow:0 0 0 3px #ffd03a;overflow:hidden}
+.ld2 .ld2-bar i{display:block;height:100%;width:10%;background:repeating-linear-gradient(90deg,#ffd03a 0 12px,#f5a600 12px 18px);transition:width .2s linear}
+.ld2 .ld2-tip{font-family:var(--f-body);font-size:14px;line-height:1.4;color:#cfd7ff;max-width:300px}
 .pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
 #tb.tb-pan .tbhud{visibility:hidden}
 body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
@@ -4457,17 +4471,39 @@ function vaiA(L){ const [x,y] = P(L.e, L.n, L.z); if (scale < 1.6){ scale = 1.6;
 
 // ===== SCHERMATA INIZIALE: una pagina tutta sua, con il paese che si muove sullo sfondo =====
 // ===== transizioni: un cerchio che si allarga dal punto toccato copre lo schermo, cambia scena, poi si riapre =====
-function transizione(ev, fn){
-  const lento = matchMedia('(prefers-reduced-motion: reduce)').matches; if (lento || !document.body.animate){ fn(); return; }
+function transizione(ev, fn, testo){ CARICA(fn, testo || (attivoGioco() ? 'Carico…' : 'Torno al menu…'), ev); }
+const attivoGioco = () => { const t = document.getElementById('title'); return !!(t && !t.hidden); };
+// ===== SCHERMATA DI CARICAMENTO =====
+// Copre lo schermo mentre una modalità si prepara e lo scopre solo quando l'animazione è fluida (niente scatti o grafica a metà).
+const CONSIGLI_CARICA = ['Il Lanciere può buttare giù dalla rupe i nemici sul bordo.', 'Le mura rallentano chi attacca: costruiscile presto.', 'In Conquista le frazioni producono ogni stagione: tienile.', 'Un patto con un borgo vicino ti lascia libero di attaccare l’altro.', 'Le castagne servono per costruire e potenziare le difese.', 'Con un account i progressi si salvano online da soli.', 'Il Falco smeriglio colpisce dall’alto i nemici più veloci.', 'In Conquista un borgo sotto assedio perde soldati ogni stagione.', 'La Sfida del giorno cambia ogni giorno: è uguale per tutti.', 'Nell’Assedio le tappe diventano sempre più difficili.'];
+let CARICA_ON = null;
+function CARICA(fn, testo, ev){
+  if (CARICA_ON){ try { fn(); } catch(e){ console.error(e); } CARICA_ON.estendi(); return; }
+  const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const x = ev && ev.clientX != null && ev.clientX > 0 ? ev.clientX : innerWidth/2, y = ev && ev.clientY != null && ev.clientY > 0 ? ev.clientY : innerHeight/2;
   const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 20;
-  const v = document.createElement('div'); v.className = 'tr-velo'; v.innerHTML = '<span class="tr-ic"></span>'; document.body.append(v);
-  try { v.querySelector('.tr-ic').append(TB.icona('lanciere', 4)); } catch(e){}
+  const v = document.createElement('div'); v.className = 'tr-velo ld2';
+  v.innerHTML = `<div class="ld2-in"><span class="tr-ic"></span><b class="ld2-t">${testo || 'Carico…'}</b><span class="ld2-bar"><i></i></span><small class="ld2-tip">${CONSIGLI_CARICA[Math.floor(Math.random()*CONSIGLI_CARICA.length)]}</small></div>`;
+  document.body.append(v); try { v.querySelector('.tr-ic').append(TB.icona('lanciere', 4)); } catch(e){}
   try { SUONI.suona('flip'); } catch(e){}
-  v.animate([{clipPath:`circle(0px at ${x}px ${y}px)`}, {clipPath:`circle(${r}px at ${x}px ${y}px)`}], {duration:230, easing:'cubic-bezier(.5,0,.3,1)', fill:'forwards'}).onfinish = () => {
-    try { fn(); } catch(e){ console.error(e); }
-    requestAnimationFrame(() => { v.animate([{clipPath:`circle(${r}px at 50% 50%)`}, {clipPath:'circle(0px at 50% 50%)'}], {duration:320, easing:'cubic-bezier(.5,0,.3,1)', fill:'forwards'}).onfinish = () => v.remove(); }); };
+  const bar = v.querySelector('.ld2-bar i'); let fine = false, tMin = 0;
+  const stato = CARICA_ON = {estendi(){ tMin = performance.now() + 500; }};
+  const chiudi = () => { if (fine) return; fine = true; CARICA_ON = null; if (bar) bar.style.width = '100%';
+    if (lento || !v.animate){ v.remove(); return; }
+    v.animate([{clipPath:`circle(${r}px at 50% 50%)`}, {clipPath:'circle(0px at 50% 50%)'}], {duration:320, easing:'cubic-bezier(.5,0,.3,1)', fill:'forwards'}).onfinish = () => v.remove(); };
+  // aspetta che le immagini si muovano lisce: 12 fotogrammi di fila sotto i 34 ms (al massimo 7 secondi)
+  const aspetta = () => { const t0 = performance.now(); tMin = t0 + 550; let ult = t0, buoni = 0;
+    const giro = now => { if (fine) return; const dt = now - ult; ult = now; buoni = dt < 34 ? buoni + 1 : 0; const t = now - t0;
+      if (bar) bar.style.width = Math.min(92, 18 + t/40) + '%';
+      if (t > 300) v.classList.add('ld2-vedi');
+      if ((now > tMin && buoni >= 12) || t > 7000) chiudi(); else requestAnimationFrame(giro); };
+    requestAnimationFrame(giro); };
+  const vai = () => { requestAnimationFrame(() => requestAnimationFrame(() => { try { fn(); } catch(e){ console.error(e); } aspetta(); })); };
+  if (lento || !v.animate){ v.style.clipPath = 'none'; vai(); return; }
+  v.animate([{clipPath:`circle(0px at ${x}px ${y}px)`}, {clipPath:`circle(${r}px at ${x}px ${y}px)`}], {duration:230, easing:'cubic-bezier(.5,0,.3,1)', fill:'forwards'}).onfinish = vai;
 }
+window.CARICA = CARICA;
+
 let RIENTRO = null; // dopo uno scrigno si torna dove eri, senza rifare le animazioni
 function mostraMenu(pannello){
   if (pannello !== 'gioca' && pannello !== 'cmis') mappaRT(0); // fuori dalla Difesa in tempo reale torna la mappa di Smerillo (serve allo sfondo del menu)
@@ -6027,9 +6063,9 @@ function squadra(i){
   const box = o.querySelector('#tbSq');
   M.start.forEach(([t0, nodo], k) => { const b = document.createElement('button'); b.className = 'tbslot'; b.innerHTML = `<span class="sn">Posto ${k+1}: ${NODI[nodo].nome}</span>`; b.append(carta(sq[k]));
     b.onclick = () => scegliPer(i, sq, k); box.append(b); });
-  o.querySelector('#tbSqOk').onclick = () => { salvaSquadra(i, sq); SQUADRA = sq.slice(); chiudiOv(); avvia(true); };
+  o.querySelector('#tbSqOk').onclick = () => { salvaSquadra(i, sq); SQUADRA = sq.slice(); chiudiOv(); CARICA(() => avvia(true), 'Preparo la missione…'); };
   o.querySelector('#tbSqDif').onclick = () => { chiudiOv(); collezione(() => squadra(i)); };
-  o.querySelector('#tbSqInd').onclick = () => { chiudiOv(); SQUADRA = squadraDi(i); avvia(true); };
+  o.querySelector('#tbSqInd').onclick = () => { chiudiOv(); SQUADRA = squadraDi(i); CARICA(() => avvia(true), 'Preparo la missione…'); };
 }
 function scegliPer(i, sq, k){
   const col = leggiCol(), usati = new Set(sq.filter((t, j) => j !== k && rarDi(t) > 0));
@@ -6192,7 +6228,8 @@ function sceltaLista(luogo){
   o.querySelector('#tbMapB').onclick = () => scelta();
   o.querySelector('#tbEsci3').onclick = esci;
 }
-function giocaEvento(){ SFIDA = null; SEME_FISSO = null; SQUADRA = null; RUN = null; SFIDA_AMICO = null; provenienza = 'missioni'; caricaMissione(EVENTO); el('tbTit').textContent = '🌰 ' + M.titolo; fitCam(); avvia(true); }
+function giocaEvento(){ CARICA(giocaEvento_, 'Preparo l’evento…'); }
+function giocaEvento_(){ SFIDA = null; SEME_FISSO = null; SQUADRA = null; RUN = null; SFIDA_AMICO = null; provenienza = 'missioni'; caricaMissione(EVENTO); el('tbTit').textContent = '🌰 ' + M.titolo; fitCam(); avvia(true); }
 // ---------- 4. sfida un amico: il link porta la missione e il punteggio da battere ----------
 function puntiPartita(){ if (!S || S.esito !== 'vinto') return 0; return stelle().filter(Boolean).length*1000 + S.porta*100 + Math.max(0, 40 - (S.turno - 1))*10 + ((S.st && S.st.k) || 0)*5; }
 function sfidaAmico(d){ const i = MISSIONI.findIndex(m => String(m.num) === String(d.m)); if (i < 0){ scelta(); return; } const m = MISSIONI[i], s = Math.max(0, Math.min(3, +d.s || 0));
@@ -6408,9 +6445,11 @@ function menuPausa(){
   o.querySelector('#tbSc').onclick = () => { chiudiOv(); scelta(); }; o.querySelector('#tbEsci2').onclick = esci;
 }
 function avvia(conIntro = true){ root.classList.remove('tb-pan'); SUONI.musica(M.evento ? 'festa' : M.luogo === 'sm' || M.luogo === 'ce' ? 'sm' : 'smerillo'); moneteViste = null; S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; fx = []; coda = []; ev = null; nuovoTempo(); aggiornaAnteprima(); if (conIntro) intro(); render(); }
-function giocaSfida(){ const sf = sfidaDiOggi(); SFIDA = sf; SEME_FISSO = sf.giorno * 7919 + sf.mi; SQUADRA = squadraDi(sf.mi); caricaMissione(sf.mi); el('tbTit').textContent = `Sfida: ${M.titolo}`; fitCam(); avvia(true); }
+function giocaSfida(){ CARICA(giocaSfida_, 'Preparo la sfida…'); }
+function giocaSfida_(){ const sf = sfidaDiOggi(); SFIDA = sf; SEME_FISSO = sf.giorno * 7919 + sf.mi; SQUADRA = squadraDi(sf.mi); caricaMissione(sf.mi); el('tbTit').textContent = `Sfida: ${M.titolo}`; fitCam(); avvia(true); }
 function prepara(i){ SFIDA = null; SEME_FISSO = null; if (i === 0 && !leggiRec().m1){ SQUADRA = null; gioca(0); } else { SQUADRA = squadraDi(i); gioca(i); } } // si gioca subito con l'ultima squadra: la cambi dall'intro
-function gioca(i){ caricaMissione(i); el('tbTit')._h = null; el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); avvia(true); }
+function gioca(i){ CARICA(() => gioca_(i), 'Preparo la missione…'); }
+function gioca_(i){ caricaMissione(i); el('tbTit')._h = null; el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); avvia(true); }
 let provenienza = 'menu';
 function apri(modo){ provenienza = 'menu'; root.hidden = false; root.classList.toggle('tb-pan', !modo || modo === 'missioni' || modo === 'collezione' || modo === 'amici' || modo === 'incarichi' || modo === 'ruota'); attivo = true; requestAnimationFrame(() => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + (i + 1)]) i++; caricaMissione(i); el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); S = nuovo(); aggiornaAnteprima(); render(); RUN = null; SFIDA = null; SEME_FISSO = null; if (modo === 'gioca') prepara(i); else if (modo === 'sfida') giocaSfida(); else if (modo === 'collezione') collezione(); else if (modo === 'incarichi') incarichi(); else if (modo === 'amici') amici(); else if (modo === 'assedio') assedio(); else if (modo === 'evento') giocaEvento(); else if (modo === 'ruota') ruota(); else if (modo && modo.amico) sfidaAmico(modo.amico); else scelta(); }); }
 function premiaSopra(tipo){ root.classList.add('sopra'); root.hidden = false; attivo = false; RUN = null; mostraScrigno(tipo, () => esci()); }
@@ -6478,7 +6517,8 @@ const mioCod = () => NET ? (NET.modo === 'vs' ? NET.ruolo : NET.io) : null;
 const mioTurno = () => !online() || (S && S.fase === mioCod());
 const puoComandare = d => !online() || (mioTurno() && (NET.modo === 'vs' ? NET.ruolo === 'd' : d.own === NET.io));
 const NOMEKEY = 'difendi-smerillo-nome';
-const mioNome = () => { try { return localStorage.getItem(NOMEKEY) || 'Amico'; } catch(e){ return 'Amico'; } };
+const nomeAccount = () => { try { return typeof ACC !== 'undefined' && ACC.account && ACC.account.nome ? String(ACC.account.nome).slice(0, 14) : ''; } catch(e){ return ''; } };
+const mioNome = () => { const a = nomeAccount(); if (a) return a; try { return localStorage.getItem(NOMEKEY) || 'Amico'; } catch(e){ return 'Amico'; } };
 const COSTI_ATT = [['fante',1],['balestriere',2],['guastatore',2],['spia',2],['corvo',2],['corazzato',3],['cavaliere',3],['catapulta',4],['nero',8]];
 const MAX_ATT = 3;
 function invia(m){ try { if (NET && NET.conn) NET.conn.send(JSON.stringify(m)); } catch(e){} }
@@ -6653,9 +6693,9 @@ function amici(){ chiudiNet();
   const o = overlay(`<div class="dlg box ol-home"><h2>${ico('amici', 3)} Gioca con gli amici</h2>
     <div class="ol-passi"><div><b>1</b><span>Uno di voi <b>crea la stanza</b> e sceglie a cosa giocare.</span></div><div><b>2</b><span>Manda il <b>codice</b> agli altri (su WhatsApp).</span></div><div><b>3</b><span>Gli altri toccano <b>Entra con un codice</b> e lo scrivono.</span></div></div>
     ${dentroClaude() && !/prova=bc/.test(location.search) ? '<p class="olavv">Dentro l’app Claude il gioco online non funziona: apri il gioco dal sito in Safari o Chrome.</p>' : ''}
-    <label class="olnome">Il tuo nome <input id="olNome" maxlength="14" value="${mioNome().replace(/"/g, '')}"></label>
+    ${nomeAccount() ? `<p class="olchi">${ico('ok', 2)} Giochi come <b>${nomeAccount().replace(/[<>&"]/g, '')}</b></p>` : `<label class="olnome">Il tuo nome <input id="olNome" maxlength="14" placeholder="Come ti chiami?" value="${(mioNome() === 'Amico' ? '' : mioNome()).replace(/"/g, '')}"></label>`}
     <button class="big" id="olCrea">Crea una stanza</button><button class="big alt" id="olEntra">Entra con un codice</button><button class="big alt" id="olNo">Indietro</button><p class="fz">Serve internet. Ognuno gioca dal suo telefono, anche lontani.</p></div>`);
-  const salvaNome = () => { const v = o.querySelector('#olNome').value.trim().slice(0, 14); if (v) try { localStorage.setItem(NOMEKEY, v); } catch(e){} };
+  const salvaNome = () => { const i = o.querySelector('#olNome'); const v = i ? i.value.trim().slice(0, 14) : ''; if (v) try { localStorage.setItem(NOMEKEY, v); } catch(e){} };
   o.querySelector('#olCrea').onclick = () => { salvaNome(); sceltaGioco(); };
   o.querySelector('#olEntra').onclick = () => { salvaNome(); entraCodice(); };
   o.querySelector('#olNo').onclick = () => { chiudiOv(); esci(); }; }
@@ -6667,13 +6707,13 @@ function sceltaGioco(){ const o = overlay(`<div class="dlg box ol-home"><h2>A co
     <button class="big alt" id="olNo">Indietro</button></div>`);
   o.querySelector('#olNo').onclick = amici;
   o.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { const g = b.dataset.g; SUONI.suona('tocco');
-    if (g === 'cq'){ chiudiOv(); esci(); setTimeout(() => { const t = document.getElementById('title'); if (t) t.hidden = true; CQ.apri('crea'); }, 0); return; }
+    if (g === 'cq'){ chiudiOv(); esci(); setTimeout(() => CARICA(() => { const t = document.getElementById('title'); if (t) t.hidden = true; CQ.apri('crea'); }, 'Apro la Conquista…'), 0); return; }
     creaStanza(); const ov2 = el('tbOv'), m = ov2.querySelector(`[data-m="${g}"]`); if (m) m.click(); const sc = ov2.querySelector('#olModo'); if (sc) sc.hidden = true; const h = ov2.querySelector('h2'); if (h) h.textContent = g === 'vs' ? 'Uno contro l’altro' : 'Missione insieme'; const no = ov2.querySelector('#olNo'); if (no) no.onclick = sceltaGioco; }); }
 // un solo posto per entrare: il codice dice da solo a cosa si gioca (quelli della Conquista cominciano con K)
 function entraCodice(){ const o = overlay(`<div class="dlg box ol-home"><h2>Entra con un codice</h2><p>Scrivi il codice che ti hanno mandato. Il gioco capisce da solo se è una Conquista o una missione.</p><input id="olCod" class="olcodin" maxlength="5" autocapitalize="characters" autocomplete="off" placeholder="ABCDE"><p class="fz" id="olMsg"></p><button class="big" id="olVai">Entra</button><button class="big alt" id="olNo">Indietro</button></div>`);
   o.querySelector('#olNo').onclick = amici;
   o.querySelector('#olVai').onclick = () => { const cod = o.querySelector('#olCod').value.trim().toUpperCase(); if (cod.length !== 5){ o.querySelector('#olMsg').textContent = 'Il codice ha 5 lettere o numeri.'; return; }
-    if (cod[0] === 'K'){ chiudiOv(); esci(); setTimeout(() => { const t = document.getElementById('title'); if (t) t.hidden = true; CQ.apri('entra:' + cod); }, 0); return; }
+    if (cod[0] === 'K'){ chiudiOv(); esci(); setTimeout(() => CARICA(() => { const t = document.getElementById('title'); if (t) t.hidden = true; CQ.apri('entra:' + cod); }, 'Entro nella stanza…'), 0); return; }
     entraStanza(); const ov2 = el('tbOv'); ov2.querySelector('#olCod').value = cod; const no = ov2.querySelector('#olNo'); if (no) no.onclick = entraCodice; ov2.querySelector('#olVai').click(); }; }
 function creaStanza(){ let modo = 'coop', ruolo = 'd', mi = 0; const r = leggiRec();
   const mis = MISSIONI.map((m, i) => `<option value="${i}">${m.num}. ${m.titolo}</option>`).join('');
@@ -6719,7 +6759,7 @@ function sfidaDiOggi(){ const g = oggi(), r = leggiRec(); let max = 0; while (ma
 function riepilogo(){ const r = leggiRec(); return {missioni: MISSIONI.map(m => ({num:m.num, titolo:m.titolo, stelle:(r['m' + m.num] || {}).stelle || 0})), sfida: sfidaDiOggi()}; }
 const prossima = () => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + MISSIONI[i].num]) i++; return MISSIONI[i]; };
 const contaDif = () => { const c = leggiCol(); return DIFENSORI.filter(t => c[t]).length + ' di ' + DIFENSORI.length; };
-return {rete: () => ({trasporto, mioNome, dentroClaude}), eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE: () => SCENA_CE || (SCENA_CE = CE.crea()), preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
+return {rete: () => ({trasporto, mioNome, nomeAccount, dentroClaude}), eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE: () => SCENA_CE || (SCENA_CE = CE.crea()), preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
 })();
 
 // ===== Conquista: scegli il tuo borgo, rinforzalo e conquista gli altri (a turni, contro il computer) =====
@@ -6998,7 +7038,7 @@ const setAmic = (a, b, v) => { S.amic[pk(a, b)] = Math.max(-100, Math.min(100, M
 const alleati = (a, b) => !!S.all[pk(a, b)];
 const stagione = t => STAGIONI[(t - 1) % 4] + ', anno ' + Math.ceil(t/4);
 const livAmic = v => v >= 50 ? ['Amico fidato', '#58c838'] : v >= 15 ? ['Amico', '#98d860'] : v > -15 ? ['Neutrale', '#c8c8d0'] : v > -50 ? ['Ostile', '#f08838'] : ['Nemico', '#e04830'];
-const salva = () => { if (S && S.mp) return; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} };
+const salva = () => { if (S && S.mp){ mpLive(); return; } try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} };
 const carica = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.v === 3 && !s.fine ? s : null; } catch(e){ return null; } };
 const terreDi = f => IDS.filter(t => S.terre[t].own === f);
 const soldDi = f => terreDi(f).reduce((a, t) => a + S.terre[t].sold, 0);
@@ -7744,7 +7784,7 @@ function aggiornaUI(){ if (root) root.classList.toggle('vuoto', !S || !!SCELTA);
   el('cqFine').disabled = !!GIOCA || mpAttesa(); el('cqFine').classList.toggle('pronto', S.mosse === 0 && !GIOCA); el('cqDip').disabled = !!GIOCA || mpAttesa();
   { const fl = el('cqFlag'), stc = CAS && stemma(CAS.stemma, 1); if (stc){ fl.className = 'cq-flag cq-flagst'; fl.style.background = 'none'; fl.innerHTML = ''; const im = new Image(); im.src = stc.toDataURL(); im.width = 18; im.height = 21; fl.append(im); } else { fl.className = 'cq-flag'; fl.style.background = FZ[S.io].col; } } pannello(); }
 function barraAmic(v){ const [n, c] = livAmic(v); return `<span class="cq-am"><span class="cq-amb"><i style="left:${(v + 100)/2}%;background:${c}"></i></span><em style="color:${c}">${n}</em></span>`; }
-function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()){ p.innerHTML = `<div class="cq-ph cq-mpw"><b>${ico('clessidra', 2)} Tocca a ${mpNomeDi(mpBorgoDi(S.mp.fase))}</b><small>Sta giocando la sua stagione con ${FZ[mpBorgoDi(S.mp.fase)] ? FZ[mpBorgoDi(S.mp.fase)].corto : ''}. Intanto puoi guardare la mappa: quando finisce tocca a te.</small></div>`; return; }
+function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()){ p.innerHTML = `<div class="cq-ph cq-mpw"><b>${ico('clessidra', 2)} Tocca a ${mpNomeDi(mpBorgoDi(S.mp.fase))}</b><small>Sta giocando la sua stagione con ${FZ[mpBorgoDi(S.mp.fase)] ? FZ[mpBorgoDi(S.mp.fase)].corto : ''}. Le sue mosse le vedi sulla mappa mentre le fa.</small>${MPN && MPN.feed && MPN.feed.length ? `<div class="cq-feed">${MPN.feed.map((t, i) => `<span class="${i === MPN.feed.length - 1 ? 'nuovo' : ''}">${t}</span>`).join('')}</div>` : ''}</div>`; return; }
   if (GIOCA){ p.innerHTML = `<div class="cq-ph"><b>Muovono gli altri borghi…</b></div><button class="big alt cq-salta" id="cqSalta">Salta</button>`; el('cqSalta').onclick = () => { ANIM.length = 0; const G = GIOCA; if (G){ G.i = G.ev.length; passo(); } }; return; }
   if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra (gialla che lampeggia): ci arrivano passando per le tue terre${MP().marcia ? `, al massimo ${MP().marcia} terre più in là` : ''}.</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
   if (!sel){ const n = terreDi(S.io).length, mieB = Object.keys(FZ).filter(f => S.terre[f].own === S.io).length, F0 = S.fz[S.io];
@@ -8154,11 +8194,11 @@ function nuova(io, dif = 'normale', sim = false, veloce = false, mappa = null){ 
   if (S.esp) for (const f in FZ) if (f !== io && S.terre[f]) S.terre[f].sold += Math.round(S.esp*10);
   S.capNews = null; if (!sim){ leggiCas(); cron(`${NomeCas()}${CAS ? ', alla ' + (CAS.gen + 1) + 'ª generazione,' : ''} prende ${FZ[io].nome}. È ${ANNI[S.anno].nome.charAt(0).toLowerCase() + ANNI[S.anno].nome.slice(1)}.`, 3); S.capNews = capInizio(); }
   sel = io; modo = null; VISTA = null; tintKey = ''; if (!sim) salva(); vaiA(io); aggiornaUI(); }
-function pausa(){ const o = ov(`<div class="dlg box cq-dlg"><h2>Pausa</h2><p>La partita si salva da sola: puoi uscire e riprenderla quando vuoi.</p><button type="button" class="tbaudio" id="cqAud">${SUONI.muto ? 'Suoni spenti' : 'Suoni accesi'}</button>
-    <button class="big" id="cqRi">Riprendi</button><button class="big alt" id="cqCs">La cronaca</button><button class="big alt" id="cqGu">Come funziona</button><button class="big alt" id="cqNu">Ricomincia (scegli il borgo)</button><button class="big alt" id="cqMe">Torna al menu</button></div>`);
+function pausa(){ const o = ov(`<div class="dlg box cq-dlg"><h2>Pausa</h2><p>${S && S.mp ? `Partita online con gli amici: il gioco va avanti anche se metti in pausa. Se esci, ${mpG().length > 2 ? 'il tuo borgo lo muove il computer e gli altri continuano' : 'la partita finisce anche per l’altro'}.` : 'La partita si salva da sola: puoi uscire e riprenderla quando vuoi.'}</p><button type="button" class="tbaudio" id="cqAud">${SUONI.muto ? 'Suoni spenti' : 'Suoni accesi'}</button>
+    <button class="big" id="cqRi">Riprendi</button><button class="big alt" id="cqCs">La cronaca</button><button class="big alt" id="cqGu">Come funziona</button>${S && S.mp ? '' : '<button class="big alt" id="cqNu">Ricomincia (scegli il borgo)</button>'}<button class="big alt" id="cqMe">${S && S.mp ? 'Esci dalla partita' : 'Torna al menu'}</button></div>`);
   o.querySelector('#cqRi').onclick = chiudiOv; o.querySelector('#cqCs').onclick = () => dlgCasata(); o.querySelector('#cqGu').onclick = () => dlgAiuto(); o.querySelector('#cqMe').onclick = esci;
   o.querySelector('#cqAud').onclick = () => { SUONI.muto = !SUONI.muto; if (!SUONI.muto) SUONI.musica('sm'); o.querySelector('#cqAud').textContent = SUONI.muto ? 'Suoni spenti' : 'Suoni accesi'; };
-  o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; }
+  const nu = o.querySelector('#cqNu'); if (nu) nu.onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; }
 function costruisciDom(){ root = document.createElement('section'); root.id = 'cq'; root.hidden = true;
   root.innerHTML = `<div id="cqStage"><canvas id="cqCv" aria-label="Mappa dei borghi"></canvas></div>
     <header class="cq-hud"><div class="cq-r1"><div class="cq-hl"><b><span class="cq-flag" id="cqFlag"></span><span id="cqTit"></span></b><small id="cqStag"></small></div><button id="cqPausa" aria-label="Pausa">II</button></div>
@@ -8212,6 +8252,7 @@ const mpAltriNomi = () => mpG().filter(p => p.borgo !== S.io).map(p => p.nome).j
 function mpAttesa(){ return !!(S && S.mp && MPN && S.mp.fase !== MPN.io); }
 const mpRete = () => { try { return TB.rete(); } catch(e){ return null; } };
 const mpNome = () => { const r = mpRete(); return r ? r.mioNome() : 'Amico'; };
+const mpAcc = () => { const r = mpRete(); return r && r.nomeAccount ? r.nomeAccount() : ''; };
 // trasporto: quello del gioco (PeerJS). Con ?prova=bc nell'indirizzo, BroadcastChannel tra schede (per le prove, anche in tre)
 function mpTrasporto(){ if (!/prova=bc/.test(location.search)) return mpRete().trasporto();
   const conn = (bc, io, a) => { const h = {data:[], close:[]}; bc.addEventListener('message', e => { const d = e.data || {}; if (d.a !== io || d.da !== a) return; if (d.m) h.data.forEach(f => f(d.m)); if (d.bye) h.close.forEach(f => f()); });
@@ -8219,6 +8260,11 @@ function mpTrasporto(){ if (!/prova=bc/.test(location.search)) return mpRete().t
   return { async crea(cod, suConn){ const bc = new BroadcastChannel('dsq-' + cod); bc.addEventListener('message', e => { const d = e.data || {}; if (d.ciao && d.a === 'h'){ const c = conn(bc, 'h', d.da); bc.postMessage({da:'h', a:d.da, ok:1}); suConn(c); } }); return {chiudi(){ try { bc.close(); } catch(e){} }}; },
     async entra(cod){ const bc = new BroadcastChannel('dsq-' + cod), me = 'x' + Math.random().toString(36).slice(2, 8); return new Promise((ok, ko) => { const t = setTimeout(() => { const e = new Error('nessuno'); e.tipo = 'nessuno'; ko(e); }, 4000);
       bc.addEventListener('message', e => { const d = e.data || {}; if (d.ok && d.a === me){ clearTimeout(t); ok(conn(bc, me, 'h')); } }); bc.postMessage({da:me, a:'h', ciao:1}); }); } }; }
+// durante il turno di un amico gli altri vedono le sue mosse dal vivo (attacchi con l'animazione, costruzioni, soldati)
+function mpLive(){ if (!MPN || !S || !S.mp || mpAttesa() || S.mp.fase === 'calc' || MPN._lt) return; MPN._lt = setTimeout(() => { if (!MPN) return; MPN._lt = null; if (S && S.mp && !mpAttesa()) mpInvia({t:'live', S}); }, 350); }
+function mpVedi(nS){ if (!MPN || !S || !S.mp) return; const log = ((nS.mp && nS.mp.log) || []).filter(e => e.n > (MPN.visto || 0)); PRIMA_SNAP = JSON.parse(JSON.stringify(S.terre)); mpApplica(nS);
+  const dopo = () => { aggiornaUI(); pannello(); const q = MPN && MPN._livePend; if (q){ MPN._livePend = null; mpVedi(q); } };
+  if (log.length){ MPN.visto = log[log.length - 1].n; MPN.feed = (MPN.feed || []).concat(log.map(e => e.testo)).slice(-4); suona('tocco'); riproduciEv(log, dopo); } else dopo(); }
 function mpInvia(m, tranne){ const t = JSON.stringify(m); try { if (!MPN) return; if (MPN.io === 'h'){ for (const id in MPN.conns) if (id !== tranne) MPN.conns[id].send(t); } else if (MPN.conn) MPN.conn.send(t); } catch(e){} }
 function mpChiudi(){ const n = MPN; MPN = null; if (!n) return; const t = JSON.stringify({t:'esci'});
   try { if (n.io === 'h') for (const id in (n.conns || {})){ n.conns[id].send(t); n.conns[id].close(); } else if (n.conn){ n.conn.send(t); n.conn.close(); } } catch(e){} try { n.stanza && n.stanza.chiudi(); } catch(e){} try { n.conn && n.conn.chiudiPeer && n.conn.chiudiPeer(); } catch(e){} }
@@ -8227,7 +8273,7 @@ function mpEsito(){ if (!S || !S.mp) return; const io = S.io, vivU = mpG().filte
 function mpApplica(nS){ if (nS.mappa && nS.mappa !== MAPPA_ATT) impostaMappa(nS.mappa); S = nS; S.io = mpBorgoDi(MPN.io) || S.io; sel = null; modo = null; VISTA = null; tintKey = ''; mpEsito(); }
 function mpAttacco(da, t, own, r, trad){ S.mp.seq = (S.mp.seq || 0) + 1; S.mp.log = S.mp.log || [];
   S.mp.log.push({n:S.mp.seq, t:'att', f:S.io, da, a:t, ok:r.vinto, contro:own, trad, snap: JSON.parse(JSON.stringify(S.terre)), testo:`${mpNomeDi(S.io)} (${FZ[S.io].corto}) attacca ${TERRE[t].nome}${own && own !== S.io ? ' di ' + FZ[own].corto : ''}: ${r.vinto ? 'la conquista!' : 'respinto.'}`});
-  MPN.visto = S.mp.seq; mpEsito(); if (S.fine || mpG().some(p => !S.fz[p.borgo].vivo && !p.fuori)) mpInvia({t:'stato', S}); }
+  MPN.visto = S.mp.seq; mpEsito(); if (S.fine || mpG().some(p => !S.fz[p.borgo].vivo && !p.fuori)) mpInvia({t:'stato', S}); else mpLive(); }
 // chi gioca dopo: si saltano i borghi caduti
 function mpProssimo(){ const o = S.mp.ordine; let k = S.mp.k + 1; while (k < o.length && !(S.fz[mpBorgoDi(o[k])] || {}).vivo) k++; return k; }
 function mpFine(){ if (!MPN) return; modo = null; sel = null; const k = mpProssimo();
@@ -8241,19 +8287,20 @@ function mpStagione(){ S.io = mpBorgoDi('h'); const ev = []; PRIMA_SNAP = JSON.p
   mpInvia({t:'stagione', S, ev, prima}); mpEsito(); riproduciEv(ev, () => { notizie(ev); mpDopoNotizie(); }); }
 function mpDopoNotizie(){ if (!S || !S.mp || S.fine) return; if (!mpAttesa()) toast('Tocca a te!'); }
 // arriva lo stato dopo il turno di qualcuno: si guardano i suoi attacchi, poi tocca a me oppure si aspetta
-function mpTurno(nS){ const log = ((nS.mp && nS.mp.log) || []).filter(e => e.n > (MPN.visto || 0)); PRIMA_SNAP = S ? JSON.parse(JSON.stringify(S.terre)) : null; mpApplica(nS); if (log.length) MPN.visto = log[log.length - 1].n;
+function mpTurno(nS){ MPN.feed = []; MPN._livePend = null; const log = ((nS.mp && nS.mp.log) || []).filter(e => e.n > (MPN.visto || 0)); PRIMA_SNAP = S ? JSON.parse(JSON.stringify(S.terre)) : null; mpApplica(nS); if (log.length) MPN.visto = log[log.length - 1].n;
   const mio = !mpAttesa() && S.mp.fase !== 'calc'; if (mio) S.mosse = S.mp.mosse || MOSSE_N();
   const dopo = () => { aggiornaUI(); pannello(); if (S.fine){ finePartita(); return; }
     if (!mio){ toast(`Ora tocca a ${mpNomeDi(mpBorgoDi(S.mp.fase))}`); return; }
-    const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Tocca a te</span><h2>La tua stagione</h2><p>${log.length ? log.map(e => e.testo).join('<br>') : 'Gli altri non hanno attaccato nessuno.'}</p><p>Hai ${S.mosse} mosse con ${FZ[S.io].corto}.</p><button class="big" id="cqOk">Gioca ${ico('play', 2)}</button></div>`, false); suona('banner'); o.querySelector('#cqOk').onclick = () => { chiudiOv(); proposte(); }; };
+    const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Tocca a te</span><h2>La tua stagione</h2><p>${(S.mp.log || []).length ? S.mp.log.map(e => e.testo).join('<br>') : 'Gli altri non hanno attaccato nessuno.'}</p><p>Hai ${S.mosse} mosse con ${FZ[S.io].corto}.</p><button class="big" id="cqOk">Gioca ${ico('play', 2)}</button></div>`, false); suona('banner'); o.querySelector('#cqOk').onclick = () => { chiudiOv(); proposte(); }; };
   if (log.length && PRIMA_SNAP) riproduciEv(log, dopo); else dopo(); }
 function mpRicevi(raw, da){ let m; try { m = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch(e){ return; } if (!MPN) return;
   const centro = MPN.io === 'h';
   if (m.t === 'ciao'){ if (centro){ const a = MPN.amici.find(x => x.id === da); if (a){ a.nome = (m.nome || 'Amico').slice(0, 14); a.fond = Math.max(0, Math.min(10, Math.floor(+m.fond || 0))); } mpLobby(); suona('stella1'); } return; }
   if (m.t === 'id'){ MPN.io = m.id; return; }
   if (m.t === 'lobby'){ const st = el('cqMpSt'); if (st) st.innerHTML = `${ico('ok', 2)} Collegato! Nella stanza: <b>${m.nomi.join(', ')}</b>. Aspetto che si cominci…`; return; }
-  if (m.t === 'inizia'){ SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; chiudiOv(); mpApplica(m.S); MPN.visto = 0; suona('banner'); aggiornaUI(); vaiA(S.io); pannello(); mpBenvenuto(); return; }
-  if (centro && da && (m.t === 'turno' || m.t === 'stato')) mpInvia(m, da); // il centro gira le mosse agli altri
+  if (m.t === 'inizia'){ const via = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; chiudiOv(); mpApplica(m.S); MPN.visto = 0; suona('banner'); aggiornaUI(); vaiA(S.io); pannello(); mpBenvenuto(); }; if (typeof CARICA === 'function') CARICA(via, 'Comincia la partita…'); else via(); return; }
+  if (centro && da && (m.t === 'turno' || m.t === 'stato' || m.t === 'live')) mpInvia(m, da);
+  if (m.t === 'live'){ if (!S || !S.mp || !mpAttesa() || !m.S.mp || m.S.mp.fase !== S.mp.fase) return; if (GIOCA){ MPN._livePend = m.S; return; } mpVedi(m.S); return; } // il centro gira le mosse agli altri
   if (m.t === 'turno'){ mpTurno(m.S); return; }
   if (m.t === 'fine'){ if (!centro) return; const log = ((m.S.mp && m.S.mp.log) || []).filter(e => e.n > (MPN.visto || 0)); PRIMA_SNAP = JSON.parse(JSON.stringify(S.terre)); mpApplica(m.S); if (log.length) MPN.visto = log[log.length - 1].n; if (log.length) riproduciEv(log, mpStagione); else mpStagione(); return; }
   if (m.t === 'stagione'){ mpApplica(m.S); MPN.visto = 0; PRIMA_SNAP = m.prima; riproduciEv(m.ev, () => { notizie(m.ev); mpDopoNotizie(); }); return; }
@@ -8265,7 +8312,7 @@ function mpTogli(id){ if (!S || !S.mp) return; const p = mpG().find(x => x.id ==
   toast(`${p.nome} è uscito: ${FZ[p.borgo].corto} ora la muove il computer`); if (S.mp.fase === id){ S.mp.k = Math.min(S.mp.k, S.mp.ordine.length) - 1; if (MPN && MPN.io === 'h') mpFine(); } aggiornaUI(); pannello(); }
 function mpVia(da){ if (!MPN) return;
   if (MPN.io === 'h' && da){ const p = mpG().find(x => x.id === da); delete MPN.conns[da]; MPN.amici = MPN.amici.filter(x => x.id !== da);
-    if (!S || !S.mp){ mpLobby(); return; } if (p && mpG().length > 2 && !S.fine){ mpInvia({t:'via', id:da}); mpTogli(da); return; } }
+    if (!S || !S.mp){ mpLobby(); return; } if (!p) return; if (p && mpG().length > 2 && !S.fine){ mpInvia({t:'via', id:da}); mpTogli(da); return; } }
   const nome = MPN.io === 'h' ? (mpG().find(x => x.id === da) || {}).nome || 'Un amico' : 'Chi ha creato la stanza'; MPN.conn = null; MPN.conns = {}; mpChiudi(); if (!attivo || !S || !S.mp || S.fine) return;
   const o = ov(`<div class="dlg box cq-dlg"><h2>Partita interrotta</h2><p><b>${nome}</b> è uscito dalla partita o si è scollegato.</p><button class="big" id="cqOk">Torna al menu</button></div>`, false); o.querySelector('#cqOk').onclick = () => esci('gioca'); }
 function mpBenvenuto(){ const altri = mpG().filter(p => p.borgo !== S.io), ia = Object.keys(FZ).filter(f => !umano(f));
@@ -8274,9 +8321,9 @@ function mpBenvenuto(){ const altri = mpG().filter(p => p.borgo !== S.io), ia = 
     <button class="big" id="cqOk">${mpAttesa() ? 'Aspetto il mio turno' : 'Comincio io'} ${ico('play', 2)}</button></div>`, false); o.querySelector('#cqOk').onclick = () => { chiudiOv(); pannello(); }; }
 function dlgMp(){ if (!mpRete()){ toast('Il gioco online non è disponibile'); return; }
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Conquista con gli amici</span><h2>Gioca con gli amici</h2><p>Ognuno dal suo telefono, in <b>due o in tre</b>. In due il terzo borgo lo muove il computer. Si gioca a turni, una stagione per uno.</p>
-    <label class="cq-mpl">Il tuo nome<input id="cqMpN" maxlength="14" value="${(mpNome() || '').replace(/"/g, '')}"></label>
+    ${mpAcc() ? `<p class="cq-nota">${ico('ok', 2)} Giochi come <b>${mpAcc().replace(/[<>&"]/g, '')}</b></p>` : `<label class="cq-mpl">Il tuo nome<input id="cqMpN" maxlength="14" placeholder="Come ti chiami?" value="${(mpNome() === 'Amico' ? '' : mpNome() || '').replace(/"/g, '')}"></label>`}
     <button class="big" id="cqMpC">Crea una stanza</button><button class="big alt" id="cqMpE">Entra con un codice</button><button class="big alt" id="cqNo">Indietro</button></div>`, false);
-  const nome = () => { const v = o.querySelector('#cqMpN').value.trim().slice(0, 14); if (v) try { localStorage.setItem('difendi-smerillo-nome', v); } catch(e){} };
+  const nome = () => { const i = o.querySelector('#cqMpN'); const v = i ? i.value.trim().slice(0, 14) : ''; if (v) try { localStorage.setItem('difendi-smerillo-nome', v); } catch(e){} };
   o.querySelector('#cqNo').onclick = () => { mpChiudi(); apri(); };
   o.querySelector('#cqMpC').onclick = () => { nome(); mpCrea(); };
   o.querySelector('#cqMpE').onclick = () => { nome(); mpEntra(); }; }
@@ -8310,7 +8357,7 @@ function mpEntra(cod){ const o = ov(`<div class="dlg box cq-dlg"><span class="ki
   (async () => { MPN = {io:'g', cod}; try { const conn = await mpTrasporto().entra(cod, (k, n) => { const st = el('cqMpSt'); if (st && MPN) st.innerHTML = `${ico('clessidra', 2)} La stanza non risponde ancora: riprovo (${k + 1} di ${n})… Chi l'ha creata deve avere il gioco aperto.`; }); if (!MPN){ try { conn.close(); conn.chiudiPeer && conn.chiudiPeer(); } catch(e){} return; } MPN.conn = conn; conn.on('data', d => mpRicevi(d)); conn.on('close', () => mpVia()); conn.send(JSON.stringify({t:'ciao', nome: mpNome(), fond: mpFond()}));
       const st = el('cqMpSt'); if (st) st.innerHTML = `${ico('ok', 2)} Sei dentro! Aspetto che chi ha creato la stanza faccia cominciare la partita…`; }
     catch(e){ if (!MPN) return; MPN = null; mpErrore(e, cod); } })(); }
-function mpInizia(){ if (!MPN || !MPN.amici.length) return; const h = MPN.borgoH; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; chiudiOv();
+function mpInizia(){ if (!MPN || !MPN.amici.length) return; if (typeof CARICA === 'function' && !mpInizia.dentro){ mpInizia.dentro = true; CARICA(() => { try { mpInizia(); } finally { mpInizia.dentro = false; } }, 'Comincia la partita…'); return; } const h = MPN.borgoH; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; chiudiOv();
   nuova(h, difScelta(), false, velScelta(), mappaScelta());
   if (S.esp){ for (const f in FZ) if (f !== h && S.terre[f]) S.terre[f].sold = Math.max(1, S.terre[f].sold - Math.round(S.esp*10)); S.esp = 0; } // tra amici niente rivali rinforzati dalla casata
   S.capNews = null; const gioc = [{id:'h', borgo:h, nome: mpNome(), fond: mpFond()}].concat(MPN.amici.map(a => ({id:a.id, borgo:a.borgo, nome:a.nome || 'Amico', fond: a.fond || 0})));
@@ -8594,7 +8641,7 @@ function toastMenu(t){ let d = document.getElementById('mnToast'); if (!d){ d = 
 window.toastMenu = toastMenu;
 
 // ---------- versione nuova: GitHub tiene in memoria la pagina per qualche minuto. Se online c'è una versione più nuova, lo dico e si aggiorna con un tocco.
-(() => { const MIA = '20261102220852'; window.DS_VER = MIA; let visto = false;
+(() => { const MIA = '20261102223128'; window.DS_VER = MIA; let visto = false;
   async function controlla(){ if (visto || !/^https?:/.test(location.protocol) || /prova=/.test(location.search)) return;
     try { const r = await fetch(location.pathname + '?v=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const t = await r.text(); const m = t.match(/const MIA = '(\d{8,})'/); if (!m || !(m[1] > MIA)) return; visto = true;
       const b = document.createElement('div'); b.id = 'dsNuova'; b.innerHTML = '<span><b>C’è una versione nuova del gioco</b><small>Aggiorna per avere le ultime correzioni.</small></span><button type="button">Aggiorna</button>';
