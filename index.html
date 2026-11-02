@@ -6536,9 +6536,14 @@ function relay(){ return {
       if (m.t === 'ciao'){ let w = conns[g]; if (!w || w._chiuso){ w = connAff(c.invia, g); conns[g] = w; suConn(w); } w._vivo = Date.now(); if (!w._chiuso) c.invia({t:'ok', a:g}); return; }
       const w = conns[g]; if (!w || w._chiuso){ if (m.t === 'd' || m.t === 'hb') c.invia({t:'chi', a:g}); return; }
       if (m.t === 'hb'){ w._vivo = Date.now(); return; } w._ric(m); });
-    const hb = setInterval(() => { for (const g in conns){ const w = conns[g]; if (w._chiuso) continue; c.invia({t:'hb', a:g}); if (Date.now() - w._vivo > VIVO_MS) w._via(); } }, 4000);
+    c.invia({t:'apri', v: window.DS_VER || ''}); let giri = 0;
+    const hb = setInterval(() => { if (++giri % 5 === 0) c.invia({t:'vivo'}); for (const g in conns){ const w = conns[g]; if (w._chiuso) continue; c.invia({t:'hb', a:g}); if (Date.now() - w._vivo > VIVO_MS) w._via(); } }, 4000);
     return {chiudi(){ if (chiusa) return; chiusa = true; clearInterval(hb); for (const g in conns) conns[g].close(); setTimeout(() => c.chiudi(), 400); }, pronto: true}; },
   async entra(cod, stato){ const io = 'g' + Math.random().toString(36).slice(2, 10); let w = null, risolvi = null;
+    let info = null; for (let k = 0; k < 3 && !info; k++){ try { info = await sbRpc('ds_stanza_info', {p_stanza: 'ds-' + cod}); } catch(e){ await new Promise(r => setTimeout(r, 1000)); } }
+    if (!info) throw Object.assign(new Error('server'), {tipo:'server'});
+    if (!info.host){ for (let k = 0; k < 4 && !info.host; k++){ await new Promise(r => setTimeout(r, 2000)); try { info = await sbRpc('ds_stanza_info', {p_stanza: 'ds-' + cod}); } catch(e){} } }
+    if (!info.host) throw Object.assign(new Error('nostanza'), {tipo:'nostanza'});
     const c = await canaleStanza(cod, io, m => { if (m.da !== 'h') return;
       if (m.t === 'ok'){ if (!w){ w = connAff(c.invia, 'h'); if (risolvi) risolvi(w); } w._vivo = Date.now(); return; }
       if (!w) return; if (m.t === 'chi'){ c.invia({t:'ciao'}); return; } if (m.t === 'hb'){ w._vivo = Date.now(); return; } w._ric(m); });
@@ -8275,12 +8280,13 @@ function dlgMp(){ if (!mpRete()){ toast('Il gioco online non è disponibile'); r
   o.querySelector('#cqNo').onclick = () => { mpChiudi(); apri(); };
   o.querySelector('#cqMpC').onclick = () => { nome(); mpCrea(); };
   o.querySelector('#cqMpE').onclick = () => { nome(); mpEntra(); }; }
+const verGioco = () => { const v = String(window.DS_VER || ''); return v ? v.slice(6, 8) + '/' + v.slice(4, 6) + ' ' + v.slice(8, 10) + ':' + v.slice(10, 12) : '?'; };
 const MPCAR = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', mpCod = () => 'K' + Array.from({length:4}, () => MPCAR[Math.floor(Math.random()*MPCAR.length)]).join('');
 // la sala d'attesa del centro: chi è entrato e quale borgo prende
 function mpLobby(){ if (!MPN || MPN.io !== 'h' || (S && S.mp)) return; const io = MPN.borgoH, liberi = Object.keys(FZ).filter(f => f !== io);
   MPN.amici.forEach((a, i) => { if (!a.borgo || a.borgo === io || MPN.amici.some((b, j) => j < i && b.borgo === a.borgo)) a.borgo = liberi.find(f => !MPN.amici.some((b, j) => j < i && b.borgo === f)); });
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Stanza creata</span><h2>Codice: <span class="cq-mpcod">${MPN.cod}</span></h2><p>Gli amici aprono il gioco, vanno in <b>Amici → Gioca con gli amici → Entra con un codice</b> e lo scrivono. Potete essere in due o in tre.</p>
-    <button class="big alt" id="cqMpSh">Manda il codice</button><p class="cq-nota cq-mpap">${ico('clessidra', 2)} Tieni aperta questa schermata finché entrano tutti. Manda il codice con il bottone qui sopra: così resti nel gioco.</p>
+    <button class="big alt" id="cqMpSh">Manda il codice</button><p class="cq-nota cq-mpap">${ico('clessidra', 2)} Tieni aperta questa schermata finché entrano tutti. Tutti devono avere la stessa versione del gioco: <b>${verGioco()}</b>.</p>
     <div class="cq-mpgl"><div class="cq-mpg"><b>${mpNome()}</b><span>(tu)</span><em style="--c:${FZ[io].col}">${FZ[io].corto}</em></div>
       ${MPN.amici.map(a => `<div class="cq-mpg"><b>${a.nome || 'Amico'}</b><span>difende</span><button type="button" data-mpa="${a.id}" style="--c:${FZ[a.borgo].col}">${FZ[a.borgo].corto} ⇄</button></div>`).join('')}
       ${MPN.amici.length < 2 ? `<p class="cq-mpst">${ico('clessidra', 2)} ${MPN.amici.length ? 'Può entrare ancora un amico…' : 'Aspetto gli amici…'}</p>` : ''}</div>
@@ -8297,9 +8303,9 @@ async function mpCrea(){ const io = SCELTA && FZ[SCELTA] ? SCELTA : 'smerillo'; 
     catch(e){ errore = e; if (e && e.type === 'unavailable-id' && MPN){ MPN.cod = mpCod(); mpLobby(); continue; } if (e && e.tipo === 'script') break; await new Promise(r => setTimeout(r, 800)); } }
   if (errore && MPN){ mpChiudi(); mpErrore(errore); } }
 function mpErrore(e, cod){ const t = e && (e.tipo || e.type) || '', r = mpRete();
-  const perche = r && r.dentroClaude() ? 'Dentro l’app Claude il gioco online non funziona: apri il gioco dal sito nel browser.' : t === 'script' ? 'Non riesco a scaricare il pezzo per il gioco online: controlla internet.' : t === 'peer-unavailable' || t === 'tempo' || t === 'nessuno' ? (cod ? `La stanza ${cod} non risponde. Controlla il codice. Chi l’ha creata deve tenere il gioco aperto sulla schermata della stanza: se è andato su un’altra app, torni nel gioco. Poi riprova.` : 'Non trovo la stanza: controlla il codice e che la stanza sia ancora aperta.') : 'Il collegamento non risponde. Controlla internet (meglio il Wi-Fi) e riprova.';
-  const o = ov(`<div class="dlg box cq-dlg"><h2>Niente collegamento</h2><p>${perche}</p><p class="cq-nota">Codice errore: ${t || 'sconosciuto'}</p>${cod ? '<button class="big" id="cqRip">Riprova</button>' : ''}<button class="big ${cod ? 'alt' : ''}" id="cqOk">Indietro</button></div>`, false); o.querySelector('#cqOk').onclick = () => esci('amici'); const rp = o.querySelector('#cqRip'); if (rp) rp.onclick = () => mpEntra(cod); }
-function mpEntra(cod){ const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Conquista con gli amici</span><h2>Entro nella stanza ${cod}</h2><p class="cq-mpst" id="cqMpSt">${ico('clessidra', 2)} Mi collego…</p><button class="big alt" id="cqNo">Esci</button></div>`, false);
+  const perche = r && r.dentroClaude() ? 'Dentro l’app Claude il gioco online non funziona: apri il gioco dal sito nel browser.' : t === 'script' ? 'Non riesco a scaricare il pezzo per il gioco online: controlla internet.' : t === 'nostanza' ? `Non trovo la stanza ${cod || ''}. Controlla il codice. Se è giusto, chi ha creato la stanza ha una versione vecchia del gioco: deve chiudere la pagina e riaprirla (sul computer: Ctrl + F5), poi creare una stanza nuova.` : t === 'peer-unavailable' || t === 'tempo' || t === 'nessuno' ? (cod ? `La stanza ${cod} non risponde. Controlla il codice. Chi l’ha creata deve tenere il gioco aperto sulla schermata della stanza: se è andato su un’altra app, torni nel gioco. Poi riprova.` : 'Non trovo la stanza: controlla il codice e che la stanza sia ancora aperta.') : 'Il collegamento non risponde. Controlla internet (meglio il Wi-Fi) e riprova.';
+  const o = ov(`<div class="dlg box cq-dlg"><h2>Niente collegamento</h2><p>${perche}</p><p class="cq-nota">Codice errore: ${t || 'sconosciuto'} · versione ${verGioco()}</p>${cod ? '<button class="big" id="cqRip">Riprova</button>' : ''}<button class="big ${cod ? 'alt' : ''}" id="cqOk">Indietro</button></div>`, false); o.querySelector('#cqOk').onclick = () => esci('amici'); const rp = o.querySelector('#cqRip'); if (rp) rp.onclick = () => mpEntra(cod); }
+function mpEntra(cod){ const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Conquista con gli amici</span><h2>Entro nella stanza ${cod}</h2><p class="cq-mpst" id="cqMpSt">${ico('clessidra', 2)} Mi collego…</p><p class="cq-nota">Versione del gioco: ${verGioco()}</p><button class="big alt" id="cqNo">Esci</button></div>`, false);
   o.querySelector('#cqNo').onclick = () => { mpChiudi(); esci('amici'); };
   (async () => { MPN = {io:'g', cod}; try { const conn = await mpTrasporto().entra(cod, (k, n) => { const st = el('cqMpSt'); if (st && MPN) st.innerHTML = `${ico('clessidra', 2)} La stanza non risponde ancora: riprovo (${k + 1} di ${n})… Chi l'ha creata deve avere il gioco aperto.`; }); if (!MPN){ try { conn.close(); conn.chiudiPeer && conn.chiudiPeer(); } catch(e){} return; } MPN.conn = conn; conn.on('data', d => mpRicevi(d)); conn.on('close', () => mpVia()); conn.send(JSON.stringify({t:'ciao', nome: mpNome(), fond: mpFond()}));
       const st = el('cqMpSt'); if (st) st.innerHTML = `${ico('ok', 2)} Sei dentro! Aspetto che chi ha creato la stanza faccia cominciare la partita…`; }
@@ -8588,7 +8594,7 @@ function toastMenu(t){ let d = document.getElementById('mnToast'); if (!d){ d = 
 window.toastMenu = toastMenu;
 
 // ---------- versione nuova: GitHub tiene in memoria la pagina per qualche minuto. Se online c'è una versione più nuova, lo dico e si aggiorna con un tocco.
-(() => { const MIA = '20261102215633'; let visto = false;
+(() => { const MIA = '20261102220852'; window.DS_VER = MIA; let visto = false;
   async function controlla(){ if (visto || !/^https?:/.test(location.protocol) || /prova=/.test(location.search)) return;
     try { const r = await fetch(location.pathname + '?v=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const t = await r.text(); const m = t.match(/const MIA = '(\d{8,})'/); if (!m || !(m[1] > MIA)) return; visto = true;
       const b = document.createElement('div'); b.id = 'dsNuova'; b.innerHTML = '<span><b>C’è una versione nuova del gioco</b><small>Aggiorna per avere le ultime correzioni.</small></span><button type="button">Aggiorna</button>';
