@@ -2065,6 +2065,8 @@ button.cr-res{border:0;cursor:pointer;color:#fff}
 .fd-inv > span{flex:1 1 180px}
 .fd-inv .big.mini{flex:1 1 100%;margin-top:4px}
 .fd-cl > span{align-items:flex-start;text-align:left}.fd-cl{justify-content:flex-start}
+.fd-sw{height:30px;width:30px!important;flex:none;border-radius:8px;border:4px solid #3fd0c9;box-shadow:0 0 12px rgba(63,208,201,.7);margin:0 2px}
+.fd-tit{font-style:normal;font-family:var(--f-pixel);font-weight:800;font-size:18px;color:#141433;background:#3fd0c9;border-radius:6px;height:30px;width:30px!important;display:flex;align-items:center;justify-content:center;margin:0 2px}
 /* ===== tema scuro unico (stile della carta missione) ===== */
 #cqPan,.dlg.box,#title .pan,.acc-box,.acc-card{--carta:#2d3889;--carta2:#232c74;--testo:#ffffff;--grigio:#b8c2f0;--ink:#ffffff;--muted:#b8c2f0;--box:#2d3889;--box-2:#232c74;--th-bord:#141433;
   background:linear-gradient(180deg,#26307e 0%,#1a1f5c 60%,#141845 100%)!important;color:#fff!important;border:3px solid #141433!important;box-shadow:0 6px 0 #141433,inset 0 2px 0 rgba(255,255,255,.1)!important}
@@ -4827,12 +4829,12 @@ const PROF = (() => {
   const CORNICI = {legno:{n:'Legno', liv:1, c:'#a87c46'}, pietra:{n:'Pietra', liv:4, c:'#9a9aa6'}, argento:{n:'Argento', liv:7, c:'#dfe5ee'}, oro:{n:'Oro', liv:11, c:'#f5b301'},
     rubino:{n:'Rubino', liv:15, c:'#e0304a'}, smeraldo:{n:'Smeraldo', liv:20, c:'#2fb36a'}, notte:{n:'Notte', liv:26, c:'#4a2aa0'},
     fuoco:{n:'Fuoco', leg:'m9', c:'#ff6a1a'}, corona:{n:'Corona', leg:'tutte', c:'#ffd700'}, muro:{n:'Muro vivente', leg:'nobar', c:'#6b6b78'}, nebbia:{n:'Nebbia', leg:'nopot', c:'#b8c8ff'},
-       trifoglio:{n:'Quadrifoglio', leg:'f_trif', c:'#3cb043'}, castoro:{n:'Castagna d’oro', leg:'f_cast', c:'#c08a2a'}, arcob:{n:'Arcobaleno', leg:'f_arco', c:'#ff6ad5'}};
+       trifoglio:{n:'Quadrifoglio', leg:'f_trif', c:'#3cb043'}, castoro:{n:'Castagna d’oro', leg:'f_cast', c:'#c08a2a'}, arcob:{n:'Arcobaleno', leg:'f_arco', c:'#ff6ad5'}, pioniere:{n:'Pioniere della beta', leg:'beta', c:'#3fd0c9'}};
   const TITOLI = {recluta:{n:'Recluta', liv:1}, sentinella:{n:'Sentinella', liv:3}, guardia:{n:'Guardia del borgo', liv:5}, balestr:{n:'Balestriere scelto', liv:9}, capitano:{n:'Capitano delle mura', liv:13},
     difensore:{n:'Difensore di Smerillo', liv:17}, eroe:{n:'Eroe della Rocca', liv:22}, signore:{n:'Signore di Smerillo', liv:30},
     leggenda:{n:'Leggenda di Smerillo', leg:'tutte'}, assedio:{n:'Inarrestabile', leg:'ass15'}, costante:{n:'Mai un giorno senza', leg:'serie7'}, spartano:{n:'Senza aiuti', leg:'nopot'},
     intoccabile:{n:'Intoccabile', leg:'diffpieno'}, pochi:{n:'Pochi ma buoni', leg:'tre'}, mani:{n:'A mani nude', leg:'mani'}, rupe:{n:'Muro vivente', leg:'nobar'}, fuoco:{n:'Vincitore della Rocca', leg:'m9'},
-    fortunato:{n:'Baciato dalla fortuna', leg:'f_bacio'}, tesori:{n:'Cercatore di tesori', leg:'f_tesori'}, gatto:{n:'Più furbo del Gatto', leg:'f_gatto'}};
+    fortunato:{n:'Baciato dalla fortuna', leg:'f_bacio'}, tesori:{n:'Cercatore di tesori', leg:'f_tesori'}, gatto:{n:'Più furbo del Gatto', leg:'f_gatto'}, pioniere:{n:'Pioniere della beta', leg:'beta'}};
   const LEGGENDE = [
     {id:'m9', t:'Vinci la Missione 9 con 3 stelle', modo:'A turni'},
     {id:'nobar', t:'Vinci una missione dalla 5 in su senza costruire barricate e senza perdere vite', modo:'A turni'},
@@ -4886,9 +4888,9 @@ const PROF = (() => {
     const ridisegna = () => pagina(c, indietro);
     const gAv = c.querySelector('#pfAv'); for (const [k, v] of Object.entries(AVATAR)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-it' + (p.avatar === k ? ' on' : ''); b.disabled = !ok;
       try { b.append(TB.icona(k, 3)); } catch(e){} b.insertAdjacentHTML('beforeend', `<small>${ok ? v.n : v.leg ? '🍀 Fortuna' : '🔒 Liv. ' + v.liv}</small>`); b.onclick = () => { const q = leggi(); q.avatar = k; scrivi(q); ridisegna(); }; gAv.append(b); }
-    const gCo = c.querySelector('#pfCo'); for (const [k, v] of Object.entries(CORNICI)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-it' + (p.cornice === k ? ' on' : ''); b.disabled = !ok;
+    const gCo = c.querySelector('#pfCo'); for (const [k, v] of Object.entries(CORNICI).filter(([k, v]) => v.leg !== 'beta' || p.leg.beta)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-it' + (p.cornice === k ? ' on' : ''); b.disabled = !ok;
       b.innerHTML = `<span class="pf-sw${v.leg ? ' pf-leg' : ''}" style="--fc:${v.c}"></span><small>${ok ? v.n : v.leg ? (v.leg.startsWith('f_') ? '🍀 Fortuna' : '🏆 Leggendaria') : '🔒 Liv. ' + v.liv}</small>`; b.onclick = () => { const q = leggi(); q.cornice = k; scrivi(q); ridisegna(); }; gCo.append(b); }
-    const gTi = c.querySelector('#pfTi'); for (const [k, v] of Object.entries(TITOLI)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-ti' + (p.titolo === k ? ' on' : '') + (v.leg ? ' leg' : ''); b.disabled = !ok;
+    const gTi = c.querySelector('#pfTi'); for (const [k, v] of Object.entries(TITOLI).filter(([k, v]) => v.leg !== 'beta' || p.leg.beta)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-ti' + (p.titolo === k ? ' on' : '') + (v.leg ? ' leg' : ''); b.disabled = !ok;
       b.textContent = ok ? v.n : (v.leg ? (v.leg.startsWith('f_') ? '🍀 ???' : '🏆 ???') : '🔒 Liv. ' + v.liv); b.onclick = () => { const q = leggi(); q.titolo = k; scrivi(q); ridisegna(); }; gTi.append(b); }
     c.querySelector('#pfBack').onclick = indietro; c.scrollTop = 0; }
   const leggende = () => { const p = leggi(); return LEGGENDE.map(q => ({...q, fatto: !!p.leg[q.id], premi: premiDi(q.id)})); };
@@ -8305,7 +8307,7 @@ const ACC = window.ACC = (() => {
       ok.disabled = true; ok.textContent = 'Un attimo…'; err('');
       try { const r = tab === 'recupera' ? await rpc('ds_recupera', {p_nome: n, p_codice: cod, p_nuovo: s}) : await rpc(tab === 'crea' ? 'ds_registra' : 'ds_entra', {p_nome: n, p_segreto: s}); ok.disabled = false; ok.textContent = testoOk;
         if (r.errore){ try { SUONI.suona('tonfo'); } catch(e){} b.classList.remove('acc-scuoti'); void b.offsetWidth; b.classList.add('acc-scuoti'); return err({nome:'Nome non valido: da 3 a 16 caratteri.', segreto:'Parola segreta non valida.', preso:'Questo nome è già usato: scegline un altro.', sbagliato:'Nome o parola segreta sbagliati.', codice:'Nome o codice di recupero sbagliati.', bloccato:`Troppi tentativi sbagliati: riprova tra ${r.minuti} minuti.`}[r.errore] || 'Qualcosa non va, riprova.'); }
-        A = {token: r.token, nome: r.nome, ultimo: r.aggiornato}; salvaA(); rpc('ds_stato', {p_token: r.token}).then(x => { if (A && x && x.fondatore){ A.fond = x.fondatore; salvaA(); aggiornaFond(); } }).catch(() => {});
+        A = {token: r.token, nome: r.nome, ultimo: r.aggiornato}; salvaA(); rpc('ds_stato', {p_token: r.token}).then(x => { if (A && x && x.fondatore){ A.fond = x.fondatore; salvaA(); aggiornaFond(); } if (A && x) doni(x); }).catch(() => {});
         if (r.codice) mostraCodice(r.codice, tab === 'recupera' ? 'Parola segreta cambiata! Ecco il tuo nuovo codice di recupero: quello vecchio non vale più.' : 'Questo codice serve se dimentichi la parola segreta. Salvalo adesso: fai uno screenshot o scrivilo da qualche parte.', () => dopoAccesso(r.aggiornato, tab === 'crea'));
         else dopoAccesso(r.aggiornato, tab === 'crea'); }
       catch(e){ ok.disabled = false; ok.textContent = testoOk; err(rete()); } };
@@ -8426,10 +8428,26 @@ const ACC = window.ACC = (() => {
     try { if (A) await invia(false); } catch(e){}
     try { const r = await rpc('ds_classifica', {p_tipo: tipo, p_token: A ? A.token : null}); if (r.errore) throw 0; CL.cache[tipo] = {t: Date.now(), r}; disegna(r); }
     catch(e){ if (CL.tipo === tipo) L.innerHTML = `<p class="cl-vuoto">${rete().replace('Controlla internet e riprova.', 'Controlla internet.')}</p><button type="button" class="big alt cl-rip">Riprova</button>`; const rb = L.querySelector('.cl-rip'); if (rb) rb.onclick = () => carica(box); } }
-  function avvia(){ if (A){ ultimoHash = ''; segna('ok'); rpc('ds_stato', {p_token: A.token}).then(r => { if (r && r.errore === 'sessione'){ A = null; salvaA(); segna('off'); } else { if (r && r.fondatore && A.fond !== r.fondatore){ A.fond = r.fondatore; salvaA(); aggiornaFond(); } invia(false); } }).catch(() => segna('errore')); } else segna('off');
+  function avvia(){ if (A){ ultimoHash = ''; segna('ok'); rpc('ds_stato', {p_token: A.token}).then(r => { if (r && r.errore === 'sessione'){ A = null; salvaA(); segna('off'); } else { if (r && r.fondatore && A.fond !== r.fondatore){ A.fond = r.fondatore; salvaA(); aggiornaFond(); } doni(r); invia(false); } }).catch(() => segna('errore')); } else segna('off');
     setInterval(() => { if (A && document.visibilityState === 'visible') invia(false); }, errori > 3 ? 60000 : 20000);
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') invia(false, true); });
     addEventListener('pagehide', () => invia(false, true)); }
+  // ---------- regali speciali dati dal server (es. il primo giocatore della beta)
+  function doni(r){ if (!A || !r || !Array.isArray(r.doni) || !r.doni.includes('beta')) return; let p = {}; try { p = JSON.parse(localStorage.getItem('difendi-smerillo-profilo')) || {}; } catch(e){}
+    p.leg = p.leg || {}; if (p.leg.beta) return; p.leg.beta = Date.now(); p.cornice = 'pioniere'; p.titolo = 'pioniere'; try { localStorage.setItem('difendi-smerillo-profilo', JSON.stringify(p)); } catch(e){}
+    const quando = () => { if (document.querySelector('#hmProf #tProf') && (!ov || ov.hidden)) regaloBeta(); else setTimeout(quando, 1000); }; setTimeout(quando, 800); }
+  function rifaiChip(){ document.querySelectorAll('#hmProf #tProf').forEach(old => { try { const ch = PROF.chip(); ch.onclick = old.onclick; old.replaceWith(ch); } catch(e){} }); aggiornaFond(); }
+  function regaloBeta(){ const n = A && A.fond; rifaiChip();
+    const b = finestra(`<div class="fd-festa">${n ? med(n, 'big') : '<span class="fd-cor"></span>'}</div><span class="fd-k">REGALO SPECIALE</span><h2>Grazie, ${esc(A.nome)}!</h2>
+      <p class="acc-sub">Hai giocato a Difendi Smerillo prima di tutti, quando era ancora in prova. Questi regali sono solo tuoi:</p>
+      <ul class="fd-cosa">${n ? `<li>${med(n, 'mini')}<span><b>Fondatore N°${n}</b>: il primo nome sulla Targa dei Fondatori, sulle mura di Smerillo.</span></li>` : ''}
+        <li><i class="fd-sw"></i><span><b>Cornice «Pioniere della beta»</b>: te l’ho già messa sul profilo.</span></li>
+        <li><i class="fd-tit">T</i><span><b>Titolo «Pioniere della beta»</b>: lo vedono tutti sotto al tuo nome.</span></li>
+        ${n ? `<li><i class="fd-bo"></i><span><b>Bandiera d’oro</b> sul tuo borgo in Conquista.</span></li>` : ''}</ul>
+      <p class="fd-per">Nessun altro potrà averli.</p>
+      ${n ? '<button class="big" data-targa>Vedi la targa</button>' : ''}<button class="big alt" data-x>Grazie!</button>`);
+    try { const i = b.querySelector('.fd-bo'); const t = CQ && CQ._fd && CQ._fd.bandiera(); if (i && t) i.style.backgroundImage = `url(${t})`; } catch(e){}
+    b.querySelector('[data-x]').onclick = chiudi; try { SUONI.suona('leggenda'); EPICO.coriandoli(180, ['#3fd0c9', '#ffd03a', '#fff1a8', '#ffffff']); } catch(e){} invia(true).catch(() => {}); }
   // ---------- fondatori di Conquista: i primi 10, per sempre
   const DIG = ['111101101101111', '010110010010111', '111001111100111', '111001111001111', '101101111001001', '111100111001111', '111100111101111', '111001001001001', '111101111101111', '111101111001111'];
   function med(n, cls = 'mini'){ const R = [], px = (x, y, w, h, c) => R.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`);
