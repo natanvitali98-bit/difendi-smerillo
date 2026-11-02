@@ -6483,15 +6483,33 @@ function caricaPeer(){ const prova = src => new Promise((ok, ko) => { const s = 
   if (window.Peer) return Promise.resolve();
   return prova('https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js').catch(() => prova('https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js')).catch(() => { const e = new Error('script'); e.tipo = 'script'; throw e; }); }
 const aperto = (p, ms) => new Promise((ok, ko) => { const t = setTimeout(() => { const e = new Error('tempo'); e.tipo = 'tempo'; ko(e); }, ms); p.on('open', id => { clearTimeout(t); ok(id); }); p.on('error', e => { clearTimeout(t); ko(e); }); });
+const PEER_OPZ = () => ({debug:0, config:{iceServers:[{urls:['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302']}, {urls:['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478', 'turn:eu-0.turn.peerjs.com:3478?transport=tcp'], username:'peerjs', credential:'peerjsp'}]}});
 const dentroClaude = () => { try { return window.top !== window.self; } catch(e){ return true; } };
 // trasporto: PeerJS (vero, tra telefoni). Con ?prova=bc nell'indirizzo usa BroadcastChannel (due schede dello stesso browser, per i test)
 function trasporto(){
   if (/prova=bc/.test(location.search)) return { async crea(cod, suConn){ const bc = new BroadcastChannel('ds-' + cod); const c = conBC(bc, 'h'); bc.addEventListener('message', e => { if (e.data && e.data.da === 'g' && e.data.ciao && !c.aperto){ c.aperto = true; bc.postMessage({da:'h', ciao:1}); suConn(c); } }); return {chiudi(){ bc.close(); }}; },
     async entra(cod){ const bc = new BroadcastChannel('ds-' + cod); const c = conBC(bc, 'g'); return new Promise((ok, ko) => { const t = setTimeout(() => ko(new Error('nessuno')), 4000); bc.addEventListener('message', e => { if (e.data && e.data.da === 'h' && e.data.ciao){ clearTimeout(t); ok(c); } }); bc.postMessage({da:'g', ciao:1}); }); } };
-  return { async crea(cod, suConn){ await caricaPeer(); const p = new window.Peer('difsmer-' + cod, {debug:0}); try { await aperto(p, 12000); } catch(e){ try { p.destroy(); } catch(_){} throw e; }
-      p.on('connection', c => c.on('open', () => suConn(conPeer(c)))); p.on('disconnected', () => { try { p.reconnect(); } catch(e){} }); return {chiudi(){ try { p.destroy(); } catch(e){} }}; },
-    async entra(cod){ await caricaPeer(); const p = new window.Peer({debug:0}); await aperto(p, 12000); return new Promise((ok, ko) => { const c = p.connect('difsmer-' + cod, {reliable:true}); const t = setTimeout(() => { const e = new Error('nessuno'); e.tipo = 'tempo'; ko(e); }, 12000);
-      p.on('error', e => { clearTimeout(t); ko(e); }); c.on('open', () => { clearTimeout(t); const w = conPeer(c); w.chiudiPeer = () => { try { p.destroy(); } catch(e){} }; ok(w); }); }); } };
+  return { async crea(cod, suConn){ await caricaPeer(); const id = 'difsmer-' + cod; let p = null, chiuso = false, riparo = false;
+      const nuovo = async () => { const q = new window.Peer(id, PEER_OPZ()); try { await aperto(q, 12000); } catch(e){ try { q.destroy(); } catch(_){} throw e; } p = q;
+        q.on('connection', c => c.on('open', () => suConn(conPeer(c)))); q.on('disconnected', () => { if (!chiuso) setTimeout(ripara, 1500); }); q.on('error', () => { if (!chiuso) setTimeout(ripara, 2500); }); };
+      // se il telefono va in un'altra app (per esempio WhatsApp per mandare il codice) il collegamento col server si perde: appena torna lo riapro con lo stesso codice
+      const ripara = async () => { if (chiuso || riparo || !p || (p.open && !p.disconnected)) return; riparo = true;
+        try { for (let k = 0; k < 12 && !chiuso && !(p.open && !p.disconnected); k++){
+            if (!p.destroyed){ try { p.reconnect(); } catch(e){} await new Promise(r => setTimeout(r, 2500)); }
+            else { try { await nuovo(); } catch(e){ await new Promise(r => setTimeout(r, 2500)); } } } } finally { riparo = false; } };
+      await nuovo();
+      const vis = () => { if (document.visibilityState === 'visible') ripara(); }; document.addEventListener('visibilitychange', vis); addEventListener('online', ripara); addEventListener('pageshow', ripara); const tic = setInterval(ripara, 5000);
+      return {chiudi(){ chiuso = true; clearInterval(tic); document.removeEventListener('visibilitychange', vis); removeEventListener('online', ripara); removeEventListener('pageshow', ripara); try { p.destroy(); } catch(e){} }, get pronto(){ return !!(p && p.open && !p.disconnected); }}; },
+    // chi entra riprova da solo per quasi un minuto: la stanza può essere ferma un attimo se chi l'ha creata è uscito un momento dal gioco
+    async entra(cod, stato){ await caricaPeer(); const p = new window.Peer(PEER_OPZ()); try { await aperto(p, 15000); } catch(e){ try { p.destroy(); } catch(_){} throw e; }
+      const prova = () => new Promise((ok, ko) => { const c = p.connect('difsmer-' + cod, {reliable:true}); let fatto = false;
+        const fine = e => { if (fatto) return; fatto = true; clearTimeout(t); p.off('error', err); try { c.close(); } catch(_){} ko(e); };
+        const err = e => { if (e && e.type === 'peer-unavailable') fine(Object.assign(new Error('assente'), {type:'peer-unavailable'})); else if (e && (e.type === 'network' || e.type === 'server-error' || e.type === 'socket-error' || e.type === 'socket-closed')) fine(e); };
+        const t = setTimeout(() => fine(Object.assign(new Error('nessuno'), {tipo:'tempo'})), 8000);
+        p.on('error', err); c.on('open', () => { if (fatto) return; fatto = true; clearTimeout(t); p.off('error', err); const w = conPeer(c); w.chiudiPeer = () => { try { p.destroy(); } catch(e){} }; ok(w); }); });
+      let ultimo = null; for (let k = 0; k < 5; k++){ if (p.destroyed) break; if (p.disconnected){ try { p.reconnect(); } catch(e){} await new Promise(r => setTimeout(r, 2000)); }
+        try { return await prova(); } catch(e){ ultimo = e; if (k < 4){ try { stato && stato(k + 1, 5); } catch(_){} await new Promise(r => setTimeout(r, 2500)); } } }
+      try { p.destroy(); } catch(e){} throw ultimo || Object.assign(new Error('nessuno'), {tipo:'tempo'}); } };
 }
 function conPeer(c){ const h = {data:[], close:[]}; c.on('data', d => h.data.forEach(f => f(d))); c.on('close', () => h.close.forEach(f => f())); c.on('error', () => h.close.forEach(f => f()));
   return {send: d => c.send(d), on: (k, f) => h[k].push(f), close: () => { try { c.close(); } catch(e){} }}; }
@@ -8203,7 +8221,7 @@ const MPCAR = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', mpCod = () => 'K' + Array.from
 function mpLobby(){ if (!MPN || MPN.io !== 'h' || (S && S.mp)) return; const io = MPN.borgoH, liberi = Object.keys(FZ).filter(f => f !== io);
   MPN.amici.forEach((a, i) => { if (!a.borgo || a.borgo === io || MPN.amici.some((b, j) => j < i && b.borgo === a.borgo)) a.borgo = liberi.find(f => !MPN.amici.some((b, j) => j < i && b.borgo === f)); });
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Stanza creata</span><h2>Codice: <span class="cq-mpcod">${MPN.cod}</span></h2><p>Gli amici aprono il gioco, vanno in <b>Amici → Gioca con gli amici → Entra con un codice</b> e lo scrivono. Potete essere in due o in tre.</p>
-    <button class="big alt" id="cqMpSh">Manda il codice</button>
+    <button class="big alt" id="cqMpSh">Manda il codice</button><p class="cq-nota cq-mpap">${ico('clessidra', 2)} Tieni aperta questa schermata finché entrano tutti. Manda il codice con il bottone qui sopra: così resti nel gioco.</p>
     <div class="cq-mpgl"><div class="cq-mpg"><b>${mpNome()}</b><span>(tu)</span><em style="--c:${FZ[io].col}">${FZ[io].corto}</em></div>
       ${MPN.amici.map(a => `<div class="cq-mpg"><b>${a.nome || 'Amico'}</b><span>difende</span><button type="button" data-mpa="${a.id}" style="--c:${FZ[a.borgo].col}">${FZ[a.borgo].corto} ⇄</button></div>`).join('')}
       ${MPN.amici.length < 2 ? `<p class="cq-mpst">${ico('clessidra', 2)} ${MPN.amici.length ? 'Può entrare ancora un amico…' : 'Aspetto gli amici…'}</p>` : ''}</div>
@@ -8219,14 +8237,14 @@ async function mpCrea(){ const io = SCELTA && FZ[SCELTA] ? SCELTA : 'smerillo'; 
         const id = 'g' + (++MPN.n); MPN.conns[id] = conn; MPN.amici.push({id, nome:'Amico'}); conn.on('data', d => mpRicevi(d, id)); conn.on('close', () => mpVia(id)); conn.send(JSON.stringify({t:'id', id})); mpLobby(); }); errore = null; break; }
     catch(e){ errore = e; if (e && e.type === 'unavailable-id' && MPN){ MPN.cod = mpCod(); mpLobby(); continue; } if (e && e.tipo === 'script') break; await new Promise(r => setTimeout(r, 800)); } }
   if (errore && MPN){ mpChiudi(); mpErrore(errore); } }
-function mpErrore(e){ const t = e && (e.tipo || e.type) || '', r = mpRete();
-  const perche = r && r.dentroClaude() ? 'Dentro l’app Claude il gioco online non funziona: apri il gioco dal sito nel browser.' : t === 'script' ? 'Non riesco a scaricare il pezzo per il gioco online: controlla internet.' : t === 'peer-unavailable' || t === 'tempo' || t === 'nessuno' ? 'Non trovo la stanza: controlla il codice e che la stanza sia ancora aperta.' : 'Il collegamento non risponde. Controlla internet (meglio il Wi-Fi) e riprova.';
-  const o = ov(`<div class="dlg box cq-dlg"><h2>Niente collegamento</h2><p>${perche}</p><p class="cq-nota">Codice errore: ${t || 'sconosciuto'}</p><button class="big" id="cqOk">Indietro</button></div>`, false); o.querySelector('#cqOk').onclick = () => esci('amici'); }
+function mpErrore(e, cod){ const t = e && (e.tipo || e.type) || '', r = mpRete();
+  const perche = r && r.dentroClaude() ? 'Dentro l’app Claude il gioco online non funziona: apri il gioco dal sito nel browser.' : t === 'script' ? 'Non riesco a scaricare il pezzo per il gioco online: controlla internet.' : t === 'peer-unavailable' || t === 'tempo' || t === 'nessuno' ? (cod ? `La stanza ${cod} non risponde. Controlla il codice. Chi l’ha creata deve tenere il gioco aperto sulla schermata della stanza: se è andato su un’altra app, torni nel gioco. Poi riprova.` : 'Non trovo la stanza: controlla il codice e che la stanza sia ancora aperta.') : 'Il collegamento non risponde. Controlla internet (meglio il Wi-Fi) e riprova.';
+  const o = ov(`<div class="dlg box cq-dlg"><h2>Niente collegamento</h2><p>${perche}</p><p class="cq-nota">Codice errore: ${t || 'sconosciuto'}</p>${cod ? '<button class="big" id="cqRip">Riprova</button>' : ''}<button class="big ${cod ? 'alt' : ''}" id="cqOk">Indietro</button></div>`, false); o.querySelector('#cqOk').onclick = () => esci('amici'); const rp = o.querySelector('#cqRip'); if (rp) rp.onclick = () => mpEntra(cod); }
 function mpEntra(cod){ const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Conquista con gli amici</span><h2>Entro nella stanza ${cod}</h2><p class="cq-mpst" id="cqMpSt">${ico('clessidra', 2)} Mi collego…</p><button class="big alt" id="cqNo">Esci</button></div>`, false);
   o.querySelector('#cqNo').onclick = () => { mpChiudi(); esci('amici'); };
-  (async () => { MPN = {io:'g', cod}; try { const conn = await mpTrasporto().entra(cod); if (!MPN) return; MPN.conn = conn; conn.on('data', d => mpRicevi(d)); conn.on('close', () => mpVia()); conn.send(JSON.stringify({t:'ciao', nome: mpNome(), fond: mpFond()}));
+  (async () => { MPN = {io:'g', cod}; try { const conn = await mpTrasporto().entra(cod, (k, n) => { const st = el('cqMpSt'); if (st && MPN) st.innerHTML = `${ico('clessidra', 2)} La stanza non risponde ancora: riprovo (${k + 1} di ${n})… Chi l'ha creata deve avere il gioco aperto.`; }); if (!MPN){ try { conn.close(); conn.chiudiPeer && conn.chiudiPeer(); } catch(e){} return; } MPN.conn = conn; conn.on('data', d => mpRicevi(d)); conn.on('close', () => mpVia()); conn.send(JSON.stringify({t:'ciao', nome: mpNome(), fond: mpFond()}));
       const st = el('cqMpSt'); if (st) st.innerHTML = `${ico('ok', 2)} Sei dentro! Aspetto che chi ha creato la stanza faccia cominciare la partita…`; }
-    catch(e){ MPN = null; mpErrore(e); } })(); }
+    catch(e){ if (!MPN) return; MPN = null; mpErrore(e, cod); } })(); }
 function mpInizia(){ if (!MPN || !MPN.amici.length) return; const h = MPN.borgoH; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; chiudiOv();
   nuova(h, difScelta(), false, velScelta(), mappaScelta());
   if (S.esp){ for (const f in FZ) if (f !== h && S.terre[f]) S.terre[f].sold = Math.max(1, S.terre[f].sold - Math.round(S.esp*10)); S.esp = 0; } // tra amici niente rivali rinforzati dalla casata
