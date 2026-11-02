@@ -2160,6 +2160,9 @@ button.cr-res{border:0;cursor:pointer;color:#fff}
 #title .pan .pf-tit button{background:#232c74;color:#fff;border-color:#3d4aa3}
 #title .pan .pf-tit button.on,#title .pan .pf-tit button[aria-pressed=true]{background:#ffd03a;color:#141433}
 #title .pan h3{color:#fff}
+#dsNuova{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:99999;display:flex;align-items:center;gap:12px;background:#1d2266;color:#fff;border:3px solid #ffd03a;border-radius:16px;padding:12px 14px;box-shadow:0 8px 0 rgba(0,0,0,.35);font-family:var(--f-body,system-ui)}
+#dsNuova span{flex:1;display:flex;flex-direction:column;gap:2px}#dsNuova small{opacity:.85}
+#dsNuova button{flex:none;background:#ffd03a;color:#141433;border:0;border-radius:12px;padding:10px 14px;font-weight:900;font-size:15px;font-family:inherit}
 .pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
 #tb.tb-pan .tbhud{visibility:hidden}
 body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
@@ -6490,19 +6493,30 @@ function trasporto(){
   if (/prova=bc/.test(location.search)) return { async crea(cod, suConn){ const bc = new BroadcastChannel('ds-' + cod); const c = conBC(bc, 'h'); bc.addEventListener('message', e => { if (e.data && e.data.da === 'g' && e.data.ciao && !c.aperto){ c.aperto = true; bc.postMessage({da:'h', ciao:1}); suConn(c); } }); return {chiudi(){ bc.close(); }}; },
     async entra(cod){ const bc = new BroadcastChannel('ds-' + cod); const c = conBC(bc, 'g'); return new Promise((ok, ko) => { const t = setTimeout(() => ko(new Error('nessuno')), 4000); bc.addEventListener('message', e => { if (e.data && e.data.da === 'h' && e.data.ciao){ clearTimeout(t); ok(c); } }); bc.postMessage({da:'g', ciao:1}); }); } };
   return relay(); }
-// ===== ONLINE PASSANDO DAL SERVER (Supabase Realtime) =====
+// ===== ONLINE PASSANDO DAL SERVER (Supabase) =====
 // I telefoni non si collegano più direttamente tra loro: ognuno parla col server, che gira i messaggi agli altri della stanza.
 // Così funziona con qualsiasi Wi-Fi, router o rete dati. Ogni messaggio ha un numero: se si perde viene rimandato, e arrivano sempre in ordine.
-function caricaSB(){ if (window.supabase && window.supabase.createClient) return Promise.resolve();
-  const prova = src => new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = () => window.supabase && window.supabase.createClient ? ok() : ko(new Error('script')); s.onerror = () => ko(new Error('script')); document.head.append(s); });
-  return prova('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js').catch(() => prova('https://unpkg.com/@supabase/supabase-js@2.49.4/dist/umd/supabase.js')).catch(() => { throw Object.assign(new Error('script'), {tipo:'script'}); }); }
-let SBC = null;
-const sbc = () => SBC || (SBC = window.supabase.createClient('https://zzadfutpjykwwcjjtpqq.supabase.co', 'sb_publishable_um6p_YzXZ8C73FcfLJS0AA_WgfNgceF', {auth:{persistSession:false, autoRefreshToken:false, detectSessionInUrl:false}, realtime:{params:{eventsPerSecond:30}}}));
-async function canaleStanza(cod, io, suMsg){ await caricaSB(); const ch = sbc().channel('ds-stanza-' + cod, {config:{broadcast:{self:false, ack:false}}});
-  ch.on('broadcast', {event:'m'}, e => { const m = e && e.payload; if (m && m.da !== io && (!m.a || m.a === io)) suMsg(m); });
-  await new Promise((ok, ko) => { let fatto = false; const t = setTimeout(() => { if (!fatto){ fatto = true; try { sbc().removeChannel(ch); } catch(e){} ko(Object.assign(new Error('server'), {tipo:'server'})); } }, 15000);
-    ch.subscribe(st => { if (st === 'SUBSCRIBED' && !fatto){ fatto = true; clearTimeout(t); ok(); } }); });
-  return {invia: m => { try { const r = ch.send({type:'broadcast', event:'m', payload: Object.assign({da: io}, m)}); if (r && r.catch) r.catch(() => {}); } catch(e){} }, chiudi: () => { try { sbc().removeChannel(ch); } catch(e){} }}; }
+// Niente websocket e niente collegamento diretto: solo richieste normali al server, le stesse dei salvataggi online.
+// Se funziona il salvataggio, funziona anche l'online. Il gioco è a turni, quindi chiedere i messaggi nuovi ogni mezzo secondo basta.
+const SBURL = 'https://zzadfutpjykwwcjjtpqq.supabase.co/rest/v1/rpc/', SBKEY = 'sb_publishable_um6p_YzXZ8C73FcfLJS0AA_WgfNgceF';
+async function sbRpc(fn, body){ const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null, t = ctl ? setTimeout(() => ctl.abort(), 10000) : 0;
+  try { const r = await fetch(SBURL + fn, {method:'POST', headers:{apikey:SBKEY, Authorization:'Bearer ' + SBKEY, 'Content-Type':'application/json'}, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined, cache:'no-store'}); if (!r.ok) throw Object.assign(new Error('http ' + r.status), {tipo:'server'}); return await r.json(); }
+  finally { if (t) clearTimeout(t); } }
+async function canaleStanza(cod, io, suMsg){ const stanza = 'ds-' + cod; let dopo, chiuso = false, coda = [], invio = null, errori = 0;
+  try { dopo = await sbRpc('ds_stanza_ultimo', {p_stanza: stanza}); } catch(e){ try { dopo = await sbRpc('ds_stanza_ultimo', {p_stanza: stanza}); } catch(e2){ throw Object.assign(new Error('server'), {tipo:'server'}); } }
+  const manda = async () => { invio = null; if (chiuso || !coda.length) return; const pacco = coda.splice(0, 50);
+    try { await sbRpc('ds_stanza_invia', {p_stanza: stanza, p_da: io, p_msgs: pacco.map(m => ({a: m.a || null, d: m}))}); } catch(e){ coda = pacco.concat(coda); }
+    if (coda.length && !invio) invio = setTimeout(manda, 400); };
+  let timer = null, leggendo = false;
+  const leggi = async () => { if (chiuso || leggendo) return; leggendo = true; clearTimeout(timer); let pausa = 600;
+    try { const L = await sbRpc('ds_stanza_leggi', {p_stanza: stanza, p_io: io, p_dopo: dopo}); errori = 0;
+      for (const x of L){ if (x.id > dopo) dopo = x.id; const m = Object.assign({}, x.d, {da: x.da}); try { suMsg(m); } catch(e){ console.error(e); } } if (L.length >= 200) pausa = 50; }
+    catch(e){ errori++; pausa = Math.min(5000, 800*errori); }
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') pausa = Math.max(pausa, 2000);
+    leggendo = false; if (!chiuso){ clearTimeout(timer); timer = setTimeout(leggi, pausa); } };
+  timer = setTimeout(leggi, 50);
+  const vis = () => { if (document.visibilityState === 'visible' && !chiuso) leggi(); }; document.addEventListener('visibilitychange', vis);
+  return {invia: m => { if (chiuso) return; coda.push(m); if (!invio) invio = setTimeout(manda, 60); }, chiudi: () => { if (coda.length) manda(); setTimeout(() => { chiuso = true; document.removeEventListener('visibilitychange', vis); }, 600); }}; }
 function connAff(invia, altro){ const h = {data:[], close:[]}, buf = {}; let out = 0, dentro = 0, coda = [];
   const giro = setInterval(() => { if (w._chiuso) return; const t = Date.now(); coda.forEach(q => { if (t - q.t > 1800){ q.t = t; invia({t:'d', a:altro, n:q.n, d:q.d}); } }); }, 900);
   const w = {_chiuso: false, _vivo: Date.now(),
@@ -8572,6 +8586,14 @@ const ACC = window.ACC = (() => {
 // un avviso piccolo nel menu (per spiegare stelle e talismani)
 function toastMenu(t){ let d = document.getElementById('mnToast'); if (!d){ d = document.createElement('div'); d.id = 'mnToast'; document.body.append(d); } d.textContent = t; d.classList.add('on'); clearTimeout(toastMenu.tm); toastMenu.tm = setTimeout(() => d.classList.remove('on'), 3200); }
 window.toastMenu = toastMenu;
+
+// ---------- versione nuova: GitHub tiene in memoria la pagina per qualche minuto. Se online c'è una versione più nuova, lo dico e si aggiorna con un tocco.
+(() => { const MIA = '20261102215633'; let visto = false;
+  async function controlla(){ if (visto || !/^https?:/.test(location.protocol) || /prova=/.test(location.search)) return;
+    try { const r = await fetch(location.pathname + '?v=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const t = await r.text(); const m = t.match(/const MIA = '(\d{8,})'/); if (!m || !(m[1] > MIA)) return; visto = true;
+      const b = document.createElement('div'); b.id = 'dsNuova'; b.innerHTML = '<span><b>C’è una versione nuova del gioco</b><small>Aggiorna per avere le ultime correzioni.</small></span><button type="button">Aggiorna</button>';
+      b.querySelector('button').onclick = () => { location.replace(location.pathname + '?v=' + m[1]); }; document.body.append(b); } catch(e){} }
+  setTimeout(controlla, 4000); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') controlla(); }); setInterval(controlla, 5*60000); })();
 
 let last = performance.now(), T = 0;
 function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); last = now; T += dt;
