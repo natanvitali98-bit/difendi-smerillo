@@ -2078,6 +2078,7 @@ button.cr-res{border:0;cursor:pointer;color:#fff}
 .fd-cl > span{align-items:flex-start;text-align:left}.fd-cl{justify-content:flex-start}
 .fd-sw{height:30px;width:30px!important;flex:none;border-radius:8px;border:4px solid #3fd0c9;box-shadow:0 0 12px rgba(63,208,201,.7);margin:0 2px}
 .fd-tit{font-style:normal;font-family:var(--f-pixel);font-weight:800;font-size:18px;color:#141433;background:#3fd0c9;border-radius:6px;height:30px;width:30px!important;display:flex;align-items:center;justify-content:center;margin:0 2px}
+.cl-card>span:only-child{display:flex;flex-direction:column;flex:1;min-width:0;gap:2px}
 /* ===== tema scuro unico (stile della carta missione) ===== */
 #cqPan,.dlg.box,#title .pan,.acc-box,.acc-card{--carta:#2d3889;--carta2:#232c74;--testo:#ffffff;--grigio:#b8c2f0;--ink:#ffffff;--muted:#b8c2f0;--box:#2d3889;--box-2:#232c74;--th-bord:#141433;
   background:linear-gradient(180deg,#26307e 0%,#1a1f5c 60%,#141845 100%)!important;color:#fff!important;border:3px solid #141433!important;box-shadow:0 6px 0 #141433,inset 0 2px 0 rgba(255,255,255,.1)!important}
@@ -4497,7 +4498,7 @@ function CARICA(fn, testo, ev){
   const stato = CARICA_ON = {estendi(){ tMin = performance.now() + 500; }};
   const chiudi = () => { if (fine) return; fine = true; CARICA_ON = null; if (bar) bar.style.width = '100%';
     if (lento || !v.animate){ v.remove(); return; }
-    v.animate([{clipPath:`circle(${r}px at 50% 50%)`}, {clipPath:'circle(0px at 50% 50%)'}], {duration:320, easing:'cubic-bezier(.5,0,.3,1)', fill:'forwards'}).onfinish = () => v.remove(); };
+    v.style.clipPath = 'none'; v.animate([{opacity:1, transform:'scale(1)'}, {opacity:0, transform:'scale(1.06)'}], {duration:300, easing:'ease-out', fill:'forwards'}).onfinish = () => v.remove(); };
   // aspetta che le immagini si muovano lisce: 12 fotogrammi di fila sotto i 34 ms (al massimo 7 secondi)
   const aspetta = () => { const t0 = performance.now(); tMin = t0 + 550; let ult = t0, buoni = 0;
     const giro = now => { if (fine) return; const dt = now - ult; ult = now; buoni = dt < 34 ? buoni + 1 : 0; const t = now - t0;
@@ -4577,7 +4578,7 @@ function mostraMenu(pannello){
     </div>`;
     // le pagine si scorrono col dito come in un gioco da telefono; la barra in basso dice dove sei
     { const pag = c.querySelector('#crPag'), tabs = [...c.querySelectorAll('.cr-tab')], pgs = [...c.querySelectorAll('.cr-pg')];
-      let auto = false; const vai = (k, liscio) => { const i = pgs.findIndex(s => s.dataset.tab === k); if (i < 0){ if (k !== 'gioca') vai('gioca', liscio); return; } auto = !!liscio; pag.scrollTo({left: i*pag.clientWidth, behavior: liscio ? 'smooth' : 'auto'}); segna(k); try { sessionStorage.setItem('ds-tab', k); } catch(e){} };
+      let auto = false; const vai = (k, liscio) => { const i = pgs.findIndex(s => s.dataset.tab === k); if (i < 0){ if (k !== 'gioca') vai('gioca', liscio); return; } auto = !!liscio; const cur = Math.round(pag.scrollLeft / Math.max(1, pag.clientWidth)); if (liscio && Math.abs(i - cur) > 1 && pag.animate){ const dir = i > cur ? 1 : -1; pag.animate([{opacity:1}, {opacity:0, transform:`translateX(${-dir*18}px)`}], {duration:110, easing:'ease-in'}).onfinish = () => { pag.scrollTo({left: i*pag.clientWidth, behavior:'auto'}); pag.animate([{opacity:0, transform:`translateX(${dir*24}px)`}, {opacity:1, transform:'none'}], {duration:200, easing:'ease-out'}); }; } else pag.scrollTo({left: i*pag.clientWidth, behavior: liscio ? 'smooth' : 'auto'}); segna(k); try { sessionStorage.setItem('ds-tab', k); } catch(e){} };
       const nav = c.querySelector('.cr-nav'), ind = document.createElement('span'); ind.className = 'cr-ind'; nav.prepend(ind); let ultima = null;
       const segna = (k, anima = true) => { tabs.forEach(b => b.classList.toggle('on', b.dataset.tab === k)); const b = tabs.find(x => x.dataset.tab === k); if (!b) return;
         ind.style.width = b.offsetWidth + 'px'; ind.style.transform = `translateX(${b.offsetLeft}px)`; ind.classList.toggle('oro', k === 'gioca');
@@ -4595,7 +4596,7 @@ function mostraMenu(pannello){
       let k0 = 'gioca'; try { k0 = sessionStorage.getItem('ds-tab') || 'gioca'; } catch(e){} requestAnimationFrame(() => { vai(R0 ? R0.tab : k0, false); if (R0){ const pg = pgs.find(s => s.dataset.tab === R0.tab); if (pg) pg.scrollTop = R0.top; requestAnimationFrame(() => { if (pg) pg.scrollTop = R0.top; quieto = false; setTimeout(() => { const cr = c.querySelector('.cr'); if (cr) cr.classList.remove('quieto'); }, 300); }); } });
       c.querySelectorAll('.cr-dif').forEach(b => { const im = TB.icona(b.dataset.dif, 3); if (b.classList.contains('no')) im.style.filter = 'brightness(0) opacity(.35)'; b.querySelector('.cr-di').append(im); b.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('collezione'); }); });
       { const W = c.querySelector('#prW'), go = c.querySelector('#prGira'), es = c.querySelector('#prEs');
-        if (go) go.onclick = () => { const r = TB.giraRuota(); if (!r) return; go.disabled = true; go.textContent = '…'; const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (go) go.onclick = () => { try { PROF.pausaAvvisi(matchMedia('(prefers-reduced-motion: reduce)').matches ? 400 : 4000); } catch(e){} const r = TB.giraRuota(); if (!r) return; go.disabled = true; go.textContent = '…'; const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
           const giri = 5*360 + (360 - (r.i + .5)*360/r.n) + (Math.random() - .5)*(300/r.n); try { SUONI.suona('carica1'); } catch(e){}
           W.style.transition = lento ? 'none' : 'transform 3.6s cubic-bezier(.12,.75,.12,1)'; requestAnimationFrame(() => { W.style.transform = `rotate(${giri}deg)`; });
           setTimeout(() => { es.innerHTML = r.msg; go.textContent = 'Domani'; c.querySelector('#prRuota').classList.remove('pronta'); try { SUONI.suona(r.x.k === 'fort' || r.x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(r.x.k === 'fort' || r.x.v === 'oro' ? 160 : 70); } catch(e){}
@@ -4902,7 +4903,8 @@ const PROF = (() => {
   // avvisi in alto, uno dopo l'altro
   const coda = []; let mostra = false;
   function avviso(tit, sub){ coda.push([tit, sub]); if (!mostra) prossimo(); }
-  function prossimo(){ const x = coda.shift(); if (!x){ mostra = false; return; } mostra = true; let el = document.getElementById('profToast');
+  let pausaFino = 0; const pausaAvvisi = ms => { pausaFino = Date.now() + ms; };
+  function prossimo(){ if (Date.now() < pausaFino){ mostra = true; setTimeout(() => { mostra = false; prossimo(); }, pausaFino - Date.now() + 20); return; } const x = coda.shift(); if (!x){ mostra = false; return; } mostra = true; let el = document.getElementById('profToast');
     if (!el){ el = document.createElement('div'); el.id = 'profToast'; document.body.append(el); }
     const ic = /Livello/.test(x[0]) ? '⬆' : '★'; el.innerHTML = `<span class="pt-ic">${ic}</span><span class="pt-tx"><b>${x[0].replace(/^⬆️\s*/, '')}</b>${x[1] ? '<small>' + x[1] + '</small>' : ''}</span>`; el.classList.remove('via'); el.classList.add('su');
     try { TB && SUONI.suona('scrigno'); } catch(e){}
@@ -4940,7 +4942,7 @@ const PROF = (() => {
       b.textContent = ok ? v.n : (v.leg ? (v.leg.startsWith('f_') ? '🍀 ???' : '🏆 ???') : '🔒 Liv. ' + v.liv); b.onclick = () => { const q = leggi(); q.titolo = k; scrivi(q); ridisegna(); }; gTi.append(b); }
     c.querySelector('#pfBack').onclick = indietro; c.scrollTop = 0; }
   const leggende = () => { const p = leggi(); return LEGGENDE.map(q => ({...q, fatto: !!p.leg[q.id], premi: premiDi(q.id)})); };
-  return {daiXP, leggenda, chip, pagina, leggende, fortuna, quantiFortunati, avviso, livello: () => livello(leggi().xp)};
+  return {daiXP, leggenda, chip, pagina, leggende, fortuna, quantiFortunati, avviso, pausaAvvisi, livello: () => livello(leggi().xp)};
 })();
 const TB = (() => {
 const el = id => document.getElementById(id);
@@ -7503,7 +7505,7 @@ function bordoMondo(){ const mw = WW*cam.s, mh = WH*cam.s, d = 26; if (cam.x <= 
   if (cam.x > 0) lin(cam.x, 0, cam.x + d, 0, cam.x, cam.y, d, mh); if (cam.x + mw < W) lin(cam.x + mw, 0, cam.x + mw - d, 0, cam.x + mw - d, cam.y, d, mh);
   if (cam.y > 0) lin(0, cam.y, 0, cam.y + d, cam.x, cam.y, mw, d); if (cam.y + mh < H) lin(0, cam.y + mh, 0, cam.y + mh - d, cam.x, cam.y + mh - d, mw, d); }
 function disegna(Tm, dt){ const ter = VISTA || (S && S.terre); passoVolo(dt);
-  if (CAMT){ const k = Math.min(1, dt*7); cam.x += (CAMT.x - cam.x)*k; cam.y += (CAMT.y - cam.y)*k; const ox = cam.x, oy = cam.y; limita(); if (Math.hypot(CAMT.x - cam.x, CAMT.y - cam.y) < 2 || (ox !== cam.x && oy !== cam.y)) CAMT = null; }
+  if (CAMT){ const k = Math.min(1, dt*7); if (CAMT.s){ cam.s += (CAMT.s - cam.s)*k; if (CAMT.t){ const T = TERRE[CAMT.t] || CAMT.t; CAMT.x = INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s; CAMT.y = INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s; } } cam.x += (CAMT.x - cam.x)*k; cam.y += (CAMT.y - cam.y)*k; const ox = cam.x, oy = cam.y; limita(); const sOk = !CAMT.s || Math.abs(CAMT.s - cam.s) < .005; if ((Math.hypot(CAMT.x - cam.x, CAMT.y - cam.y) < 2 && sOk) || (ox !== cam.x && oy !== cam.y && sOk)) CAMT = null; }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#1f3a22'; ctx.fillRect(0, 0, W, H); sfondo(); ctx.imageSmoothingEnabled = cam.s < .7;
   ctx.drawImage(cB, cam.x, cam.y, WW*cam.s, WH*cam.s); bordoMondo(); ctx.imageSmoothingEnabled = false;
   if (!ter) return;
@@ -7548,7 +7550,7 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre); passoVolo(dt);
   // soldati in marcia
   for (let i = ANIM.length - 1; i >= 0; i--){ const a = ANIM[i]; a.t += dt/a.dur; const k = Math.min(1, a.t), P = a.pts, n = 5;
     for (let j = 0; j < n; j++){ const qv = Math.max(0, Math.min(1, k - j*.05)), p = P[Math.min(P.length - 1, Math.floor(qv*(P.length - 1)))], [sx, sy] = aSchermo(p[0], p[1]), r = 4;
-      const z = Math.max(1, Math.round(Math.min(2.4, .8 + cam.s))), ph = Math.floor(performance.now()/120 + j) % 2, X = Math.round(sx), Y = Math.round(sy) + (r - r);
+      const z = Math.max(2, Math.round(Math.min(3, 1.2 + cam.s*1.4))), ph = Math.floor(performance.now()/120 + j) % 2, X = Math.round(sx), Y = Math.round(sy) + (r - r);
       omino(ctx, X, Y, z, a.col, S && CAS && a.col === FZ[S.io].col ? (CAS.skin || 'base') : 'base', ph, j === 0);
       if (Math.random() < .15) spruzzo(p[0], p[1] + 3, 1, ['#c8b898', '#e0d4bc'], 12, -8, .5, 3); }
     if (a.t >= 1){ ANIM.splice(i, 1); if (a.fine) a.fine(); } }
@@ -7785,6 +7787,8 @@ function passo(){ const G = GIOCA; if (!G) return; if (G.i >= G.ev.length){ GIOC
   else if ((e.t === 'str' || e.t === 'costr' || e.t === 'opera') && e.a && visibile(e.a)){ VISTA = e.snap; nasce(e.a, e.k); suona('costruisci'); setTimeout(passo, 750); }
   else { VISTA = e.snap; if (!e.muto) suona(e.t === 'costr' ? 'costruisci' : e.t === 'regalo' ? 'moneta' : 'flip'); setTimeout(passo, e.muto ? 260 : 700); } }
 const visibile = t => { const [x, y] = aSchermo(TERRE[t].x, TERRE[t].y); return x > INS.l + 20 && x < W - INS.r - 20 && y > INS.t + 20 && y < H - INS.b - 20; };
+// la telecamera va sulla battaglia: centra tra le due terre e si avvicina se la mappa è lontana
+function inquadra(a, b){ const A = TERRE[a], B = TERRE[b]; if (!A || !B) return; const m = {x:(A.x + B.x)/2, y:(A.y + B.y)/2}, s2 = Math.max(cam.s, Math.min(ZMAX, fitS*2.4)); CAMT = {s: s2, t: m, x: cam.x, y: cam.y}; }
 function guarda(t){ const T = TERRE[t]; CAMT = {x: INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s, y: INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s}; }
 let CAMT = null;
 function stradaVerso(a, b){ const p = strada(a < b ? a : b, a < b ? b : a); return a < b ? p : p.slice().reverse(); }
@@ -7805,7 +7809,7 @@ function aggiornaUI(){ if (root) root.classList.toggle('vuoto', !S || !!SCELTA);
   { const fl = el('cqFlag'), stc = CAS && stemma(CAS.stemma, 1); if (stc){ fl.className = 'cq-flag cq-flagst'; fl.style.background = 'none'; fl.innerHTML = ''; const im = new Image(); im.src = stc.toDataURL(); im.width = 18; im.height = 21; fl.append(im); } else { fl.className = 'cq-flag'; fl.style.background = FZ[S.io].col; } } pannello(); }
 function barraAmic(v){ const [n, c] = livAmic(v); return `<span class="cq-am"><span class="cq-amb"><i style="left:${(v + 100)/2}%;background:${c}"></i></span><em style="color:${c}">${n}</em></span>`; }
 function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()){ p.innerHTML = `<div class="cq-ph cq-mpw"><b>${ico('clessidra', 2)} Tocca a ${mpNomeDi(mpBorgoDi(S.mp.fase))}</b><small>Sta giocando la sua stagione con ${FZ[mpBorgoDi(S.mp.fase)] ? FZ[mpBorgoDi(S.mp.fase)].corto : ''}. Le sue mosse le vedi sulla mappa mentre le fa.</small>${MPN && MPN.feed && MPN.feed.length ? `<div class="cq-feed">${MPN.feed.map((t, i) => `<span class="${i === MPN.feed.length - 1 ? 'nuovo' : ''}">${t}</span>`).join('')}</div>` : ''}</div>`; return; }
-  if (GIOCA){ p.innerHTML = `<div class="cq-ph"><b>Muovono gli altri borghi…</b></div><button class="big alt cq-salta" id="cqSalta">Salta</button>`; el('cqSalta').onclick = () => { ANIM.length = 0; const G = GIOCA; if (G){ G.i = G.ev.length; passo(); } }; return; }
+  if (GIOCA){ p.innerHTML = `<div class="cq-ph"><b>${GIOCA.testo || 'Muovono gli altri borghi…'}</b></div>${GIOCA.testo ? '' : '<button class="big alt cq-salta" id="cqSalta">Salta</button>'}`; if (GIOCA.testo) return; el('cqSalta').onclick = () => { ANIM.length = 0; const G = GIOCA; if (G){ G.i = G.ev.length; passo(); } }; return; }
   if (modo && modo.tipo === 'sposta'){ p.innerHTML = `<div class="cq-ph"><b>Dove sposti i soldati?</b><small>Tocca una tua terra (gialla che lampeggia): ci arrivano passando per le tue terre${MP().marcia ? `, al massimo ${MP().marcia} terre più in là` : ''}.</small></div><button class="big alt" id="cqAnn">Annulla</button>`; el('cqAnn').onclick = () => { modo = null; pannello(); }; return; }
   if (!sel){ const n = terreDi(S.io).length, mieB = Object.keys(FZ).filter(f => S.terre[f].own === S.io).length, F0 = S.fz[S.io];
     p.innerHTML = `<div class="cq-ph"><b>Tocca una terra sulla mappa</b><small>Hai ${n} ${n === 1 ? 'terra' : 'terre'} e ${sol(soldDi(S.io))}.${S.mosse === 0 ? ' Hai finito le mosse: premi <b>Fine stagione</b>.' : ''}</small></div>
@@ -7895,7 +7899,7 @@ function dlgBilancio(){ if (!S || GIOCA) return; const f = S.io, F = S.fz[f], pc
 function dlgSposta(da, a){ const max = S.terre[da].sold - 1; if (max < 1) return;
   const o = ov(`<div class="dlg box cq-dlg"><h2>Sposta soldati</h2><p>Da <b>${TERRE[da].nome}</b> a <b>${TERRE[a].nome}</b>. Almeno 1 soldato resta a fare la guardia.</p>${slider(max, max)}<button class="big" id="cqOk">Sposta</button><button class="big alt" id="cqNo">Annulla</button></div>`);
   legaSlider(o, () => {}); o.querySelector('#cqNo').onclick = () => { chiudiOv(); pannello(); };
-  o.querySelector('#cqOk').onclick = () => { const n = +o.querySelector('#cqN').value; chiudiOv(); S.terre[da].sold -= n; GIOCA = {ev:[], i:0, dopo(){}}; VISTA = JSON.parse(JSON.stringify(S.terre)); aggiornaUI();
+  o.querySelector('#cqOk').onclick = () => { const n = +o.querySelector('#cqN').value; chiudiOv(); S.terre[da].sold -= n; GIOCA = {ev:[], i:0, dopo(){}, testo:'I tuoi soldati si spostano…'}; VISTA = JSON.parse(JSON.stringify(S.terre)); aggiornaUI();
     ANIM.push({pts: cammino(percorso(S.io, da, a) || [da, a]), t:0, dur:.7, col:FZ[S.io].col, fine: () => { S.terre[a].sold += n; GIOCA = null; VISTA = null; sel = a; suona('tocco'); usaMossa(); }}); }; }
 function dlgAttacco(t){ const fonti = VIC[t].filter(v => S.terre[v].own === S.io && S.terre[v].sold > 1).sort((a, b) => S.terre[b].sold - S.terre[a].sold); if (!fonti.length) return;
   let da = fonti[0]; const own = S.terre[t].own, trad = own && (alleati(S.io, own) || patto(S.io, own)); leggiCas(); const tuttiC = (CAS && CAS.cap) || [], pronti = capiPronti(); let capSel = pronti[0] || null;
@@ -7915,7 +7919,7 @@ function dlgAttacco(t){ const fonti = VIC[t].filter(v => S.terre[v].own === S.io
 function attaccaIo(da, t, n, cap){ const prima = JSON.parse(JSON.stringify(S.terre)), own = S.terre[t].own, trad = own && (alleati(S.io, own) || patto(S.io, own)), r = battaglia(S.io, da, t, n, cap), rc = capDopo(cap, r, t, da); if (r.vinto){ stat('batt'); if (TERRE[t].fraz) stat('fraz'); } S.mosse = Math.max(0, S.mosse - 1);
   let missOk = null; if (r.vinto && own){ const i = (S.missioni || []).findIndex(mi => mi.contro === own); if (i >= 0){ const mi = S.missioni.splice(i, 1)[0]; setAmic(S.io, mi.f, amic(S.io, mi.f) + 25); S.rep[S.io] = Math.min(100, rep(S.io) + 6); S.fz[S.io].monete += 10; missOk = mi.f; } }
   if (vivi().length === 1) S.fine = 'vinto'; if (S.mp) mpAttacco(da, t, own, r, trad); salva();
-  prima[da].sold -= n; VISTA = prima; GIOCA = {ev:[], i:0, dopo(){}}; modo = null; aggiornaUI(); suona('carica1');
+  prima[da].sold -= n; VISTA = prima; GIOCA = {ev:[], i:0, dopo(){}, testo:'I tuoi soldati vanno all’attacco…'}; modo = null; aggiornaUI(); suona('carica1'); inquadra(da, t);
   ANIM.push({pts: stradaVerso(da, t), t:0, dur:.8, col:FZ[S.io].col, fine: () => { FLASH.push({a:t, t:0, col: r.vinto ? FZ[S.io].col : '#f8f8f0'}); suona(r.vinto ? 'boom' : 'tonfo'); VISTA = null; tintKey = '';
     setTimeout(() => { GIOCA = null; sel = r.vinto ? t : da; aggiornaUI();
       const o = ov(`<div class="dlg box cq-dlg cq-esito ${r.vinto ? 'ok' : 'no'}"><span class="kicker">${trad ? 'Tradimento' : 'Battaglia'} · ${TERRE[t].nome}</span><h2>${r.vinto ? (r.borgo && own ? FZ[own].nome + ' è tuo!' : 'Conquistata!') : 'Respinti!'}</h2>
@@ -8661,7 +8665,7 @@ function toastMenu(t){ let d = document.getElementById('mnToast'); if (!d){ d = 
 window.toastMenu = toastMenu;
 
 // ---------- versione nuova: GitHub tiene in memoria la pagina per qualche minuto. Se online c'è una versione più nuova, lo dico e si aggiorna con un tocco.
-(() => { const MIA = '20261102225911'; window.DS_VER = MIA; let visto = false;
+(() => { const MIA = '20261102230818'; window.DS_VER = MIA; let visto = false;
   async function controlla(){ if (visto || !/^https?:/.test(location.protocol) || /prova=/.test(location.search)) return;
     try { const r = await fetch(location.pathname + '?v=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const t = await r.text(); const m = t.match(/const MIA = '(\d{8,})'/); if (!m || !(m[1] > MIA)) return; visto = true;
       const b = document.createElement('div'); b.id = 'dsNuova'; b.innerHTML = '<span><b>C’è una versione nuova del gioco</b><small>Aggiorna per avere le ultime correzioni.</small></span><button type="button">Aggiorna</button>';
@@ -8709,7 +8713,7 @@ fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){
 (async () => { const ld = document.getElementById('caricamento'); if (!ld) return; const bar = document.getElementById('ldBar'), tx = document.getElementById('ldTxt');
   const perc = document.getElementById('ldPerc'), corre = document.getElementById('ldCorre'); try { corre.append(TB.icona('lanciere', 3)); } catch(e){}
   { const tick = () => { if (!document.getElementById('caricamento')) return; const w = bar.parentElement.clientWidth || 1, v = Math.round(bar.offsetWidth / w * 100); if (perc) perc.textContent = Math.min(100, v) + '%'; if (corre) corre.style.left = Math.max(4, v) + '%'; requestAnimationFrame(tick); }; requestAnimationFrame(tick); } // numero e omino seguono la barra vera
-  const passo = (p, t) => { bar.style.width = p + '%'; tx.textContent = t; return new Promise(r => requestAnimationFrame(() => setTimeout(r, 30))); };
+  const passo = (p, t) => { bar.style.transition = 'width .18s ease-out'; bar.style.width = p + '%'; tx.textContent = t; return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 200)))); };
   const TIPS = ['Dalla rupe i Lancieri buttano giù i nemici.', 'Le barricate hanno le punte: chi le colpisce perde 1 vita.', 'Abbatti i nemici lontano: vale 1 moneta in più.', 'Il Gatto Mammone salta un turno sì e uno no.', 'Sfida un amico: chi fa più punti vince!', 'Lo smeriglio è il falchetto che dà il nome a Smerillo.'];
   const tip = document.getElementById('ldTip'); let ti = Math.floor(Math.random()*TIPS.length); const metti = () => { if (tip){ tip.style.opacity = 0; setTimeout(() => { tip.textContent = TIPS[ti++ % TIPS.length]; tip.style.opacity = 1; }, 250); } }; metti(); const tiT = setInterval(metti, 2600);
   try { await passo(45, 'Disegno le case e la Rocca…'); if (!scena) scena = creaScena();
