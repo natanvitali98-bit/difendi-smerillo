@@ -6489,6 +6489,51 @@ const dentroClaude = () => { try { return window.top !== window.self; } catch(e)
 function trasporto(){
   if (/prova=bc/.test(location.search)) return { async crea(cod, suConn){ const bc = new BroadcastChannel('ds-' + cod); const c = conBC(bc, 'h'); bc.addEventListener('message', e => { if (e.data && e.data.da === 'g' && e.data.ciao && !c.aperto){ c.aperto = true; bc.postMessage({da:'h', ciao:1}); suConn(c); } }); return {chiudi(){ bc.close(); }}; },
     async entra(cod){ const bc = new BroadcastChannel('ds-' + cod); const c = conBC(bc, 'g'); return new Promise((ok, ko) => { const t = setTimeout(() => ko(new Error('nessuno')), 4000); bc.addEventListener('message', e => { if (e.data && e.data.da === 'h' && e.data.ciao){ clearTimeout(t); ok(c); } }); bc.postMessage({da:'g', ciao:1}); }); } };
+  return relay(); }
+// ===== ONLINE PASSANDO DAL SERVER (Supabase Realtime) =====
+// I telefoni non si collegano più direttamente tra loro: ognuno parla col server, che gira i messaggi agli altri della stanza.
+// Così funziona con qualsiasi Wi-Fi, router o rete dati. Ogni messaggio ha un numero: se si perde viene rimandato, e arrivano sempre in ordine.
+function caricaSB(){ if (window.supabase && window.supabase.createClient) return Promise.resolve();
+  const prova = src => new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = () => window.supabase && window.supabase.createClient ? ok() : ko(new Error('script')); s.onerror = () => ko(new Error('script')); document.head.append(s); });
+  return prova('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js').catch(() => prova('https://unpkg.com/@supabase/supabase-js@2.49.4/dist/umd/supabase.js')).catch(() => { throw Object.assign(new Error('script'), {tipo:'script'}); }); }
+let SBC = null;
+const sbc = () => SBC || (SBC = window.supabase.createClient('https://zzadfutpjykwwcjjtpqq.supabase.co', 'sb_publishable_um6p_YzXZ8C73FcfLJS0AA_WgfNgceF', {auth:{persistSession:false, autoRefreshToken:false, detectSessionInUrl:false}, realtime:{params:{eventsPerSecond:30}}}));
+async function canaleStanza(cod, io, suMsg){ await caricaSB(); const ch = sbc().channel('ds-stanza-' + cod, {config:{broadcast:{self:false, ack:false}}});
+  ch.on('broadcast', {event:'m'}, e => { const m = e && e.payload; if (m && m.da !== io && (!m.a || m.a === io)) suMsg(m); });
+  await new Promise((ok, ko) => { let fatto = false; const t = setTimeout(() => { if (!fatto){ fatto = true; try { sbc().removeChannel(ch); } catch(e){} ko(Object.assign(new Error('server'), {tipo:'server'})); } }, 15000);
+    ch.subscribe(st => { if (st === 'SUBSCRIBED' && !fatto){ fatto = true; clearTimeout(t); ok(); } }); });
+  return {invia: m => { try { const r = ch.send({type:'broadcast', event:'m', payload: Object.assign({da: io}, m)}); if (r && r.catch) r.catch(() => {}); } catch(e){} }, chiudi: () => { try { sbc().removeChannel(ch); } catch(e){} }}; }
+function connAff(invia, altro){ const h = {data:[], close:[]}, buf = {}; let out = 0, dentro = 0, coda = [];
+  const giro = setInterval(() => { if (w._chiuso) return; const t = Date.now(); coda.forEach(q => { if (t - q.t > 1800){ q.t = t; invia({t:'d', a:altro, n:q.n, d:q.d}); } }); }, 900);
+  const w = {_chiuso: false, _vivo: Date.now(),
+    send(d){ if (w._chiuso) return; const q = {n: ++out, d, t: Date.now()}; coda.push(q); invia({t:'d', a:altro, n:q.n, d}); },
+    on(k, f){ if (h[k]) h[k].push(f); },
+    close(){ if (w._chiuso) return; invia({t:'bye', a:altro}); w._via(); },
+    _ric(m){ if (w._chiuso) return; w._vivo = Date.now();
+      if (m.t === 'd'){ if (m.n > dentro) buf[m.n] = m.d; while (buf[dentro + 1] !== undefined){ dentro++; const d = buf[dentro]; delete buf[dentro]; h.data.forEach(f => { try { f(d); } catch(e){ console.error(e); } }); } invia({t:'ack', a:altro, n:dentro}); }
+      else if (m.t === 'ack') coda = coda.filter(q => q.n > m.n);
+      else if (m.t === 'bye') w._via(); },
+    _via(){ if (w._chiuso) return; w._chiuso = true; clearInterval(giro); h.close.forEach(f => { try { f(); } catch(e){} }); } };
+  return w; }
+const VIVO_MS = 40000;
+function relay(){ return {
+  async crea(cod, suConn){ const conns = {}; let chiusa = false;
+    const c = await canaleStanza(cod, 'h', m => { const g = m.da; if (!g || chiusa) return;
+      if (m.t === 'ciao'){ let w = conns[g]; if (!w || w._chiuso){ w = connAff(c.invia, g); conns[g] = w; suConn(w); } w._vivo = Date.now(); if (!w._chiuso) c.invia({t:'ok', a:g}); return; }
+      const w = conns[g]; if (!w || w._chiuso){ if (m.t === 'd' || m.t === 'hb') c.invia({t:'chi', a:g}); return; }
+      if (m.t === 'hb'){ w._vivo = Date.now(); return; } w._ric(m); });
+    const hb = setInterval(() => { for (const g in conns){ const w = conns[g]; if (w._chiuso) continue; c.invia({t:'hb', a:g}); if (Date.now() - w._vivo > VIVO_MS) w._via(); } }, 4000);
+    return {chiudi(){ if (chiusa) return; chiusa = true; clearInterval(hb); for (const g in conns) conns[g].close(); setTimeout(() => c.chiudi(), 400); }, pronto: true}; },
+  async entra(cod, stato){ const io = 'g' + Math.random().toString(36).slice(2, 10); let w = null, risolvi = null;
+    const c = await canaleStanza(cod, io, m => { if (m.da !== 'h') return;
+      if (m.t === 'ok'){ if (!w){ w = connAff(c.invia, 'h'); if (risolvi) risolvi(w); } w._vivo = Date.now(); return; }
+      if (!w) return; if (m.t === 'chi'){ c.invia({t:'ciao'}); return; } if (m.t === 'hb'){ w._vivo = Date.now(); return; } w._ric(m); });
+    try { await new Promise((ok, ko) => { risolvi = ok; let k = 0; const giro = () => { if (w) return; if (k >= 32){ ko(Object.assign(new Error('nessuno'), {tipo:'tempo'})); return; }
+        if (k && k % 6 === 0 && stato){ try { stato(k/6, 5); } catch(e){} } k++; c.invia({t:'ciao'}); setTimeout(giro, 1500); }; giro(); }); }
+    catch(e){ c.chiudi(); throw e; }
+    const hb = setInterval(() => { if (w._chiuso){ clearInterval(hb); return; } c.invia({t:'hb', a:'h'}); if (Date.now() - w._vivo > VIVO_MS) w._via(); }, 4000);
+    w.on('close', () => { clearInterval(hb); setTimeout(() => c.chiudi(), 400); }); w.chiudiPeer = () => { clearInterval(hb); c.chiudi(); }; return w; } }; }
+function _vecchioPeer(){ // il vecchio collegamento diretto (PeerJS): non più usato, tenuto solo come riferimento
   return { async crea(cod, suConn){ await caricaPeer(); const id = 'difsmer-' + cod; let p = null, chiuso = false, riparo = false;
       const nuovo = async () => { const q = new window.Peer(id, PEER_OPZ()); try { await aperto(q, 12000); } catch(e){ try { q.destroy(); } catch(_){} throw e; } p = q;
         q.on('connection', c => c.on('open', () => suConn(conPeer(c)))); q.on('disconnected', () => { if (!chiuso) setTimeout(ripara, 1500); }); q.on('error', () => { if (!chiuso) setTimeout(ripara, 2500); }); };
