@@ -7086,7 +7086,12 @@ const ANNI = {
   abbondanza:{nome:'L’anno dell’abbondanza', ic:'albero', desc:'Cibo e legna il 30% in più per tutti.'},
   mercanti:  {nome:'L’anno dei mercanti', ic:'moneta', desc:'Ogni accordo commerciale rende 2 monete in più.'}};
 const ANNO = () => (S && S.anno) || 'calmo';
-const costoOpera = fase => { const o = OPERA[fase]; if (!o) return null; const m = (ANNO() === 'fiera' ? .6 : 1)*(S && S.veloce ? .6 : 1); return m < 1 ? o.map(v => Math.round(v*m)) : o; };
+// sulle mappe grandi tra una fase della Grande Fiera e l'altra devono passare alcune stagioni: gli altri hanno il tempo di arrivare a fermarla
+// sulle mappe grandi la Fiera serve un territorio largo: per ogni fase servono più terre
+const terreFiera = fase => S && (S.mappa === 'enorme' || S.mappa === 'grande') ? Math.ceil(IDS.length*[.1, .15, .2][fase]) : 0;
+const fieraOk = f => !attesaFiera(f) && terreDi(f).length >= terreFiera(S.fz[f].opera || 0);
+const attesaFiera = f => { const F = S.fz[f], gap = S.mappa === 'enorme' ? 3 : S.mappa === 'grande' ? 2 : 0; return F && F.opera && F.operaT && gap ? Math.max(0, gap - (S.turno - F.operaT)) : 0; };
+const costoOpera = fase => { const o = OPERA[fase]; if (!o) return null; const m = (ANNO() === 'fiera' ? .6 : 1)*(S && S.veloce ? .6 : 1)*(S && S.mappa === 'enorme' ? 1.7 : S && S.mappa === 'grande' ? 1.3 : 1); return m !== 1 ? o.map(v => Math.round(v*m)) : o; };
 const neve = () => ANNO() === 'inverno' && (S.turno - 1) % 4 === 3; // le tre fasi della Grande Fiera: monete, legna, cibo
 const patto = (a, b) => !!(S.patti && S.patti[pk(a, b)] >= S.turno);
 const rep = f => S.rep ? (S.rep[f] == null ? 50 : S.rep[f]) : 50;
@@ -7737,7 +7742,7 @@ function daFermare(f){ let best = null, bv = 0; const pf = Math.max(1, punti(f))
 function valoreTerra(f, v, nem){ const T = TERRE[v], st = S.terre[v], o = st.own; let val = 1 + T.rend*.55 + (T.c || 0)*.22 + (T.l || 0)*.18 + (st.str ? 1.2*(st.sl || 1) : 0);
   if (T.fraz) val += 3 + prosp(v); if (eBorgo(v)) val += o ? 14 : 4;
   if (T.di && T.di === f) val += 3; else if (T.di && TERRE[T.di] && eBorgo(T.di) && S.terre[T.di].own !== f){ const bo = S.terre[T.di].own; val += 2.2 + (perse(T.di) === ASSEDIO - 1 ? 2.5 : 0); if (bo === nem) val += 2; }
-  if (o && nem && o === nem) val *= 1.5; if (o && (S.fz[o].opera || 0) >= 2) val *= 1.4;
+  if (o && nem && o === nem) val *= 1.5; if (o && o !== f && (S.fz[o].opera || 0) >= 1) val += 3.5*S.fz[o].opera;
   if (!o && st.aut) val *= 1.15;
   const mie = VIC[v].filter(x => S.terre[x].own === f).length, ost = VIC[v].filter(x => { const q = S.terre[x].own; return q && q !== f && q !== o && !alleati(f, q) && !patto(f, q); }).length;
   return val + mie*.45 - ost*.35; }
@@ -7761,7 +7766,7 @@ function cervello(f, az, news){ const F = S.fz[f], ai = (S.ai = S.ai || {}), me 
   while (az > 0 && giri++ < 10 && !neve()){ let best = null;
     for (const src of terreDi(f)){ const avail = S.terre[src].sold - tieniIn(f, src); if (avail < 2) continue; if (partePace(f, src) && !(CAR(f).tradisce && rnd() < .08)) continue;
       for (const v of VIC[src]){ const o = S.terre[v].own; if (o === f) continue; if (TERRE[v].borgo && eBorgo(v) && (S.turno <= TREGUA() || !puoAssediare(v, f))) continue;
-        const legato = o && (alleati(f, o) || patto(f, o)); if (legato && !(CAR(f).tradisce ? (S.turno > 5 && rnd() < .35) : (o === nem && (S.fz[o].opera || 0) >= 2 && amic(f, o) < 50) || (o === S.io && ioInTesta() && amic(f, o) < 45 && rnd() < .3))) continue;
+        const legato = o && (alleati(f, o) || patto(f, o)); if (legato && !(CAR(f).tradisce ? (S.turno > 5 && rnd() < .35) : ((S.fz[o].opera || 0) >= 2 && !alleati(f, o)) || (o === nem && (S.fz[o].opera || 0) >= 1 && amic(f, o) < 50) || (o === S.io && ioInTesta() && amic(f, o) < 45 && rnd() < .3))) continue;
         const assalto = TERRE[v].borgo && eBorgo(v) && o; let n = avail, pr = previsione(f, n, v, null, src); if (pr.p < (assalto ? .36 : soglia - .08)) continue;
         // si manda quasi tutto: l'esercito avanza unito. Si tiene una riserva solo se la terra di partenza è minacciata
         { const r0 = rischio(f, src); if (r0 > 0 && pr.p > .9){ const tieniX = Math.min(avail - 2, Math.ceil(r0*.6)); if (tieniX > 0){ const q = previsione(f, avail - tieniX, v, null, src); if (q.p >= .8){ n = avail - tieniX; pr = q; } } } }
@@ -7783,6 +7788,7 @@ function cervello(f, az, news){ const F = S.fz[f], ai = (S.ai = S.ai || {}), me 
       if (pm){ const p = percorso(f, pm.da, pm.src); S.terre[pm.da].sold -= pm.add; S.terre[pm.src].sold += pm.add; az--; news({t:'mov', f, da:pm.da, a:pm.src, p, testo:`${FZ[f].corto} unisce ${pm.add} soldati per un attacco`, muto:true}); continue; } }
     // E. piano lungo: sceglie un obiettivo e ci porta l'esercito
     if (me.obj && (!S.terre[me.obj] || S.terre[me.obj].own === f || S.turno - (me.dal || 0) > 4)) me.obj = null;
+    { const fz = vivi().filter(g => g !== f && (S.fz[g].opera || 0) >= 1).sort((a, b) => S.fz[b].opera - S.fz[a].opera)[0]; if (fz && !(me.obj && S.terre[me.obj] && S.terre[me.obj].own === fz)){ let bo = null, bd = 1e9; for (const t of terreDi(fz)){ if (eBorgo(t) && !puoAssediare(t, f)) continue; let d = 1e9; for (const x of terreDi(f)){ const q = Math.hypot(TERRE[x].x - TERRE[t].x, TERRE[x].y - TERRE[t].y); if (q < d) d = q; } if (d < bd){ bd = d; bo = t; } } if (bo){ me.obj = bo; me.dal = S.turno; } } }
     if (!me.obj){ let bo = null, bv = -1; for (const t of terreDi(f)) for (const v of VIC[t]){ const o = S.terre[v].own; if (o === f || (o && (patto(f, o) || alleati(f, o)) && o !== nem)) continue; if (TERRE[v].borgo && eBorgo(v) && !puoAssediare(v, f)) continue;
         const sc = valoreTerra(f, v, nem)/(1 + S.terre[v].sold*(o ? 1 + .2*S.fz[o].ed.armeria : 1)*(eBorgo(v) ? 1.6 : 1)*.35)*(eBorgo(v) && o ? 1.8 : 1); if (sc > bv){ bv = sc; bo = v; } }
       if (bo){ me.obj = bo; me.dal = S.turno; } }
@@ -7820,7 +7826,7 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
   // 0. scambi col mercato (senza mosse): chi ha troppo di una cosa la cambia
   if (F.legna > 25 && F.cibo < 8){ F.legna -= 10; F.cibo += 7; } if (F.cibo > 30 && F.legna < 6){ F.cibo -= 10; F.legna += 7; } if (F.monete > 40 && F.cibo < 5){ F.monete -= 10; F.cibo += 6; } if (F.monete > 40 && F.legna < 5){ F.monete -= 10; F.legna += 6; }
   // 1. la Grande Fiera, se è al sicuro e ha le risorse
-  const fase = F.opera || 0; if (mio && fase < 3 && az > 1 && inPace(f)){ const [cm, cl, cc] = costoOpera(fase); if (st0 !== 'guerra' && puoPagare(F, cm + 8, cl, cc + 4) && m < S.terre[f].sold*(st0 === 'economia' || st0 === 'diplofiera' ? 1.2 : .7) && rnd() < (st0 === 'economia' || st0 === 'diplofiera' ? .9 : Math.min(.8, .35*(st0 ? 1 : CAR(f).fiera)))){ paga(F, cm, cl, cc); F.opera = fase + 1; az--;
+  const fase = F.opera || 0; if (mio && fase < 3 && az > 1 && inPace(f) && fieraOk(f)){ const [cm, cl, cc] = costoOpera(fase); if (st0 !== 'guerra' && puoPagare(F, cm + 8, cl, cc + 4) && m < S.terre[f].sold*(st0 === 'economia' || st0 === 'diplofiera' ? 1.2 : .7) && rnd() < (st0 === 'economia' || st0 === 'diplofiera' ? .9 : Math.min(.8, .35*(st0 ? 1 : CAR(f).fiera)))){ paga(F, cm, cl, cc); F.opera = fase + 1; F.operaT = S.turno; az--;
     cron(`${FZ[f].corto} prepara la Grande Fiera (fase ${F.opera} di 3).`, F.opera >= 2 ? 2 : 1);
     news({t:'opera', f, a:f, k:'fiera', testo: F.opera >= 3 ? `${FZ[f].corto} ha finito la Grande Fiera!` : `Attenzione: ${FZ[f].corto} costruisce la Grande Fiera (fase ${F.opera} di 3). Se la finisce, vince.`});
     if (F.opera >= 3){ S.vincitore = f; S.vitt = 'opera'; return; } } }
@@ -7860,7 +7866,7 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
     const n = sur, p = percorso(f, da, meta); S.terre[da].sold -= n; S.terre[meta].sold += n; az--; news({t:'mov', f, da, a:meta, p, testo:`${FZ[f].corto} sposta ${n} soldati`, muto:true}); }
   // 6. politica
   const nemC = cervelloOn(f, st0) && S.ai && S.ai[f] ? S.ai[f].nem : null;
-  for (const g of vivi()){ if (g === f) continue; const k = pk(f, g), fid = amic(f, g) + (rep(g) - 50)/2 + (f === S.io && STRAT ? 0 : CAR(f).dipl) + (nemC ? (g === nemC ? -30 : 12) : 0);
+  for (const g of vivi()){ if (g === f) continue; const k = pk(f, g), fid = amic(f, g) + (rep(g) - 50)/2 + (f === S.io && STRAT ? 0 : CAR(f).dipl) + (nemC ? (g === nemC ? -30 : 12) : 0) - (cervelloOn(f, st0) && (S.fz[g].opera || 0) >= 1 ? 45 : 0);
     if (!S.all[k] && fid >= 50 && !troppoForte(g) && rnd() < .3 && vivi().length > 2){ if (g === S.io || umano(g)){ if (!S.proposte.some(p => p.f === f && p.tipo === 'all' && (p.per || S.io) === g)) S.proposte.push({f, tipo:'all', per:g}); } else { S.all[k] = true; news({t:'all', f, testo:`${FZ[f].corto} e ${FZ[g].corto} fanno un’alleanza`}); } }
     if (!S.acc[k] && fid >= 10 && rnd() < .3){ if (g === S.io || umano(g)){ if (!S.proposte.some(p => p.f === f && p.tipo === 'acc' && (p.per || S.io) === g)) S.proposte.push({f, tipo:'acc', per:g}); } else { S.acc[k] = true; news({t:'acc', f, testo:`${FZ[f].corto} e ${FZ[g].corto} firmano un accordo commerciale`}); } }
     if (!patto(f, g) && !S.all[k] && fid >= (S.turno <= 6 ? -5 : 0) && rnd() < (S.turno <= 6 && (g === S.io || umano(g)) ? .35 : .2)){ if (g === S.io || umano(g)){ if (!S.proposte.some(p => p.f === f && p.tipo === 'patto' && (p.per || S.io) === g)) S.proposte.push({f, tipo:'patto', per:g}); } else { S.patti[k] = S.turno + 8; news({t:'patto', f, muto:true, testo:`${FZ[f].corto} e ${FZ[g].corto} firmano un patto di non aggressione`}); } }
@@ -7992,10 +7998,10 @@ function usaMossa(){ S.mosse = Math.max(0, S.mosse - 1); salva(); aggiornaUI(); 
 function dlgCostruisci(){ const F = S.fz[S.io], fase = F.opera || 0, op = costoOpera(fase);
   const o = ov(`<div class="dlg box cq-dlg"><h2>Costruisci a ${FZ[S.io].corto}</h2><p>Hai ${prezzo(F.monete, F.legna, F.cibo)}. Costruire usa 1 mossa.</p><div class="cq-list">${Object.keys(ED).map(k => { const c = costo(S.io, k), cl = costoL(S.io, k), l = F.ed[k];
     return `<button class="cq-it" data-k="${k}" ${c == null || !puoPagare(F, c, cl) ? 'disabled' : ''}><span class="cq-ii">${ico(ED[k].ic, 3)}</span><span class="cq-it-t"><b>${ED[k].nome} <small>livello ${l} di ${ED[k].max}</small></b><small>${ED[k].desc}</small></span><span class="cq-pr">${c == null ? 'Max' : prezzo(c, cl)}</span></button>`; }).join('')}
-    <button class="cq-it cq-opera" id="cqOp" ${!op || !puoPagare(F, ...op) || !inPace(S.io) ? 'disabled' : ''}><span class="cq-ii">${ico('coppa', 3)}</span><span class="cq-it-t"><b>La Grande Fiera <small>fase ${fase} di 3</small></b><small>Una grande festa che porta gente da tutte le Marche. Quando finisci la fase 3, <b>vinci</b>. Si costruisce solo in pace: ${inPace(S.io) ? 'ora puoi.' : `hai combattuto contro un borgo da poco, aspetta ${PACE_FIERA - (S.turno - S.fz[S.io].guerra)} ${PACE_FIERA - (S.turno - S.fz[S.io].guerra) === 1 ? 'stagione' : 'stagioni'}.`} Gli altri borghi cercheranno di fermarti.</small></span><span class="cq-pr">${op ? prezzo(...op) : 'Fatta'}</span></button></div><button class="big alt" id="cqNo">Indietro</button></div>`);
+    <button class="cq-it cq-opera" id="cqOp" ${!op || !puoPagare(F, ...op) || !inPace(S.io) || !fieraOk(S.io) ? 'disabled' : ''}><span class="cq-ii">${ico('coppa', 3)}</span><span class="cq-it-t"><b>La Grande Fiera <small>fase ${fase} di 3</small></b><small>Una grande festa che porta gente da tutte le Marche. Quando finisci la fase 3, <b>vinci</b>. Si costruisce solo in pace${terreFiera(fase) ? ` e con almeno <b>${terreFiera(fase)} terre</b> (ne hai ${terreDi(S.io).length})` : ''}: ${attesaFiera(S.io) ? `sulla mappa ${MAPPE[S.mappa].nome.toLowerCase()} la prossima fase arriva tra ${attesaFiera(S.io)} ${attesaFiera(S.io) === 1 ? 'stagione' : 'stagioni'}.` : inPace(S.io) ? 'ora puoi.' : `hai combattuto contro un borgo da poco, aspetta ${PACE_FIERA - (S.turno - S.fz[S.io].guerra)} ${PACE_FIERA - (S.turno - S.fz[S.io].guerra) === 1 ? 'stagione' : 'stagioni'}.`} Gli altri borghi cercheranno di fermarti.</small></span><span class="cq-pr">${op ? prezzo(...op) : 'Fatta'}</span></button></div><button class="big alt" id="cqNo">Indietro</button></div>`);
   o.querySelector('#cqNo').onclick = chiudiOv;
   o.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const k = b.dataset.k, c = costo(S.io, k), cl = costoL(S.io, k); if (c == null || !puoPagare(F, c, cl)) return; paga(F, c, cl); F.ed[k]++; nasce(S.io, k); suona('costruisci'); chiudiOv(); FLASH.push({a:S.io, t:0, col:'#f8d048'}); usaMossa(); stat('costr'); toast(`${ED[k].nome}: livello ${F.ed[k]}`); });
-  o.querySelector('#cqOp').onclick = () => { if (!op || !puoPagare(F, ...op) || !inPace(S.io)) return; paga(F, ...op); F.opera = fase + 1; nasce(S.io, 'fiera'); stat('costr'); cron(F.opera >= 3 ? `La Grande Fiera di ${FZ[S.io].corto} richiama gente da tutte le Marche.` : `${NomeCas()} prepara la Grande Fiera (fase ${F.opera} di 3).`, F.opera >= 2 ? 3 : 2); suona('stella2'); chiudiOv(); FLASH.push({a:S.io, t:0, col:'#ffd03a'}); usaMossa();
+  o.querySelector('#cqOp').onclick = () => { if (!op || !puoPagare(F, ...op) || !inPace(S.io) || !fieraOk(S.io)) return; paga(F, ...op); F.opera = fase + 1; F.operaT = S.turno; nasce(S.io, 'fiera'); stat('costr'); cron(F.opera >= 3 ? `La Grande Fiera di ${FZ[S.io].corto} richiama gente da tutte le Marche.` : `${NomeCas()} prepara la Grande Fiera (fase ${F.opera} di 3).`, F.opera >= 2 ? 3 : 2); suona('stella2'); chiudiOv(); FLASH.push({a:S.io, t:0, col:'#ffd03a'}); usaMossa();
     if (F.opera >= 3){ S.vincitore = S.io; S.vitt = 'opera'; S.fine = 'vinto'; salva(); finePartita(); } else toast(`Grande Fiera: fase ${F.opera} di 3. Gli altri borghi ti tengono d’occhio!`); }; }
 function slider(max, val, min = 1){ return `<div class="cq-sl"><button type="button" class="hbtn" data-d="-1">−</button><input type="range" min="${min}" max="${max}" value="${val}" id="cqN"><button type="button" class="hbtn" data-d="1">+</button><b id="cqNv">${val}</b></div>`; }
 function legaSlider(o, agg){ const r = o.querySelector('#cqN'), f = () => { o.querySelector('#cqNv').textContent = r.value; agg(+r.value); }; r.oninput = f; o.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { r.value = Math.max(+r.min, Math.min(+r.max, +r.value + +b.dataset.d)); f(); }); f(); }
@@ -8803,7 +8809,7 @@ function toastMenu(t){ let d = document.getElementById('mnToast'); if (!d){ d = 
 window.toastMenu = toastMenu;
 
 // ---------- versione nuova: GitHub tiene in memoria la pagina per qualche minuto. Se online c'è una versione più nuova, lo dico e si aggiorna con un tocco.
-(() => { const MIA = '20261108184044'; window.DS_VER = MIA; let visto = false;
+(() => { const MIA = '20261108191719'; window.DS_VER = MIA; let visto = false;
   async function controlla(){ if (visto || !/^https?:/.test(location.protocol) || /prova=/.test(location.search)) return;
     try { const r = await fetch(location.pathname + '?v=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const t = await r.text(); const m = t.match(/const MIA = '(\d{8,})'/); if (!m || !(m[1] > MIA)) return; visto = true;
       const b = document.createElement('div'); b.id = 'dsNuova'; b.innerHTML = '<span><b>C’è una versione nuova del gioco</b><small>Aggiorna per avere le ultime correzioni.</small></span><button type="button">Aggiorna</button>';
