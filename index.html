@@ -2231,6 +2231,7 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
 .cq-nbody>*,.cq-nsez>*,.cq-nbs>*{flex-shrink:0}
 .cq-notizie .cq-nbody{max-height:54vh}
 .cq-ocons{display:block}.cq-ocons .ico,.cq-ocons img,.cq-ocons canvas{vertical-align:middle}
+.fd-po{display:grid;place-items:center;width:130px;height:130px;border-radius:50%;background:radial-gradient(#ffb070,#ff8a3a);border:6px solid #141433;box-shadow:0 0 30px rgba(255,138,58,.6);font-family:var(--f-pixel);font-size:30px;font-weight:800;color:#141433}
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -4932,12 +4933,12 @@ const PROF = (() => {
   const CORNICI = {legno:{n:'Legno', liv:1, c:'#a87c46'}, pietra:{n:'Pietra', liv:4, c:'#9a9aa6'}, argento:{n:'Argento', liv:7, c:'#dfe5ee'}, oro:{n:'Oro', liv:11, c:'#f5b301'},
     rubino:{n:'Rubino', liv:15, c:'#e0304a'}, smeraldo:{n:'Smeraldo', liv:20, c:'#2fb36a'}, notte:{n:'Notte', liv:26, c:'#4a2aa0'},
     fuoco:{n:'Fuoco', leg:'m9', c:'#ff6a1a'}, corona:{n:'Corona', leg:'tutte', c:'#ffd700'}, muro:{n:'Muro vivente', leg:'nobar', c:'#6b6b78'}, nebbia:{n:'Nebbia', leg:'nopot', c:'#b8c8ff'},
-       trifoglio:{n:'Quadrifoglio', leg:'f_trif', c:'#3cb043'}, castoro:{n:'Castagna d’oro', leg:'f_cast', c:'#c08a2a'}, arcob:{n:'Arcobaleno', leg:'f_arco', c:'#ff6ad5'}, pioniere:{n:'Pioniere della beta', leg:'beta', c:'#3fd0c9'}};
+       trifoglio:{n:'Quadrifoglio', leg:'f_trif', c:'#3cb043'}, castoro:{n:'Castagna d’oro', leg:'f_cast', c:'#c08a2a'}, arcob:{n:'Arcobaleno', leg:'f_arco', c:'#ff6ad5'}, pioniere:{n:'Pioniere della beta', leg:'beta', c:'#3fd0c9'}, primaora:{n:'Prima ora', leg:'primaora', c:'#ff8a3a'}};
   const TITOLI = {recluta:{n:'Recluta', liv:1}, sentinella:{n:'Sentinella', liv:3}, guardia:{n:'Guardia del borgo', liv:5}, balestr:{n:'Balestriere scelto', liv:9}, capitano:{n:'Capitano delle mura', liv:13},
     difensore:{n:'Difensore di Smerillo', liv:17}, eroe:{n:'Eroe della Rocca', liv:22}, signore:{n:'Signore di Smerillo', liv:30},
     leggenda:{n:'Leggenda di Smerillo', leg:'tutte'}, assedio:{n:'Inarrestabile', leg:'ass15'}, costante:{n:'Mai un giorno senza', leg:'serie7'}, spartano:{n:'Senza aiuti', leg:'nopot'},
     intoccabile:{n:'Intoccabile', leg:'diffpieno'}, pochi:{n:'Pochi ma buoni', leg:'tre'}, mani:{n:'A mani nude', leg:'mani'}, rupe:{n:'Muro vivente', leg:'nobar'}, fuoco:{n:'Vincitore della Rocca', leg:'m9'},
-    fortunato:{n:'Baciato dalla fortuna', leg:'f_bacio'}, tesori:{n:'Cercatore di tesori', leg:'f_tesori'}, gatto:{n:'Più furbo del Gatto', leg:'f_gatto'}, pioniere:{n:'Pioniere della beta', leg:'beta'}};
+    fortunato:{n:'Baciato dalla fortuna', leg:'f_bacio'}, tesori:{n:'Cercatore di tesori', leg:'f_tesori'}, gatto:{n:'Più furbo del Gatto', leg:'f_gatto'}, pioniere:{n:'Pioniere della beta', leg:'beta'}, primaora:{n:'Difensore della prima ora', leg:'primaora'}};
   const LEGGENDE = [
     {id:'m9', t:'Vinci la Missione 9 con 3 stelle', modo:'A turni'},
     {id:'nobar', t:'Vinci una missione dalla 5 in su senza costruire barricate e senza perdere vite', modo:'A turni'},
@@ -4992,9 +4993,9 @@ const PROF = (() => {
     const ridisegna = () => pagina(c, indietro);
     const gAv = c.querySelector('#pfAv'); for (const [k, v] of Object.entries(AVATAR)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-it' + (p.avatar === k ? ' on' : ''); b.disabled = !ok;
       try { b.append(TB.icona(k, 3)); } catch(e){} b.insertAdjacentHTML('beforeend', `<small>${ok ? v.n : v.leg ? '🍀 Fortuna' : '🔒 Liv. ' + v.liv}</small>`); b.onclick = () => { const q = leggi(); q.avatar = k; scrivi(q); ridisegna(); }; gAv.append(b); }
-    const gCo = c.querySelector('#pfCo'); for (const [k, v] of Object.entries(CORNICI).filter(([k, v]) => v.leg !== 'beta' || p.leg.beta)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-it' + (p.cornice === k ? ' on' : ''); b.disabled = !ok;
+    const gCo = c.querySelector('#pfCo'); for (const [k, v] of Object.entries(CORNICI).filter(([k, v]) => !(v.leg === 'beta' || v.leg === 'primaora') || p.leg[v.leg])){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-it' + (p.cornice === k ? ' on' : ''); b.disabled = !ok;
       b.innerHTML = `<span class="pf-sw${v.leg ? ' pf-leg' : ''}" style="--fc:${v.c}"></span><small>${ok ? v.n : v.leg ? (v.leg.startsWith('f_') ? '🍀 Fortuna' : '🏆 Leggendaria') : '🔒 Liv. ' + v.liv}</small>`; b.onclick = () => { const q = leggi(); q.cornice = k; scrivi(q); ridisegna(); }; gCo.append(b); }
-    const gTi = c.querySelector('#pfTi'); for (const [k, v] of Object.entries(TITOLI).filter(([k, v]) => v.leg !== 'beta' || p.leg.beta)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-ti' + (p.titolo === k ? ' on' : '') + (v.leg ? ' leg' : ''); b.disabled = !ok;
+    const gTi = c.querySelector('#pfTi'); for (const [k, v] of Object.entries(TITOLI).filter(([k, v]) => !(v.leg === 'beta' || v.leg === 'primaora') || p.leg[v.leg])){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-ti' + (p.titolo === k ? ' on' : '') + (v.leg ? ' leg' : ''); b.disabled = !ok;
       b.textContent = ok ? v.n : (v.leg ? (v.leg.startsWith('f_') ? '🍀 ???' : '🏆 ???') : '🔒 Liv. ' + v.liv); b.onclick = () => { const q = leggi(); q.titolo = k; scrivi(q); ridisegna(); }; gTi.append(b); }
     c.querySelector('#pfBack').onclick = indietro; c.scrollTop = 0; }
   const leggende = () => { const p = leggi(); return LEGGENDE.map(q => ({...q, fatto: !!p.leg[q.id], premi: premiDi(q.id)})); };
@@ -8825,7 +8826,7 @@ const ACC = window.ACC = (() => {
       else io.innerHTML = `<div class="cl-card"><span><b>${esc(A.nome)}</b><small>${tipo === 'gloria' ? 'Gioca a Conquista per entrare in questa classifica.' : tipo === 'assedio' ? 'Gioca ad Assedio per entrare in questa classifica.' : 'Gioca una missione per entrare in classifica.'}</small></span></div>`;
       if (tipo === 'gloria') io.insertAdjacentHTML('beforeend', `<button type="button" class="fd-cl" data-targa>${med(0, 'mini')}<span><b>Targa dei Fondatori</b><small>I primi 10 a giocare a Conquista</small></span><i>Leggi</i></button>`);
       const b = io.querySelector('#clAcc'); if (b) b.onclick = () => apri('crea');
-      L.innerHTML = r.righe.length ? r.righe.map(x => `<div class="cl-r ${x.io ? 'io' : ''} ${x.pos <= 3 ? 'p' + x.pos : ''}"><span class="cl-pos">${x.pos}</span><span class="cl-av" data-av="${esc(x.av)}"></span><b class="cl-n">${esc(x.nome)}${x.fond ? med(x.fond, 'mini') : ''}</b><span class="cl-v">${valore(tipo, x.v)}</span></div>`).join('')
+      r.righe = r.righe || []; L.innerHTML = r.righe.length ? r.righe.map(x => `<div class="cl-r ${x.io ? 'io' : ''} ${x.pos <= 3 ? 'p' + x.pos : ''}"><span class="cl-pos">${x.pos}</span><span class="cl-av" data-av="${esc(x.av)}"></span><b class="cl-n">${esc(x.nome)}${x.fond ? med(x.fond, 'mini') : ''}</b><span class="cl-v">${valore(tipo, x.v)}</span></div>`).join('')
         : `<p class="cl-vuoto">Ancora nessuno in questa classifica. Puoi essere il primo!</p>`;
       L.querySelectorAll('[data-av]').forEach(e => { try { e.append(TB.icona(e.dataset.av, 2)); } catch(er){ try { e.append(TB.icona('lanciere', 2)); } catch(e2){} } }); };
     const c = CL.cache[tipo]; if (c && Date.now() - c.t < 60000){ disegna(c.r); return; }
@@ -8838,9 +8839,21 @@ const ACC = window.ACC = (() => {
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') invia(false, true); });
     addEventListener('pagehide', () => invia(false, true)); }
   // ---------- regali speciali dati dal server (es. il primo giocatore della beta)
-  function doni(r){ if (!A || !r || !Array.isArray(r.doni) || !r.doni.includes('beta')) return; let p = {}; try { p = JSON.parse(localStorage.getItem('difendi-smerillo-profilo')) || {}; } catch(e){}
+  function doni(r){ if (A && r && Array.isArray(r.doni) && r.doni.includes('primaora')) doniPrimaOra(); if (!A || !r || !Array.isArray(r.doni) || !r.doni.includes('beta')) return; let p = {}; try { p = JSON.parse(localStorage.getItem('difendi-smerillo-profilo')) || {}; } catch(e){}
     p.leg = p.leg || {}; if (p.leg.beta) return; p.leg.beta = Date.now(); p.cornice = 'pioniere'; p.titolo = 'pioniere'; try { localStorage.setItem('difendi-smerillo-profilo', JSON.stringify(p)); } catch(e){}
     const quando = () => { if (document.querySelector('#hmProf #tProf') && (!ov || ov.hidden)) regaloBeta(); else setTimeout(quando, 1000); }; setTimeout(quando, 800); }
+  function doniPrimaOra(){ let p = {}; try { p = JSON.parse(localStorage.getItem('difendi-smerillo-profilo')) || {}; } catch(e){}
+    p.leg = p.leg || {}; if (p.leg.primaora) return; p.leg.primaora = Date.now(); if (!p.leg.beta){ p.cornice = 'primaora'; p.titolo = 'primaora'; } try { localStorage.setItem('difendi-smerillo-profilo', JSON.stringify(p)); } catch(e){}
+    try { regalaScrigno('oro', 'Regalo dei primi giorni'); } catch(e){}
+    const quando = () => { if (document.querySelector('#hmProf #tProf') && (!ov || ov.hidden)) regaloPrimaOra(); else setTimeout(quando, 1000); }; setTimeout(quando, 900); }
+  function regaloPrimaOra(){ rifaiChip();
+    const b = finestra(`<div class="fd-festa"><span class="fd-po">7·11</span></div><span class="fd-k">REGALO SPECIALE</span><h2>Grazie, ${esc(A.nome)}!</h2>
+      <p class="acc-sub">Sei arrivato nei primi giorni, appena Difendi Smerillo è uscito. Questo regalo è solo per chi c'era:</p>
+      <ul class="fd-cosa"><li><i class="fd-sw" style="border-color:#ff8a3a;box-shadow:0 0 12px rgba(255,138,58,.7)"></i><span><b>Cornice «Prima ora»</b>: arancione come la Castagnata.</span></li>
+        <li><i class="fd-tit" style="background:#ff8a3a">T</i><span><b>Titolo «Difensore della prima ora»</b>: lo vedono tutti sotto al tuo nome.</span></li>
+        <li><i class="fd-tit" style="background:#ffd03a">S</i><span><b>Uno scrigno d’oro</b>: lo apri nella pagina Premi.</span></li></ul>
+      <p class="fd-per">Chi arriva dopo non potrà averli.</p><button class="big" data-x>Grazie!</button>`);
+    b.querySelector('[data-x]').onclick = () => { chiudi(); try { const t = document.getElementById('title'); if (t && !t.hidden) mostraMenu('home'); } catch(e){} }; try { SUONI.suona('leggenda'); EPICO.coriandoli(160, ['#ff8a3a', '#ffd03a', '#fff1a8', '#ffffff']); } catch(e){} invia(true).catch(() => {}); }
   function rifaiChip(){ document.querySelectorAll('#hmProf #tProf').forEach(old => { try { const ch = PROF.chip(); ch.onclick = old.onclick; old.replaceWith(ch); } catch(e){} }); aggiornaFond(); }
   function regaloBeta(){ const n = A && A.fond; rifaiChip();
     const b = finestra(`<div class="fd-festa">${n ? med(n, 'big') : '<span class="fd-cor"></span>'}</div><span class="fd-k">REGALO SPECIALE</span><h2>Grazie, ${esc(A.nome)}!</h2>
@@ -8916,7 +8929,7 @@ function toastMenu(t){ let d = document.getElementById('mnToast'); if (!d){ d = 
 window.toastMenu = toastMenu;
 
 // ---------- versione nuova: GitHub tiene in memoria la pagina per qualche minuto. Se online c'è una versione più nuova, lo dico e si aggiorna con un tocco.
-(() => { const MIA = '20261108195054'; window.DS_VER = MIA; let visto = false;
+(() => { const MIA = '20261108205234'; window.DS_VER = MIA; let visto = false;
   async function controlla(){ if (visto || !/^https?:/.test(location.protocol) || /prova=/.test(location.search)) return;
     try { const r = await fetch(location.pathname + '?v=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const t = await r.text(); const m = t.match(/const MIA = '(\d{8,})'/); if (!m || !(m[1] > MIA)) return; visto = true;
       const b = document.createElement('div'); b.id = 'dsNuova'; b.innerHTML = '<span><b>C’è una versione nuova del gioco</b><small>Aggiorna per avere le ultime correzioni.</small></span><button type="button">Aggiorna</button>';
