@@ -2006,6 +2006,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .hm-av{font-size:14px!important;background:#fff1d6;border:2px solid #f5b301;border-radius:12px;padding:8px 10px}
 .as-scr.oro{background:#ffd03a;box-shadow:inset 0 14px 0 #e0a000,0 4px 0 #141433}
 .as-scr.oro::after{background:#fff}
+#agBar{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 8px);z-index:100004;border:3px solid #141433;border-radius:999px;background:#ffd03a;color:#141433;font:inherit;font-size:14px;padding:7px 14px;box-shadow:0 3px 0 #141433;cursor:pointer;white-space:nowrap}
 .fz-acc{margin-left:4px;border:2px solid #f8d048;background:none;color:#f8d048;border-radius:8px;padding:2px 8px;font-weight:700;cursor:pointer}
 .acc-box{width:100%;max-width:440px;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
 @keyframes accIn{from{transform:translateY(30px) scale(.96);opacity:0}to{transform:none;opacity:1}}
@@ -9040,13 +9041,7 @@ const ACC = window.ACC = (() => {
 function toastMenu(t){ let d = document.getElementById('mnToast'); if (!d){ d = document.createElement('div'); d.id = 'mnToast'; document.body.append(d); } d.textContent = t; d.classList.add('on'); clearTimeout(toastMenu.tm); toastMenu.tm = setTimeout(() => d.classList.remove('on'), 3200); }
 window.toastMenu = toastMenu;
 
-// ---------- versione nuova: GitHub tiene in memoria la pagina per qualche minuto. Se online c'è una versione più nuova, lo dico e si aggiorna con un tocco.
-(() => { const MIA = '20261108205234'; window.DS_VER = MIA; let visto = false;
-  async function controlla(){ if (visto || !/^https?:/.test(location.protocol) || /prova=/.test(location.search)) return;
-    try { const r = await fetch(location.pathname + '?v=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const t = await r.text(); const m = t.match(/const MIA = '(\d{8,})'/); if (!m || !(m[1] > MIA)) return; visto = true;
-      const b = document.createElement('div'); b.id = 'dsNuova'; b.innerHTML = '<span><b>C’è una versione nuova del gioco</b><small>Aggiorna per avere le ultime correzioni.</small></span><button type="button">Aggiorna</button>';
-      b.querySelector('button').onclick = () => { location.replace(location.pathname + '?v=' + m[1]); }; document.body.append(b); } catch(e){} }
-  setTimeout(controlla, 4000); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') controlla(); }); setInterval(controlla, 5*60000); })();
+// (il controllo delle versioni nuove ora è in RITORNO: legge version.json, che pubblica.py aggiorna a ogni pubblicazione)
 
 let last = performance.now(), T = 0;
 function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); last = now; T += dt;
@@ -9167,6 +9162,23 @@ const RITORNO = window.RITORNO = (() => {
     const b = finestra(`<div class="fd-festa"><span class="as-scr oro"></span></div><span class="fd-k">BENVENUTO NELL’APP</span><h2>Ora Smerillo è tra le tue app!</h2><p class="acc-sub">Per ringraziarti c’è uno <b>scrigno d’oro</b>: lo apri nella pagina Premi.</p><button class="big" data-x>Apri lo scrigno</button>`);
     try { SUONI.suona('leggenda'); EPICO.coriandoli(140); } catch(e){}
     b.querySelector('[data-x]').onclick = () => { chiudi(); RIENTRA('premi'); }; return true; }
+
+  // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
+  // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
+  const VERSIONE = window.DS_VER = '20261109002639';
+  let ultimoCheck = 0, nuovaV = null;
+  async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
+    try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
+  function aggiorna(){ traccia('aggiorna', {da: VERSIONE, a: nuovaV}, true); const u = new window.URL(location.href); u.searchParams.set('v', nuovaV || Date.now()); u.hash = ''; location.replace(u.toString()); }
+  function avvisaVersione(){ if (!nuovaV) return;
+    // nel menu chiedo subito; durante una partita metto solo una striscia in alto, così non si perde niente
+    if (nelMenu() && !aperta()){ const b = finestra(`<span class="fd-k">AGGIORNAMENTO</span><h2>C’è una versione nuova!</h2><p class="acc-sub">Tocca Aggiorna per avere le ultime novità. I tuoi progressi restano.</p><button class="big" data-ok>Aggiorna ora</button><button class="as-salta" data-no>Dopo</button>`);
+      b.querySelector('[data-ok]').onclick = aggiorna; b.querySelector('[data-no]').onclick = () => { chiudi(); strisciaV(); }; }
+    else strisciaV(); }
+  function strisciaV(){ if (document.getElementById('agBar')) return; const d = document.createElement('button'); d.type = 'button'; d.id = 'agBar'; d.innerHTML = '<b>Versione nuova</b> · tocca per aggiornare'; d.onclick = () => { if (nelMenu() || confirm('Aggiorno adesso? Se sei in una missione la ricominci.')) aggiorna(); }; document.body.append(d); }
+  setTimeout(controllaVersione, 4000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') controllaVersione(); });
+  addEventListener('pageshow', e => { if (e.persisted) controllaVersione(); });
 
   // ---------- giorni di fila: torna ogni giorno, lo scrigno cresce
   const GKEY = 'difendi-smerillo-giorni', PREMI_G = ['legno', 'legno', 'argento', 'legno', 'legno', 'argento', 'oro'];
@@ -9332,7 +9344,7 @@ const RITORNO = window.RITORNO = (() => {
   // all'avvio
   { const s = stato(), g = giorni(); traccia('apri', {nuovo: s.nuovo && s.passo === 0 ? 1 : 0, torna: s.torna ? 1 : 0, ass: s.passo, giorni: g.s, acc: acc() ? 1 : 0, w: innerWidth}); }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') traccia('chiudi', {sec: Math.round((Date.now() - T0)/1000)}, true); });
-  return {traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
+  return {versione: VERSIONE, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
 })();
 
 fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){ console.error(e); }
