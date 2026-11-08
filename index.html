@@ -1980,6 +1980,33 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .fz-mig{display:flex;flex-wrap:wrap;gap:6px;font-size:12px!important;margin:0}.fz-mig span{background:#0d1220;border-left:4px solid var(--fc);border-radius:6px;padding:3px 7px;color:#c8cfe4}.fz-mig b{color:#fff}
 .fz-p{margin:0;font-size:13px;color:#c8cfe4;line-height:1.4}
 .fz-box .as-fzb button{background:#222c40;color:#fff;border-color:#3a4766}.fz-box .as-fzb button.on{background:var(--fc)}
+.tu-fig{position:relative;height:120px;border-radius:16px;border:3px solid #141433;overflow:hidden;background:#7fb04a}
+.tu-strada{background:radial-gradient(circle at 20% 30%,#8cc057 0 20%,transparent 21%),#7fb04a}
+.tu-via{position:absolute;left:-10%;right:-10%;top:42%;height:22px;background:#f4d36a;border-top:3px dashed #c99a2a;border-bottom:3px dashed #c99a2a;transform:rotate(-8deg)}
+.tu-pal{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#fff;border:3px solid #141433}
+.tu-pal.on{box-shadow:0 0 0 8px rgba(255,255,255,.45);animation:tuPulsa 1.2s ease-in-out infinite}
+.tu-dito{position:absolute;font-size:28px;animation:tuTocca 1.2s ease-in-out infinite}
+.tu-nem{position:absolute;top:30%;left:-15%;width:40px;height:40px;display:grid;place-items:center;background:#e04830;border:3px solid #141433;border-radius:10px;animation:tuCammina 2.4s linear infinite;animation-delay:var(--d)}
+.tu-nem.fermo{animation:none}
+.tu-bt{position:absolute;right:8px;bottom:8px;background:#ffd03a;border:3px solid #141433;border-radius:12px;padding:5px 10px;font-weight:900;font-size:13px;color:#141433;box-shadow:0 3px 0 #141433;animation:tuPulsa 1.2s ease-in-out infinite}
+.tu-bt.fisso{position:static;align-self:center;font-size:16px}
+.tu-pop{position:absolute;background:#fff;border:2px solid #141433;border-radius:10px;padding:2px 8px;font-weight:900;color:#141433;animation:tuSu 1.2s ease-out infinite}
+.tu-map{background:linear-gradient(135deg,#9ccf6a,#6aa043)}
+.tu-map span{position:absolute;padding:6px 10px;border-radius:12px;background:var(--c);color:#fff;font-weight:900;font-size:14px;border:3px solid #141433;box-shadow:0 3px 0 #141433}
+.tu-map span:nth-child(1){animation:tuPulsa 1.6s ease-in-out infinite}
+.tu-mosse{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;background:#1d2540;padding:10px}
+.tu-r{position:absolute;top:8px;right:10px;color:#ffd03a;font-size:18px;letter-spacing:2px}.tu-r i{font-style:normal;opacity:.35}
+.tu-t{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:74px;padding:8px;border-radius:12px;background:#2a3456;border:3px solid #141433;color:#fff}
+.tu-t small{font-size:12px;font-weight:800}
+.tu-t.mia{background:#3a78d0;animation:tuPulsa 1.4s ease-in-out infinite}
+.tu-sta{width:100%;text-align:center;color:#c8cfe4;font-size:12px;font-weight:700}
+.tu-d{min-height:62px}
+.tu-pt{display:flex;justify-content:center;gap:6px}.tu-pt i{width:10px;height:10px;border-radius:50%;background:#d8dbe8}.tu-pt i.ok{background:#8a90b0}.tu-pt i.on{width:26px;border-radius:6px;background:#ffd03a;border:2px solid #141433}
+@keyframes tuPulsa{50%{transform:scale(1.07)}}
+@keyframes tuTocca{0%,100%{transform:translate(0,0)}50%{transform:translate(-4px,-6px) scale(.9)}}
+@keyframes tuCammina{from{left:-15%}to{left:105%}}
+@keyframes tuSu{from{transform:translateY(8px);opacity:0}30%{opacity:1}to{transform:translateY(-10px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.tu-fig *{animation:none!important}.tu-nem{left:40%}}
 .fz-acc{margin-left:4px;border:2px solid #f8d048;background:none;color:#f8d048;border-radius:8px;padding:2px 8px;font-weight:700;cursor:pointer}
 .acc-box{width:100%;max-width:440px;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
 @keyframes accIn{from{transform:translateY(30px) scale(.96);opacity:0}to{transform:none;opacity:1}}
@@ -4261,7 +4288,8 @@ function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; 
   document.querySelectorAll('.punta').forEach(x => x.classList.remove('punta'));
   if (!S || fatto || MOD || S.fine){ g.hidden = true; return; }
   const costruite = S.luoghi.some(L => L.lvl); let t = '', sub = '', ok = false, punta = null;
-  if (ORIZ && costruite){ g.hidden = true; return; } // sul telefono la guida serve solo per la prima difesa
+  let inAss = false; try { inAss = RITORNO.stato().in === 'tempo'; } catch(e){}
+  if (ORIZ && costruite && !inAss){ g.hidden = true; return; } // sul telefono la guida serve solo per la prima difesa (nell'assaggio arriva fino all'ondata)
   if (ORIZ && !costruite){ t = ANELLO ? '2. Scegli la Balestra.' : '1. Tocca un pallino bianco vicino alla strada.'; sub = ANELLO ? 'Costa 70 castagne 🌰. Spara lontano.' : 'Si apre un cerchio con le difese.'; }
   else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci') && !NEG){ t = '1. Tocca Negozio, in basso.'; sub = 'Lì compri le difese. Le castagne 🌰 sono i tuoi soldi.'; punta = '#bShop'; }
   else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci')){ t = '1. Tocca la Balestra.'; sub = 'Costa 70 castagne 🌰. Spara lontano.'; punta = '[data-shop="vedetta"]'; }
@@ -9103,7 +9131,7 @@ const RITORNO = window.RITORNO = (() => {
   function chiudi(){ if (ov){ ov.hidden = true; ov.innerHTML = ''; } }
   const aperta = () => !!(ov && !ov.hidden) || !!(document.getElementById('accOv') && !document.getElementById('accOv').hidden);
   const titolo = () => document.getElementById('title');
-  const nelMenu = () => { const t = titolo(); return !!t && !t.hidden && !document.getElementById('caricamento') && !document.querySelector('.tr-velo'); };
+  const nelMenu = () => { const t = titolo(); return !!t && !t.hidden && !document.getElementById('caricamento') && !document.querySelector('.tr-velo, .acc-in, .acc-gate'); };
   // aspetta che il menu sia caricato davvero (niente finestre sopra la schermata di caricamento)
   function quandoPronto(f, prove = 0){ if (prove > 150) return; if (!nelMenu() || aperta()){ setTimeout(() => quandoPronto(f, prove + 1), 400); return; } setTimeout(() => { if (nelMenu() && !aperta()) f(); else quandoPronto(f, prove + 1); }, 700); }
 
@@ -9121,7 +9149,38 @@ const RITORNO = window.RITORNO = (() => {
     scJ(SKEY, s); return s; }
   const salvaS = s => scJ(SKEY, s);
   const pallini = i => `<div class="as-passi">${PASSI.map((k, j) => `<span class="${j < i ? 'ok' : j === i ? 'ora' : ''}">${j < i ? '✓' : ico(INFO[k].ic, 2)}</span>`).join('<i></i>')}</div>`;
-  function avviaPasso(k){ const t = titolo(), s = stato(); s.in = k; salvaS(s); chiudi(); traccia('assaggio', {passo: k, ev:'via'});
+  // piccolo tutorial prima di tempo reale e Conquista: poche schede con un disegno e una frase
+  const TUT = {
+    tempo:[
+      {ic:'torre', t:'Costruisci le difese', d:'Tocca un <b>pallino bianco</b> vicino alla strada gialla e scegli una difesa. Si pagano con le <b>castagne</b>.', fig:'pallini'},
+      {ic:'play', t:'Fai partire l’ondata', d:'Quando sei pronto tocca <b>Avvia ondata</b>. I nemici camminano sulla strada verso il paese.', fig:'ondata'},
+      {ic:'spade', t:'Aiuta le tue difese', d:'<b>Tocca un nemico</b> per mandargli il Falco. Ogni nemico abbattuto ti dà castagne per costruire ancora.', fig:'falco'}],
+    conquista:[
+      {ic:'bandiera', t:'Scegli il tuo borgo', d:'Smerillo, San Martino o Ceresola. Le terre del tuo <b>colore</b> sono tue, le altre sono dei borghi rivali.', fig:'borghi'},
+      {ic:'martello', t:'Poche mosse a stagione', d:'Tocca <b>una tua terra</b> per costruire o arruolare soldati. Tocca <b>una terra vicina</b> per attaccarla. I rombi in alto sono le mosse che ti restano.', fig:'mosse'},
+      {ic:'pergamena', t:'Fine stagione', d:'Quando hai finito tocca <b>Fine stagione</b>: muovono gli altri borghi e poi leggi cosa è successo.', fig:'stagione'},
+      {ic:'coppa', t:'Come si vince', d:'<b>Conquista</b> gli altri borghi, finisci la <b>Grande Fiera</b>, oppure resta <b>alleato di tutti</b>. Scegli tu la strada.', fig:'vinci'}]};
+  function figura(k){ const I = n => ico(n, 3);
+    if (k === 'pallini') return `<div class="tu-fig tu-strada"><i class="tu-via"></i><span class="tu-pal" style="left:22%;top:18%"></span><span class="tu-pal on" style="left:52%;top:62%"></span><span class="tu-pal" style="left:78%;top:24%"></span><span class="tu-dito" style="left:56%;top:66%">👆</span></div>`;
+    if (k === 'ondata') return `<div class="tu-fig tu-strada"><i class="tu-via"></i><span class="tu-nem" style="--d:0s">${I('spade')}</span><span class="tu-nem" style="--d:-1.2s">${I('spade')}</span><span class="tu-bt">Avvia ondata</span></div>`;
+    if (k === 'falco') return `<div class="tu-fig tu-strada"><i class="tu-via"></i><span class="tu-nem fermo" style="left:48%;top:36%">${I('spade')}</span><span class="tu-dito" style="left:54%;top:46%">👆</span><span class="tu-pop" style="left:60%;top:16%">+🌰</span></div>`;
+    if (k === 'borghi') return `<div class="tu-fig tu-map"><span style="--c:#e04830;left:8%;top:10%">Smerillo</span><span style="--c:#3f9a4a;left:44%;top:52%">San Martino</span><span style="--c:#3a78d0;left:12%;top:60%">Ceresola</span></div>`;
+    if (k === 'mosse') return `<div class="tu-fig tu-mosse"><span class="tu-r">◆◆<i>◆◆</i></span><span class="tu-t mia">${I('martello')}<small>Costruisci</small></span><span class="tu-t">${I('spade')}<small>Attacca</small></span></div>`;
+    if (k === 'stagione') return `<div class="tu-fig tu-mosse"><span class="tu-bt fisso">Fine stagione ▸</span><span class="tu-sta">Primavera ▸ Estate ▸ Autunno ▸ Inverno</span></div>`;
+    return `<div class="tu-fig tu-mosse"><span class="tu-t">${I('bandiera')}<small>Conquista</small></span><span class="tu-t">${I('campana')}<small>Fiera</small></span><span class="tu-t">${I('amici')}<small>Pace</small></span></div>`; }
+  function tutorial(k, poi){ const L = TUT[k]; if (!L){ poi(); return; } let i = 0; traccia('tutorial', {k});
+    const disegna = () => { const x = L[i];
+      const b = finestra(`<span class="fd-k">COME SI GIOCA · ${k === 'tempo' ? 'TEMPO REALE' : 'CONQUISTA'}</span>${figura(x.fig)}
+        <h2>${x.t}</h2><p class="acc-sub tu-d">${x.d}</p>
+        <div class="tu-pt">${L.map((_, j) => `<i class="${j === i ? 'on' : j < i ? 'ok' : ''}"></i>`).join('')}</div>
+        <button class="big" data-av>${i < L.length - 1 ? 'Avanti ▸' : 'Ho capito, gioco! ▸'}</button>${i ? '<button class="as-salta" data-in>Indietro</button>' : '<button class="as-salta" data-sk>Lo so già, gioca</button>'}`);
+      b.querySelector('[data-av]').onclick = () => { if (i < L.length - 1){ i++; disegna(); } else { chiudi(); poi(); } };
+      const bi = b.querySelector('[data-in]'); if (bi) bi.onclick = () => { i--; disegna(); };
+      const bs = b.querySelector('[data-sk]'); if (bs) bs.onclick = () => { chiudi(); poi(); }; };
+    disegna(); }
+  function avviaPasso(k){ if (TUT[k] && !avviaPasso.visto){ avviaPasso.visto = {}; } if (TUT[k] && !avviaPasso.visto[k]){ avviaPasso.visto[k] = true; tutorial(k, () => avviaPasso(k)); return; }
+    if (k === 'conquista') sc('difendi-smerillo-conquista-guida3', '1'); // il tutorial ha già spiegato: niente muro di testo all'inizio
+    const t = titolo(), s = stato(); s.in = k; salvaS(s); chiudi(); traccia('assaggio', {passo: k, ev:'via'});
     if (t) t.hidden = true;
     if (k === 'turni') TB.apri('gioca');
     else if (k === 'tempo'){ try { avviaRT(); } catch(e){ console.error(e); } }
