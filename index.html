@@ -7849,12 +7849,21 @@ function ribellione(t, ev, sn){ const st = S.terre[t], f = st.own; st.own = null
 function aggiornaFedelta(ev, sn){ if (!RIBELLI()) return;
   for (const t of IDS){ if (!puoRibellarsi(t)) continue; const st = S.terre[t];
     if (!st.own){ if (st.aut && st.sold < 9 && rnd() < .5) st.sold++; continue; }
-    const f = st.own; let d = st.prom === 'tasse' ? 7 : st.prom ? 4 : 1; const mot = [];
+    const f = st.own; let d = st.prom === 'tasse' ? 4 : st.prom ? 2 : 0; const mot = [];
     if (st.prom === 'protezione' && st.sold < 3){ d -= 22; mot.push('non la stai proteggendo: ci sono meno di 3 soldati'); }
     if (VIC[t].some(v => { const o = S.terre[v].own; return o && o !== f && !alleati(f, o) && !patto(f, o) && S.terre[v].sold > st.sold; })){ d -= 4; mot.push('ha paura dei nemici vicini'); }
     if (st.guerra === S.turno) d -= 6;
     if (rep(f) < 30){ d -= 3; mot.push('non si fida di chi non mantiene la parola'); }
-    if (st.sold <= 1) d -= 2;
+    if (st.sold <= 1){ d -= 3; mot.push('è quasi senza soldati'); }
+    // sulle mappe grandi: lontano dalle tue basi la frazione si sente abbandonata
+    if (MP().marcia && lontananza(f, t) >= 4 && st.sold < 4){ d -= 3; mot.push('è lontana dalle tue basi e si sente abbandonata'); }
+    // un dominio troppo grande è difficile da tenere insieme
+    { const mie = IDS.reduce((n, x) => n + (S.terre[x].own === f ? 1 : 0), 0); if (mie > IDS.length*.28){ d -= 3; mot.push('il tuo dominio è troppo grande per tenerlo tranquillo'); } }
+    if (S.fz[f] && S.fz[f].cibo <= 0){ d -= 5; mot.push('c’è fame: manca il cibo'); }
+    // ogni tanto arrivano gli agitatori: la fedeltà crolla di colpo (si vede nel resoconto)
+    if (S.turno > 4 && rnd() < .06){ d -= 14; mot.unshift('sono arrivati degli agitatori che parlano contro di te'); }
+    st.dfed = d; st.mot = mot.slice(0, 2);
+    if (mot[0] && mot[0].startsWith('sono arrivati') && f === S.io && !S.sim) ev.push({t:'malc', f, a:t, snap: sn(), testo:`Agitatori a ${TERRE[t].nome}: parlano contro di te e la fedeltà crolla. Mantieni le promesse e lascia dei soldati.`});
     st.fed = Math.max(0, Math.min(100, fed(t) + d)); const v = st.fed;
     if (f !== S.io && !umano(f) && !st.prom && S.turno - (st.tradita || 0) >= 3) st.prom = promettiIA(f, t);
     if (v < 35 && !st.avvisata && (f === S.io || umano(f))){ st.avvisata = true; if (f === S.io) ev.push({t:'malc', f, a:t, snap: sn(), testo:`${TERRE[t].nome} è scontenta${mot.length ? ': ' + mot[0] : ''}. Se non cambia, si ribella.`}); }
@@ -7875,6 +7884,7 @@ function schedaFedelta(t){ if (!RIBELLI() || !puoRibellarsi(t)) return ''; const
   const v = fed(t), col = v >= 60 ? '#5fd36a' : v >= 35 ? '#ffd03a' : '#ff6a5a', P = st.prom && PROMESSE[st.prom];
   const stato = st.prom === 'protezione' ? (st.sold >= 3 ? 'mantenuta: ci sono ' + st.sold + ' soldati' : `<b style="color:#ff8a6a">non mantenuta: servono almeno 3 soldati</b>`) : st.prom === 'pace' ? 'non partire all’attacco da qui' : st.prom === 'tasse' ? 'ti dà metà delle monete' : '';
   return `<div class="cq-rel cq-fed"><span class="cq-fedh">${ico('amici', 2)} Fedeltà <b style="color:${col}">${v}</b>/100${v < 35 ? ' · <b style="color:#ff8a6a">rischia di ribellarsi</b>' : ''}</span><span class="cq-fedb"><i style="width:${v}%;background:${col}"></i></span>
+    ${st.dfed != null ? `<small>Ultima stagione: <b style="color:${st.dfed >= 0 ? '#5fd36a' : '#ff8a6a'}">${st.dfed >= 0 ? '+' : ''}${st.dfed}</b>${st.mot && st.mot.length ? ' · ' + st.mot.join(', ') : ''}</small>` : ''}
     ${P ? `<small>Promessa: <b>${P.nome}</b> · ${stato}</small>` : `<small>Nessuna promessa${st.tradita ? ' (l’hai rotta)' : ''}: la fedeltà sale piano.</small><button type="button" class="big alt mini" id="cqNuovaProm" ${S.mosse < 1 || S.fz[S.io].monete < 6 ? 'disabled' : ''}>Fai una promessa: 6 ${ico('moneta', 2)} · 1 mossa</button>`}</div>`; }
 // ===== IL CERVELLO DEL COMPUTER (normale e difficile) =====
 // Ogni stagione guarda tutta la mappa: chi è in testa e va fermato, dove è in pericolo, quanto vale ogni terra.
@@ -9225,10 +9235,11 @@ const RITORNO = window.RITORNO = (() => {
         const sp = pg.querySelector('#prScr'); if (sp) sp.after(d); else pg.prepend(d);
         const bt = d.querySelector('.gf-go'); if (bt) bt.onclick = () => { if (ritiraG()) RIENTRA('premi'); }; } }
     // pagina Gioca: la modalità che non hai ancora provato
-    { const pg = c.querySelector('.cr-pg[data-tab="gioca"]'), row = pg && pg.querySelector('.gp-row'), p = provate(); const manca = ['conquista', 'tempo', 'assedio'].find(m => !p[m]);
+    { const pg = c.querySelector('.cr-pg[data-tab="gioca"]'), row = pg && pg.querySelector('.gp-row'), p = provate(); const gia = {conquista: () => !!(lg('difendi-smerillo-conquista') || (lgJ('difendi-smerillo-casata') || {}).gen), tempo: () => Object.keys(lgJ('difendi-smerillo-record') || {}).length > 0, assedio: () => +lg('difendi-smerillo-assedio') > 0};
+      const manca = ['conquista', 'tempo', 'assedio'].find(m => !p[m] && !gia[m]());
       if (row && manca && !pg.querySelector('.pv-box')){ const T = {conquista:['bandiera', 'Conquista', 'Scegli un borgo e conquista gli altri'], tempo:['torre', 'Tempo reale', 'Ferma le ondate di nemici'], assedio:['torre', 'Assedio', 'Quante tappe resisti?']}[manca];
         const d = document.createElement('button'); d.type = 'button'; d.className = 'pv-box'; d.innerHTML = `<span class="pv-k">Non l’hai ancora provata</span><span class="pv-r">${ico(T[0], 3)}<span><b>${T[1]}</b><small>${T[2]}</small></span><em>▸</em></span>`;
-        row.after(d); d.onclick = () => { const t = titolo(); if (t) t.hidden = true; traccia('prova', {modo: manca}); if (manca === 'conquista') CQ.apri(); else if (manca === 'tempo') avviaRT(); else TB.apri('assedio'); }; } }
+        row.after(d); d.onclick = () => { const t = titolo(); if (t) t.hidden = true; traccia('prova', {modo: manca}); { const pp = provate(); pp[manca] = pp[manca] || 0.5; scJ(PKEY, pp); } if (manca === 'conquista') CQ.apri(); else if (manca === 'tempo') avviaRT(); else TB.apri('assedio'); }; } }
     // pagina Classifica: la sfida delle frazioni
     { const pg = c.querySelector('.cr-pg[data-tab="classifica"]'); if (pg && !pg.querySelector('.fz-box')){ const d = document.createElement('div'); d.className = 'fz-box'; const box = pg.querySelector('#clBox'); if (box) box.before(d); else pg.append(d); disegnaFz(d); } }
     // una volta al giorno: lo scrigno dei giorni di fila
@@ -9241,7 +9252,7 @@ const RITORNO = window.RITORNO = (() => {
   async function disegnaFz(d){ const f = frazione(), a = acc();
     const scegli = `<div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" class="${f === k ? 'on' : ''}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div>`;
     const testa = (fine) => `<div class="fz-h"><b>${ico('bandiera', 2)} Sfida delle frazioni</b><small>${fine}</small></div>`;
-    const lega = () => d.querySelectorAll('[data-fz]').forEach(x => x.onclick = async () => { await scegliFrazione(x.dataset.fz); disegnaFz(d); });
+    const lega = () => d.querySelectorAll('[data-fz]').forEach(x => x.onclick = async () => { if (d.dataset.occ) return; d.dataset.occ = '1'; d.querySelectorAll('[data-fz]').forEach(y => y.classList.toggle('on', y === x)); try { SUONI.suona('tocco'); } catch(e){} try { await scegliFrazione(x.dataset.fz); } finally { delete d.dataset.occ; } disegnaFz(d); });
     d.innerHTML = testa('Carico…');
     let r = FST && Date.now() - FST.t < 60000 ? FST.r : null;
     if (!r){ try { if (a) await inviaFrazione(); r = await rpc('ds_frazioni_stato', {p_token: tok()}); FST = {t: Date.now(), r}; } catch(e){ d.innerHTML = testa('Senza internet non vedo i punti') + (f ? '' : `<p class="fz-p">Scegli la tua frazione:</p>${scegli}`); lega(); return; } }
