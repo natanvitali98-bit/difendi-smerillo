@@ -1911,6 +1911,60 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 @keyframes accPulse{50%{transform:scale(1.3)}}
 #accOv{position:fixed;inset:0;z-index:90;background:rgba(14,22,70,.6);display:flex;align-items:flex-end;justify-content:center;padding:12px 10px calc(12px + env(safe-area-inset-bottom));overflow-y:auto}
 #accOv[hidden]{display:none}
+
+/* ===== assaggio, giorni di fila, sfida delle frazioni ===== */
+#rtOv{position:fixed;inset:0;z-index:100003;background:rgba(14,22,70,.62);display:flex;align-items:center;justify-content:center;padding:12px 10px calc(12px + env(safe-area-inset-bottom));overflow-y:auto}
+#rtOv[hidden]{display:none}
+.rr-box{width:100%;max-width:440px;margin:auto;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
+.rr-box h2{margin:0;font-family:var(--f-big,system-ui);font-weight:400;font-size:26px;line-height:1.1}
+.rr-box p{margin:0;line-height:1.4;font-size:15px}
+.rr-box .big{align-items:center;text-align:center}
+.as-passi{display:flex;align-items:center;justify-content:center;gap:0;margin:4px 0}
+.as-passi span{width:40px;height:40px;border-radius:50%;border:3px solid #141433;display:grid;place-items:center;background:#eef0f8;font-weight:900;font-size:18px;color:#1d7a35}
+.as-passi span.ok{background:#bfeac6}.as-passi span.ora{background:#ffd03a;box-shadow:0 0 0 4px rgba(255,208,58,.35)}
+.as-passi i{width:28px;height:3px;background:#141433}
+.as-card{display:flex;gap:12px;align-items:center;background:#fff6d8;border:3px solid #141433;border-radius:16px;padding:12px}
+.as-card>span>b{display:block;font-size:17px;margin-bottom:2px}.as-card small{font-size:14px;line-height:1.35;color:#3a3f60}
+.as-ic{flex:none;width:56px;height:56px;display:grid;place-items:center;background:#141433;border-radius:12px}
+.as-salta{background:none;border:0;color:#4a5070;text-decoration:underline;font-size:14px;padding:6px;cursor:pointer}
+.as-scr{display:block;width:64px;height:52px;margin:0 auto;background:#c8d0dc;border:3px solid #141433;border-radius:8px;box-shadow:inset 0 14px 0 #9aa4b4,0 4px 0 #141433;position:relative}
+.as-scr::after{content:'';position:absolute;left:50%;top:9px;width:12px;height:14px;margin-left:-6px;background:#ffd03a;border:3px solid #141433;border-radius:3px}
+.as-fz{display:flex;flex-direction:column;gap:6px;background:#eef0f8;border-radius:14px;padding:12px}
+.as-fz small{color:#4a5070;font-size:13px;line-height:1.35}
+.as-fzb{display:flex;flex-wrap:wrap;gap:6px}
+.as-fzb button{flex:1 1 30%;min-height:44px;border-radius:12px;border:3px solid #141433;background:#fff;color:#141433;font-weight:800;font-size:14px;padding:6px;cursor:pointer;box-shadow:inset 0 -5px 0 var(--fc)}
+.as-fzb button.on{background:var(--fc);color:#fff;box-shadow:0 0 0 3px rgba(255,208,58,.9)}
+.as-dom{font-size:14px!important;color:#3a3f60;display:flex;gap:6px;align-items:center}
+#asChip{position:fixed;z-index:100002;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 58px);display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-radius:999px;border:2px solid #141433;background:rgba(255,255,255,.95);color:#141433;font-size:13px;font-weight:700;box-shadow:0 3px 0 #141433;cursor:pointer;white-space:nowrap}
+#asChip b{background:#ffd03a;border:2px solid #141433;border-radius:999px;padding:3px 10px}
+#asChip[hidden]{display:none}
+.gf-box{background:#1d2540;border:3px solid #f8d048;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.gf-h{display:flex;flex-direction:column}.gf-h b{color:#fff;font-size:17px}.gf-h small{color:#c8cfe4;font-size:13px}
+.gf-st{display:flex;gap:4px;justify-content:space-between}
+.gf-d{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.gf-d i{display:block;width:100%;max-width:38px;aspect-ratio:1.2;border-radius:6px;background:var(--gc);border:2px solid #0d1220;opacity:.45;box-shadow:inset 0 8px 0 rgba(0,0,0,.18)}
+.gf-d small{font-size:12px;font-weight:800;color:#c8cfe4}
+.gf-d.ok i{opacity:1}.gf-d.ok small{color:#7ee08a}
+.gf-d.ora i{opacity:1;outline:3px solid #ffd03a;outline-offset:1px;animation:gfPulsa 1.2s ease-in-out infinite}
+.gf-d.ora small{color:#ffd03a}
+.rr-box .gf-st{background:#141433;border-radius:14px;padding:10px 8px}
+@keyframes gfPulsa{50%{transform:scale(1.08)}}
+.gf-go{align-self:stretch}
+.pv-box{display:flex;flex-direction:column;gap:4px;width:100%;margin-top:10px;padding:10px 12px;border-radius:14px;border:3px dashed #f8d048;background:rgba(20,27,41,.88);color:#fff;text-align:left;cursor:pointer}
+.pv-k{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#f8d048;font-weight:800}
+.pv-r{display:flex;align-items:center;gap:10px}.pv-r b{display:block;font-size:16px}.pv-r small{color:#c8cfe4;font-size:13px}.pv-r em{margin-left:auto;font-style:normal;font-size:22px;color:#f8d048}
+.fz-box{background:#1d2540;border:3px solid #3a4766;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;margin-bottom:12px;color:#fff}
+.fz-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.fz-h b{font-size:16px;display:flex;gap:6px;align-items:center}.fz-h small{color:#c8cfe4;font-size:12px;white-space:nowrap}
+.fz-righe{display:flex;flex-direction:column;gap:6px}
+.fz-r{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center}
+.fz-n{font-size:14px;font-weight:700}.fz-n em{font-style:normal;font-size:11px;background:#ffd03a;color:#141433;border-radius:6px;padding:1px 5px;margin-left:4px}
+.fz-bar{grid-column:1;height:10px;border-radius:6px;background:#0d1220;overflow:hidden}.fz-bar i{display:block;height:100%;background:var(--fc);min-width:4px}
+.fz-r>b{grid-row:1 / span 2;grid-column:2;font-size:18px}
+.fz-r.mia .fz-n{color:#ffd03a}
+.fz-mig{display:flex;flex-wrap:wrap;gap:6px;font-size:12px!important;margin:0}.fz-mig span{background:#0d1220;border-left:4px solid var(--fc);border-radius:6px;padding:3px 7px;color:#c8cfe4}.fz-mig b{color:#fff}
+.fz-p{margin:0;font-size:13px;color:#c8cfe4;line-height:1.4}
+.fz-box .as-fzb button{background:#222c40;color:#fff;border-color:#3a4766}.fz-box .as-fzb button.on{background:var(--fc)}
+.fz-acc{margin-left:4px;border:2px solid #f8d048;background:none;color:#f8d048;border-radius:8px;padding:2px 8px;font-weight:700;cursor:pointer}
 .acc-box{width:100%;max-width:440px;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
 @keyframes accIn{from{transform:translateY(30px) scale(.96);opacity:0}to{transform:none;opacity:1}}
 .acc-box h2{margin:0;font-family:var(--f-big,system-ui);font-weight:400;font-size:26px}
@@ -3614,7 +3668,7 @@ const CE = (() => {
 
 /* ================= STATO ================= */
 let S = null, scena = null, MOD = false, modSel = null, storia = [];
-function nuovaPartita(diff){ mappaRT(CMIS);
+function nuovaPartita(diff){ mappaRT(CMIS); try { RITORNO.inizio('tempo'); } catch(e){}
   const D = DIFF[diff || (S && S.diff) || 'normale'];
   S = { miss: CMIS, diff: diff || (S && S.diff) || 'normale', hpDiff: D.hp, viteMax: D.vite, castagne:D.cast, vite:D.vite, ondata:0, prossima:null, vieAttive:[], inCorso:false, coda:[], timer:0, intervallo:1, multVita:1, multVel:1,
         nemici:[], proj:[], fx:[], part:[], morti:[], monete:[], soldati:[], trappole:[], ordini:2, modo:null, assalti:[], shake:0, pausa:false, camT:null, luoghi: [], // niente posti fissi: le difese le costruisci tu dove vuoi
@@ -3849,8 +3903,9 @@ function ondataFinita(){
   const interesse = Math.min(S.bonus.interesse, Math.floor(S.castagne / 10));
   S.castagne += premio + interesse; S.fossili = []; S.vieAttive = [];
   if (S.ondata >= ONDATE){ vittoria(); return; }
-  preparaOndata();
-  S.attesaCarta = true; mostraCarte(premio, interesse); ui();
+  const avanti = () => { preparaOndata(); S.attesaCarta = true; mostraCarte(premio, interesse); ui(); };
+  try { if (RITORNO.ondataRT(S.ondata, avanti)){ S.attesaCarta = true; ui(); return; } } catch(e){ console.error(e); }
+  avanti();
 }
 
 /* ================= DISEGNO ================= */
@@ -4764,6 +4819,7 @@ function mostraMenu(pannello){
   const tsf = c.querySelector('#tSfida'); if (tsf) tsf.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('sfida'); });
   const tts = c.querySelector('#tTest'); if (tts) tts.onclick = () => { fineTester(); location.reload(); };
   const tev = c.querySelector('#tEv'); if (tev) tev.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('evento'); });
+  try { RITORNO.menu(pannello, c); } catch(e){ console.error(e); }
 }
 // salvataggio: tutti i dati del gioco in un codice da copiare e incollare
 function esportaSalvataggio(){ const d = {}; try { for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (k && k.startsWith('difendi-smerillo')) d[k] = localStorage.getItem(k); } } catch(e){}
@@ -4808,7 +4864,7 @@ function mostraCarte(premio, interesse){
     bt.onclick = () => { k.f(S.bonus, S); S.attesaCarta = false; c.hidden = true; ui(); aggiornaHud(); }; box.append(bt); });
   c.hidden = false;
 }
-function vittoria(){ S.fine = true; const e = $('#end'); if (unaVoltaOggi('rt-' + S.diff)) regalaScrigno({facile:'legno', normale:'argento', difficile:'oro'}[S.diff] || 'legno', 'Difesa in tempo reale vinta');
+function vittoria(){ S.fine = true; const e = $('#end'); try { RITORNO.partita('tempo', true, {ondata: S.ondata, diff: S.diff}); } catch(e){} if (unaVoltaOggi('rt-' + S.diff)) regalaScrigno({facile:'legno', normale:'argento', difficile:'oro'}[S.diff] || 'legno', 'Difesa in tempo reale vinta');
   PROF.daiXP({facile:40, normale:70, difficile:110}[S.diff] || 50);
   if (S.diff !== 'facile' && !S.potenziato) PROF.leggenda('nopot');
   if (S.diff === 'difficile' && S.vite >= S.viteMax) PROF.leggenda('diffpieno');
@@ -4822,7 +4878,7 @@ function vittoria(){ S.fine = true; const e = $('#end'); if (unaVoltaOggi('rt-' 
   const m2 = e.querySelector('#eM2'); if (m2) m2.onclick = () => { e.hidden = true; CMIS = 2; nuovaPartita(); };
   e.querySelector('#eMenu').onclick = () => { e.hidden = true; mostraMenu('cmis'); };
   e.hidden = false; e.querySelector('#eAgain').onclick = () => { e.hidden = true; nuovaPartita(); }; }
-function sconfitta(){ S.fine = true; S.inCorso = false; const e = $('#end');
+function sconfitta(){ S.fine = true; S.inCorso = false; const e = $('#end'); try { RITORNO.partita('tempo', false, {ondata: S.ondata, diff: S.diff}); if (RITORNO.persoRT()) return; } catch(er){}
   const rec = leggiRecord(), kk = RK(S.diff); if (!rec[kk] || (!rec[kk].stelle && S.ondata > rec[kk].ondata)){ rec[kk] = {stelle:0, ondata:S.ondata}; scriviRecord(rec); }
   e.innerHTML = S.miss >= 3 ? `<div class="dlg box"><span class="kicker">Missione ${S.miss} · Ondata ${S.ondata} di ${ONDATE}</span><h2>${CMISSIONI[S.miss].perso}</h2><p>Guarda i cartelli rossi: da lì entrano i nemici. Metti le difese lungo le loro strade prima che arrivino a ${CMISSIONI[S.miss].meta}. I cavalieri hanno l’armatura: servono colpi forti.</p><button class="big" id="eRetry">Riprova</button><button class="big alt" id="eMenu">Le missioni</button></div>`
     : S.miss === 2 ? `<div class="dlg box"><span class="kicker">Missione 2 · Ondata ${S.ondata} di ${ONDATE}</span><h2>I cavalieri hanno preso il piazzale</h2><p>Quasi tutti scendono da <b>Via dei Caduti</b>: difendi quella strada per prima. I cavalieri hanno l’armatura: servono colpi forti (Balestre potenziate, Braciere). I portabandiera rinforzano chi hanno vicino: abbattili per primi.</p><button class="big" id="eRetry">Riprova</button><button class="big alt" id="eMenu">Le missioni</button></div>`
@@ -6445,7 +6501,7 @@ function fine(){
   if (!S || ovAperto) return;
   if (!S.suonato){ S.suonato = true; SUONI.ferma(); SUONI.suona((S.fase ? esitoMio() : S.esito === 'vinto') ? 'vinto' : 'perso'); }
   if (S.fase){ fineOnline(); return; } // le partite online non contano per Incarichi e imprese
-  if (!S.registrato){ S.registrato = true; registraPartita(S); salvaAbitudini(S); }
+  if (!S.registrato){ S.registrato = true; registraPartita(S); salvaAbitudini(S); try { RITORNO.partita(RUN ? 'assedio' : SFIDA ? 'sfida' : M.evento ? 'evento' : 'missione', S.esito === 'vinto', RUN ? {tappa: RUN.tappa} : {m: M.num, stelle: S.esito === 'vinto' ? stelle().filter(Boolean).length : 0}); } catch(e){} }
   if (!S.bottinoFatto && !S.fase){ S.bottinoFatto = true; bottino(S.esito === 'vinto'); }
   if (RUN){ fineTappa(); return; } const vinto = S.esito === 'vinto', st = stelle(), n = vinto ? st.filter(Boolean).length : 0, turni = S.turno - 1, k = 'm' + M.num;
   if (vinto && SFIDA && !S.premiato){ S.premiato = true; let f = null; try { f = JSON.parse(localStorage.getItem(SFKEY)); } catch(e){}
@@ -6461,6 +6517,7 @@ function fine(){
     if (M.num >= 5 && !(S.st && S.st.bar) && S.portaPersa === 0) PROF.leggenda('nobar');
     if (MISSIONI.every(m => ((leggiRec()['m' + m.num] || {}).stelle || 0) >= 3)) PROF.leggenda('tutte');
     if (meglio){ mostraScrigno(n >= 3 ? 'oro' : n === 2 ? 'argento' : 'legno', fine); return; } }
+  if (!SFIDA && !M.evento){ try { if (RITORNO.fineTurni(vinto)) return; } catch(e){ console.error(e); } }
   const dopo = vinto && !SFIDA && !M.evento && MI >= 0 && MI + 1 < MISSIONI.length ? MISSIONI[MI + 1] : null, pt = puntiPartita(), am = SFIDA_AMICO && String(SFIDA_AMICO.m) === String(M.num) ? SFIDA_AMICO : null;
   const o = overlay(`<div class="dlg box ${vinto ? 'vittoria' : 'sconfitta'}">${vinto ? '<div class="fx-raggi" aria-hidden="true"></div>' : ''}<span class="kicker">Missione ${M.num} · ${M.titolo}</span>
     <h2 class="fx-tit">${vinto ? (M.evento ? 'Castagne salve!' : dopo ? 'Missione riuscita!' : 'Hai salvato il comune!') : M.caduta}</h2>
@@ -6511,7 +6568,7 @@ function menuPausa(){
   const ist = o.querySelector('#tbIst'); if (ist) ist.onclick = () => { chiudiOv(); guida = 0; try { localStorage.removeItem(GUIDAKEY); } catch(e){} avvia(false); };
   o.querySelector('#tbSc').onclick = () => { chiudiOv(); scelta(); }; o.querySelector('#tbEsci2').onclick = esci;
 }
-function avvia(conIntro = true){ root.classList.remove('tb-pan'); SUONI.musica(M.evento ? 'festa' : M.luogo === 'sm' || M.luogo === 'ce' ? 'sm' : 'smerillo'); moneteViste = null; S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; fx = []; coda = []; ev = null; nuovoTempo(); aggiornaAnteprima(); if (conIntro) intro(); render(); }
+function avvia(conIntro = true){ root.classList.remove('tb-pan'); try { RITORNO.inizio(NET ? 'online' : RUN ? 'assedio' : SFIDA ? 'sfida' : M.evento ? 'evento' : 'missione'); } catch(e){} SUONI.musica(M.evento ? 'festa' : M.luogo === 'sm' || M.luogo === 'ce' ? 'sm' : 'smerillo'); moneteViste = null; S = nuovo(); { const f = !NET && S.dif.find(d => !stat(d.tipo).passo); piazza = f ? {id: f.id} : null; } V = null; storia = []; sel = null; fx = []; coda = []; ev = null; nuovoTempo(); aggiornaAnteprima(); if (conIntro) intro(); render(); }
 function giocaSfida(){ CARICA(giocaSfida_, 'Preparo la sfida…'); }
 function giocaSfida_(){ const sf = sfidaDiOggi(); SFIDA = sf; SEME_FISSO = sf.giorno * 7919 + sf.mi; SQUADRA = squadraDi(sf.mi); caricaMissione(sf.mi); el('tbTit').textContent = `Sfida: ${M.titolo}`; fitCam(); avvia(true); }
 function prepara(i){ SFIDA = null; SEME_FISSO = null; if (i === 0 && !leggiRec().m1){ SQUADRA = null; gioca(0); } else { SQUADRA = squadraDi(i); gioca(i); } } // si gioca subito con l'ultima squadra: la cambi dall'intro
@@ -6743,7 +6800,7 @@ function fineTurnoOnline(){ if (!mioTurno()) return true;
 let ULTIMO = {ruolo:null, amico:'il tuo amico', io:'Tu'};
 const nomeAmico = n => !n || n === 'Amico' ? 'il tuo amico' : n;
 const esitoMio = () => { const vinto = S.esito === 'vinto'; return S.vs ? (ULTIMO.ruolo === 'd' ? vinto : !vinto) : vinto; };
-function fineOnline(){ const vs = !!S.vs, vinto = S.esito === 'vinto'; const iovinco = esitoMio(); if (!S.scrOn){ S.scrOn = true; if (iovinco && unaVoltaOggi('onl')) regalaScrigno('argento', 'Partita con gli amici vinta'); }
+function fineOnline(){ const vs = !!S.vs, vinto = S.esito === 'vinto'; const iovinco = esitoMio(); if (!S.scrOn){ S.scrOn = true; try { RITORNO.partita('online', iovinco, {vs: vs ? 1 : 0}); } catch(e){} if (iovinco && unaVoltaOggi('onl')) regalaScrigno('argento', 'Partita con gli amici vinta'); }
   PROF.daiXP(iovinco ? 25 : 8);
   const vincitore = vs ? (vinto ? 'i difensori 🛡️' : 'i cavalieri 🐴') : '';
   const chi = vs ? (iovinco ? 'Tu' : ULTIMO.amico) : '';
@@ -6826,7 +6883,7 @@ function sfidaDiOggi(){ const g = oggi(), r = leggiRec(); let max = 0; while (ma
 function riepilogo(){ const r = leggiRec(); return {missioni: MISSIONI.map(m => ({num:m.num, titolo:m.titolo, stelle:(r['m' + m.num] || {}).stelle || 0})), sfida: sfidaDiOggi()}; }
 const prossima = () => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + MISSIONI[i].num]) i++; return MISSIONI[i]; };
 const contaDif = () => { const c = leggiCol(); return DIFENSORI.filter(t => c[t]).length + ' di ' + DIFENSORI.length; };
-return {rete: () => ({trasporto, mioNome, nomeAccount, dentroClaude}), eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE: () => SCENA_CE || (SCENA_CE = CE.crea()), preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
+return {esci: () => esci(), rete: () => ({trasporto, mioNome, nomeAccount, dentroClaude}), eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE: () => SCENA_CE || (SCENA_CE = CE.crea()), preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
 })();
 
 // ===== Conquista: scegli il tuo borgo, rinforzalo e conquista gli altri (a turni, contro il computer) =====
@@ -8260,7 +8317,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
   o.querySelectorAll('[data-dc]').forEach(b => b.onclick = () => { const [i, j] = b.dataset.dc.split('|').map(Number), c = D[i]; if (!c || c.fatto || !c.scelte[j][1]()) return; const r = c.scelte[j][2](); c.fatto = true; suona(j ? 'tocco' : 'stella1');
     const box = o.querySelector(`.cq-dec[data-i="${i}"]`); box.classList.add('fatto'); box.querySelector('.cq-decb').outerHTML = `<p class="cq-decr">${ico('ok', 2)} ${r}</p>`; salva(); aggiornaUI(); aggiorna(); });
   aggiorna();
-  ok.onclick = () => { if (resta()) return; chiudiOv(); if (S.mp && !mpAttesa()) proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); pannello(); }; aggiornaUI(); }
+  ok.onclick = () => { if (resta()) return; chiudiOv(); if (S.mp && !mpAttesa()) proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); pannello(); if (!S.mp) try { RITORNO.dopoStagione(); } catch(e){} }; aggiornaUI(); }
 function rivediStagione(){ if (!ULTIMO_REP) return; const o = ov(`<div class="dlg box cq-dlg cq-notizie">${ULTIMO_REP}<button class="big" id="cqOk">Chiudi</button></div>`); o.querySelector('#cqOk').onclick = chiudiOv; }
 function proposte(){ let p; if (S.mp){ const i = S.proposte.findIndex(x => !x.per || x.per === S.io); p = i >= 0 ? S.proposte.splice(i, 1)[0] : null; } else p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
   if (!p){ richieste(); return; }
@@ -8344,7 +8401,7 @@ function finePartita(){ if (S && S.mp){ const am = mpAltriNomi() || 'gli amici',
 function fondDopo(o){ if (typeof ACC === 'undefined' || !ACC.fondatore) return; ACC.fondatore().then(r => { if (!r || !document.body.contains(o)) return;
     if (r.nuovo) setTimeout(() => ACC.festa(r.n), 1500);
     else if (r.noacc && r.liberi > 0 && !o.querySelector('.fd-inv')){ const ag = o.querySelector('#cqAg'); if (ag) ag.insertAdjacentHTML('beforebegin', `<div class="cq-premio fd-inv">${ACC.med(0, 'med')}<span><b>Diventa un Fondatore</b><small>I primi 10 che finiscono una partita a Conquista con un account restano per sempre sulla Targa dei Fondatori. ${r.liberi === 1 ? 'Resta 1 posto' : 'Restano ' + r.liberi + ' posti'}.</small></span><button type="button" class="big mini" data-acc-crea>Crea account</button></div>`); } }); }
-function chiudiGenerazione(){ leggiCas(); if (!CAS || S.chiusa) return null; S.chiusa = true;
+function chiudiGenerazione(){ leggiCas(); if (!CAS || S.chiusa) return null; S.chiusa = true; try { RITORNO.partita('conquista', S.fine === 'vinto', {stag: S.turno, mp: S.mp ? 1 : 0}); } catch(e){}
   { const v = S.fine === 'vinto'; const tipo = v ? (S.dif === 'difficile' ? 'oro' : S.dif === 'facile' ? 'legno' : 'argento') : (S.turno >= 10 ? 'legno' : null); if (tipo && (v || unaVoltaOggi('cq-persa'))) regalaScrigno(tipo, v ? 'Conquista vinta' : 'Conquista: hai resistito ' + S.turno + ' stagioni'); }
   const vinto = S.fine === 'vinto', vt = S.vitt || 'conquista', mDif = {facile:.7, normale:1, difficile:1.5}[S.dif] || 1, voci = [];
   if (vinto){ voci.push([`Vittoria (${DIFF[S.dif].nome})`, Math.round(100*mDif)]); if (vt === 'opera') voci.push(['Con la Grande Fiera', 20]); if (vt === 'dipl') voci.push(['Con la pace', 30]); if (rep(S.io) >= 70) voci.push(['Parola sempre mantenuta', 15]); }
@@ -8451,7 +8508,7 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   o.querySelectorAll('[data-dif]').forEach(b => b.onclick = () => { try { localStorage.setItem(KDIF, b.dataset.dif); } catch(e){} DIFSC = b.dataset.dif; o.querySelectorAll('[data-dif]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqDifT').textContent = DIFF[b.dataset.dif].desc; opt(); suona('tocco'); });
   o.querySelectorAll('[data-vel]').forEach(b => b.onclick = () => { const v = b.dataset.vel === 'veloce'; try { localStorage.setItem(KVEL, v ? '1' : '0'); } catch(e){} o.querySelectorAll('[data-vel]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqVelT').textContent = velTesto(); opt(); suona('tocco'); });
   o.querySelectorAll('[data-map]').forEach(b => b.onclick = () => { const m = b.dataset.map; try { localStorage.setItem(KMAPPA, m); } catch(e){} o.querySelectorAll('[data-map]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqMapT').textContent = 'Mappa ' + MAPPE[m].nome.toLowerCase() + ': ' + MAPPE[m].desc; opt(); suona('tocco'); nuova(SCELTA, difScelta(), true, false, m); sel = null; tintKey = ''; });
-  o.querySelector('#cqVai').onclick = () => { if (SCELTA_MP){ suona('tocco'); mpCrea(); return; } const f = SCELTA; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; suona('banner'); o.classList.remove('scelta'); nuova(f, difScelta(), false, velScelta()); chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); }); };
+  o.querySelector('#cqVai').onclick = () => { if (SCELTA_MP){ suona('tocco'); mpCrea(); return; } const f = SCELTA; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; suona('banner'); o.classList.remove('scelta'); nuova(f, difScelta(), false, velScelta()); try { RITORNO.inizio('conquista'); } catch(e){} chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g) guida(); }); };
   o.querySelector('#cqMe').onclick = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; S = null; o.classList.remove('scelta'); esci(); };
   opt(); misura(); centra(); mostra(SCELTA, false); setTimeout(() => volaSu(SCELTA), 350); }
 let SCELTA_MOSTRA = null, SCELTA_MP = false;
@@ -8664,7 +8721,7 @@ function suProposta(a, b, p){ const A = S.fz[a], B = S.fz[b]; for (const k in RI
   const k = pk(a, b); if (p.patto === 'patto') S.patti[k] = S.turno + 8; else if (p.patto === 'acc') S.acc[k] = true; else if (p.patto === 'all'){ S.all[k] = true; stat('all'); } salva(); aggiornaUI(); }
 const testoSu = p => { const l = o2 => Object.keys(RISP).filter(k => o2[k]).map(k => `${o2[k]} ${RISP[k][1]}`).join(', '); const d = l(p.dai), c = l(p.chiedi), pt = {patto:'un patto di non aggressione', acc:'un accordo commerciale', all:'un’alleanza'}[p.patto];
   return [d ? `Ti dà <b>${d}</b>.` : '', c ? `Ti chiede <b>${c}</b>.` : '', pt ? `Propone ${pt}.` : ''].filter(Boolean).join(' '); };
-return {_fd:{targa: () => spriteTarga().toDataURL(), bandiera: () => spriteBandOro(0).toDataURL()}, apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{scegliTerra: t => { sel = t; modo = null; pannello(); }, cerv: v => { CERV_PROVA = v; }, promessa: () => dlgPromessa(), dopoPresa: (f, t, df) => dopoPresa(f, t, df), get MPN(){ return MPN; }, mpCrea: () => mpCrea(), mpEntra: c => mpEntra(c), mpFine: () => mpFine(), EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: (ev, tutti) => calcolaStagione(ev, tutti), terreDi: f => terreDi(f), vivi: () => vivi(), punti: f => punti(f), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {esci: () => esci(), _fd:{targa: () => spriteTarga().toDataURL(), bandiera: () => spriteBandOro(0).toDataURL()}, apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{scegliTerra: t => { sel = t; modo = null; pannello(); }, cerv: v => { CERV_PROVA = v; }, promessa: () => dlgPromessa(), dopoPresa: (f, t, df) => dopoPresa(f, t, df), get MPN(){ return MPN; }, mpCrea: () => mpCrea(), mpEntra: c => mpEntra(c), mpFine: () => mpFine(), EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: (ev, tutti) => calcolaStagione(ev, tutti), terreDi: f => terreDi(f), vivi: () => vivi(), punti: f => punti(f), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 // ===== account: i progressi salvati online, per ritrovarli su ogni telefono =====
@@ -8972,6 +9029,177 @@ document.addEventListener('keydown', e => {
   else if (k === 'Escape'){ e.preventDefault(); if (S.modo){ S.modo = null; costruisciTorri(); ui(); } else if (NEG){ NEG = false; ui(); } else if (S.sel !== null){ S.sel = null; ui(); } else clic('#bPausa'); }
   else if (k === '+' || k === '=') clic('#zIn'); else if (k === '-') clic('#zOut');
 });
+// ===== RITORNO: assaggio delle modalità al primo accesso, giorni di fila, sfida delle frazioni, conteggio anonimo =====
+const RITORNO = window.RITORNO = (() => {
+  const URL = 'https://zzadfutpjykwwcjjtpqq.supabase.co/rest/v1/rpc/', KEY = 'sb_publishable_um6p_YzXZ8C73FcfLJS0AA_WgfNgceF';
+  const lg = k => { try { return localStorage.getItem(k); } catch(e){ return null; } }, sc = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+  const lgJ = k => { try { return JSON.parse(localStorage.getItem(k)) || null; } catch(e){ return null; } }, scJ = (k, v) => sc(k, JSON.stringify(v));
+  const giornoStr = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const oggi = () => giornoStr(new Date()), ieri = () => { const d = new Date(); d.setDate(d.getDate() - 1); return giornoStr(d); };
+  const acc = () => { try { return ACC.account || null; } catch(e){ return null; } }, tok = () => { const a = acc(); return a && a.token || null; };
+  const prova = () => lg('difendi-smerillo-tester') === '1';
+  const ico = (n, s = 2) => { try { return TB.ico(n, s); } catch(e){ return ''; } };
+  const esc = s => String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<':'&lt;', '>':'&gt;', '&':'&amp;', '"':'&quot;'}[c]));
+  async function rpc(fn, body, keep){ const r = await fetch(URL + fn, {method:'POST', keepalive: !!keep, headers:{apikey:KEY, Authorization:'Bearer ' + KEY, 'Content-Type':'application/json'}, body: JSON.stringify(body)}); if (!r.ok) throw new Error('http ' + r.status); const t = await r.text(); return t ? JSON.parse(t) : null; }
+
+  // ---------- conteggio anonimo: fin dove arriva ognuno (nessun dato personale, solo un numero a caso per telefono)
+  const AKEY = 'difendi-smerillo-anon', T0 = Date.now(), vero = /github\.io$/.test(location.hostname);
+  let anon = lg(AKEY); if (!anon){ anon = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); sc(AKEY, anon); }
+  function traccia(ev, dati, keep){ if (!vero || prova()) return; rpc('ds_traccia', {p_anon: anon, p_ev: ev, p_dati: dati || null, p_token: tok()}, keep).catch(() => {}); }
+
+  // ---------- modalità provate (per suggerire quella che manca)
+  const PKEY = 'difendi-smerillo-provate', provate = () => lgJ(PKEY) || {};
+  const NOMI = {missione:'Missioni a turni', tempo:'Difesa in tempo reale', conquista:'Conquista', assedio:'Assedio', sfida:'Sfida del giorno', evento:'Castagnata', online:'Con gli amici'};
+  function inizio(modo){ const p = provate(); p[modo] = (p[modo] || 0) + 1; scJ(PKEY, p); traccia('inizio', {modo, n: p[modo], ass: stato().passo < 9 ? stato().passo : undefined}); }
+
+  // ---------- sfida delle frazioni: ogni partita dà punti alla tua frazione
+  const FZ = {smerillo:{n:'Smerillo', c:'#e04830'}, sanmartino:{n:'San Martino al Faggio', c:'#3f9a4a'}, ceresola:{n:'Ceresola', c:'#3a78d0'}};
+  const FKEY = 'difendi-smerillo-frazione', frazione = () => FZ[lg(FKEY)] ? lg(FKEY) : null;
+  let FST = null, fInviata = null;
+  async function inviaFrazione(){ const f = frazione(), t = tok(); if (!f || !t || fInviata === f + t) return true; try { const r = await rpc('ds_frazione_scegli', {p_token: t, p_frazione: f}); if (r && r.ok){ fInviata = f + t; return true; } if (r && r.errore === 'presto' && FZ[r.frazione]){ sc(FKEY, r.frazione); fInviata = r.frazione + t; return 'presto'; } } catch(e){} return false; }
+  function scegliFrazione(f){ if (!FZ[f]) return; const vecchia = frazione(); sc(FKEY, f); FST = null; traccia('frazione', {f}); return inviaFrazione().then(r => { if (r === 'presto' && vecchia !== frazione()) { try { PROF.avviso('Frazione già scelta', 'Puoi cambiarla una volta a settimana'); } catch(e){} } return r; }); }
+  function puntiDi(modo, vinto, x = {}){
+    if (modo === 'missione') return vinto ? 10 + 5*(x.stelle || 0) : 3;
+    if (modo === 'sfida' || modo === 'evento') return vinto ? 20 : 3;
+    if (modo === 'assedio') return vinto ? 8 : 3;
+    if (modo === 'tempo') return vinto ? 40 : Math.min(20, 3 + (x.ondata || 0)*2);
+    if (modo === 'conquista') return vinto ? 60 : 10;
+    if (modo === 'online') return vinto ? 20 : 5;
+    return 0; }
+  async function puntiFrazione(n){ const f = frazione(), t = tok(); if (!f || !n) return; if (!t){ return; }
+    await inviaFrazione(); try { const r = await rpc('ds_frazione_punti', {p_token: t, p_punti: n}); FST = null; if (r && r.dati > 0) setTimeout(() => { try { PROF.avviso(`+${r.dati} per ${FZ[r.frazione].n}`, 'Sfida delle frazioni'); } catch(e){} }, 1600); } catch(e){} }
+  function partita(modo, vinto, x = {}){ traccia('partita', Object.assign({modo, v: vinto ? 1 : 0, sec: Math.round((Date.now() - T0)/1000)}, x)); puntiFrazione(puntiDi(modo, vinto, x)); }
+
+  // ---------- giorni di fila: torna ogni giorno, lo scrigno cresce
+  const GKEY = 'difendi-smerillo-giorni', PREMI_G = ['legno', 'legno', 'argento', 'legno', 'legno', 'argento', 'oro'];
+  const COL = {legno:'#a87c46', argento:'#c8d0dc', oro:'#f5b301'}, NOMEG = {legno:'legno', argento:'argento', oro:'oro'};
+  function giorni(){ const g = lgJ(GKEY) || {u:null, s:0, p:null}, o = oggi(); if (g.u !== o){ g.s = g.u === ieri() ? g.s + 1 : 1; g.u = o; scJ(GKEY, g); } return g; }
+  const premioG = s => PREMI_G[(Math.max(1, s) - 1) % 7];
+  function ritiraG(){ const g = giorni(); if (g.p === g.u) return null; g.p = g.u; scJ(GKEY, g); const tipo = premioG(g.s); try { regalaScrigno(tipo, `Giorno ${g.s} di fila`); } catch(e){} traccia('giorno', {s: g.s}); return tipo; }
+  function strisciaG(g){ const base = Math.floor((Math.max(1, g.s) - 1)/7)*7; return Array.from({length:7}, (_, i) => { const n = base + i + 1, tipo = premioG(n), fatto = n < g.s || (n === g.s && g.p === g.u), ora = n === g.s && g.p !== g.u;
+      return `<span class="gf-d ${fatto ? 'ok' : ''} ${ora ? 'ora' : ''}" style="--gc:${COL[tipo]}"><i></i><small>${fatto ? '✓' : n}</small></span>`; }).join(''); }
+
+  // ---------- la finestra (sopra a tutto: menu, missione, conquista)
+  let ov = null, chip = null;
+  function finestra(html, chiudibile = false){ if (!ov){ ov = document.createElement('div'); ov.id = 'rtOv'; document.body.append(ov); ov.addEventListener('click', e => { if (e.target === ov && ov.dataset.ch === '1') chiudi(); }); }
+    ov.dataset.ch = chiudibile ? '1' : ''; ov.innerHTML = `<div class="rr-box">${html}</div>`; ov.hidden = false; try { SUONI.suona('tocco'); } catch(e){} return ov.firstElementChild; }
+  function chiudi(){ if (ov){ ov.hidden = true; ov.innerHTML = ''; } }
+  const aperta = () => !!(ov && !ov.hidden) || !!(document.getElementById('accOv') && !document.getElementById('accOv').hidden);
+  const titolo = () => document.getElementById('title');
+  const nelMenu = () => { const t = titolo(); return t && !t.hidden; };
+
+  // ---------- ASSAGGIO: al primo accesso provi le modalità, poi entri nel menu
+  const SKEY = 'difendi-smerillo-assaggio', PASSI = ['turni', 'tempo', 'conquista'];
+  const INFO = {
+    turni:{ic:'scudo', t:'Le missioni a turni', d:'Muovi i difensori uno alla volta, come a scacchi, e difendi la Porta Nord. Ti guido io, passo passo.', go:'Gioca la missione'},
+    tempo:{ic:'torre', t:'La difesa in tempo reale', d:'Costruisci le difese vicino alla strada e ferma <b>2 ondate</b> di nemici. Qui si gioca veloce.', go:'Difendi il paese'},
+    conquista:{ic:'bandiera', t:'La Conquista', d:'Fonda la tua famiglia, scegli un borgo e gioca la <b>prima stagione</b>. Poi la partita resta salvata e la continui quando vuoi.', go:'Scegli il tuo borgo'}};
+  function stato(){ let s = lgJ(SKEY); if (s && typeof s.passo === 'number') return s;
+    // chi aveva già giocato non lo rivede; chi ha fatto solo la prima missione prova le altre modalità
+    const mis = lgJ('difendi-smerillo-missioni') || {}, rec = lgJ('difendi-smerillo-record') || {}, cas = lgJ('difendi-smerillo-casata'), nMis = Object.keys(mis).length;
+    const tanto = nMis > 2 || Object.keys(rec).length || (cas && cas.gen) || +lg('difendi-smerillo-assedio') > 0 || lg('difendi-smerillo-conquista');
+    s = tanto ? {passo:9} : (nMis || lg('difendi-smerillo-guida')) ? {passo:1, torna:1} : {passo:0, nuovo:1};
+    scJ(SKEY, s); return s; }
+  const salvaS = s => scJ(SKEY, s);
+  const pallini = i => `<div class="as-passi">${PASSI.map((k, j) => `<span class="${j < i ? 'ok' : j === i ? 'ora' : ''}">${j < i ? '✓' : ico(INFO[k].ic, 2)}</span>`).join('<i></i>')}</div>`;
+  function avviaPasso(k){ const t = titolo(), s = stato(); s.in = k; salvaS(s); chiudi(); traccia('assaggio', {passo: k, ev:'via'});
+    if (t) t.hidden = true;
+    if (k === 'turni') TB.apri('gioca');
+    else if (k === 'tempo'){ try { avviaRT(); } catch(e){ console.error(e); } }
+    else if (k === 'conquista') CQ.apri();
+    setTimeout(mostraChip, 1200); }
+  function mostraChip(){ const s = stato(); if (!s.in || s.passo >= 3){ togliChip(); return; } const i = PASSI.indexOf(s.in);
+    if (!chip){ chip = document.createElement('button'); chip.type = 'button'; chip.id = 'asChip'; document.body.append(chip); chip.onclick = () => salta(); }
+    chip.innerHTML = `<span>Assaggio ${i + 1} di 3</span><b>${i < 2 ? 'Avanti' : 'Fine'} ▸</b>`; chip.hidden = false; }
+  function togliChip(){ if (chip) chip.hidden = true; }
+  // il passo è finito (o saltato): si torna al menu e si vede il prossimo
+  function fatto(k, come){ const s = stato(); if (s.passo >= 3 || PASSI[s.passo] !== k) return false; s.passo++; s.in = null; s.ultimo = {k, come}; salvaS(s); togliChip(); traccia('assaggio', {passo: k, ev: come}); return true; }
+  function salta(){ const s = stato(); if (!s.in) return; const k = s.in; fatto(k, 'avanti'); chiudi();
+    if (k === 'turni') TB.esci(); else if (k === 'tempo') mostraMenu(); else if (k === 'conquista') CQ.esci(); }
+  function finestraPasso(){ const s = stato(); if (s.passo > 3) return false; if (s.in){ s.in = null; salvaS(s); } // riaperto il gioco a metà: si riparte da questo passo
+    if (s.passo >= 3){ finestraFine(); return true; }
+    const k = PASSI[s.passo], I = INFO[k], u = s.ultimo; let su = '';
+    if (s.passo === 0 && !u) su = `<span class="fd-k">BENVENUTO A SMERILLO</span><h2>Ti faccio provare il gioco</h2><p class="acc-sub">Tre assaggi brevi delle modalità. Poi entri nel menu e scegli tu come continuare.</p>`;
+    else if (s.torna && s.passo === 1 && !u) su = `<span class="fd-k">BENTORNATO</span><h2>Hai provato solo le missioni</h2><p class="acc-sub">Difendi Smerillo ha anche altre modalità. Ti faccio fare due assaggi veloci, poi scegli tu.</p>`;
+    else su = `<span class="fd-k">ASSAGGIO ${s.passo} DI 3 FATTO</span><h2>${u && u.come === 'perso' ? 'Ci hai provato!' : 'Bravo!'}</h2>${u && u.come === 'perso' ? '<p class="acc-sub">Non è andata, ma ora sai come funziona: la riprovi quando vuoi dal menu.</p>' : ''}`;
+    const b = finestra(`${su}${pallini(s.passo)}<div class="as-card"><span class="as-ic">${ico(I.ic, 4)}</span><span><b>${s.passo + 1}. ${I.t}</b><small>${I.d}</small></span></div>
+      <button class="big" data-go>${I.go} ▸</button><button class="as-salta" data-no>Salta gli assaggi e vai al menu</button>`);
+    b.querySelector('[data-go]').onclick = () => avviaPasso(k);
+    b.querySelector('[data-no]').onclick = () => { const s2 = stato(); traccia('assaggio', {passo: PASSI[s2.passo], ev:'salta tutto'}); s2.passo = 3; s2.in = null; s2.saltato = 1; salvaS(s2); finestraFine(); };
+    return true; }
+  function finestraFine(){ const s = stato(), f = frazione(), saltato = s.saltato;
+    const b = finestra(`<div class="fd-festa"><span class="as-scr"></span></div><span class="fd-k">${saltato ? 'REGALO DI BENVENUTO' : 'HAI PROVATO TUTTO'}</span><h2>${saltato ? 'Eccoti a Smerillo!' : 'Ora scegli tu!'}</h2>
+      <p class="acc-sub">Per cominciare ti regalo uno <b>scrigno d’argento</b>: lo apri nella pagina Premi.</p>
+      <div class="as-fz"><b>Per quale frazione giochi?</b><small>Ogni partita dà punti alla tua frazione. La domenica si vede chi ha vinto la settimana.</small>
+        <div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" class="${f === k ? 'on' : ''}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div></div>
+      <p class="as-dom">${ico('calendario', 2)} Torna anche domani: ogni giorno di fila lo scrigno è più ricco.</p>
+      <button class="big" data-x>Entra nel gioco ▸</button>`);
+    let scelta = f; b.querySelectorAll('[data-fz]').forEach(x => x.onclick = () => { scelta = x.dataset.fz; b.querySelectorAll('[data-fz]').forEach(y => y.classList.toggle('on', y === x)); try { SUONI.suona('tocco'); } catch(e){} });
+    try { SUONI.suona('leggenda'); EPICO.coriandoli(120); } catch(e){}
+    b.querySelector('[data-x]').onclick = () => { const s2 = stato(); s2.passo = 9; s2.in = null; salvaS(s2); if (scelta) scegliFrazione(scelta);
+      try { regalaScrigno('argento', 'Regalo di benvenuto'); } catch(e){}
+      const g = giorni(); g.p = g.u; scJ(GKEY, g); // il giorno 1 è già questo regalo
+      traccia('assaggio', {passo:'fine', fz: scelta || null}); chiudi(); RIENTRA('premi'); }; }
+  // dopo ogni partita: se è un passo dell'assaggio, lo chiude
+  function fineTurni(vinto){ const s = stato(); if (s.in !== 'turni') return false; fatto('turni', vinto ? 'vinto' : 'perso'); try { TB.esci(); } catch(e){ mostraMenu(); } return true; }
+  function ondataRT(n, continua){ const s = stato(); if (s.in !== 'tempo' || n < 2) return false; fatto('tempo', 'vinto');
+    const b = finestra(`<span class="fd-k">ASSAGGIO 2 DI 3 FATTO</span><h2>Hai fermato 2 ondate!</h2><p class="acc-sub">La partita intera ne ha 12. Puoi finirla adesso oppure passare all’ultimo assaggio.</p>${pallini(2)}
+      <button class="big" data-go>Avanti: la Conquista ▸</button><button class="big alt" data-st>Continuo questa partita</button>`);
+    b.querySelector('[data-go]').onclick = () => { chiudi(); mostraMenu(); };
+    b.querySelector('[data-st]').onclick = () => { chiudi(); continua(); }; return true; }
+  function persoRT(){ const s = stato(); if (s.in !== 'tempo') return false; fatto('tempo', 'perso'); mostraMenu(); return true; }
+  function dopoStagione(){ const s = stato(); if (s.in !== 'conquista') return; fatto('conquista', 'vinto');
+    const b = finestra(`<span class="fd-k">ASSAGGIO 3 DI 3 FATTO</span><h2>La tua prima stagione!</h2><p class="acc-sub">La partita resta salvata: la continui quando vuoi da <b>Gioca → Conquista</b>.</p>${pallini(3)}
+      <button class="big" data-go>Vai al menu ▸</button><button class="big alt" data-st>Resto qui a giocare</button>`);
+    b.querySelector('[data-go]').onclick = () => { chiudi(); CQ.esci(); };
+    b.querySelector('[data-st]').onclick = chiudi; }
+
+  // ---------- nel menu: assaggio, giorni di fila, sfida delle frazioni, la modalità da provare
+  let gVisto = false;
+  function menu(pannello, c){ if (nelMenu()) togliChip(); if (pannello && pannello !== 'home') return; if (!c) return;
+    const s = stato();
+    if (s.passo <= 3){ if (!aperta() && nelMenu()) setTimeout(() => { if (!aperta() && nelMenu() && stato().passo <= 3) finestraPasso(); }, 350); return; }
+    const g = giorni();
+    // pagina Premi: i giorni di fila in cima
+    { const pg = c.querySelector('.cr-pg[data-tab="premi"]'); if (pg && !pg.querySelector('.gf-box')){ const d = document.createElement('div'); d.className = 'gf-box';
+        d.innerHTML = `<div class="gf-h"><b>🔥 ${g.s} ${g.s === 1 ? 'giorno' : 'giorni'} di fila</b><small>${g.p === g.u ? `Domani: scrigno di ${NOMEG[premioG(g.s + 1)]}` : 'Lo scrigno di oggi è pronto!'}</small></div><div class="gf-st">${strisciaG(g)}</div>${g.p === g.u ? '' : '<button type="button" class="pr-go gf-go">Ritira</button>'}`;
+        const sp = pg.querySelector('#prScr'); if (sp) sp.after(d); else pg.prepend(d);
+        const bt = d.querySelector('.gf-go'); if (bt) bt.onclick = () => { if (ritiraG()) RIENTRA('premi'); }; } }
+    // pagina Gioca: la modalità che non hai ancora provato
+    { const pg = c.querySelector('.cr-pg[data-tab="gioca"]'), row = pg && pg.querySelector('.gp-row'), p = provate(); const manca = ['conquista', 'tempo', 'assedio'].find(m => !p[m]);
+      if (row && manca && !pg.querySelector('.pv-box')){ const T = {conquista:['bandiera', 'Conquista', 'Scegli un borgo e conquista gli altri'], tempo:['torre', 'Tempo reale', 'Ferma le ondate di nemici'], assedio:['torre', 'Assedio', 'Quante tappe resisti?']}[manca];
+        const d = document.createElement('button'); d.type = 'button'; d.className = 'pv-box'; d.innerHTML = `<span class="pv-k">Non l’hai ancora provata</span><span class="pv-r">${ico(T[0], 3)}<span><b>${T[1]}</b><small>${T[2]}</small></span><em>▸</em></span>`;
+        row.after(d); d.onclick = () => { const t = titolo(); if (t) t.hidden = true; traccia('prova', {modo: manca}); if (manca === 'conquista') CQ.apri(); else if (manca === 'tempo') avviaRT(); else TB.apri('assedio'); }; } }
+    // pagina Classifica: la sfida delle frazioni
+    { const pg = c.querySelector('.cr-pg[data-tab="classifica"]'); if (pg && !pg.querySelector('.fz-box')){ const d = document.createElement('div'); d.className = 'fz-box'; const box = pg.querySelector('#clBox'); if (box) box.before(d); else pg.append(d); disegnaFz(d); } }
+    // una volta al giorno: lo scrigno dei giorni di fila
+    if (!gVisto && g.p !== g.u && nelMenu()){ gVisto = true; setTimeout(() => { if (aperta() || !nelMenu()) { gVisto = false; return; } finestraGiorno(); }, 900); } }
+  function finestraGiorno(){ const g = giorni(); if (g.p === g.u) return; const tipo = premioG(g.s);
+    const b = finestra(`<span class="fd-k">${g.s === 1 ? 'BENTORNATO' : 'SEI TORNATO'}</span><h2>${g.s === 1 ? 'Giorno 1' : `🔥 ${g.s} giorni di fila!`}</h2><p class="acc-sub">Il premio di oggi è uno <b>scrigno di ${NOMEG[tipo]}</b>. Torna domani per non perdere la serie.</p>
+      <div class="gf-st">${strisciaG(g)}</div><button class="big" data-x>Ritira</button>`, true);
+    b.querySelector('[data-x]').onclick = () => { ritiraG(); chiudi(); RIENTRA('premi'); }; }
+  async function disegnaFz(d){ const f = frazione(), a = acc();
+    const scegli = `<div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" class="${f === k ? 'on' : ''}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div>`;
+    const testa = (fine) => `<div class="fz-h"><b>${ico('bandiera', 2)} Sfida delle frazioni</b><small>${fine}</small></div>`;
+    const lega = () => d.querySelectorAll('[data-fz]').forEach(x => x.onclick = async () => { await scegliFrazione(x.dataset.fz); disegnaFz(d); });
+    d.innerHTML = testa('Carico…');
+    let r = FST && Date.now() - FST.t < 60000 ? FST.r : null;
+    if (!r){ try { if (a) await inviaFrazione(); r = await rpc('ds_frazioni_stato', {p_token: tok()}); FST = {t: Date.now(), r}; } catch(e){ d.innerHTML = testa('Senza internet non vedo i punti') + (f ? '' : `<p class="fz-p">Scegli la tua frazione:</p>${scegli}`); lega(); return; } }
+    const tot = r.tot || {}, max = Math.max(1, ...Object.values(tot).map(Number)), ord = Object.keys(FZ).sort((x, y) => (tot[y] || 0) - (tot[x] || 0));
+    const gg = Math.max(0, Math.ceil((new Date(r.fine + 'T00:00:00') - Date.now())/864e5)), fine = gg <= 1 ? 'Finisce stanotte' : `Finisce tra ${gg} giorni`;
+    d.innerHTML = testa(fine) + `<div class="fz-righe">${ord.map((k, i) => `<div class="fz-r ${k === f ? 'mia' : ''}" style="--fc:${FZ[k].c}"><span class="fz-n">${i + 1}. ${FZ[k].n}${k === f ? ' <em>tua</em>' : ''}</span><span class="fz-bar"><i style="width:${Math.round((tot[k] || 0)/max*100)}%"></i></span><b>${tot[k] || 0}</b></div>`).join('')}</div>`
+      + (r.migliori && r.migliori.length ? `<p class="fz-mig">${r.migliori.slice(0, 3).map(m => `<span style="--fc:${(FZ[m.fr] || {}).c}">${esc(m.nome)} <b>${m.v}</b></span>`).join('')}</p>` : '')
+      + (!f ? `<p class="fz-p">Per quale frazione giochi?</p>${scegli}` : !a ? `<p class="fz-p">Crea un account per far contare i tuoi punti. <button type="button" class="fz-acc">Crea account</button></p>` : `<p class="fz-p">I tuoi punti questa settimana: <b>${r.mia ? r.mia.punti : 0}</b>. Vinci partite per farne di più.</p>`);
+    lega(); const ba = d.querySelector('.fz-acc'); if (ba) ba.onclick = () => { try { ACC.apri(); } catch(e){} }; }
+  function RIENTRA(tab){ try { sessionStorage.setItem('ds-tab', tab); } catch(e){} mostraMenu('home'); }
+  function avviaRT(){ CMIS = 1; S = null; nuovaPartita('facile'); }
+
+  // all'avvio
+  { const s = stato(), g = giorni(); traccia('apri', {nuovo: s.nuovo && s.passo === 0 ? 1 : 0, torna: s.torna ? 1 : 0, ass: s.passo, giorni: g.s, acc: acc() ? 1 : 0, w: innerWidth}); }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') traccia('chiudi', {sec: Math.round((Date.now() - T0)/1000)}, true); });
+  return {traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, _test:{finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
+})();
+
 fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){ console.error(e); }
 // caricamento: disegno subito il paese e aspetto i caratteri, poi tolgo la schermata (fino ad allora i tocchi sono bloccati)
 (async () => { const ld = document.getElementById('caricamento'); if (!ld) return; const bar = document.getElementById('ldBar'), tx = document.getElementById('ldTxt');
