@@ -2007,6 +2007,9 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .as-scr.oro{background:#ffd03a;box-shadow:inset 0 14px 0 #e0a000,0 4px 0 #141433}
 .as-scr.oro::after{background:#fff}
 #agBar{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 8px);z-index:100004;border:3px solid #141433;border-radius:999px;background:#ffd03a;color:#141433;font:inherit;font-size:14px;padding:7px 14px;box-shadow:0 3px 0 #141433;cursor:pointer;white-space:nowrap}
+.sc-modo{display:inline-block;margin:2px auto 0;font-size:11px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:2px 8px;border-radius:999px;color:#fff;background:#3a78d0;border:2px solid #141433}
+.sc-m-torre{background:#e0882a}.sc-m-gloria{background:#8b4dff}
+.cr-tor{cursor:default}
 .fz-acc{margin-left:4px;border:2px solid #f8d048;background:none;color:#f8d048;border-radius:8px;padding:2px 8px;font-weight:700;cursor:pointer}
 .acc-box{width:100%;max-width:440px;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
 @keyframes accIn{from{transform:translateY(30px) scale(.96);opacity:0}to{transform:none;opacity:1}}
@@ -3845,7 +3848,7 @@ function update(dt){
     if (!vic.length){ L.cd = .15; continue; }
     L.cd = st.cad[i] * (sp.cad || 1); L.anim = 1;
     if (L.tipo === 'campanile'){
-      for (const x of vic){ x.stun = Math.max(x.stun, (x.d.boss ? .4 : 1) * (st.stun[i] + S.bonus.stun) * (sp.stun || 1)); if (sp.rallenta) x.lento = 2.5; colpisci(x, st.danno[i]); }
+      for (const x of vic){ x.stun = Math.max(x.stun, (x.d.boss ? .4 : 1) * (st.stun[i] + S.bonus.stun) * (sp.stun || 1)); if (sp.rallenta) x.lento = 2.5; colpisci(x, st.danno[i]*TM('campanile')); }
       S.fx.push({k:'ring', e:L.e, n:L.n, z:L.z+st.h, t:0, r:st.range[i], col:'#f8d048'});
     } else {
       // scelta del bersaglio: il primo della fila, il più forte, oppure prima chi vola
@@ -3856,7 +3859,7 @@ function update(dt){
       if (sp.doppio && vic.length > 1) bersagli.push(vic.filter(x => x !== bersagli[0]).reduce(ordina));
       const tipo = L.tipo === 'vedetta' ? 'dardo' : L.tipo === 'piazza' ? 'castagna' : 'falco';
       for (const b of bersagli){
-        const mult = L.tipo === 'vedetta' ? S.bonus.vedetta * (sp.danno || 1) : L.tipo === 'nido' ? S.bonus.nido * (b.d.vola ? 1.6 * (sp.vola || 1) : 1) * (S.ev.stormo ? 2 : 1) : 1;
+        const mult = (L.tipo === 'vedetta' ? S.bonus.vedetta * (sp.danno || 1) : L.tipo === 'nido' ? S.bonus.nido * (b.d.vola ? 1.6 * (sp.vola || 1) : 1) * (S.ev.stormo ? 2 : 1) : 1) * TM(L.tipo);
         scoppio(L.e, L.n, L.z + st.h + 1, 2, tipo === 'castagna' ? ['#f08838','#f8d048'] : ['#f8f8f0','#fff8d0'], 10, .2, 0);
         S.proj.push({tipo, e:L.e, n:L.n, z:L.z + st.h, t:b, v: tipo==='dardo' ? 140 : tipo==='falco' ? 100 : 70, perfora: !!sp.perfora, brucia: !!sp.brucia,
           danno: st.danno[i]*mult, splash: tipo==='castagna' ? st.splash[i]*S.bonus.splash*(sp.splash || 1) : 0});
@@ -3891,7 +3894,7 @@ function puntoStrada(e, n, maxd){ let best = null, bd = maxd;
   for (const V of VIE) for (let i = 0; i < V.length-1; i++){ const a = V[i], c = V[i+1], dx = c[0]-a[0], dy = c[1]-a[1], l = dx*dx + dy*dy; let t = l ? ((e-a[0])*dx + (n-a[1])*dy)/l : 0; t = Math.max(0, Math.min(1, t));
     const pe = a[0] + dx*t, pn = a[1] + dy*t, d = Math.hypot(pe-e, pn-n); if (d < bd){ bd = d; best = [pe, pn]; } }
   return best; }
-function statSoldato(L){ const st = STAT.milizia, i = L.lvl-1, sp = specDi(L); return {quanti: sp.quanti || st.quanti[i], hp: st.hp[i]*(sp.hp || 1), danno: st.danno[i]*(sp.danno || 1), cavallo: L.spec === 0, rallenta: !!sp.rallenta}; }
+function statSoldato(L){ const st = STAT.milizia, i = L.lvl-1, sp = specDi(L); return {quanti: sp.quanti || st.quanti[i], hp: st.hp[i]*(sp.hp || 1), danno: st.danno[i]*(sp.danno || 1)*TM('milizia'), cavallo: L.spec === 0, rallenta: !!sp.rallenta}; }
 function aggiornaMilizia(L){
   if (!L.raduno) L.raduno = puntoStrada(L.e, L.n, STAT.milizia.range[0]) || [L.e, L.n];
   S.soldati = S.soldati.filter(q => q.L !== L || L.lvl);
@@ -3941,7 +3944,7 @@ function frana(e, n){ S.aiuti = true;
 }
 function ondataFinita(){
   S.inCorso = false; PROF.daiXP(3); let premio = 12 * S.ondata + (S.ondata % 5 === 0 ? 40 : 0);
-  for (const L of S.luoghi) if (L.lvl){ if (L.tipo === 'logge') premio += Math.round(STAT.logge.bonus[L.lvl-1] * (specDi(L).bonus || 1)); if (specDi(L).oro) premio += specDi(L).oro; }
+  for (const L of S.luoghi) if (L.lvl){ if (L.tipo === 'logge') premio += Math.round(STAT.logge.bonus[L.lvl-1] * (specDi(L).bonus || 1) * TM('logge')); if (specDi(L).oro) premio += specDi(L).oro; }
   // interesse: chi risparmia guadagna (1 castagna ogni 10 tenute da parte)
   const interesse = Math.min(S.bonus.interesse, Math.floor(S.castagne / 10));
   S.castagne += premio + interesse; S.fossili = []; S.vieAttive = [];
@@ -4276,6 +4279,11 @@ function aggiornaHud(){
   bf.setAttribute('aria-pressed', String(!!(S && S.frana)));
   if (S && S.sel !== null && !S._uiT){ S._uiT = true; setTimeout(() => { if (S){ S._uiT = false; const L = S.luoghi[S.sel]; const ba = document.querySelector('#infoActs .act'); if (L && ba && L.lvl < 3) ba.disabled = S.castagne < costoLivello(L); } }, 250); }
 }
+// livelli permanenti delle torri del tempo reale: si alzano con le carte degli scrigni (+7% per livello)
+const TORKEY = 'difendi-smerillo-torri';
+const leggiTorri = () => { try { return JSON.parse(localStorage.getItem(TORKEY)) || {}; } catch(e){ return {}; } };
+const livTorre = t => Math.max(1, (leggiTorri()[t] || {}).liv || 1);
+const TM = t => 1 + .07*(livTorre(t) - 1);
 const sprIcon = id => { const img = SPR[id], c = document.createElement('canvas'); c.className = 'ic'; c.width = img.width; c.height = img.height; c.getContext('2d').drawImage(img, 0, 0); return c; };
 function bottone(testo, fn, dis, alt){ const bt = document.createElement('button'); bt.className = 'act' + (alt ? ' alt' : ''); if (typeof testo === 'string') bt.textContent = testo; else bt.append(...testo); bt.disabled = !!dis; bt.onclick = fn; return bt; }
 function compra(L){ const c = costoLivello(L); if (L.lvl >= 3 || S.castagne < c) return;
@@ -4607,7 +4615,7 @@ function piazzaDifesa(t, e, n){ const off = NEGOZIO.find(x => x.tipo === t), z =
   S.luoghi.push(L); compra(L); S.sel = S.luoghi.length - 1; costruisciTorri(); ui(); aggiornaHud(); return true; }
 function costruisciTorri(){ const box = $('#torri'); box.innerHTML = '';
   for (const off of NEGOZIO){ const bt = document.createElement('button'); bt.className = 'chip shop' + (S.modo && S.modo.tipo === 'costruisci' && S.modo.t === off.tipo ? ' sel' : ''); bt.dataset.shop = off.tipo;
-    const ic = sprIcon(ICONA[off.tipo]); const nm = document.createElement('span'); nm.className = 'cn'; nm.textContent = off.nome; const cl = document.createElement('span'); cl.className = 'cl'; cl.append(nutIcon(), document.createTextNode(off.costo));
+    const ic = sprIcon(ICONA[off.tipo]); const nm = document.createElement('span'); nm.className = 'cn'; nm.textContent = off.nome + (livTorre(off.tipo) > 1 ? ' ' + livTorre(off.tipo) : ''); const cl = document.createElement('span'); cl.className = 'cl'; cl.append(nutIcon(), document.createTextNode(off.costo));
     bt.append(ic, nm, cl); bt.onclick = () => { S.sel = null; S.modo = S.modo && S.modo.t === off.tipo ? null : {tipo:'costruisci', t:off.tipo}; if (S.modo){ POSTI = calcolaPosti(); NEG = false; } costruisciTorri(); ui(); aggiornaHud(); }; box.append(bt); }
   const sep = document.createElement('span'); sep.className = 'chipsep'; box.append(sep);
   S.luoghi.forEach((L, i) => { if (L.libero && !L.lvl) return; const bt = document.createElement('button'); bt.className = 'chip'; bt.dataset.i = i;
@@ -4696,7 +4704,7 @@ function mostraMenu(pannello){
             <span class="pr-fort">${TB.ico('trifoglio')} Premi fortunati <span class="pr-bar"><i style="width:${fa/ft*100}%"></i><em>${fa}/${ft}</em></span></span></span></button>
         </section>
         <section class="cr-pg" data-tab="dif"><h2 class="cr-h">Collezione</h2><h3 class="cr-sub">${TB.ico('scudo', 2)} Difensori <small>${TB.contaDif()}</small></h3><div class="cr-difs">${difs}</div>
-          <button class="big alt" id="tDif">Livelli e specialità</button><div class="cr-cq" id="crCq"></div></section>
+          <button class="big alt" id="tDif">Livelli e specialità</button><h3 class="cr-sub">${TB.ico('torre', 2)} Torri del tempo reale <small>dagli scrigni</small></h3><div class="cr-difs cr-torri" id="crTorri"></div><div class="cr-cq" id="crCq"></div></section>
         <section class="cr-pg cr-arena" data-tab="gioca">
           <h1 class="logo">Difendi<br>Smerillo</h1>
           <div class="cr-luogo">${TB.ico('pin', 2)} ${LUOGO}</div>
@@ -4737,7 +4745,9 @@ function mostraMenu(pannello){
         clearTimeout(tmr); tmr = setTimeout(() => { const eraAuto = auto; auto = false; ind.style.transition = ''; const cv = document.getElementById('titleCv'); if (cv) cv.style.transition = ''; const i = Math.round(pag.scrollLeft / Math.max(1, pag.clientWidth)); const k = pgs[i] && pgs[i].dataset.tab; if (k && !eraAuto){ segna(k, false); try { sessionStorage.setItem('ds-tab', k); } catch(e){} } }, 120); }, {passive:true});
       const R0 = RIENTRO; RIENTRO = null; let quieto = !!R0; if (R0){ const cr = c.querySelector('.cr'); if (cr) cr.classList.add('quieto'); }
       let k0 = 'gioca'; try { k0 = sessionStorage.getItem('ds-tab') || 'gioca'; } catch(e){} requestAnimationFrame(() => { vai(R0 ? R0.tab : k0, false); if (R0){ const pg = pgs.find(s => s.dataset.tab === R0.tab); if (pg) pg.scrollTop = R0.top; requestAnimationFrame(() => { if (pg) pg.scrollTop = R0.top; quieto = false; setTimeout(() => { const cr = c.querySelector('.cr'); if (cr) cr.classList.remove('quieto'); }, 300); }); } });
-      c.querySelectorAll('.cr-dif').forEach(b => { const im = TB.icona(b.dataset.dif, 3); if (b.classList.contains('no')) im.style.filter = 'brightness(0) opacity(.35)'; b.querySelector('.cr-di').append(im); b.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('collezione'); }); });
+      { const bt = c.querySelector('#crTorri'); if (bt){ const T = leggiTorri(); for (const k of ['vedetta','piazza','logge','nido','milizia','campanile']){ const x = T[k] || {liv:1, copie:0}, d = document.createElement('div'); d.className = 'cr-dif cr-tor'; d.style.setProperty('--rc', ['#6b7280','#3d8bfd','#a855f7'][{vedetta:0,piazza:0,logge:0,nido:1,milizia:1,campanile:2}[k]]);
+          d.innerHTML = `<span class="cr-di"></span><b>${{vedetta:'Balestra',piazza:'Braciere',logge:'Castagneto',nido:'Falco',milizia:'Soldati',campanile:'Campana'}[k]}</b><small>liv. ${x.liv}${x.liv < 5 ? ' · ' + (x.copie || 0) + '/' + (x.liv + 1) : ' MAX'}</small>`; try { const ic = sprIcon(ICONA[k]); ic.style.width = Math.min(64, ic.width*6) + 'px'; ic.style.imageRendering = 'pixelated'; d.querySelector('.cr-di').append(ic); } catch(e){} bt.append(d); } } }
+      c.querySelectorAll('.cr-dif[data-dif]').forEach(b => { const im = TB.icona(b.dataset.dif, 3); if (b.classList.contains('no')) im.style.filter = 'brightness(0) opacity(.35)'; b.querySelector('.cr-di').append(im); b.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('collezione'); }); });
       { const bs = c.querySelector('#prScr'); if (bs) bs.onclick = () => { const x = prendiScrigno(); if (!x) return; const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; t.hidden = true; TB.premiaSopra(x.tipo); }; }
       { const W = c.querySelector('#prW'), go = c.querySelector('#prGira'), es = c.querySelector('#prEs');
         if (go) go.onclick = () => { try { PROF.pausaAvvisi(matchMedia('(prefers-reduced-motion: reduce)').matches ? 400 : 4000); } catch(e){} const r = TB.giraRuota(); if (!r) return; go.disabled = true; go.textContent = '…'; const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -5499,21 +5509,48 @@ const SCRIGNI = {
   argento:{nome:'Scrigno d’argento', carte:2, prob:[62,28,9,1], col:'#c8d0dc'},
   oro:    {nome:'Scrigno d’oro', carte:3, prob:[46,33,17,4], col:'#f5b301'},
 };
+// le carte degli scrigni valgono per tutte e tre le modalità:
+//  · missioni a turni → difensori (nuovi o copie)
+//  · tempo reale → torri (copie: la torre sale di livello e colpisce più forte)
+//  · Conquista → gloria della casata (fa salire di livello: capitani e edifici)
+const RAR_TORRE = {vedetta:0, piazza:0, logge:0, nido:1, milizia:1, campanile:2};
+const GLORIA_CARTA = [20, 40, 80, 150];
+function modiCarte(n){ const M = ['dif', 'torre', 'gloria'];
+  for (let i = M.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i + 1)); [M[i], M[j]] = [M[j], M[i]]; }
+  return Array.from({length:n}, (_, i) => M[i % 3]); }
 function apriScrigno(tipo){
-  const sc = SCRIGNI[tipo], col = leggiCol(), out = []; let primo = false; try { primo = !localStorage.getItem('difendi-smerillo-primo-scrigno'); } catch(e){}
+  const sc = SCRIGNI[tipo], col = leggiCol(), tor = leggiTorri(), out = []; let primo = false; try { primo = !localStorage.getItem('difendi-smerillo-primo-scrigno'); } catch(e){}
+  const modi = primo ? ['dif'].concat(modiCarte(sc.carte - 1)) : modiCarte(sc.carte);
   for (let i = 0; i < sc.carte; i++){
     let r = Math.random()*100, rar = 0; for (let k = 0; k < 4; k++){ if (r < sc.prob[k]){ rar = k; break; } r -= sc.prob[k]; }
     if (primo && i === 0) rar = Math.max(rar, 1);
+    const m = modi[i];
+    if (m === 'torre'){ const pool = Object.keys(RAR_TORRE).filter(t => RAR_TORRE[t] <= rar), t = pool.filter(x => RAR_TORRE[x] === Math.min(2, rar)).length ? pool.filter(x => RAR_TORRE[x] === Math.min(2, rar)) : pool;
+      const tt = t[Math.floor(Math.random()*t.length)], c = tor[tt] || (tor[tt] = {liv:1, copie:0}); let esito;
+      if (c.liv < LIVMAX){ c.copie = (c.copie || 0) + 1 + (rar >= 2 ? 1 : 0); if (c.copie >= copieServe(c.liv)){ c.liv++; c.copie = 0; esito = 'livello'; } else esito = 'copia'; } else esito = 'max';
+      out.push({m, t:tt, rar: Math.max(rar, RAR_TORRE[tt]), esito, liv:c.liv, copie:c.copie || 0, serve:copieServe(c.liv)}); continue; }
+    if (m === 'gloria'){ const g = GLORIA_CARTA[rar]; let ok = false; try { ok = CQ.daiGloria(g); } catch(e){} out.push({m, rar, g, esito: ok ? 'gloria' : 'attesa'}); continue; }
     const pool = DIFENSORI.filter(t => rarDi(t) === rar); const t = pool[Math.floor(Math.random()*pool.length)];
     const c = col[t]; let esito;
     if (!c){ col[t] = {liv:1, copie:0}; esito = 'nuovo'; }
     else if (c.liv < LIVMAX){ c.copie = (c.copie || 0) + 1; if (c.copie >= copieServe(c.liv)){ c.liv++; c.copie = 0; esito = 'livello'; } else esito = 'copia'; }
     else esito = 'max';
-    out.push({t, esito, liv:col[t].liv, copie:col[t].copie || 0, serve:copieServe(col[t].liv)});
+    out.push({m:'dif', t, rar, esito, liv:col[t].liv, copie:col[t].copie || 0, serve:copieServe(col[t].liv)});
   }
-  scriviCol(col); try { localStorage.setItem('difendi-smerillo-primo-scrigno', '1'); } catch(e){}
+  scriviCol(col); try { localStorage.setItem(TORKEY, JSON.stringify(tor)); localStorage.setItem('difendi-smerillo-primo-scrigno', '1'); } catch(e){}
   return out;
 }
+// come si mostra una carta (difensore, torre o gloria)
+const NOME_TORRE = {vedetta:'Balestra', piazza:'Braciere', logge:'Castagneto', nido:'Falco', milizia:'Soldati', campanile:'Campana'};
+const cartaModo = c => c.m === 'torre' ? 'Tempo reale' : c.m === 'gloria' ? 'Conquista' : 'Missioni';
+const cartaNome = c => c.m === 'torre' ? NOME_TORRE[c.t] : c.m === 'gloria' ? `+${c.g} gloria` : TIPI[c.t].nome;
+const cartaRar = c => c.m === 'dif' ? rarDi(c.t) : c.rar;
+function cartaImg(c, px){ if (c.m === 'torre'){ const k = sprIcon(ICONA[c.t]); k.style.width = Math.min(150, k.width*px*2.2) + 'px'; k.style.imageRendering = 'pixelated'; return k; }
+  if (c.m === 'gloria'){ const d = document.createElement('span'); d.innerHTML = ico('bandiera', px); return d; } return icona(c.t, px); }
+function cartaEsito(c, lungo){
+  if (c.m === 'torre') return c.esito === 'livello' ? `Livello ${c.liv}! Colpisce più forte` : c.esito === 'copia' ? `+copia · ${c.copie}/${c.serve}${lungo ? ' per il livello ' + (c.liv + 1) : ''}` : 'Livello massimo';
+  if (c.m === 'gloria') return c.esito === 'gloria' ? (lungo ? 'Gloria per la tua casata' : 'Per la tua casata') : (lungo ? 'Ti aspetta quando fondi la casata' : 'Per la tua prima casata');
+  return c.esito === 'nuovo' ? (lungo ? 'NUOVO DIFENSORE!' : 'NUOVO!') : c.esito === 'livello' ? (lungo ? 'Sale al livello ' + c.liv + '! (+1 vita)' : 'Livello ' + c.liv + '! +1 vita') : c.esito === 'copia' ? (lungo ? `+1 copia · ${c.copie}/${c.serve} per il livello ${c.liv + 1}` : `+1 copia · ${c.copie}/${c.serve}`) : (lungo ? 'È già al livello massimo' : 'Livello massimo'); }
 // ===== INCARICHI: 3 al giorno + imprese per sempre. Sono il modo principale per avere scrigni =====
 const INKEY = 'difendi-smerillo-incarichi';
 const INC_GIORNO = [
@@ -6243,7 +6280,7 @@ function scegliPer(i, sq, k){
 }
 function mostraScrigno(tipo, poi){
   const sc = SCRIGNI[tipo], carte = apriScrigno(tipo), calma = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const top = carte.reduce((m, c) => Math.max(m, rarDi(c.t)), 0), colTop = RARITA[top].col;
+  const top = carte.reduce((m, c) => Math.max(m, cartaRar(c)), 0), colTop = RARITA[top].col;
   const host = el('tb'), st = document.createElement('div'); st.className = 'scr-stage'; st.style.setProperty('--sc', sc.col);
   st.innerHTML = `<canvas class="scr-fx"></canvas><div class="scr-raggi"></div><div class="scr-flash"></div>
     <div class="scr-tit"><small>Hai guadagnato</small><b>${sc.nome}</b></div>
@@ -6294,10 +6331,10 @@ function mostraScrigno(tipo, poi){
   }
   // --- 4. le carte escono una alla volta, coperte: tocca per girarle ---
   function prossima(i){ if (i >= carte.length){ chiudi(); return; }
-    const c = carte[i], r = RARITA[rarDi(c.t)], rar = rarDi(c.t); zonaC.innerHTML = '';
+    const c = carte[i], rar = cartaRar(c), r = RARITA[rar]; zonaC.innerHTML = '';
     const k = document.createElement('div'); k.className = 'scr-carta'; k.style.setProperty('--rc', r.col);
-    k.innerHTML = `<div class="sc-in"><div class="sc-dorso"><span>?</span></div><div class="sc-fronte"><div class="sc-rar">${r.nome}</div><div class="sc-img"></div><b>${TIPI[c.t].nome}</b><span class="sc-es">${c.esito === 'nuovo' ? 'NUOVO!' : c.esito === 'livello' ? 'Livello ' + c.liv + '! +1 vita' : c.esito === 'copia' ? `+1 copia · ${c.copie}/${c.serve}` : 'Livello massimo'}</span></div></div><small class="sc-conta">${carte.length - i - 1 ? 'Ancora ' + (carte.length - i - 1) : 'Ultima!'}</small>`;
-    k.querySelector('.sc-img').append(icona(c.t, 6)); zonaC.append(k); hint.textContent = 'Tocca la carta'; hint.classList.add('su');
+    k.innerHTML = `<div class="sc-in"><div class="sc-dorso"><span>?</span></div><div class="sc-fronte"><div class="sc-rar">${r.nome}</div><div class="sc-modo sc-m-${c.m}">${cartaModo(c)}</div><div class="sc-img"></div><b>${cartaNome(c)}</b><span class="sc-es">${cartaEsito(c)}</span></div></div><small class="sc-conta">${carte.length - i - 1 ? 'Ancora ' + (carte.length - i - 1) : 'Ultima!'}</small>`;
+    k.querySelector('.sc-img').append(cartaImg(c, 6)); zonaC.append(k); hint.textContent = 'Tocca la carta'; hint.classList.add('su');
     k.animate([{transform:'translateY(80px) scale(.2) rotate(-25deg)', opacity:0}, {transform:'translateY(-30px) scale(1.08) rotate(4deg)', opacity:1, offset:.7}, {transform:'none', opacity:1}], {duration:calma ? 1 : 520, easing:'cubic-bezier(.2,.9,.3,1.2)', fill:'both'});
     SUONI.suona('esce');
     let girata = false;
@@ -6315,9 +6352,9 @@ function mostraScrigno(tipo, poi){
   function riepilogo(){
     const oo = overlay(`<div class="dlg box tbscr"><span class="kicker">${sc.nome}</span><h2>Hai trovato</h2><div class="tbcol" id="tbRvAll"></div><button class="big" id="tbRvOk">Continua ${ico('play')}</button></div>`);
     const box = oo.querySelector('#tbRvAll');
-    let ci = 0; for (const c of carte){ const r = RARITA[rarDi(c.t)], d = document.createElement('div'); d.className = 'rivela'; d.style.animationDelay = (ci++ * .08) + 's'; d.style.setProperty('--rc', r.col);
-      d.innerHTML = `<div class="rv-r">${r.nome}</div><div class="rv-i"></div><b>${TIPI[c.t].nome}</b><span class="rv-e">${c.esito === 'nuovo' ? 'NUOVO DIFENSORE!' : c.esito === 'livello' ? 'Sale al livello ' + c.liv + '! (+1 vita)' : c.esito === 'copia' ? `+1 copia · ${c.copie}/${c.serve} per il livello ${c.liv + 1}` : 'È già al livello massimo'}</span>`;
-      d.querySelector('.rv-i').append(icona(c.t, 5)); box.append(d); }
+    let ci = 0; for (const c of carte){ const r = RARITA[cartaRar(c)], d = document.createElement('div'); d.className = 'rivela'; d.style.animationDelay = (ci++ * .08) + 's'; d.style.setProperty('--rc', r.col);
+      d.innerHTML = `<div class="rv-r">${r.nome}</div><div class="sc-modo sc-m-${c.m}">${cartaModo(c)}</div><div class="rv-i"></div><b>${cartaNome(c)}</b><span class="rv-e">${cartaEsito(c, true)}</span>`;
+      d.querySelector('.rv-i').append(cartaImg(c, 5)); box.append(d); }
     oo.querySelector('#tbRvOk').onclick = () => { chiudiOv(); poi(); };
   }
 }
@@ -6972,7 +7009,9 @@ const SSIM = [['torre','Torre'],['castagna','Castagna'],['spade','Spade'],['albe
 const SFOR = [['pieno','Pieno'],['partito','Diviso'],['troncato','Spaccato'],['banda','Banda'],['inquartato','Inquartato','for:inquartato'],['croce','Croce','for:croce'],['scaglione','Scaglione','for:scaglione']];
 const LIVC = [[0,'Famiglia di contadini'],[150,'Casata minore'],[400,'Casata nobile'],[800,'Signori del comune'],[1500,'Leggenda delle Marche']];
 let CAS = null;
-const leggiCas = () => { if (CAS) return CAS; try { CAS = JSON.parse(localStorage.getItem(KCAS)); } catch(e){} return CAS; };
+const leggiCas = () => { if (!CAS){ try { CAS = JSON.parse(localStorage.getItem(KCAS)); } catch(e){} } if (CAS){ let pend = 0; try { pend = +localStorage.getItem('difendi-smerillo-gloria-attesa') || 0; } catch(e){} if (pend > 0){ CAS.gloria = (CAS.gloria || 0) + pend; try { localStorage.removeItem('difendi-smerillo-gloria-attesa'); localStorage.setItem(KCAS, JSON.stringify(CAS)); } catch(e){} } } return CAS; };
+// gloria trovata negli scrigni: se la casata non c'è ancora, la tengo da parte
+function daiGloria(g){ leggiCas(); if (CAS){ CAS.gloria = (CAS.gloria || 0) + g; salvaCas(); return true; } try { localStorage.setItem('difendi-smerillo-gloria-attesa', String((+localStorage.getItem('difendi-smerillo-gloria-attesa') || 0) + g)); } catch(e){} return false; }
 const salvaCas = () => { try { localStorage.setItem(KCAS, JSON.stringify(CAS)); } catch(e){} };
 const livCas = g => { let i = 0; while (i + 1 < LIVC.length && g >= LIVC[i + 1][0]) i++; return i; };
 const nomeCas = () => CAS ? 'la casata ' + CAS.nome : 'la tua casata';
@@ -8777,7 +8816,7 @@ function suProposta(a, b, p){ const A = S.fz[a], B = S.fz[b]; for (const k in RI
   const k = pk(a, b); if (p.patto === 'patto') S.patti[k] = S.turno + 8; else if (p.patto === 'acc') S.acc[k] = true; else if (p.patto === 'all'){ S.all[k] = true; stat('all'); } salva(); aggiornaUI(); }
 const testoSu = p => { const l = o2 => Object.keys(RISP).filter(k => o2[k]).map(k => `${o2[k]} ${RISP[k][1]}`).join(', '); const d = l(p.dai), c = l(p.chiedi), pt = {patto:'un patto di non aggressione', acc:'un accordo commerciale', all:'un’alleanza'}[p.patto];
   return [d ? `Ti dà <b>${d}</b>.` : '', c ? `Ti chiede <b>${c}</b>.` : '', pt ? `Propone ${pt}.` : ''].filter(Boolean).join(' '); };
-return {esci: () => esci(), _fd:{targa: () => spriteTarga().toDataURL(), bandiera: () => spriteBandOro(0).toDataURL()}, apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{scegliTerra: t => { sel = t; modo = null; pannello(); }, cerv: v => { CERV_PROVA = v; }, promessa: () => dlgPromessa(), dopoPresa: (f, t, df) => dopoPresa(f, t, df), get MPN(){ return MPN; }, mpCrea: () => mpCrea(), mpEntra: c => mpEntra(c), mpFine: () => mpFine(), EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: (ev, tutti) => calcolaStagione(ev, tutti), terreDi: f => terreDi(f), vivi: () => vivi(), punti: f => punti(f), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {esci: () => esci(), daiGloria, _fd:{targa: () => spriteTarga().toDataURL(), bandiera: () => spriteBandOro(0).toDataURL()}, apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{scegliTerra: t => { sel = t; modo = null; pannello(); }, cerv: v => { CERV_PROVA = v; }, promessa: () => dlgPromessa(), dopoPresa: (f, t, df) => dopoPresa(f, t, df), get MPN(){ return MPN; }, mpCrea: () => mpCrea(), mpEntra: c => mpEntra(c), mpFine: () => mpFine(), EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: (ev, tutti) => calcolaStagione(ev, tutti), terreDi: f => terreDi(f), vivi: () => vivi(), punti: f => punti(f), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 // ===== account: i progressi salvati online, per ritrovarli su ogni telefono =====
@@ -9165,7 +9204,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109002639';
+  const VERSIONE = window.DS_VER = '20261109100758';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
