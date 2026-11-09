@@ -4850,6 +4850,7 @@ function mostraMenu(pannello){
       <button class="big" data-p="profilo">Profilo e account</button>
       <button class="big alt" data-p="salva">Salvataggio con codice</button>
       <button class="big alt" data-p="best">I nemici del tempo reale</button>
+      <button class="big alt" id="tGuide">Rivedi le guide</button>
       ${tester() ? '<button class="big alt" id="tEdit">Correggi la mappa del paese</button>' : ''}
       <button class="big alt" data-p="home">Indietro</button></div>`;
   } else if (pannello === 'profilo'){
@@ -4915,6 +4916,7 @@ function mostraMenu(pannello){
   c.querySelectorAll('[data-cm]').forEach(bt => bt.onclick = () => { CMIS = +bt.dataset.cm; mostraMenu('gioca'); });
   c.querySelectorAll('[data-d]').forEach(bt => bt.onclick = (ev) => transizione(ev, () => { t.hidden = true; S = null; nuovaPartita(bt.dataset.d); }));
   const ed = c.querySelector('#tEdit'); if (ed) ed.onclick = () => { t.hidden = true; entraModifica(); };
+  const tgu = c.querySelector('#tGuide'); if (tgu) tgu.onclick = () => { try { RITORNO.rivediGuide(); } catch(e){} };
   const tg = c.querySelector('#tGioca'); if (tg) tg.onclick = () => mostraMenu('modo');
   const tmo = c.querySelector('#tMod'); if (tmo) tmo.onclick = () => mostraMenu('modalita');
   const tpr = c.querySelector('#tPremi'); if (tpr) tpr.onclick = () => mostraMenu('premi');
@@ -6724,7 +6726,7 @@ function prepara(i){ SFIDA = null; SEME_FISSO = null; if (i === 0 && !leggiRec()
 function gioca(i){ CARICA(() => gioca_(i), 'Preparo la missione…'); }
 function gioca_(i){ caricaMissione(i); el('tbTit')._h = null; el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); avvia(true); }
 let provenienza = 'menu';
-function apri(modo){ provenienza = 'menu'; root.hidden = false; root.classList.toggle('tb-pan', !modo || modo === 'missioni' || modo === 'collezione' || modo === 'amici' || modo === 'incarichi' || modo === 'ruota'); attivo = true; requestAnimationFrame(() => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + (i + 1)]) i++; caricaMissione(i); el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); S = nuovo(); aggiornaAnteprima(); render(); RUN = null; SFIDA = null; SEME_FISSO = null; if (modo === 'gioca') prepara(i); else if (modo === 'sfida') giocaSfida(); else if (modo === 'collezione') collezione(); else if (modo === 'incarichi') incarichi(); else if (modo === 'amici') amici(); else if (modo === 'assedio') assedio(); else if (modo === 'evento') giocaEvento(); else if (modo === 'ruota') ruota(); else if (modo && modo.amico) sfidaAmico(modo.amico); else scelta(); }); }
+function apri(modo){ provenienza = 'menu'; root.hidden = false; root.classList.toggle('tb-pan', !modo || modo === 'missioni' || modo === 'collezione' || modo === 'amici' || modo === 'incarichi' || modo === 'ruota'); attivo = true; requestAnimationFrame(() => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + (i + 1)]) i++; caricaMissione(i); el('tbTit').textContent = `${M.num}. ${M.titolo}`; fitCam(); S = nuovo(); aggiornaAnteprima(); render(); RUN = null; SFIDA = null; SEME_FISSO = null; if (modo === 'gioca') prepara(i); else if (modo === 'prima'){ SQUADRA = null; gioca(0); } else if (modo === 'sfida') giocaSfida(); else if (modo === 'collezione') collezione(); else if (modo === 'incarichi') incarichi(); else if (modo === 'amici') amici(); else if (modo === 'assedio') assedio(); else if (modo === 'evento') giocaEvento(); else if (modo === 'ruota') ruota(); else if (modo && modo.amico) sfidaAmico(modo.amico); else scelta(); }); }
 function premiaSopra(tipo){ root.classList.add('sopra'); root.hidden = false; attivo = false; RUN = null; mostraScrigno(tipo, () => esci()); }
 function righeInc(){ const d = leggiInc(), q = incDiOggi(), col = leggiCol(), out = {oggi:[], imp:[]};
   for (const x of q){ const v = d.oggi.c[x.k] || 0, preso = d.oggi.presi.includes(x.id); out.oggi.push({k:'g', id:x.id, t:x.t, v, n:x.n, premio:'legno', stato: preso ? 'preso' : v >= x.n ? 'pronto' : 'no'}); }
@@ -7032,7 +7034,7 @@ function sfidaDiOggi(){ const g = oggi(), r = leggiRec(); let max = 0; while (ma
 function riepilogo(){ const r = leggiRec(); return {missioni: MISSIONI.map(m => ({num:m.num, titolo:m.titolo, stelle:(r['m' + m.num] || {}).stelle || 0})), sfida: sfidaDiOggi()}; }
 const prossima = () => { const r = leggiRec(); let i = 0; while (i + 1 < MISSIONI.length && r['m' + MISSIONI[i].num]) i++; return MISSIONI[i]; };
 const contaDif = () => { const c = leggiCol(); return DIFENSORI.filter(t => c[t]).length + ' di ' + DIFENSORI.length; };
-return {esci: () => esci(), rete: () => ({trasporto, mioNome, nomeAccount, dentroClaude}), eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE: () => SCENA_CE || (SCENA_CE = CE.crea()), preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
+return {esci: () => esci(), resetGuida: () => { guida = 0; COACH_TB = -1; }, rete: () => ({trasporto, mioNome, nomeAccount, dentroClaude}), eventoAttivo, scenaSM: () => SCENA_SM || (SCENA_SM = SM.crea()), scenaCE: () => SCENA_CE || (SCENA_CE = CE.crea()), preparaSM: () => { if (!SCENA_SM) SCENA_SM = SM.crea(); }, ruotaPronta, preparaCE: () => { if (!SCENA_CE) SCENA_CE = CE.crea(); }, apri, frame, prossima, contaDif, apriSopra, premiaSopra, righeInc, ritiraInc, giraRuota, get RUOTA(){ return RUOTA; }, SCRIGNI, listaDif: () => { const c = leggiCol(); return DIFENSORI.map(t => ({t, nome: TIPI[t].nome, rar: RARITA[rarDi(t)], liv: c[t] ? c[t].liv : 0})); }, talismani: () => leggiTal(), TAL, incOggi: () => { const d = leggiInc(); return incDiOggi().map(q => ({t:q.t, v:Math.min(q.n, d.oggi.c[q.k] || 0), n:q.n, preso:d.oggi.presi.includes(q.id)})); }, ico, riepilogo, statoInc, icona, get attivo(){ return attivo; }, _test:{set DIF(v){ DIFFICILE = v; }, OBI, memDbg: () => { const m = memMappa(); return m && [...ARRIVO].map(n => [n, presidio(m, n), viaDi(n).join('>')]); }, get NET(){ return NET; }, piazzaAtt, get ARRIVO(){ return ARRIVO; }, fine, usaSpeciale, specialeDi, get RUN(){ return RUN; }, set RUN(v){ RUN = v; }, set SEME(v){ SEME_FISSO = v; }, ondateCasuali, CARTE_RUN, nuovoMembro, MAPPE:[MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], get S(){ return S; }, set S(v){ S = v; }, get NODI(){ return NODI; }, get ADJ(){ return ADJ; }, get DISTP(){ return DISTP; }, get NEXT(){ return NEXT; }, get VIA(){ return VIA; }, get META(){ return META; }, caricaMissione, gioca, MISSIONI, gdist, dopoAzione, faseNemici, attacca, raggiungibili, bersagli, tocca, fineTurno, annulla, scrN, nuovo, clona, occ, TIPI, get prev(){ return prev; }, get ev(){ return ev; }}};
 })();
 
 // ===== Conquista: scegli il tuo borgo, rinforzalo e conquista gli altri (a turni, contro il computer) =====
@@ -8776,7 +8778,7 @@ function avviaCQ(){ SCELTA_MP = false; if (APRI_DOPO === 'crea' || APRI_DOPO ===
   requestAnimationFrame(() => { misura(); if (S) vaiA(S.io); else centra(); });
   const c = carica(); if (c){ S = c; impostaMappa(S.mappa || 'media'); if (!S.capIA && !S.mp) capIAinit(); for (const k of ['acc', 'patti', 'rep']) if (!S[k]) S[k] = {}; for (const k of ['proposte', 'richieste', 'missioni', 'cron', 'eventi']) if (!S[k]) S[k] = []; if (!S.car){ S.car = {}; S.noto = {}; const ks = Object.keys(CARATTERI).sort(() => rnd() - .5); Object.keys(FZ).filter(f => f !== S.io).forEach((f, i) => { S.car[f] = ks[i]; }); } if (!S.noto) S.noto = {}; if (!S.anno) S.anno = 'calmo'; sel = S.io; misura(); vaiA(S.io); aggiornaUI();
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
-    o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); if (S && S.turno <= 2) coachCQ(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
+    o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); if (S) coachCQ(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
   else { S = null; aggiornaUI(); scegli(); misura(); centra(); } }
 function esci(tab){ mpChiudi(); if (CG){ clearInterval(CG.iv); CG = null; COACH.nascondi(); } if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', typeof tab === 'string' ? tab : 'gioca'); } catch(e){} mostraMenu(); }
 function tasto(e, k){ const o = el('cqOv');
@@ -9359,7 +9361,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109134951';
+  const VERSIONE = window.DS_VER = '20261109140134';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
@@ -9439,7 +9441,7 @@ const RITORNO = window.RITORNO = (() => {
     if (k === 'conquista') sc('difendi-smerillo-conquista-guida3', '1'); // il tutorial ha già spiegato: niente muro di testo all'inizio
     const t = titolo(), s = stato(); s.in = k; salvaS(s); chiudi(); traccia('assaggio', {passo: k, ev:'via'});
     if (t) t.hidden = true;
-    if (k === 'turni') TB.apri('gioca');
+    if (k === 'turni') TB.apri(stato().rivedi ? 'prima' : 'gioca');
     else if (k === 'tempo'){ try { avviaRT(); } catch(e){ console.error(e); } }
     else if (k === 'conquista') CQ.apri();
     setTimeout(mostraChip, 1200); }
@@ -9466,7 +9468,7 @@ const RITORNO = window.RITORNO = (() => {
     return true; }
   function finestraFine(){ const s = stato(), f = frazione(), saltato = s.saltato;
     const b = finestra(`<div class="fd-festa"><span class="as-scr"></span></div><span class="fd-k">${saltato ? 'REGALO DI BENVENUTO' : 'HAI PROVATO TUTTO'}</span><h2>${saltato ? 'Eccoti a Smerillo!' : 'Ora scegli tu!'}</h2>
-      <p class="acc-sub">Per cominciare ti regalo uno <b>scrigno d’argento</b>: lo apri nella pagina Premi.</p>
+      ${lg('difendi-smerillo-benvenuto') ? '' : '<p class="acc-sub">Per cominciare ti regalo uno <b>scrigno d’argento</b>: lo apri nella pagina Premi.</p>'}
       <div class="as-fz"><b>Per quale frazione giochi?</b><small>Ogni partita dà punti alla tua frazione. La domenica si vede chi ha vinto la settimana.</small>
         <div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" class="${f === k ? 'on' : ''}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div></div>
       <p class="as-dom">${ico('calendario', 2)} Torna anche domani: ogni giorno di fila lo scrigno è più ricco.</p>
@@ -9474,7 +9476,7 @@ const RITORNO = window.RITORNO = (() => {
     let scelta = f; b.querySelectorAll('[data-fz]').forEach(x => x.onclick = () => { scelta = x.dataset.fz; b.querySelectorAll('[data-fz]').forEach(y => y.classList.toggle('on', y === x)); try { SUONI.suona('tocco'); } catch(e){} });
     try { SUONI.suona('leggenda'); EPICO.coriandoli(120); } catch(e){}
     b.querySelector('[data-x]').onclick = () => { const s2 = stato(); s2.passo = 9; s2.in = null; salvaS(s2); if (scelta) scegliFrazione(scelta);
-      try { regalaScrigno('argento', 'Regalo di benvenuto'); } catch(e){}
+      if (!lg('difendi-smerillo-benvenuto')){ sc('difendi-smerillo-benvenuto', '1'); try { regalaScrigno('argento', 'Regalo di benvenuto'); } catch(e){} }
       const g = giorni(); g.p = g.u; scJ(GKEY, g); // il giorno 1 è già questo regalo
       traccia('assaggio', {passo:'fine', fz: scelta || null}); chiudi(); RIENTRA('premi'); }; }
   // dopo ogni partita: se è un passo dell'assaggio, lo chiude
@@ -9535,10 +9537,14 @@ const RITORNO = window.RITORNO = (() => {
   function RIENTRA(tab){ try { sessionStorage.setItem('ds-tab', tab); } catch(e){} mostraMenu('home'); }
   function avviaRT(){ CMIS = 1; S = null; nuovaPartita('facile'); }
 
+  // rivedere tutte le guide (anche dal link ...?tutorial=1): i progressi restano
+  function rivediGuide(){ for (const k of ['difendi-smerillo-guida', 'difendi-smerillo-guida-classica', 'difendi-smerillo-conquista-guida3', 'difendi-smerillo-conquista-guida4']){ try { localStorage.removeItem(k); } catch(e){} }
+    try { TB.resetGuida(); } catch(e){} scJ(SKEY, {passo:0, nuovo:1, rivedi:1}); traccia('guide', {ev:'rivedi'}); try { history.replaceState(null, '', location.pathname); } catch(e){} mostraMenu('home'); }
+  if (/[?&]tutorial=1/.test(location.search)){ setTimeout(rivediGuide, 300); }
   // all'avvio
   { const s = stato(), g = giorni(); traccia('apri', {nuovo: s.nuovo && s.passo === 0 ? 1 : 0, torna: s.torna ? 1 : 0, ass: s.passo, giorni: g.s, acc: acc() ? 1 : 0, w: innerWidth}); }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') traccia('chiudi', {sec: Math.round((Date.now() - T0)/1000)}, true); });
-  return {versione: VERSIONE, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
+  return {versione: VERSIONE, rivediGuide, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
 })();
 
 fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){ console.error(e); }
