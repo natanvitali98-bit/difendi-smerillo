@@ -2015,6 +2015,20 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-stg.cq-sag button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 6px 4px;min-width:62px}
 .cq-sag small{font-size:11px;font-weight:800;display:flex;align-items:center;gap:2px}
 .cq-sagi img{image-rendering:pixelated;display:block}
+
+/* carta dello scrigno: impaginazione fissa, niente sovrapposizioni */
+.sc-fronte{justify-content:flex-start!important;gap:0!important;padding:12px 12px 14px!important}
+.sc-testa{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+.sc-fronte .sc-rar{font-size:17px;padding:1px 14px}
+.sc-fronte .sc-modo{margin:0}
+.sc-img{flex:1 1 auto;min-height:0;width:100%;height:auto!important;display:flex!important;align-items:center;justify-content:center;padding:6px 0;overflow:hidden}
+.sc-img > img.sc-stm{max-height:118px;max-width:86%;width:auto;height:auto}
+.sc-tipo{flex:none;font-size:11px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;color:#4a5070;line-height:1}
+.sc-fronte b{flex:none;margin:3px 0 6px;font-size:26px!important;line-height:1!important;max-width:100%;overflow-wrap:anywhere}
+.sc-fronte .sc-es{flex:none;align-self:center;text-align:center;font-size:13px;line-height:1.15;background:#fff;border:2px solid #141433;border-radius:999px;padding:4px 10px;color:#141433}
+.scr-carta.nuovo .sc-fronte .sc-es{background:#ffd03a;font-size:20px}
+.rivela .sc-tipo{font-size:9px}
+.rivela .rv-i img.sc-stm{max-height:76px;width:auto;height:auto}
 .fz-acc{margin-left:4px;border:2px solid #f8d048;background:none;color:#f8d048;border-radius:8px;padding:2px 8px;font-weight:700;cursor:pointer}
 .acc-box{width:100%;max-width:440px;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
 @keyframes accIn{from{transform:translateY(30px) scale(.96);opacity:0}to{transform:none;opacity:1}}
@@ -5553,15 +5567,16 @@ function apriScrigno(tipo){
 // come si mostra una carta (difensore, torre o gloria)
 const NOME_TORRE = {vedetta:'Balestra', piazza:'Braciere', logge:'Castagneto', nido:'Falco', milizia:'Soldati', campanile:'Campana'};
 const cartaModo = c => c.m === 'torre' ? 'Tempo reale' : (c.m === 'gloria' || c.m === 'forma') ? 'Conquista' : 'Missioni';
-const cartaNome = c => c.m === 'torre' ? NOME_TORRE[c.t] : c.m === 'gloria' ? `+${c.g} gloria` : c.m === 'forma' ? CQ.nomeForma(c.f) : TIPI[c.t].nome;
+const cartaNome = c => c.m === 'torre' ? NOME_TORRE[c.t] : c.m === 'gloria' ? `+${c.g}` : c.m === 'forma' ? CQ.nomeForma(c.f).replace(/^(Stemma|Scudo) «(.*)»$/, '$2') : TIPI[c.t].nome;
+const cartaTipo = c => c.m === 'torre' ? 'Torre' : c.m === 'gloria' ? 'Gloria della casata' : c.m === 'forma' ? (c.f.startsWith('s_') ? 'Nuovo scudo' : 'Forma dello stemma') : 'Difensore';
 const cartaRar = c => c.m === 'dif' ? rarDi(c.t) : c.rar;
 function cartaImg(c, px){ if (c.m === 'torre') return iconaTorre(c.t, px*14);
   if (c.m === 'gloria'){ const d = document.createElement('span'); d.innerHTML = ico('bandiera', px); return d; }
-  if (c.m === 'forma'){ const k = CQ.anteprimaForma(c.f, px); const im = document.createElement('img'); im.src = k.toDataURL(); im.width = k.width; im.height = k.height; im.style.imageRendering = 'pixelated'; return im; } return icona(c.t, px); }
+  if (c.m === 'forma'){ const k = CQ.anteprimaForma(c.f, px); const im = document.createElement('img'); im.className = 'sc-stm'; im.src = k.toDataURL(); im.width = k.width; im.height = k.height; im.style.imageRendering = 'pixelated'; return im; } return icona(c.t, px); }
 function cartaEsito(c, lungo){
-  if (c.m === 'torre') return c.esito === 'livello' ? `Livello ${c.liv}! Colpisce più forte` : c.esito === 'copia' ? `+copia · ${c.copie}/${c.serve}${lungo ? ' per il livello ' + (c.liv + 1) : ''}` : 'Livello massimo';
-  if (c.m === 'forma') return c.f.startsWith('s_') ? (lungo ? 'Nuova sagoma per lo scudo della casata!' : 'Nuovo scudo!') : (lungo ? 'Nuova forma per lo stemma della casata!' : 'Nuova forma di stemma!');
-  if (c.m === 'gloria') return c.esito === 'gloria' ? (lungo ? 'Gloria per la tua casata' : 'Per la tua casata') : (lungo ? 'Ti aspetta quando fondi la casata' : 'Per la tua prima casata');
+  if (c.m === 'torre') return c.esito === 'livello' ? `Livello ${c.liv}! Più forte` : c.esito === 'copia' ? `+copia · ${c.copie}/${c.serve}${lungo ? ' per il livello ' + (c.liv + 1) : ''}` : 'Livello massimo';
+  if (c.m === 'forma') return lungo ? 'Sbloccato!' : 'SBLOCCATO!';
+  if (c.m === 'gloria') return c.esito === 'gloria' ? 'Alla tua casata' : 'Per la prima casata';
   return c.esito === 'nuovo' ? (lungo ? 'NUOVO DIFENSORE!' : 'NUOVO!') : c.esito === 'livello' ? (lungo ? 'Sale al livello ' + c.liv + '! (+1 vita)' : 'Livello ' + c.liv + '! +1 vita') : c.esito === 'copia' ? (lungo ? `+1 copia · ${c.copie}/${c.serve} per il livello ${c.liv + 1}` : `+1 copia · ${c.copie}/${c.serve}`) : (lungo ? 'È già al livello massimo' : 'Livello massimo'); }
 // ===== INCARICHI: 3 al giorno + imprese per sempre. Sono il modo principale per avere scrigni =====
 const INKEY = 'difendi-smerillo-incarichi';
@@ -6345,7 +6360,7 @@ function mostraScrigno(tipo, poi){
   function prossima(i){ if (i >= carte.length){ chiudi(); return; }
     const c = carte[i], rar = cartaRar(c), r = RARITA[rar]; zonaC.innerHTML = '';
     const k = document.createElement('div'); k.className = 'scr-carta'; k.style.setProperty('--rc', r.col);
-    k.innerHTML = `<div class="sc-in"><div class="sc-dorso"><span>?</span></div><div class="sc-fronte"><div class="sc-rar">${r.nome}</div><div class="sc-modo sc-m-${c.m}">${cartaModo(c)}</div><div class="sc-img"></div><b>${cartaNome(c)}</b><span class="sc-es">${cartaEsito(c)}</span></div></div><small class="sc-conta">${carte.length - i - 1 ? 'Ancora ' + (carte.length - i - 1) : 'Ultima!'}</small>`;
+    k.innerHTML = `<div class="sc-in"><div class="sc-dorso"><span>?</span></div><div class="sc-fronte"><div class="sc-testa"><span class="sc-rar">${r.nome}</span><span class="sc-modo sc-m-${c.m}">${cartaModo(c)}</span></div><div class="sc-img"></div><small class="sc-tipo">${cartaTipo(c)}</small><b>${cartaNome(c)}</b><span class="sc-es">${cartaEsito(c)}</span></div></div><small class="sc-conta">${carte.length - i - 1 ? 'Ancora ' + (carte.length - i - 1) : 'Ultima!'}</small>`;
     k.querySelector('.sc-img').append(cartaImg(c, 6)); zonaC.append(k); hint.textContent = 'Tocca la carta'; hint.classList.add('su');
     k.animate([{transform:'translateY(80px) scale(.2) rotate(-25deg)', opacity:0}, {transform:'translateY(-30px) scale(1.08) rotate(4deg)', opacity:1, offset:.7}, {transform:'none', opacity:1}], {duration:calma ? 1 : 520, easing:'cubic-bezier(.2,.9,.3,1.2)', fill:'both'});
     SUONI.suona('esce');
@@ -6365,7 +6380,7 @@ function mostraScrigno(tipo, poi){
     const oo = overlay(`<div class="dlg box tbscr"><span class="kicker">${sc.nome}</span><h2>Hai trovato</h2><div class="tbcol" id="tbRvAll"></div><button class="big" id="tbRvOk">Continua ${ico('play')}</button></div>`);
     const box = oo.querySelector('#tbRvAll');
     let ci = 0; for (const c of carte){ const r = RARITA[cartaRar(c)], d = document.createElement('div'); d.className = 'rivela'; d.style.animationDelay = (ci++ * .08) + 's'; d.style.setProperty('--rc', r.col);
-      d.innerHTML = `<div class="rv-r">${r.nome}</div><div class="sc-modo sc-m-${c.m}">${cartaModo(c)}</div><div class="rv-i"></div><b>${cartaNome(c)}</b><span class="rv-e">${cartaEsito(c, true)}</span>`;
+      d.innerHTML = `<div class="rv-r">${r.nome}</div><div class="sc-modo sc-m-${c.m}">${cartaModo(c)}</div><div class="rv-i"></div><small class="sc-tipo">${cartaTipo(c)}</small><b>${cartaNome(c)}</b><span class="rv-e">${cartaEsito(c, true)}</span>`;
       d.querySelector('.rv-i').append(cartaImg(c, 5)); box.append(d); }
     oo.querySelector('#tbRvOk').onclick = () => { chiudiOv(); poi(); };
   }
@@ -9237,7 +9252,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109110924';
+  const VERSIONE = window.DS_VER = '20261109114113';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
