@@ -2010,6 +2010,8 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .sc-modo{display:inline-block;margin:2px auto 0;font-size:11px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:2px 8px;border-radius:999px;color:#fff;background:#3a78d0;border:2px solid #141433}
 .sc-m-torre{background:#e0882a}.sc-m-gloria{background:#8b4dff}
 .cr-tor{cursor:default}
+.cr-tor .cr-di > *{transform:none}
+.ico-torre{display:inline-grid;place-items:center;line-height:0}
 .fz-acc{margin-left:4px;border:2px solid #f8d048;background:none;color:#f8d048;border-radius:8px;padding:2px 8px;font-weight:700;cursor:pointer}
 .acc-box{width:100%;max-width:440px;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
 @keyframes accIn{from{transform:translateY(30px) scale(.96);opacity:0}to{transform:none;opacity:1}}
@@ -4284,6 +4286,10 @@ const TORKEY = 'difendi-smerillo-torri';
 const leggiTorri = () => { try { return JSON.parse(localStorage.getItem(TORKEY)) || {}; } catch(e){ return {}; } };
 const livTorre = t => Math.max(1, (leggiTorri()[t] || {}).liv || 1);
 const TM = t => 1 + .07*(livTorre(t) - 1);
+const ICO_TORRE = {vedetta:'arco', piazza:'fiamma', logge:'castagna', nido:null, milizia:'spade', campanile:'campana'};
+function iconaTorre(t, h){ // h = altezza in px
+  if (!ICO_TORRE[t]){ try { const img = SPR.falco, c = document.createElement('canvas'); c.width = img.width; c.height = img.height; c.getContext('2d').drawImage(img, 0, 0); c.style.height = h + 'px'; c.style.width = Math.round(h*img.width/img.height) + 'px'; c.style.imageRendering = 'pixelated'; return c; } catch(e){} }
+  const d = document.createElement('span'); d.className = 'ico-torre'; d.innerHTML = TB.ico(ICO_TORRE[t] || 'freccia', 1); const im = d.firstChild; if (im){ const r = im.width/im.height; im.style.height = h + 'px'; im.style.width = Math.round(h*r) + 'px'; im.removeAttribute('width'); im.removeAttribute('height'); } return d; }
 const sprIcon = id => { const img = SPR[id], c = document.createElement('canvas'); c.className = 'ic'; c.width = img.width; c.height = img.height; c.getContext('2d').drawImage(img, 0, 0); return c; };
 function bottone(testo, fn, dis, alt){ const bt = document.createElement('button'); bt.className = 'act' + (alt ? ' alt' : ''); if (typeof testo === 'string') bt.textContent = testo; else bt.append(...testo); bt.disabled = !!dis; bt.onclick = fn; return bt; }
 function compra(L){ const c = costoLivello(L); if (L.lvl >= 3 || S.castagne < c) return;
@@ -4746,7 +4752,7 @@ function mostraMenu(pannello){
       const R0 = RIENTRO; RIENTRO = null; let quieto = !!R0; if (R0){ const cr = c.querySelector('.cr'); if (cr) cr.classList.add('quieto'); }
       let k0 = 'gioca'; try { k0 = sessionStorage.getItem('ds-tab') || 'gioca'; } catch(e){} requestAnimationFrame(() => { vai(R0 ? R0.tab : k0, false); if (R0){ const pg = pgs.find(s => s.dataset.tab === R0.tab); if (pg) pg.scrollTop = R0.top; requestAnimationFrame(() => { if (pg) pg.scrollTop = R0.top; quieto = false; setTimeout(() => { const cr = c.querySelector('.cr'); if (cr) cr.classList.remove('quieto'); }, 300); }); } });
       { const bt = c.querySelector('#crTorri'); if (bt){ const T = leggiTorri(); for (const k of ['vedetta','piazza','logge','nido','milizia','campanile']){ const x = T[k] || {liv:1, copie:0}, d = document.createElement('div'); d.className = 'cr-dif cr-tor'; d.style.setProperty('--rc', ['#6b7280','#3d8bfd','#a855f7'][{vedetta:0,piazza:0,logge:0,nido:1,milizia:1,campanile:2}[k]]);
-          d.innerHTML = `<span class="cr-di"></span><b>${{vedetta:'Balestra',piazza:'Braciere',logge:'Castagneto',nido:'Falco',milizia:'Soldati',campanile:'Campana'}[k]}</b><small>liv. ${x.liv}${x.liv < 5 ? ' · ' + (x.copie || 0) + '/' + (x.liv + 1) : ' MAX'}</small>`; try { const ic = sprIcon(ICONA[k]); ic.style.width = Math.min(64, ic.width*6) + 'px'; ic.style.imageRendering = 'pixelated'; d.querySelector('.cr-di').append(ic); } catch(e){} bt.append(d); } } }
+          d.innerHTML = `<span class="cr-di"></span><b>${{vedetta:'Balestra',piazza:'Braciere',logge:'Castagneto',nido:'Falco',milizia:'Soldati',campanile:'Campana'}[k]}</b><small>liv. ${x.liv}${x.liv < 5 ? ' · ' + (x.copie || 0) + '/' + (x.liv + 1) : ' MAX'}</small>`; try { d.querySelector('.cr-di').append(iconaTorre(k, 40)); } catch(e){} bt.append(d); } } }
       c.querySelectorAll('.cr-dif[data-dif]').forEach(b => { const im = TB.icona(b.dataset.dif, 3); if (b.classList.contains('no')) im.style.filter = 'brightness(0) opacity(.35)'; b.querySelector('.cr-di').append(im); b.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('collezione'); }); });
       { const bs = c.querySelector('#prScr'); if (bs) bs.onclick = () => { const x = prendiScrigno(); if (!x) return; const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; t.hidden = true; TB.premiaSopra(x.tipo); }; }
       { const W = c.querySelector('#prW'), go = c.querySelector('#prGira'), es = c.querySelector('#prEs');
@@ -5545,7 +5551,7 @@ const NOME_TORRE = {vedetta:'Balestra', piazza:'Braciere', logge:'Castagneto', n
 const cartaModo = c => c.m === 'torre' ? 'Tempo reale' : c.m === 'gloria' ? 'Conquista' : 'Missioni';
 const cartaNome = c => c.m === 'torre' ? NOME_TORRE[c.t] : c.m === 'gloria' ? `+${c.g} gloria` : TIPI[c.t].nome;
 const cartaRar = c => c.m === 'dif' ? rarDi(c.t) : c.rar;
-function cartaImg(c, px){ if (c.m === 'torre'){ const k = sprIcon(ICONA[c.t]); k.style.width = Math.min(150, k.width*px*2.2) + 'px'; k.style.imageRendering = 'pixelated'; return k; }
+function cartaImg(c, px){ if (c.m === 'torre') return iconaTorre(c.t, px*14);
   if (c.m === 'gloria'){ const d = document.createElement('span'); d.innerHTML = ico('bandiera', px); return d; } return icona(c.t, px); }
 function cartaEsito(c, lungo){
   if (c.m === 'torre') return c.esito === 'livello' ? `Livello ${c.liv}! Colpisce più forte` : c.esito === 'copia' ? `+copia · ${c.copie}/${c.serve}${lungo ? ' per il livello ' + (c.liv + 1) : ''}` : 'Livello massimo';
@@ -9204,7 +9210,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109100758';
+  const VERSIONE = window.DS_VER = '20261109103509';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
