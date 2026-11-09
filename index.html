@@ -9289,6 +9289,7 @@ const RITORNO = window.RITORNO = (() => {
   async function rpc(fn, body, keep){ const r = await fetch(URL + fn, {method:'POST', keepalive: !!keep, headers:{apikey:KEY, Authorization:'Bearer ' + KEY, 'Content-Type':'application/json'}, body: JSON.stringify(body)}); if (!r.ok) throw new Error('http ' + r.status); const t = await r.text(); return t ? JSON.parse(t) : null; }
 
   // ---------- conteggio anonimo: fin dove arriva ognuno (nessun dato personale, solo un numero a caso per telefono)
+  const DA = (() => { const m = /[?&]da=([a-z0-9_-]{1,20})/i.exec(location.search); if (m) return m[1].toLowerCase(); try { return window.top !== window ? 'iframe' : null; } catch(e){ return 'iframe'; } })(), INFRAME = (() => { try { return window.top !== window; } catch(e){ return true; } })();
   const AKEY = 'difendi-smerillo-anon', T0 = Date.now(), vero = /github\.io$/.test(location.hostname) && !/\/beta\//.test(location.pathname);
   let anon = lg(AKEY); if (!anon){ anon = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); sc(AKEY, anon); }
   function traccia(ev, dati, keep){ if (!vero || prova()) return; rpc('ds_traccia', {p_anon: anon, p_ev: ev, p_dati: dati || null, p_token: tok()}, keep).catch(() => {}); }
@@ -9337,7 +9338,7 @@ const RITORNO = window.RITORNO = (() => {
     b.querySelector('[data-ok]').onclick = () => { const testo = b.querySelector('.vt-txt').value.trim(); sc(VKEY, String(voto)); const d = disp();
       rpc('ds_voto', {p_anon: anon, p_voto: voto, p_testo: testo || null, p_dati: {partite: +lg('difendi-smerillo-partite') || 0, home: daHome() ? 1 : 0, ios: d.ios ? 1 : 0, app: d.inApp ? 1 : 0}, p_token: tok()}).catch(() => {});
       traccia('voto', {v: voto, testo: testo ? 1 : 0});
-      if (voto >= 4 && !daHome()) finestraHome(true); else { chiudi(); try { PROF.avviso('Grazie per il voto!', 'Ci aiuta a migliorare il gioco'); } catch(e){} } }; }
+      if (voto >= 4 && !daHome() && !INFRAME) finestraHome(true); else { chiudi(); try { PROF.avviso('Grazie per il voto!', 'Ci aiuta a migliorare il gioco'); } catch(e){} } }; }
   const icoCondividi = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11v9h14v-9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
   function finestraHome(dopoVoto){ const d = disp(), a = acc(); traccia('home', {ev:'chiesto'});
     let passi;
@@ -9361,7 +9362,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109140134';
+  const VERSIONE = window.DS_VER = '20261109225818';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
@@ -9542,7 +9543,7 @@ const RITORNO = window.RITORNO = (() => {
     try { TB.resetGuida(); } catch(e){} scJ(SKEY, {passo:0, nuovo:1, rivedi:1}); traccia('guide', {ev:'rivedi'}); try { history.replaceState(null, '', location.pathname); } catch(e){} mostraMenu('home'); }
   if (/[?&]tutorial=1/.test(location.search)){ setTimeout(rivediGuide, 300); }
   // all'avvio
-  { const s = stato(), g = giorni(); traccia('apri', {nuovo: s.nuovo && s.passo === 0 ? 1 : 0, torna: s.torna ? 1 : 0, ass: s.passo, giorni: g.s, acc: acc() ? 1 : 0, w: innerWidth}); }
+  { const s = stato(), g = giorni(); traccia('apri', {da: DA, nuovo: s.nuovo && s.passo === 0 ? 1 : 0, torna: s.torna ? 1 : 0, ass: s.passo, giorni: g.s, acc: acc() ? 1 : 0, w: innerWidth}); }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') traccia('chiudi', {sec: Math.round((Date.now() - T0)/1000)}, true); });
   return {versione: VERSIONE, rivediGuide, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
 })();
