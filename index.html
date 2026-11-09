@@ -2030,6 +2030,14 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .rivela .sc-tipo{font-size:9px}
 .rivela .rv-i img.sc-stm{max-height:76px;width:auto;height:auto}
 
+
+/* schermi stretti (iPhone SE e simili) */
+@media (max-width:360px){ .cq-dif button{font-size:11px!important;padding:0!important;letter-spacing:-.4px;min-width:0;white-space:nowrap;border-width:2px!important} .gp-tile{padding:8px 8px;gap:6px} .gp-tile b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%} }
+/* guida su schermi bassi (telefono in orizzontale): nuvoletta stretta sul lato libero */
+#coach.lato{left:auto;right:auto;max-width:none;width:min(44vw,360px);top:calc(env(safe-area-inset-top) + 56px);bottom:auto;margin:0;padding:10px 12px}
+#coach.lato.dx{right:calc(env(safe-area-inset-right) + 12px)}#coach.lato.sx{left:calc(env(safe-area-inset-left) + 12px)}
+#coach.lato .co-t{font-size:16px}#coach.lato .co-s{font-size:13px}
+#coach.stretto .co-s{display:none}
 /* ===== guida col dito ===== */
 #coach{position:fixed;left:12px;right:12px;z-index:100001;max-width:460px;margin:0 auto;background:#fff;color:#141433;border:4px solid #141433;border-radius:20px;box-shadow:0 6px 0 #141433;padding:12px 14px 14px;font-family:var(--f-body,system-ui);pointer-events:auto}
 #coach[hidden]{display:none}
@@ -9249,7 +9257,11 @@ const COACH = window.COACH = (() => {
     if (b){ ring.style.left = (b.x - b.w/2) + 'px'; ring.style.top = (b.y - b.h/2) + 'px'; ring.style.width = b.w + 'px'; ring.style.height = b.h + 'px'; ring.style.borderRadius = b.el ? '16px' : '50%';
       const t = performance.now()/1000, k = Math.abs(Math.sin(t*3.2))*10; dito.style.left = (b.x + b.w*.18 + k*.6) + 'px'; dito.style.top = (b.y + b.h*.18 + k) + 'px'; }
     // la nuvoletta sta dalla parte opposta al bersaglio
-    if (!nascosto){ const alto = !b || b.y > innerHeight*.45; box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto); } }
+    if (!nascosto){ const basso = innerHeight < 560 && innerWidth > innerHeight;
+      if (basso){ const dx = !b || b.x < innerWidth/2; box.classList.add('lato'); box.classList.remove('sopra', 'sotto'); box.classList.toggle('dx', dx); box.classList.toggle('sx', !dx); }
+      else { box.classList.remove('lato', 'dx', 'sx'); const alto = !b || b.y > innerHeight*.45; box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
+        // se la nuvoletta copre comunque il punto da toccare, la accorcio
+        if (b){ const r = box.getBoundingClientRect(); box.classList.toggle('stretto', b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8); } } } }
   function mostra(c){ crea(); cfg = c;
     box.innerHTML = `<div class="co-h"><span class="co-n">${c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : 'GUIDA'}</span>${c.salta ? '<button type="button" class="co-salta">Salta la guida</button>' : ''}</div>
       <p class="co-t">${c.testo}</p>${c.sotto ? `<p class="co-s">${c.sotto}</p>` : ''}${c.bottone ? `<button type="button" class="co-ok">${c.bottone}</button>` : ''}`;
@@ -9347,7 +9359,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109125913';
+  const VERSIONE = window.DS_VER = '20261109134951';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
