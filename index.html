@@ -2012,6 +2012,9 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cr-tor{cursor:default}
 .cr-tor .cr-di > *{transform:none}
 .ico-torre{display:inline-grid;place-items:center;line-height:0}
+.cq-stg.cq-sag button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 6px 4px;min-width:62px}
+.cq-sag small{font-size:11px;font-weight:800;display:flex;align-items:center;gap:2px}
+.cq-sagi img{image-rendering:pixelated;display:block}
 .fz-acc{margin-left:4px;border:2px solid #f8d048;background:none;color:#f8d048;border-radius:8px;padding:2px 8px;font-weight:700;cursor:pointer}
 .acc-box{width:100%;max-width:440px;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
 @keyframes accIn{from{transform:translateY(30px) scale(.96);opacity:0}to{transform:none;opacity:1}}
@@ -5550,14 +5553,14 @@ function apriScrigno(tipo){
 // come si mostra una carta (difensore, torre o gloria)
 const NOME_TORRE = {vedetta:'Balestra', piazza:'Braciere', logge:'Castagneto', nido:'Falco', milizia:'Soldati', campanile:'Campana'};
 const cartaModo = c => c.m === 'torre' ? 'Tempo reale' : (c.m === 'gloria' || c.m === 'forma') ? 'Conquista' : 'Missioni';
-const cartaNome = c => c.m === 'torre' ? NOME_TORRE[c.t] : c.m === 'gloria' ? `+${c.g} gloria` : c.m === 'forma' ? `Stemma «${CQ.nomeForma(c.f)}»` : TIPI[c.t].nome;
+const cartaNome = c => c.m === 'torre' ? NOME_TORRE[c.t] : c.m === 'gloria' ? `+${c.g} gloria` : c.m === 'forma' ? CQ.nomeForma(c.f) : TIPI[c.t].nome;
 const cartaRar = c => c.m === 'dif' ? rarDi(c.t) : c.rar;
 function cartaImg(c, px){ if (c.m === 'torre') return iconaTorre(c.t, px*14);
   if (c.m === 'gloria'){ const d = document.createElement('span'); d.innerHTML = ico('bandiera', px); return d; }
   if (c.m === 'forma'){ const k = CQ.anteprimaForma(c.f, px); const im = document.createElement('img'); im.src = k.toDataURL(); im.width = k.width; im.height = k.height; im.style.imageRendering = 'pixelated'; return im; } return icona(c.t, px); }
 function cartaEsito(c, lungo){
   if (c.m === 'torre') return c.esito === 'livello' ? `Livello ${c.liv}! Colpisce più forte` : c.esito === 'copia' ? `+copia · ${c.copie}/${c.serve}${lungo ? ' per il livello ' + (c.liv + 1) : ''}` : 'Livello massimo';
-  if (c.m === 'forma') return lungo ? 'Nuova forma per lo stemma della casata!' : 'Nuova forma di stemma!';
+  if (c.m === 'forma') return c.f.startsWith('s_') ? (lungo ? 'Nuova sagoma per lo scudo della casata!' : 'Nuovo scudo!') : (lungo ? 'Nuova forma per lo stemma della casata!' : 'Nuova forma di stemma!');
   if (c.m === 'gloria') return c.esito === 'gloria' ? (lungo ? 'Gloria per la tua casata' : 'Per la tua casata') : (lungo ? 'Ti aspetta quando fondi la casata' : 'Per la tua prima casata');
   return c.esito === 'nuovo' ? (lungo ? 'NUOVO DIFENSORE!' : 'NUOVO!') : c.esito === 'livello' ? (lungo ? 'Sale al livello ' + c.liv + '! (+1 vita)' : 'Livello ' + c.liv + '! +1 vita') : c.esito === 'copia' ? (lungo ? `+1 copia · ${c.copie}/${c.serve} per il livello ${c.liv + 1}` : `+1 copia · ${c.copie}/${c.serve}`) : (lungo ? 'È già al livello massimo' : 'Livello massimo'); }
 // ===== INCARICHI: 3 al giorno + imprese per sempre. Sono il modo principale per avere scrigni =====
@@ -7017,6 +7020,17 @@ const SCOL = [['Rosso','#c8382c'],['Blu','#2f5fb8'],['Verde','#3a8a3e'],['Oro','
 const SSIM = [['torre','Torre'],['castagna','Castagna'],['spade','Spade'],['albero','Faggio'],['stella','Stella'],['campana','Campana'],['cavallo','Cavallo'],['chiesa','Chiesa'],['coppa','Coppa','sim:coppa'],['martello','Martello','sim:martello'],['cuore','Cuore','sim:cuore'],['trifoglio','Trifoglio','sim:trifoglio'],['luna','Luna','sim:luna']];
 const SFOR = [['pieno','Pieno'],['partito','Diviso'],['troncato','Spaccato'],['banda','Banda'],['inquartato','Inquartato','for:inquartato'],['croce','Croce','for:croce'],['scaglione','Scaglione','for:scaglione'],['palo','Palo','scr:palo'],['fascia','Fascia','scr:fascia'],['onde','Onde','scr:onde'],['bordura','Bordura','scr:bordura'],['scaccato','Scaccato','scr:scaccato'],['rombo','Rombo','scr:rombo']];
 const FORME_SCR = {palo:1, fascia:1, onde:1, bordura:2, scaccato:2, rombo:3}; // rarità della forma negli scrigni
+// la sagoma dello scudo: due di base, le altre dagli scrigni
+const SSAG = [['classico','Classico'],['francese','Francese'],['tondo','Tondo','scr:s_tondo'],['losanga','Losanga','scr:s_losanga'],['gotico','Gotico','scr:s_gotico'],['stendardo','Stendardo','scr:s_stendardo'],['torre','Torre','scr:s_torre']];
+const SAG_SCR = {tondo:1, losanga:1, gotico:2, stendardo:2, torre:3};
+const SAGOME = {
+  classico: (x, y) => { if (y < 1 || y > 19 || x < 1 || x > 16) return false; if (y < 12) return true; return Math.abs(x - 8.5) <= 8 - (y - 12)*0.9; },
+  francese: (x, y) => { if (y < 1 || y > 19 || x < 1 || x > 16) return false; if (y < 16) return true; return Math.abs(x - 8.5) <= 7.6 - (y - 16)*2.2; },
+  tondo:    (x, y) => ((x - 8.5)/7.9)**2 + ((y - 10)/9.3)**2 <= 1,
+  losanga:  (x, y) => Math.abs(x - 8.5)/8.2 + Math.abs(y - 10)/9.8 <= 1,
+  gotico:   (x, y) => { if (y < 1 || y > 19 || x < 1 || x > 16) return false; if (y < 6){ const q = (6 - y)/5.3; return Math.abs(x - 8.5) <= 7.6*Math.sqrt(Math.max(0, 1 - q*q)); } if (y < 12) return true; return Math.abs(x - 8.5) <= 8 - (y - 12)*0.95; },
+  stendardo:(x, y) => { if (y < 1 || y > 19 || x < 2 || x > 15) return false; return !(y > 13 && Math.abs(x - 8.5) < (y - 13)*1.25); },
+  torre:    (x, y) => { if (y < 1 || y > 19 || x < 1 || x > 16) return false; if (y < 4) return Math.floor((x - 1)/3) % 2 === 0; if (y < 15) return true; return Math.abs(x - 8.5) <= 7.6 - (y - 15)*1.8; }};
 const KFORME = 'difendi-smerillo-forme';
 const formeScr = () => { try { return JSON.parse(localStorage.getItem(KFORME)) || []; } catch(e){ return []; } };
 const LIVC = [[0,'Famiglia di contadini'],[150,'Casata minore'],[400,'Casata nobile'],[800,'Signori del comune'],[1500,'Leggenda delle Marche']];
@@ -7032,7 +7046,7 @@ const NomeCas = () => CAS ? 'La casata ' + CAS.nome : 'La tua casata';
 // lo stemma in pixel: scudo, colori, partizione e simbolo
 const STM = {};
 function stemma(st, px = 1){ if (!st) return null; const key = JSON.stringify(st) + px; if (STM[key]) return STM[key]; const im = icoImg(st.sim); const c = document.createElement('canvas'), W0 = 18, H0 = 21; c.width = W0*px; c.height = H0*px; const g = c.getContext('2d');
-  const dentro = (x, y) => { if (y < 1 || y > 19 || x < 1 || x > 16) return false; if (y < 12) return true; const r = 8 - (y - 12)*0.9; return Math.abs(x - 8.5) <= r; };
+  const dentro = SAGOME[st.s] || SAGOME.classico;
   const c1 = SCOL[st.c1][1], c2 = SCOL[st.c2][1];
   for (let y = 0; y < H0; y++) for (let x = 0; x < W0; x++){ const d = dentro(x, y), bordo = !d && (dentro(x - 1, y) || dentro(x + 1, y) || dentro(x, y - 1) || dentro(x, y + 1)); if (!d && !bordo) continue;
     let col = bordo ? '#141433' : c1; if (d){ if (st.f === 'partito' && x >= 9) col = c2; if (st.f === 'troncato' && y >= 10) col = c2; if (st.f === 'banda' && Math.abs((x - 1) - (y - 1)*0.85) < 3) col = c2; if (st.f === 'inquartato' && ((x >= 9) !== (y >= 10))) col = c2; if (st.f === 'croce' && (Math.abs(x - 8.5) < 1.6 || Math.abs(y - 9) < 1.6)) col = c2; if (st.f === 'scaglione'){ const h = 13 - Math.abs(x - 8.5)*.95; if (y >= h && y < h + 3.5) col = c2; } if (st.f === 'palo' && Math.abs(x - 8.5) < 2.6) col = c2; if (st.f === 'fascia' && y >= 8 && y <= 12) col = c2; if (st.f === 'onde' && ((y + [0,1,2,1][x % 4]) % 6) < 2) col = c2; if (st.f === 'bordura' && !(dentro(x - 2, y) && dentro(x + 2, y) && dentro(x, y - 2) && dentro(x, y + 2))) col = c2; if (st.f === 'scaccato' && ((Math.floor((x - 1)/4) + Math.floor((y - 1)/4)) % 2)) col = c2; if (st.f === 'rombo' && Math.abs(x - 8.5)/6 + Math.abs(y - 10)/8 <= 1) col = c2; }
@@ -8535,15 +8549,16 @@ function dlgStemma(dopo){ const nuovaC = !leggiCas(); const st = nuovaC ? {c1:0,
   const o = ov(`<div class="dlg box cq-dlg cq-casd"><span class="kicker">${ico('bandiera', 2)} ${nuovaC ? 'Prima di cominciare' : 'La tua casata'}</span><h2>${nuovaC ? 'Fonda la tua casata' : 'Cambia stemma'}</h2>
     <p>${nuovaC ? 'La tua famiglia vivrà partita dopo partita: ogni partita è una generazione. Vinci o perdi, la casata guadagna gloria e la sua storia viene scritta nella cronaca.' : 'Nome e stemma compaiono sulla mappa e nella cronaca.'}</p>
     <div class="cq-stp"><span id="cqStPrev"></span><label class="cq-nomec">Casata <input id="cqNomeC" maxlength="16" autocomplete="off" placeholder="Vitali" value="${nome.replace(/"/g, '')}"></label></div>
-    <div class="cq-sts"><small>Forma</small><div class="cq-stg">${SFOR.map(([k, n, lk]) => `<button type="button" data-fo="${k}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}>${lk && !haPremio(lk) ? ico('lucchetto', 2) + ' ' : ''}${n}</button>`).join('')}</div>
+    <div class="cq-sts"><small>Scudo</small><div class="cq-stg cq-sag">${SSAG.map(([k, n, lk]) => `<button type="button" data-sa="${k}" aria-label="${n}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}><span class="cq-sagi"></span><small>${lk && !haPremio(lk) ? ico('lucchetto', 1) + ' ' : ''}${n}</small></button>`).join('')}</div>
+      <small>Forma</small><div class="cq-stg">${SFOR.map(([k, n, lk]) => `<button type="button" data-fo="${k}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}>${lk && !haPremio(lk) ? ico('lucchetto', 2) + ' ' : ''}${n}</button>`).join('')}</div>
       <small>Primo colore</small><div class="cq-stg cq-col">${SCOL.map(([n, c, lk], i) => `<button type="button" data-c1="${i}" aria-label="${n}" style="background:${c}!important" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}></button>`).join('')}</div>
       <small>Secondo colore</small><div class="cq-stg cq-col">${SCOL.map(([n, c, lk], i) => `<button type="button" data-c2="${i}" aria-label="${n}" style="background:${c}!important" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}></button>`).join('')}</div>
       <small>Simbolo</small><div class="cq-stg cq-sim">${SSIM.map(([k, n, lk]) => `<button type="button" data-si="${k}" aria-label="${n}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}>${ico(k, 2)}</button>`).join('')}</div></div>
     <p class="cq-warn" id="cqStErr" hidden>Scrivi il nome della casata (almeno 2 lettere).</p>
     <button class="big" id="cqOk">${nuovaC ? 'Fonda la casata' : 'Salva'}</button>${nuovaC ? '' : '<button class="big alt" id="cqNo">Indietro</button>'}</div>`, false);
-  const agg = () => { o.querySelector('#cqStPrev').innerHTML = imgStemma(st, 5); o.querySelectorAll('[data-fo]').forEach(b => b.classList.toggle('on', b.dataset.fo === st.f)); o.querySelectorAll('[data-c1]').forEach(b => b.classList.toggle('on', +b.dataset.c1 === st.c1)); o.querySelectorAll('[data-c2]').forEach(b => b.classList.toggle('on', +b.dataset.c2 === st.c2)); o.querySelectorAll('[data-si]').forEach(b => b.classList.toggle('on', b.dataset.si === st.sim)); };
+  const agg = () => { o.querySelector('#cqStPrev').innerHTML = imgStemma(st, 5); o.querySelectorAll('[data-fo]').forEach(b => b.classList.toggle('on', b.dataset.fo === st.f)); o.querySelectorAll('[data-c1]').forEach(b => b.classList.toggle('on', +b.dataset.c1 === st.c1)); o.querySelectorAll('[data-c2]').forEach(b => b.classList.toggle('on', +b.dataset.c2 === st.c2)); o.querySelectorAll('[data-si]').forEach(b => b.classList.toggle('on', b.dataset.si === st.sim)); o.querySelectorAll('[data-sa]').forEach(b => { b.classList.toggle('on', b.dataset.sa === (st.s || 'classico')); const c = stemma({...st, s: b.dataset.sa}, 2); const sp = b.querySelector('.cq-sagi'); if (c && sp){ sp.innerHTML = ''; const im = document.createElement('img'); im.src = c.toDataURL(); im.width = c.width; im.height = c.height; sp.append(im); } }); };
   o.querySelectorAll('[data-fo]').forEach(b => b.onclick = () => { st.f = b.dataset.fo; suona('tocco'); agg(); }); o.querySelectorAll('[data-c1]').forEach(b => b.onclick = () => { st.c1 = +b.dataset.c1; suona('tocco'); agg(); });
-  o.querySelectorAll('[data-c2]').forEach(b => b.onclick = () => { st.c2 = +b.dataset.c2; suona('tocco'); agg(); }); o.querySelectorAll('[data-si]').forEach(b => b.onclick = () => { st.sim = b.dataset.si; suona('tocco'); agg(); });
+  o.querySelectorAll('[data-c2]').forEach(b => b.onclick = () => { st.c2 = +b.dataset.c2; suona('tocco'); agg(); }); o.querySelectorAll('[data-si]').forEach(b => b.onclick = () => { st.sim = b.dataset.si; suona('tocco'); agg(); }); o.querySelectorAll('[data-sa]').forEach(b => b.onclick = () => { st.s = b.dataset.sa; suona('tocco'); agg(); });
   agg(); setTimeout(agg, 120);
   const inp = o.querySelector('#cqNomeC'); inp.oninput = () => { if (inp.value.trim().length >= 2) o.querySelector('#cqStErr').hidden = true; }; inp.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); o.querySelector('#cqOk').click(); } };
   o.querySelector('#cqOk').onclick = () => { const n = inp.value.trim().replace(/\s+/g, ' ').replace(/[<>"]/g, ''); if (n.length < 2){ o.querySelector('#cqStErr').hidden = false; inp.focus(); return; }
@@ -8830,10 +8845,10 @@ function suProposta(a, b, p){ const A = S.fz[a], B = S.fz[b]; for (const k in RI
 const testoSu = p => { const l = o2 => Object.keys(RISP).filter(k => o2[k]).map(k => `${o2[k]} ${RISP[k][1]}`).join(', '); const d = l(p.dai), c = l(p.chiedi), pt = {patto:'un patto di non aggressione', acc:'un accordo commerciale', all:'un’alleanza'}[p.patto];
   return [d ? `Ti dà <b>${d}</b>.` : '', c ? `Ti chiede <b>${c}</b>.` : '', pt ? `Propone ${pt}.` : ''].filter(Boolean).join(' '); };
 return {esci: () => esci(), daiGloria,
-  formeDaTrovare: rar => SFOR.filter(f => FORME_SCR[f[0]] != null && FORME_SCR[f[0]] <= rar && !formeScr().includes(f[2])).map(f => f[0]),
+  formeDaTrovare: rar => SFOR.filter(f => FORME_SCR[f[0]] != null && FORME_SCR[f[0]] <= rar && !formeScr().includes(f[2])).map(f => f[0]).concat(SSAG.filter(g => SAG_SCR[g[0]] != null && SAG_SCR[g[0]] <= rar && !formeScr().includes(g[2])).map(g => 's_' + g[0])),
   daiForma: k => { const L = formeScr(); if (!L.includes('scr:' + k)) L.push('scr:' + k); try { localStorage.setItem(KFORME, JSON.stringify(L)); } catch(e){} },
-  nomeForma: k => (SFOR.find(f => f[0] === k) || [k, k])[1], rarForma: k => FORME_SCR[k] || 1,
-  anteprimaForma: (k, px) => { leggiCas(); const b = CAS && CAS.stemma ? CAS.stemma : {c1:0, c2:3, sim:'torre'}; const st = {c1:b.c1, c2: b.c2 === b.c1 ? (b.c1 + 3) % 8 : b.c2, sim:b.sim, f:k}; return stemma(st, px); },
+  nomeForma: k => k.startsWith('s_') ? `Scudo «${(SSAG.find(g => g[0] === k.slice(2)) || [k, k])[1]}»` : `Stemma «${(SFOR.find(f => f[0] === k) || [k, k])[1]}»`, rarForma: k => (k.startsWith('s_') ? SAG_SCR[k.slice(2)] : FORME_SCR[k]) || 1,
+  anteprimaForma: (k, px) => { leggiCas(); const b = CAS && CAS.stemma ? CAS.stemma : {c1:0, c2:3, sim:'torre'}; const st = {c1:b.c1, c2: b.c2 === b.c1 ? (b.c1 + 3) % 8 : b.c2, sim:b.sim, f: k.startsWith('s_') ? (b.f || 'partito') : k, s: k.startsWith('s_') ? k.slice(2) : (b.s || 'classico')}; return stemma(st, px); },
   _fd:{targa: () => spriteTarga().toDataURL(), bandiera: () => spriteBandOro(0).toDataURL()}, apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{scegliTerra: t => { sel = t; modo = null; pannello(); }, cerv: v => { CERV_PROVA = v; }, promessa: () => dlgPromessa(), dopoPresa: (f, t, df) => dopoPresa(f, t, df), get MPN(){ return MPN; }, mpCrea: () => mpCrea(), mpEntra: c => mpEntra(c), mpFine: () => mpFine(), EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: (ev, tutti) => calcolaStagione(ev, tutti), terreDi: f => terreDi(f), vivi: () => vivi(), punti: f => punti(f), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
@@ -9222,7 +9237,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109104342';
+  const VERSIONE = window.DS_VER = '20261109110924';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
