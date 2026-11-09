@@ -8912,7 +8912,7 @@ const ACC = window.ACC = (() => {
       if ((tab === 'crea' || tab === 'recupera') && s !== b.querySelector('#accS2').value) return err('Le due parole segrete non sono uguali.');
       ok.disabled = true; ok.textContent = 'Un attimo…'; err('');
       try { const r = tab === 'recupera' ? await rpc('ds_recupera', {p_nome: n, p_codice: cod, p_nuovo: s}) : await rpc(tab === 'crea' ? 'ds_registra' : 'ds_entra', {p_nome: n, p_segreto: s}); ok.disabled = false; ok.textContent = testoOk;
-        if (r.errore){ try { SUONI.suona('tonfo'); } catch(e){} b.classList.remove('acc-scuoti'); void b.offsetWidth; b.classList.add('acc-scuoti'); return err({nome:'Nome non valido: da 3 a 16 caratteri.', segreto:'Parola segreta non valida.', preso:'Questo nome è già usato: scegline un altro.', sbagliato:'Nome o parola segreta sbagliati.', codice:'Nome o codice di recupero sbagliati.', bloccato:`Troppi tentativi sbagliati: riprova tra ${r.minuti} minuti.`}[r.errore] || 'Qualcosa non va, riprova.'); }
+        if (r.errore){ try { SUONI.suona('tonfo'); } catch(e){} b.classList.remove('acc-scuoti'); void b.offsetWidth; b.classList.add('acc-scuoti'); return err({nome:'Nome non valido: da 3 a 16 caratteri.', brutto:'Questo nome non si può usare: scegline uno senza parolacce.', segreto:'Parola segreta non valida.', preso:'Questo nome è già usato: scegline un altro.', sbagliato:'Nome o parola segreta sbagliati.', codice:'Nome o codice di recupero sbagliati.', bloccato:`Troppi tentativi sbagliati: riprova tra ${r.minuti} minuti.`}[r.errore] || 'Qualcosa non va, riprova.'); }
         A = {token: r.token, nome: r.nome, ultimo: r.aggiornato}; salvaA(); rpc('ds_stato', {p_token: r.token}).then(x => { if (A && x && x.fondatore){ A.fond = x.fondatore; salvaA(); aggiornaFond(); } if (A && x) doni(x); }).catch(() => {});
         if (r.codice) mostraCodice(r.codice, tab === 'recupera' ? 'Parola segreta cambiata! Ecco il tuo nuovo codice di recupero: quello vecchio non vale più.' : 'Questo codice serve se dimentichi la parola segreta. Salvalo adesso: fai uno screenshot o scrivilo da qualche parte.', () => dopoAccesso(r.aggiornato, tab === 'crea'));
         else dopoAccesso(r.aggiornato, tab === 'crea'); }
@@ -9252,7 +9252,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109114113';
+  const VERSIONE = window.DS_VER = '20261109123918';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
@@ -9420,7 +9420,7 @@ const RITORNO = window.RITORNO = (() => {
     let r = FST && Date.now() - FST.t < 60000 ? FST.r : null;
     if (!r){ try { if (a) await inviaFrazione(); r = await rpc('ds_frazioni_stato', {p_token: tok()}); FST = {t: Date.now(), r}; } catch(e){ d.innerHTML = testa('Senza internet non vedo i punti') + (f ? '' : `<p class="fz-p">Scegli la tua frazione:</p>${scegli}`); lega(); return; } }
     const tot = r.tot || {}, max = Math.max(1, ...Object.values(tot).map(Number)), ord = Object.keys(FZ).sort((x, y) => (tot[y] || 0) - (tot[x] || 0));
-    const gg = Math.max(0, Math.ceil((new Date(r.fine + 'T00:00:00') - Date.now())/864e5)), fine = gg <= 1 ? 'Finisce stanotte' : `Finisce tra ${gg} giorni`;
+    const ore = (new Date(r.fine + 'T00:00:00') - Date.now())/36e5, fine = ore <= 24 ? 'Finisce stanotte' : ore <= 48 ? 'Finisce domani sera' : 'Finisce domenica sera';
     d.innerHTML = testa(fine) + `<div class="fz-righe">${ord.map((k, i) => `<div class="fz-r ${k === f ? 'mia' : ''}" style="--fc:${FZ[k].c}"><span class="fz-n">${i + 1}. ${FZ[k].n}${k === f ? ' <em>tua</em>' : ''}</span><span class="fz-bar"><i style="width:${Math.round((tot[k] || 0)/max*100)}%"></i></span><b>${tot[k] || 0}</b></div>`).join('')}</div>`
       + (r.migliori && r.migliori.length ? `<p class="fz-mig">${r.migliori.slice(0, 3).map(m => `<span style="--fc:${(FZ[m.fr] || {}).c}">${esc(m.nome)} <b>${m.v}</b></span>`).join('')}</p>` : '')
       + (!f ? `<p class="fz-p">Per quale frazione giochi?</p>${scegli}` : !a ? `<p class="fz-p">Crea un account per far contare i tuoi punti. <button type="button" class="fz-acc">Crea account</button></p>` : `<p class="fz-p">I tuoi punti questa settimana: <b>${r.mia ? r.mia.punti : 0}</b>. Vinci partite per farne di più.</p>`);
