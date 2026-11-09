@@ -1089,12 +1089,13 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
   .cr-h small{font-size:16px}
   .cr-arena{padding-inline:max(28px,calc((100% - 580px)/2));gap:16px}
   .cr-arena .logo{font-size:88px;-webkit-text-stroke:3px var(--linea);text-shadow:0 7px 0 var(--linea)}
-  .cr-pg[data-tab="premi"]{display:grid;grid-template-columns:1fr 1fr;align-content:start;align-items:start;gap:16px;padding-inline:max(28px,calc((100% - 1040px)/2))}
-  .cr-pg[data-tab="premi"] > .cr-h{grid-column:1/-1}
-  .cr-pg[data-tab="premi"] > .pr-ruota{grid-column:1;grid-row:2/span 3;align-self:start;position:sticky;top:0;padding-bottom:22px}
-  .cr-pg[data-tab="premi"] .pr-rbox{zoom:1.5;margin:6px auto}
-  .cr-pg[data-tab="premi"] .pr-go{font-size:26px;padding:12px 44px}
-  .cr-pg[data-tab="premi"] > :not(.cr-h):not(.pr-ruota){grid-column:2}
+  .cr-pg[data-tab="premi"]{padding-inline:max(28px,calc((100% - 1040px)/2))}
+  .cr-pg[data-tab="premi"] .cr-sg[data-s="oggi"]:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:14px}
+  .cr-pg[data-tab="premi"] .cr-sg[data-s="oggi"] > #prRuota{grid-column:1;grid-row:1/span 3}
+  .cr-pg[data-tab="premi"] > .cr-h{order:-1}
+  .cr-pg[data-tab="premi"] .cr-sg[data-s="oggi"] > :not(#prRuota){grid-column:2}
+  .cr-pg[data-tab="premi"] .pr-rbox{zoom:1.2;margin:6px auto}
+  .cr-pg[data-tab="premi"] .pr-go{font-size:22px;padding:10px 40px}
   .cr-difs{gap:14px}
   .cr-dif{min-height:130px}
   .cr-dif .cr-di{height:56px}
@@ -1110,6 +1111,7 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
   .cr-dif .cr-di > *{transform:scale(1.5)}
   #title.cr-on .velo{background:linear-gradient(180deg,rgba(22,47,143,0) 0%,rgba(22,47,143,.18) 40%,rgba(22,47,143,.6) 80%,rgba(22,47,143,.8) 100%)}
 }
+@media (min-width:900px) and (min-height:820px){ .cr-pg[data-tab="premi"] .pr-rbox{zoom:1.45} }
 @keyframes tabSaltaPc{0%{transform:scale(1)}50%{transform:scale(1.3) rotate(-5deg)}100%{transform:scale(1.12)}}
 @media (min-width:1600px) and (min-height:950px){ .cr{zoom:1.2} }
 .cr-h small{background:rgba(20,20,51,.82);padding:3px 10px;border-radius:999px}
@@ -9362,7 +9364,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109225818';
+  const VERSIONE = window.DS_VER = '20261110000626';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
