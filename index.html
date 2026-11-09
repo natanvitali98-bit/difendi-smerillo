@@ -2008,7 +2008,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .as-scr.oro::after{background:#fff}
 #agBar{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 8px);z-index:100004;border:3px solid #141433;border-radius:999px;background:#ffd03a;color:#141433;font:inherit;font-size:14px;padding:7px 14px;box-shadow:0 3px 0 #141433;cursor:pointer;white-space:nowrap}
 .sc-modo{display:inline-block;margin:2px auto 0;font-size:11px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:2px 8px;border-radius:999px;color:#fff;background:#3a78d0;border:2px solid #141433}
-.sc-m-torre{background:#e0882a}.sc-m-gloria{background:#8b4dff}
+.sc-m-torre{background:#e0882a}.sc-m-gloria,.sc-m-forma{background:#8b4dff}
 .cr-tor{cursor:default}
 .cr-tor .cr-di > *{transform:none}
 .ico-torre{display:inline-grid;place-items:center;line-height:0}
@@ -5535,6 +5535,7 @@ function apriScrigno(tipo){
       const tt = t[Math.floor(Math.random()*t.length)], c = tor[tt] || (tor[tt] = {liv:1, copie:0}); let esito;
       if (c.liv < LIVMAX){ c.copie = (c.copie || 0) + 1 + (rar >= 2 ? 1 : 0); if (c.copie >= copieServe(c.liv)){ c.liv++; c.copie = 0; esito = 'livello'; } else esito = 'copia'; } else esito = 'max';
       out.push({m, t:tt, rar: Math.max(rar, RAR_TORRE[tt]), esito, liv:c.liv, copie:c.copie || 0, serve:copieServe(c.liv)}); continue; }
+    if (m === 'gloria' && rar >= 1 && Math.random() < .5){ let L = []; try { L = CQ.formeDaTrovare(rar); } catch(e){} if (L.length){ const f = L[Math.floor(Math.random()*L.length)]; try { CQ.daiForma(f); } catch(e){} out.push({m:'forma', f, rar: Math.max(rar, CQ.rarForma(f)), esito:'forma'}); continue; } }
     if (m === 'gloria'){ const g = GLORIA_CARTA[rar]; let ok = false; try { ok = CQ.daiGloria(g); } catch(e){} out.push({m, rar, g, esito: ok ? 'gloria' : 'attesa'}); continue; }
     const pool = DIFENSORI.filter(t => rarDi(t) === rar); const t = pool[Math.floor(Math.random()*pool.length)];
     const c = col[t]; let esito;
@@ -5548,13 +5549,15 @@ function apriScrigno(tipo){
 }
 // come si mostra una carta (difensore, torre o gloria)
 const NOME_TORRE = {vedetta:'Balestra', piazza:'Braciere', logge:'Castagneto', nido:'Falco', milizia:'Soldati', campanile:'Campana'};
-const cartaModo = c => c.m === 'torre' ? 'Tempo reale' : c.m === 'gloria' ? 'Conquista' : 'Missioni';
-const cartaNome = c => c.m === 'torre' ? NOME_TORRE[c.t] : c.m === 'gloria' ? `+${c.g} gloria` : TIPI[c.t].nome;
+const cartaModo = c => c.m === 'torre' ? 'Tempo reale' : (c.m === 'gloria' || c.m === 'forma') ? 'Conquista' : 'Missioni';
+const cartaNome = c => c.m === 'torre' ? NOME_TORRE[c.t] : c.m === 'gloria' ? `+${c.g} gloria` : c.m === 'forma' ? `Stemma «${CQ.nomeForma(c.f)}»` : TIPI[c.t].nome;
 const cartaRar = c => c.m === 'dif' ? rarDi(c.t) : c.rar;
 function cartaImg(c, px){ if (c.m === 'torre') return iconaTorre(c.t, px*14);
-  if (c.m === 'gloria'){ const d = document.createElement('span'); d.innerHTML = ico('bandiera', px); return d; } return icona(c.t, px); }
+  if (c.m === 'gloria'){ const d = document.createElement('span'); d.innerHTML = ico('bandiera', px); return d; }
+  if (c.m === 'forma'){ const k = CQ.anteprimaForma(c.f, px); const im = document.createElement('img'); im.src = k.toDataURL(); im.width = k.width; im.height = k.height; im.style.imageRendering = 'pixelated'; return im; } return icona(c.t, px); }
 function cartaEsito(c, lungo){
   if (c.m === 'torre') return c.esito === 'livello' ? `Livello ${c.liv}! Colpisce più forte` : c.esito === 'copia' ? `+copia · ${c.copie}/${c.serve}${lungo ? ' per il livello ' + (c.liv + 1) : ''}` : 'Livello massimo';
+  if (c.m === 'forma') return lungo ? 'Nuova forma per lo stemma della casata!' : 'Nuova forma di stemma!';
   if (c.m === 'gloria') return c.esito === 'gloria' ? (lungo ? 'Gloria per la tua casata' : 'Per la tua casata') : (lungo ? 'Ti aspetta quando fondi la casata' : 'Per la tua prima casata');
   return c.esito === 'nuovo' ? (lungo ? 'NUOVO DIFENSORE!' : 'NUOVO!') : c.esito === 'livello' ? (lungo ? 'Sale al livello ' + c.liv + '! (+1 vita)' : 'Livello ' + c.liv + '! +1 vita') : c.esito === 'copia' ? (lungo ? `+1 copia · ${c.copie}/${c.serve} per il livello ${c.liv + 1}` : `+1 copia · ${c.copie}/${c.serve}`) : (lungo ? 'È già al livello massimo' : 'Livello massimo'); }
 // ===== INCARICHI: 3 al giorno + imprese per sempre. Sono il modo principale per avere scrigni =====
@@ -7012,7 +7015,10 @@ const ED = {
 const KCAS = 'difendi-smerillo-casata';
 const SCOL = [['Rosso','#c8382c'],['Blu','#2f5fb8'],['Verde','#3a8a3e'],['Oro','#e0b030'],['Viola','#7a4aa8'],['Nero','#2a2a30'],['Bianco','#eeeae0'],['Azzurro','#5aa8d8'],['Rame','#b8683a','col:Rame'],['Smeraldo','#1f9a6a','col:Smeraldo'],['Argento','#b8bcc8','col:Argento'],['Notte','#1c2450','col:Notte']];
 const SSIM = [['torre','Torre'],['castagna','Castagna'],['spade','Spade'],['albero','Faggio'],['stella','Stella'],['campana','Campana'],['cavallo','Cavallo'],['chiesa','Chiesa'],['coppa','Coppa','sim:coppa'],['martello','Martello','sim:martello'],['cuore','Cuore','sim:cuore'],['trifoglio','Trifoglio','sim:trifoglio'],['luna','Luna','sim:luna']];
-const SFOR = [['pieno','Pieno'],['partito','Diviso'],['troncato','Spaccato'],['banda','Banda'],['inquartato','Inquartato','for:inquartato'],['croce','Croce','for:croce'],['scaglione','Scaglione','for:scaglione']];
+const SFOR = [['pieno','Pieno'],['partito','Diviso'],['troncato','Spaccato'],['banda','Banda'],['inquartato','Inquartato','for:inquartato'],['croce','Croce','for:croce'],['scaglione','Scaglione','for:scaglione'],['palo','Palo','scr:palo'],['fascia','Fascia','scr:fascia'],['onde','Onde','scr:onde'],['bordura','Bordura','scr:bordura'],['scaccato','Scaccato','scr:scaccato'],['rombo','Rombo','scr:rombo']];
+const FORME_SCR = {palo:1, fascia:1, onde:1, bordura:2, scaccato:2, rombo:3}; // rarità della forma negli scrigni
+const KFORME = 'difendi-smerillo-forme';
+const formeScr = () => { try { return JSON.parse(localStorage.getItem(KFORME)) || []; } catch(e){ return []; } };
 const LIVC = [[0,'Famiglia di contadini'],[150,'Casata minore'],[400,'Casata nobile'],[800,'Signori del comune'],[1500,'Leggenda delle Marche']];
 let CAS = null;
 const leggiCas = () => { if (!CAS){ try { CAS = JSON.parse(localStorage.getItem(KCAS)); } catch(e){} } if (CAS){ let pend = 0; try { pend = +localStorage.getItem('difendi-smerillo-gloria-attesa') || 0; } catch(e){} if (pend > 0){ CAS.gloria = (CAS.gloria || 0) + pend; try { localStorage.removeItem('difendi-smerillo-gloria-attesa'); localStorage.setItem(KCAS, JSON.stringify(CAS)); } catch(e){} } } return CAS; };
@@ -7029,7 +7035,7 @@ function stemma(st, px = 1){ if (!st) return null; const key = JSON.stringify(st
   const dentro = (x, y) => { if (y < 1 || y > 19 || x < 1 || x > 16) return false; if (y < 12) return true; const r = 8 - (y - 12)*0.9; return Math.abs(x - 8.5) <= r; };
   const c1 = SCOL[st.c1][1], c2 = SCOL[st.c2][1];
   for (let y = 0; y < H0; y++) for (let x = 0; x < W0; x++){ const d = dentro(x, y), bordo = !d && (dentro(x - 1, y) || dentro(x + 1, y) || dentro(x, y - 1) || dentro(x, y + 1)); if (!d && !bordo) continue;
-    let col = bordo ? '#141433' : c1; if (d){ if (st.f === 'partito' && x >= 9) col = c2; if (st.f === 'troncato' && y >= 10) col = c2; if (st.f === 'banda' && Math.abs((x - 1) - (y - 1)*0.85) < 3) col = c2; if (st.f === 'inquartato' && ((x >= 9) !== (y >= 10))) col = c2; if (st.f === 'croce' && (Math.abs(x - 8.5) < 1.6 || Math.abs(y - 9) < 1.6)) col = c2; if (st.f === 'scaglione'){ const h = 13 - Math.abs(x - 8.5)*.95; if (y >= h && y < h + 3.5) col = c2; } }
+    let col = bordo ? '#141433' : c1; if (d){ if (st.f === 'partito' && x >= 9) col = c2; if (st.f === 'troncato' && y >= 10) col = c2; if (st.f === 'banda' && Math.abs((x - 1) - (y - 1)*0.85) < 3) col = c2; if (st.f === 'inquartato' && ((x >= 9) !== (y >= 10))) col = c2; if (st.f === 'croce' && (Math.abs(x - 8.5) < 1.6 || Math.abs(y - 9) < 1.6)) col = c2; if (st.f === 'scaglione'){ const h = 13 - Math.abs(x - 8.5)*.95; if (y >= h && y < h + 3.5) col = c2; } if (st.f === 'palo' && Math.abs(x - 8.5) < 2.6) col = c2; if (st.f === 'fascia' && y >= 8 && y <= 12) col = c2; if (st.f === 'onde' && ((y + [0,1,2,1][x % 4]) % 6) < 2) col = c2; if (st.f === 'bordura' && !(dentro(x - 2, y) && dentro(x + 2, y) && dentro(x, y - 2) && dentro(x, y + 2))) col = c2; if (st.f === 'scaccato' && ((Math.floor((x - 1)/4) + Math.floor((y - 1)/4)) % 2)) col = c2; if (st.f === 'rombo' && Math.abs(x - 8.5)/6 + Math.abs(y - 10)/8 <= 1) col = c2; }
     g.fillStyle = col; g.fillRect(x*px, y*px, px, px); if (d && y === 2){ g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(x*px, y*px, px, px); } }
   if (im.complete && im.width){ const w = Math.min(10, im.width), h = Math.min(10, im.height), ox = Math.round((W0 - w)/2), oy = 5; g.fillStyle = 'rgba(20,20,51,.35)'; g.imageSmoothingEnabled = false;
     g.drawImage(im, 0, 0, im.width, im.height, ox*px, oy*px, w*px, h*px); return STM[key] = c; }
@@ -7124,7 +7130,8 @@ const MISS = [
   {id:'vbor3',   nome:'Tre borghi, tre vittorie', desc:'Vinci almeno una volta con ognuno dei 3 borghi.', n:3, val: s => s.borghiV.length, premio:['cornice','oro','Cornice d’oro sulla mappa']},
   {id:'tutte',   nome:'Leggenda delle Marche', desc:'Completa tutte le altre missioni.', n:15, val: () => MISS.filter(m => m.id !== 'tutte' && CAS && CAS.miss && CAS.miss[m.id]).length, premio:['skin','oro','Skin Guardia d’oro']}];
 const premioK = p => p[0] + ':' + p[1];
-const haPremio = k => !!(CAS && CAS.premi && CAS.premi.includes(k));
+const haPremio = k => !!(CAS && CAS.premi && CAS.premi.includes(k)) || formeScr().includes(k);
+const titoloChiuso = lk => lk.startsWith('scr:') ? 'Si trova negli scrigni' : (missDi(lk) || {}).nome || '';
 const missDi = k => MISS.find(m => premioK(m.premio) === k);
 // le statistiche della casata: si sommano partita dopo partita (quelle vecchie si ricavano dalla cronaca)
 function initSt(){ leggiCas(); if (!CAS) return null; CAS.miss = CAS.miss || {}; CAS.premi = CAS.premi || []; if (!CAS.skin) CAS.skin = 'base';
@@ -8528,10 +8535,10 @@ function dlgStemma(dopo){ const nuovaC = !leggiCas(); const st = nuovaC ? {c1:0,
   const o = ov(`<div class="dlg box cq-dlg cq-casd"><span class="kicker">${ico('bandiera', 2)} ${nuovaC ? 'Prima di cominciare' : 'La tua casata'}</span><h2>${nuovaC ? 'Fonda la tua casata' : 'Cambia stemma'}</h2>
     <p>${nuovaC ? 'La tua famiglia vivrà partita dopo partita: ogni partita è una generazione. Vinci o perdi, la casata guadagna gloria e la sua storia viene scritta nella cronaca.' : 'Nome e stemma compaiono sulla mappa e nella cronaca.'}</p>
     <div class="cq-stp"><span id="cqStPrev"></span><label class="cq-nomec">Casata <input id="cqNomeC" maxlength="16" autocomplete="off" placeholder="Vitali" value="${nome.replace(/"/g, '')}"></label></div>
-    <div class="cq-sts"><small>Forma</small><div class="cq-stg">${SFOR.map(([k, n, lk]) => `<button type="button" data-fo="${k}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${missDi(lk).nome}"` : ''}>${lk && !haPremio(lk) ? ico('lucchetto', 2) + ' ' : ''}${n}</button>`).join('')}</div>
-      <small>Primo colore</small><div class="cq-stg cq-col">${SCOL.map(([n, c, lk], i) => `<button type="button" data-c1="${i}" aria-label="${n}" style="background:${c}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${missDi(lk).nome}"` : ''}></button>`).join('')}</div>
-      <small>Secondo colore</small><div class="cq-stg cq-col">${SCOL.map(([n, c, lk], i) => `<button type="button" data-c2="${i}" aria-label="${n}" style="background:${c}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${missDi(lk).nome}"` : ''}></button>`).join('')}</div>
-      <small>Simbolo</small><div class="cq-stg cq-sim">${SSIM.map(([k, n, lk]) => `<button type="button" data-si="${k}" aria-label="${n}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${missDi(lk).nome}"` : ''}>${ico(k, 2)}</button>`).join('')}</div></div>
+    <div class="cq-sts"><small>Forma</small><div class="cq-stg">${SFOR.map(([k, n, lk]) => `<button type="button" data-fo="${k}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}>${lk && !haPremio(lk) ? ico('lucchetto', 2) + ' ' : ''}${n}</button>`).join('')}</div>
+      <small>Primo colore</small><div class="cq-stg cq-col">${SCOL.map(([n, c, lk], i) => `<button type="button" data-c1="${i}" aria-label="${n}" style="background:${c}!important" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}></button>`).join('')}</div>
+      <small>Secondo colore</small><div class="cq-stg cq-col">${SCOL.map(([n, c, lk], i) => `<button type="button" data-c2="${i}" aria-label="${n}" style="background:${c}!important" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}></button>`).join('')}</div>
+      <small>Simbolo</small><div class="cq-stg cq-sim">${SSIM.map(([k, n, lk]) => `<button type="button" data-si="${k}" aria-label="${n}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}>${ico(k, 2)}</button>`).join('')}</div></div>
     <p class="cq-warn" id="cqStErr" hidden>Scrivi il nome della casata (almeno 2 lettere).</p>
     <button class="big" id="cqOk">${nuovaC ? 'Fonda la casata' : 'Salva'}</button>${nuovaC ? '' : '<button class="big alt" id="cqNo">Indietro</button>'}</div>`, false);
   const agg = () => { o.querySelector('#cqStPrev').innerHTML = imgStemma(st, 5); o.querySelectorAll('[data-fo]').forEach(b => b.classList.toggle('on', b.dataset.fo === st.f)); o.querySelectorAll('[data-c1]').forEach(b => b.classList.toggle('on', +b.dataset.c1 === st.c1)); o.querySelectorAll('[data-c2]').forEach(b => b.classList.toggle('on', +b.dataset.c2 === st.c2)); o.querySelectorAll('[data-si]').forEach(b => b.classList.toggle('on', b.dataset.si === st.sim)); };
@@ -8822,7 +8829,12 @@ function suProposta(a, b, p){ const A = S.fz[a], B = S.fz[b]; for (const k in RI
   const k = pk(a, b); if (p.patto === 'patto') S.patti[k] = S.turno + 8; else if (p.patto === 'acc') S.acc[k] = true; else if (p.patto === 'all'){ S.all[k] = true; stat('all'); } salva(); aggiornaUI(); }
 const testoSu = p => { const l = o2 => Object.keys(RISP).filter(k => o2[k]).map(k => `${o2[k]} ${RISP[k][1]}`).join(', '); const d = l(p.dai), c = l(p.chiedi), pt = {patto:'un patto di non aggressione', acc:'un accordo commerciale', all:'un’alleanza'}[p.patto];
   return [d ? `Ti dà <b>${d}</b>.` : '', c ? `Ti chiede <b>${c}</b>.` : '', pt ? `Propone ${pt}.` : ''].filter(Boolean).join(' '); };
-return {esci: () => esci(), daiGloria, _fd:{targa: () => spriteTarga().toDataURL(), bandiera: () => spriteBandOro(0).toDataURL()}, apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{scegliTerra: t => { sel = t; modo = null; pannello(); }, cerv: v => { CERV_PROVA = v; }, promessa: () => dlgPromessa(), dopoPresa: (f, t, df) => dopoPresa(f, t, df), get MPN(){ return MPN; }, mpCrea: () => mpCrea(), mpEntra: c => mpEntra(c), mpFine: () => mpFine(), EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: (ev, tutti) => calcolaStagione(ev, tutti), terreDi: f => terreDi(f), vivi: () => vivi(), punti: f => punti(f), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
+return {esci: () => esci(), daiGloria,
+  formeDaTrovare: rar => SFOR.filter(f => FORME_SCR[f[0]] != null && FORME_SCR[f[0]] <= rar && !formeScr().includes(f[2])).map(f => f[0]),
+  daiForma: k => { const L = formeScr(); if (!L.includes('scr:' + k)) L.push('scr:' + k); try { localStorage.setItem(KFORME, JSON.stringify(L)); } catch(e){} },
+  nomeForma: k => (SFOR.find(f => f[0] === k) || [k, k])[1], rarForma: k => FORME_SCR[k] || 1,
+  anteprimaForma: (k, px) => { leggiCas(); const b = CAS && CAS.stemma ? CAS.stemma : {c1:0, c2:3, sim:'torre'}; const st = {c1:b.c1, c2: b.c2 === b.c1 ? (b.c1 + 3) % 8 : b.c2, sim:b.sim, f:k}; return stemma(st, px); },
+  _fd:{targa: () => spriteTarga().toDataURL(), bandiera: () => spriteBandOro(0).toDataURL()}, apri, frame, tasto, menuMissioni, menuCollezione, missPronte, segmenta, get attivo(){ return attivo; }, _test:{scegliTerra: t => { sel = t; modo = null; pannello(); }, cerv: v => { CERV_PROVA = v; }, promessa: () => dlgPromessa(), dopoPresa: (f, t, df) => dopoPresa(f, t, df), get MPN(){ return MPN; }, mpCrea: () => mpCrea(), mpEntra: c => mpEntra(c), mpFine: () => mpFine(), EVENTI, notizie: ev => notizie(ev), impostaMappa, get MAPPA(){ return MAPPA_ATT; }, lontananza, collegate, dlgMissioni, initSt, controllaMiss, stat, finePartita: () => finePartita(), syncSbl, addSegno, dlgStruttura, chiudiGen: () => chiudiGenerazione(), dlgAttacco, dlgMercato, dlgLivello, capDi, capLiv, evento: k => { S.evento = {k, d: EVENTI[k].prepara ? EVENTI[k].prepara() : {}}; evento(); }, casata: () => CAS, resetCas: () => { CAS = null; try { localStorage.removeItem(KCAS); } catch(e){} }, spot: () => SPOT, mappe: () => ({OCC, CASA, idx, MURA, GW, Q, IDS}), simula, calcola: (ev, tutti) => calcolaStagione(ev, tutti), terreDi: f => terreDi(f), vivi: () => vivi(), punti: f => punti(f), vai: (t, s) => vaiA(t, s), ui: () => aggiornaUI(), get S(){ return S; }, set S(v){ S = v; }, VIC, TERRE, previsione, fineStagione, nuova, battaglia, turnoIA, get GIOCA(){ return GIOCA; }, terraIn, aSchermo, salva}};
 })();
 
 // ===== account: i progressi salvati online, per ritrovarli su ogni telefono =====
@@ -9210,7 +9222,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261109103509';
+  const VERSIONE = window.DS_VER = '20261109104342';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
