@@ -2122,6 +2122,9 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .acc-card .acc-nota{color:#6a7090!important;font-size:12.5px!important}
 .acc-card .acc-err{color:#7a1d10!important;font-weight:700!important}
 #caricamento .acc-itch{display:inline-flex;align-items:center;margin:2px 0 0;background:rgba(20,20,51,.82);color:#fff;font:400 16px "Lilita One","Arial Black",sans-serif;letter-spacing:.5px;padding:6px 16px;border-radius:999px}
+body.itch-va .tr-velo,body.itch-va #coach,body.itch-va #coachRing,body.itch-va #coachDito,body.itch-va #asChip{opacity:0!important;visibility:hidden!important}
+#caricamento .acc-itch-car{animation:accPulsa 1s ease-in-out infinite alternate}
+@keyframes accPulsa{from{opacity:.55}to{opacity:1}}
 #caricamento .acc-bt{font:700 20px var(--f-body,system-ui)!important;color:#cfe0ff!important;margin:0!important}
 #caricamento .acc-nome{font:400 48px var(--f-big),"Lilita One","Arial Black",sans-serif!important;color:#ffd03a!important;margin:-4px 0 6px!important;text-shadow:0 4px 0 #141433!important}
 #caricamento .acc-benv{font:700 22px var(--f-body,system-ui)!important;color:#fff!important}
@@ -9029,7 +9032,12 @@ const ACC = window.ACC = (() => {
         // il telefono a volte manda un secondo tocco "fantasma" subito dopo: per un attimo si ignorano tutti i tocchi
         const blocca = ev => { ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); }, TIPI = ['click', 'pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend'];
         TIPI.forEach(t => document.addEventListener(t, blocca, true)); setTimeout(() => TIPI.forEach(t => document.removeEventListener(t, blocca, true)), 900);
-        try { SUONI.suona('banner'); } catch(er){} try { RITORNO.subito(); } catch(er){} entra(); }; g.querySelector('#accHo').onclick = () => disegnaCancello('entra'); return; }
+        // la schermata iniziale resta sopra finché la missione non è pronta: niente menu né altri caricamenti in vista
+        g.innerHTML = `<div class="acc-itch acc-itch-car">Preparo la missione…</div>`; document.body.classList.add('itch-va');
+        try { SUONI.suona('banner'); } catch(er){} let ok = false; try { ok = RITORNO.subito(); } catch(er){}
+        const t0 = Date.now(), pronto = () => { const vis = id => { const x = document.getElementById(id); return !!(x && !x.hidden); };
+          if (!ok || Date.now() - t0 > 7000 || (Date.now() - t0 > 400 && !document.querySelector('.tr-velo') && (vis('tbOv') || vis('rtOv')))){ document.body.classList.remove('itch-va'); entra(); return; }
+          setTimeout(pronto, 100); }; setTimeout(pronto, 150); }; g.querySelector('#accHo').onclick = () => disegnaCancello('entra'); return; }
     g.innerHTML = `<div class="acc-card"><div class="acc-h">Entra nel portale</div><p class="acc-sub">Con il tuo account i progressi si salvano online e li ritrovi su ogni telefono.</p>${campi(tab)}<button class="big" id="accOk">${tab === 'crea' ? 'Crea il giocatore' : tab === 'recupera' ? 'Cambia la parola segreta' : 'Entra'}</button></div>
       <button type="button" class="acc-link" id="accOspite">Gioca senza account</button>`;
     const card = g.querySelector('.acc-card'); FINE = () => vai(A && A.nome); form(card, tab, t => disegnaCancello(t));
