@@ -2121,6 +2121,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .acc-card p,.acc-card .acc-sub{color:#4a5070!important;font:400 14px/1.35 var(--f-body,system-ui)!important;text-shadow:none!important;margin:0!important}
 .acc-card .acc-nota{color:#6a7090!important;font-size:12.5px!important}
 .acc-card .acc-err{color:#7a1d10!important;font-weight:700!important}
+#caricamento .acc-itch{display:inline-flex;align-items:center;margin:2px 0 0;background:rgba(20,20,51,.82);color:#fff;font:400 16px "Lilita One","Arial Black",sans-serif;letter-spacing:.5px;padding:6px 16px;border-radius:999px}
 #caricamento .acc-bt{font:700 20px var(--f-body,system-ui)!important;color:#cfe0ff!important;margin:0!important}
 #caricamento .acc-nome{font:400 48px var(--f-big),"Lilita One","Arial Black",sans-serif!important;color:#ffd03a!important;margin:-4px 0 6px!important;text-shadow:0 4px 0 #141433!important}
 #caricamento .acc-benv{font:700 22px var(--f-body,system-ui)!important;color:#fff!important}
@@ -9022,8 +9023,8 @@ const ACC = window.ACC = (() => {
     const vai = nome => { FINE = null; chiudi(); entraAnim(CANC.ld, nome, entra); };
     if (tab === 'dentro' && A){ g.innerHTML = `<div class="acc-bt">Bentornato,</div><div class="acc-nome">${A.nome.replace(/[<>&]/g, '')}</div><button class="acc-entra" id="accGo">Entra nel portale</button><button type="button" class="acc-link" id="accAltro">Non sei tu? Cambia giocatore</button>`;
       g.querySelector('#accGo').onclick = () => vai(A.nome); g.querySelector('#accAltro').onclick = () => { A = null; salvaA(); segna('off'); disegnaCancello('entra'); }; return; }
-    if (tab === 'crea' && !A && /[?&]da=itch/i.test(location.search)){ g.innerHTML = `<div class="acc-bt" style="background:rgba(20,20,51,.82);color:#fff!important;padding:6px 18px;border-radius:999px;border:2px solid #141433;font-size:22px!important;box-shadow:0 3px 0 rgba(20,20,51,.5)">Benvenuto a</div><div class="acc-nome">Smerillo</div><button class="acc-entra" id="accGo">Gioca subito</button><button type="button" class="acc-link" id="accHo">Ho già un account</button>`;
-      g.querySelector('#accGo').onclick = () => vai(null); g.querySelector('#accHo').onclick = () => disegnaCancello('entra'); return; }
+    if (tab === 'crea' && !A && /[?&]da=itch/i.test(location.search)){ g.innerHTML = `<button class="acc-entra" id="accGo">▶ Gioca subito</button><div class="acc-itch">Gratis · si gioca subito</div><button type="button" class="acc-link" id="accHo">Ho già un account</button>`;
+      g.querySelector('#accGo').onclick = () => { vai(null); try { RITORNO.subito(); } catch(e){} }; g.querySelector('#accHo').onclick = () => disegnaCancello('entra'); return; }
     g.innerHTML = `<div class="acc-card"><div class="acc-h">Entra nel portale</div><p class="acc-sub">Con il tuo account i progressi si salvano online e li ritrovi su ogni telefono.</p>${campi(tab)}<button class="big" id="accOk">${tab === 'crea' ? 'Crea il giocatore' : tab === 'recupera' ? 'Cambia la parola segreta' : 'Entra'}</button></div>
       <button type="button" class="acc-link" id="accOspite">Gioca senza account</button>`;
     const card = g.querySelector('.acc-card'); FINE = () => vai(A && A.nome); form(card, tab, t => disegnaCancello(t));
@@ -9558,7 +9559,8 @@ const RITORNO = window.RITORNO = (() => {
   // all'avvio
   { const s = stato(), g = giorni(); traccia('apri', {da: DA, nuovo: s.nuovo && s.passo === 0 ? 1 : 0, torna: s.torna ? 1 : 0, ass: s.passo, giorni: g.s, acc: acc() ? 1 : 0, w: innerWidth}); invitoSalva(); }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') traccia('chiudi', {sec: Math.round((Date.now() - T0)/1000)}, true); });
-  return {versione: VERSIONE, rivediGuide, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
+  function subito(){ const s = stato(); if (s.passo !== 0 || s.in) return false; aspettaPasso = true; avviaPasso(PASSI[0]); setTimeout(() => { aspettaPasso = false; }, 4000); return true; }
+  return {versione: VERSIONE, rivediGuide, subito, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
 })();
 
 fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){ console.error(e); }
