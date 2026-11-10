@@ -8974,8 +8974,9 @@ const ACC = window.ACC = (() => {
   const quando = iso => { if (!iso) return 'mai'; const d = new Date(iso), s = Math.round((Date.now() - d)/1000); if (s < 60) return 'pochi secondi fa'; if (s < 3600) return Math.round(s/60) + ' min fa'; if (s < 86400) return Math.round(s/3600) + ' ore fa'; return d.toLocaleDateString('it-IT', {day:'numeric', month:'long'}) + ' alle ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}); };
   // ---------- finestre
   let ov = null;
-  function finestra(html){ if (!ov){ ov = document.createElement('div'); ov.id = 'accOv'; document.body.append(ov); ov.addEventListener('click', e => { if (e.target === ov) chiudi(); }); } ov.innerHTML = `<div class="acc-box">${html}</div>`; ov.hidden = false; try { SUONI.suona('tocco'); } catch(e){} return ov.firstElementChild; }
-  function chiudi(){ if (ov){ ov.hidden = true; ov.innerHTML = ''; } }
+  let OBBLIGO = false;
+  function finestra(html){ OBBLIGO = false; if (!ov){ ov = document.createElement('div'); ov.id = 'accOv'; document.body.append(ov); ov.addEventListener('click', e => { if (e.target === ov && !OBBLIGO) chiudi(); }); } ov.innerHTML = `<div class="acc-box">${html}</div>`; ov.hidden = false; try { SUONI.suona('tocco'); } catch(e){} return ov.firstElementChild; }
+  function chiudi(){ OBBLIGO = false; if (ov){ ov.hidden = true; ov.innerHTML = ''; } }
   function avviso(t){ const b = document.createElement('div'); b.className = 'acc-toast'; b.textContent = t; document.body.append(b); setTimeout(() => b.classList.add('via'), 2600); setTimeout(() => b.remove(), 3100); }
   let FINE = null; // cosa fare quando l'accesso è finito (dal cancello: entrare nel gioco)
   const finito = () => { const f = FINE; FINE = null; if (f) f(); else chiudi(); };
@@ -9006,11 +9007,13 @@ const ACC = window.ACC = (() => {
       <label class="acc-f">Parola segreta<input id="accS" type="password" maxlength="64" autocomplete="${tab === 'crea' ? 'new-password' : 'current-password'}" placeholder="almeno 4 caratteri"></label>
       ${tab === 'crea' ? '<label class="acc-f">Ripeti la parola segreta<input id="accS2" type="password" maxlength="64" autocomplete="new-password"></label><p class="acc-nota">Non usare la password di altri siti. Dopo ti diamo un codice per recuperarla se la dimentichi.</p>' : '<button type="button" class="acc-dim" id="accDim">Hai dimenticato la parola segreta?</button>'}
       <p class="acc-err" id="accE" hidden></p>`;
-  function apri(tab){ if (provaAttiva()){ const b = finestra(`<h2>Il tuo account</h2><p>Adesso è attivo il pass di prova: i progressi non sono i tuoi veri. Esci dal pass di prova, poi torna qui.</p><button class="big" data-x>Ok</button>`); b.querySelector('[data-x]').onclick = chiudi; return; }
+  function apri(tab, op = {}){ if (provaAttiva()){ const b = finestra(`<h2>Il tuo account</h2><p>Adesso è attivo il pass di prova: i progressi non sono i tuoi veri. Esci dal pass di prova, poi torna qui.</p><button class="big" data-x>Ok</button>`); b.querySelector('[data-x]').onclick = chiudi; return; }
     if (A) return pagina(); tab = tab || 'crea';
-    const b = finestra(`<div class="acc-ic"></div><h2>Il tuo account</h2><p class="acc-sub">Salva i progressi online: li ritrovi su ogni telefono o computer, anche se cancelli i dati del browser.</p>
-      ${campi(tab)}<button class="big" id="accOk">${tab === 'crea' ? 'Crea e salva i progressi' : tab === 'recupera' ? 'Cambia la parola segreta' : 'Entra'}</button><button class="big alt" data-x>Più tardi</button>`);
-    b.querySelector('[data-x]').onclick = chiudi; form(b, tab, apri); setTimeout(() => b.querySelector('#accN').focus(), 80); }
+    const ob = !!op.obbligo;
+    const b = finestra(`<div class="acc-ic"></div><h2>${ob ? 'Crea il tuo giocatore' : 'Il tuo account'}</h2><p class="acc-sub">${ob ? 'Hai già fatto 5 partite! Per continuare a giocare e <b>salire in classifica</b> crea il tuo giocatore: ci vogliono 10 secondi e i progressi restano salvati.' : 'Salva i progressi online: li ritrovi su ogni telefono o computer, anche se cancelli i dati del browser.'}</p>
+      ${campi(tab)}<button class="big" id="accOk">${tab === 'crea' ? (ob ? 'Crea e continua' : 'Crea e salva i progressi') : tab === 'recupera' ? 'Cambia la parola segreta' : 'Entra'}</button>${ob ? '' : '<button class="big alt" data-x>Più tardi</button>'}`);
+    if (ob) OBBLIGO = true;
+    const bx = b.querySelector('[data-x]'); if (bx) bx.onclick = chiudi; form(b, tab, t => apri(t, op)); setTimeout(() => b.querySelector('#accN').focus(), 80); }
   // ---------- il cancello: la schermata d'ingresso prima del menu
   let CANC = null;
   function cancello(ld, entra){ const giu = ld.querySelector('.ld-giu'); if (!giu){ entra(); return; } CANC = {ld, giu, entra}; ld.classList.add('acc-gate-on'); disegnaCancello(A ? 'dentro' : 'crea'); }
@@ -9019,7 +9022,7 @@ const ACC = window.ACC = (() => {
     const vai = nome => { FINE = null; chiudi(); entraAnim(CANC.ld, nome, entra); };
     if (tab === 'dentro' && A){ g.innerHTML = `<div class="acc-bt">Bentornato,</div><div class="acc-nome">${A.nome.replace(/[<>&]/g, '')}</div><button class="acc-entra" id="accGo">Entra nel portale</button><button type="button" class="acc-link" id="accAltro">Non sei tu? Cambia giocatore</button>`;
       g.querySelector('#accGo').onclick = () => vai(A.nome); g.querySelector('#accAltro').onclick = () => { A = null; salvaA(); segna('off'); disegnaCancello('entra'); }; return; }
-    if (tab === 'crea' && !A && /[?&]da=itch/i.test(location.search)){ g.innerHTML = `<div class="acc-bt">Benvenuto a</div><div class="acc-nome">Smerillo</div><button class="acc-entra" id="accGo">Gioca subito</button><button type="button" class="acc-link" id="accHo">Ho già un account</button>`;
+    if (tab === 'crea' && !A && /[?&]da=itch/i.test(location.search)){ g.innerHTML = `<div class="acc-bt" style="background:rgba(20,20,51,.82);color:#fff!important;padding:6px 18px;border-radius:999px;border:2px solid #141433;font-size:22px!important;box-shadow:0 3px 0 rgba(20,20,51,.5)">Benvenuto a</div><div class="acc-nome">Smerillo</div><button class="acc-entra" id="accGo">Gioca subito</button><button type="button" class="acc-link" id="accHo">Ho già un account</button>`;
       g.querySelector('#accGo').onclick = () => vai(null); g.querySelector('#accHo').onclick = () => disegnaCancello('entra'); return; }
     g.innerHTML = `<div class="acc-card"><div class="acc-h">Entra nel portale</div><p class="acc-sub">Con il tuo account i progressi si salvano online e li ritrovi su ogni telefono.</p>${campi(tab)}<button class="big" id="accOk">${tab === 'crea' ? 'Crea il giocatore' : tab === 'recupera' ? 'Cambia la parola segreta' : 'Entra'}</button></div>
       <button type="button" class="acc-link" id="accOspite">Gioca senza account</button>`;
@@ -9319,10 +9322,12 @@ const RITORNO = window.RITORNO = (() => {
     return 0; }
   async function puntiFrazione(n){ const f = frazione(), t = tok(); if (!f || !n) return; if (!t){ return; }
     await inviaFrazione(); try { const r = await rpc('ds_frazione_punti', {p_token: t, p_punti: n}); FST = null; if (r && r.dati > 0) setTimeout(() => { try { PROF.avviso(`+${r.dati} per ${FZ[r.frazione].n}`, 'Sfida delle frazioni'); } catch(e){} }, 1600); } catch(e){} }
-  function partita(modo, vinto, x = {}){ sc('difendi-smerillo-partite', String((+lg('difendi-smerillo-partite') || 0) + 1)); traccia('partita', Object.assign({modo, v: vinto ? 1 : 0, sec: Math.round((Date.now() - T0)/1000)}, x)); puntiFrazione(puntiDi(modo, vinto, x)); invitoSalva(vinto); }
-  function invitoSalva(vinto){ if (!vinto || DA !== 'itch' || lg('difendi-smerillo-invito-salva')) return; try { if (ACC.account) return; } catch(e){ return; }
-    sc('difendi-smerillo-invito-salva', '1'); traccia('invito_salva', {});
-    quandoPronto(() => { try { ACC.apri('crea'); } catch(e){} }); }
+  function partita(modo, vinto, x = {}){ sc('difendi-smerillo-partite', String((+lg('difendi-smerillo-partite') || 0) + 1)); traccia('partita', Object.assign({modo, v: vinto ? 1 : 0, sec: Math.round((Date.now() - T0)/1000)}, x)); puntiFrazione(puntiDi(modo, vinto, x)); invitoSalva(); }
+  // chi gioca da itch: dopo 5 partite deve creare il giocatore (senza account non entra in classifica)
+  const MAX_OSPITE = 5;
+  if (/[?&]prova5=1/.test(location.search)) sc('difendi-smerillo-partite', '5'); // solo beta: finge 5 partite giocate
+  function devRegistrarsi(){ if (DA !== 'itch') return false; try { if (ACC.account) return false; } catch(e){ return false; } return (+lg('difendi-smerillo-partite') || 0) >= MAX_OSPITE; }
+  function invitoSalva(){ if (!devRegistrarsi()) return; traccia('obbligo_account', {}); quandoPronto(() => { if (devRegistrarsi()) try { ACC.apri('crea', {obbligo: true}); } catch(e){} }); }
 
   // ---------- voto e schermata Home: lo chiedo una volta sola, dopo qualche partita
   const VKEY = 'difendi-smerillo-voto', HKEY = 'difendi-smerillo-home';
@@ -9466,6 +9471,7 @@ const RITORNO = window.RITORNO = (() => {
   function finestraPasso(){ const s = stato(); if (s.passo > 3) return false; if (s.in){ s.in = null; salvaS(s); } // riaperto il gioco a metà: si riparte da questo passo
     if (s.passo >= 3){ finestraFine(); return true; }
     const k = PASSI[s.passo], I = INFO[k], u = s.ultimo; let su = '';
+    if (DA === 'itch' && s.passo === 0 && !u){ avviaPasso(k); return true; }
     if (s.passo === 0 && !u) su = `<span class="fd-k">BENVENUTO A SMERILLO</span><h2>Ti faccio provare il gioco</h2><p class="acc-sub">Tre assaggi brevi delle modalità. Poi entri nel menu e scegli tu come continuare.</p>`;
     else if (s.torna && s.passo === 1 && !u) su = `<span class="fd-k">BENTORNATO</span><h2>Hai provato solo le missioni</h2><p class="acc-sub">Difendi Smerillo ha anche altre modalità. Ti faccio fare due assaggi veloci, poi scegli tu.</p>`;
     else su = `<span class="fd-k">ASSAGGIO ${s.passo} DI 3 FATTO</span><h2>${u && u.come === 'perso' ? 'Ci hai provato!' : 'Bravo!'}</h2>${u && u.come === 'perso' ? '<p class="acc-sub">Non è andata, ma ora sai come funziona: la riprovi quando vuoi dal menu.</p>' : ''}`;
@@ -9550,7 +9556,7 @@ const RITORNO = window.RITORNO = (() => {
     try { TB.resetGuida(); } catch(e){} scJ(SKEY, {passo:0, nuovo:1, rivedi:1}); traccia('guide', {ev:'rivedi'}); try { history.replaceState(null, '', location.pathname); } catch(e){} mostraMenu('home'); }
   if (/[?&]tutorial=1/.test(location.search)){ setTimeout(rivediGuide, 300); }
   // all'avvio
-  { const s = stato(), g = giorni(); traccia('apri', {da: DA, nuovo: s.nuovo && s.passo === 0 ? 1 : 0, torna: s.torna ? 1 : 0, ass: s.passo, giorni: g.s, acc: acc() ? 1 : 0, w: innerWidth}); }
+  { const s = stato(), g = giorni(); traccia('apri', {da: DA, nuovo: s.nuovo && s.passo === 0 ? 1 : 0, torna: s.torna ? 1 : 0, ass: s.passo, giorni: g.s, acc: acc() ? 1 : 0, w: innerWidth}); invitoSalva(); }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') traccia('chiudi', {sec: Math.round((Date.now() - T0)/1000)}, true); });
   return {versione: VERSIONE, rivediGuide, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
 })();
