@@ -4382,13 +4382,15 @@ function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; 
   else if (!costruite && !S.modo.ghost){ k = 'pal2'; n = 3; t = 'Tocca un <b>pallino bianco</b> vicino alla strada.'; sub = 'È il posto dove metti la Balestra.'; mappa = pallino; }
   else if (!costruite){ k = 'costr'; n = 3; t = 'Tocca <b>Costruisci</b>.'; sub = 'Il cerchio mostra fin dove arriva: colpisce i nemici che ci entrano.'; punta = () => document.querySelector('#infoActs .act'); }
   else if (S.ondata === 0 && !S.inCorso){ k = 'go'; n = ORIZ ? 3 : 4; t = 'Tocca <b>Avvia ondata</b>.'; sub = 'Partono i nemici. Se hai ancora castagne puoi prima costruire altre difese.'; punta = () => document.querySelector('#bGo'); }
-  else if (S.inCorso && S.ondata === 1){ k = 'nem'; n = ORIZ ? 4 : 5; t = 'Arrivano! <b>Tocca un nemico</b>.'; sub = 'Il tuo Falco lo colpisce. Ogni nemico abbattuto ti dà castagne.';
+  else if (S.inCorso && S.ondata === 1 && !S.toccoNem){ k = 'nem'; n = ORIZ ? 4 : 5; t = 'Arrivano! <b>Tocca un nemico</b>.'; sub = 'Il tuo Falco lo colpisce. Ogni nemico abbattuto ti dà castagne.';
     mappa = () => { const r = cv.getBoundingClientRect(), x = S.nemici.find(m => !m.morto); if (!x) return null; const [a, b] = P(x.e, x.n, x.z || 0), sx = r.left + a*scale + ox, sy = r.top + b*scale + oy; if (sx < 0 || sx > innerWidth || sy < 60 || sy > innerHeight - 120) return null; return {x: sx, y: sy - 10, r: 28}; }; }
   else { k = 'fine'; n = ORIZ ? 5 : 6; t = 'Bravo! Ora <b>giochi tu</b>.'; sub = 'Costruisci altre difese tra un’ondata e l’altra. Tocca una tua difesa per renderla più forte.'; ok = true; }
   if (COACH_RT === k) return; COACH_RT = k;
+  if (k === 'fine') setTimeout(() => { if (COACH_RT === 'fine'){ try { localStorage.setItem(GKEY_CL, '1'); } catch(e){} COACH_RT = ''; COACH.nascondi(); } }, 5000);
   const basta = () => { try { localStorage.setItem(GKEY_CL, '1'); } catch(e){} COACH_RT = ''; COACH.nascondi(); };
   COACH.mostra({passo: n, tot: ORIZ ? 5 : 6, testo: t, sotto: sub, bottone: ok ? 'Ho capito' : null, ok: basta, salta: ok ? null : basta,
-    pausa: () => !S || S.fine || S.attesaCarta || !$('#title').hidden, dove: mappa || punta }); }
+    // se stai guardando una difesa o costruendo fuori dalla guida, il fumetto si fa da parte: niente finestre una sopra l'altra
+    pausa: () => !S || S.fine || S.attesaCarta || !$('#title').hidden || (!['anello','costr','bal','pal2'].includes(k) && (S.sel !== null || !!S.modo || !!ANELLO)), dove: mappa || punta }); }
 let COACH_RT = '';
 // negozio a tendina: chiuso di solito, così la mappa si vede tutta
 let NEG = false;
@@ -4586,7 +4588,7 @@ function tocca(ev){
     let spot = false; if (tgt && ORIZ){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); } POSTI = POSTI || calcolaPosti();
       const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]), [qx, qy] = P(q[0], q[1], altB(q[0], q[1])), [tx, ty] = P(tgt.e, tgt.n, tgt.z);
       spot = Math.hypot(qx - sx, qy - sy) < Math.hypot(tx - sx, ty - (tgt.d.vola ? 16 : 6) - sy) && Math.hypot(qx - sx, qy - sy)*scale < 22; } // il tocco è più vicino a un pallino che al nemico: si costruisce
-    if (tgt && !spot){ if (S.falcoCd <= 0) lanciaFalco(tgt); return; } }
+    if (tgt && !spot){ if (S.falcoCd <= 0){ lanciaFalco(tgt); S.toccoNem = true; } return; } }
   let idx = null, best = Math.max(16, 30/scale);
   S.luoghi.forEach((L,i) => { const [x,y] = P(L.e, L.n, L.z); const top = y - (STAT[L.tipo].h||0)*K - 6; const d = Math.min(Math.hypot(x-sx, y-sy), Math.hypot(x-sx, top-sy)); if (d < best){ best = d; idx = i; } });
   if (ORIZ){ const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top;
