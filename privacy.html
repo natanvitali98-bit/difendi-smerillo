@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Privacy e cookie · Difendi Smerillo</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--bg:#0b1033;--card:#141f52;--txt:#eef1ff;--muted:#b9c3f2;--acc:#ffd03a;--line:#2a3a85}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 64px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+header .ic{width:52px;height:52px;border-radius:14px;background:var(--acc);display:grid;place-items:center;font-size:28px;border:3px solid #141433;flex:none}
+h1{margin:0;font-size:28px;line-height:1.15;font-weight:900;letter-spacing:-.3px}
+.sub{color:var(--muted);margin:6px 0 22px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 8px;margin:14px 0}
+h2{margin:0 0 8px;font-size:20px;color:var(--acc)}
+p{margin:0 0 12px}
+ul{margin:0 0 12px;padding-left:20px}
+li{margin:4px 0}
+b{color:#fff}
+a{color:var(--acc)}
+.breve{background:#1d2b70;border-left:4px solid var(--acc);padding:12px 14px;border-radius:10px;margin:0 0 12px}
+table{width:100%;border-collapse:collapse;margin:0 0 12px;font-size:14.5px}
+th,td{text-align:left;vertical-align:top;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600}
+.torna{display:inline-block;margin-top:18px;background:var(--acc);color:#141433;text-decoration:none;font-weight:800;padding:12px 18px;border-radius:12px;border:3px solid #141433}
+small{color:var(--muted)}
+@media (max-width:520px){table,thead,tbody,tr,th,td{display:block}thead{display:none}td{border:0;padding:2px 0}tr{border-bottom:1px solid var(--line);padding:8px 0}td:first-child{font-weight:700;color:#fff}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="ic" aria-hidden="true">🛡️</div><h1>Privacy e cookie<br><small style="font-size:16px;font-weight:600">Difendi Smerillo</small></h1></header>
+<p class="sub">Ultimo aggiornamento: 11 novembre 2026</p>
+
+<div class="box">
+<h2>In breve</h2>
+<p class="breve">Il gioco salva sul tuo telefono i progressi e le impostazioni. Se crei un account, sul nostro server (in Europa) salviamo il <b>nome da giocatore</b> che scegli, la parola segreta <b>cifrata</b> e i tuoi progressi. Contiamo le visite in modo <b>anonimo</b>, senza nome e senza pubblicità. Non vendiamo e non regaliamo i tuoi dati a nessuno.</p>
+</div>
+
+<div class="box">
+<h2>Chi è il responsabile dei dati</h2>
+<p>Il titolare del trattamento è <b>[NOME DEL RESPONSABILE]</b>, che ha creato e pubblica il gioco.<br>Per qualsiasi domanda o richiesta scrivi a: <b>[EMAIL DI CONTATTO]</b></p>
+</div>
+
+<div class="box">
+<h2>Quali dati raccogliamo e perché</h2>
+<table>
+<thead><tr><th>Cosa</th><th>Perché</th><th>Su quale base</th></tr></thead>
+<tbody>
+<tr><td>Nome da giocatore, parola segreta (cifrata, nemmeno noi possiamo leggerla), codice di recupero</td><td>Per creare il tuo account e farti entrare da qualsiasi telefono o computer</td><td>Serve a darti il servizio che chiedi</td></tr>
+<tr><td>Progressi di gioco: missioni, scrigni, difensori, stemma, frazione scelta, punteggi</td><td>Per salvarli online e non farteli perdere</td><td>Serve a darti il servizio che chiedi</td></tr>
+<tr><td>Nome da giocatore e punteggio in classifica</td><td>La classifica è pubblica: il nome che scegli lo vedono gli altri giocatori</td><td>Fa parte del gioco</td></tr>
+<tr><td>Statistiche anonime: un codice casuale creato dal telefono, quando apri il gioco, le partite giocate, i passi della guida, la larghezza dello schermo, da dove arrivi (per esempio itch.io)</td><td>Per capire se il gioco funziona e cosa migliorare</td><td>Nostro interesse a migliorare il gioco. Le statistiche non contengono il tuo nome e non servono a riconoscerti</td></tr>
+<tr><td>Il voto che dai al gioco, se lo dai</td><td>Per sapere se il gioco piace</td><td>Lo scegli tu</td></tr>
+</tbody>
+</table>
+<p>Non chiediamo email, numero di telefono, età, posizione GPS o foto. Ti consigliamo di <b>non usare il tuo nome e cognome veri</b> come nome da giocatore.</p>
+</div>
+
+<div class="box">
+<h2>Dove finiscono i dati</h2>
+<ul>
+<li><b>Supabase</b>: il server con account, progressi e statistiche. Si trova in <b>Europa</b> (Francoforte, Germania).</li>
+<li><b>GitHub Pages</b> (GitHub Inc.): il servizio che pubblica il sito del gioco. Come ogni sito, riceve l'indirizzo internet (IP) di chi lo apre.</li>
+<li><b>itch.io</b>: se giochi dalla pagina itch.io, vale anche la privacy di itch.io per la loro pagina.</li>
+<li><b>Partite online con gli amici</b>: solo quando le usi, il gioco scarica un programma (PeerJS) da unpkg.com o jsdelivr.net e usa il server di PeerJS per mettere in contatto i telefoni. Durante la partita i telefoni dei giocatori si collegano direttamente: per questo <b>gli altri giocatori della partita possono vedere il tuo indirizzo internet (IP)</b>.</li>
+</ul>
+<p>I caratteri e le immagini del gioco sono dentro il gioco stesso: non usiamo Google Fonts né servizi di pubblicità o di profilazione.</p>
+</div>
+
+<div class="box">
+<h2>Per quanto tempo li teniamo</h2>
+<ul>
+<li><b>Account e progressi</b>: finché l'account esiste. Puoi chiederci di cancellarlo quando vuoi.</li>
+<li><b>Statistiche anonime</b>: solo per il tempo che serve a fare le statistiche, e comunque non oltre 24 mesi.</li>
+<li><b>Dati sul telefono</b>: restano finché non cancelli i dati del sito dal browser.</li>
+</ul>
+</div>
+
+<div class="box">
+<h2>Cookie e dati salvati sul telefono</h2>
+<p>Il gioco <b>non usa cookie</b>. Usa la memoria del browser (localStorage) per salvare sul tuo telefono:</p>
+<ul>
+<li>i progressi, gli scrigni, le impostazioni e le guide già viste;</li>
+<li>l'accesso al tuo account, se ne hai uno;</li>
+<li>il codice casuale per le statistiche anonime.</li>
+</ul>
+<p>Sono dati <b>tecnici</b>, che servono a far funzionare il gioco, oppure statistiche anonime fatte da noi, senza passarle ad altri: per questo non serve un banner per chiedere il permesso. Non ci sono cookie di pubblicità o di profilazione.</p>
+<p>Per cancellarli: nelle impostazioni del browser cancella i "dati dei siti" di <b>natanvitali98-bit.github.io</b>. Attenzione: senza un account perderai i progressi.</p>
+</div>
+
+<div class="box">
+<h2>Ragazzi e ragazze</h2>
+<p>Il gioco è adatto a tutti. Se hai <b>meno di 14 anni</b>, chiedi a un genitore prima di creare un account. Un genitore può scriverci in qualsiasi momento per chiedere di vedere o cancellare i dati del proprio figlio.</p>
+</div>
+
+<div class="box">
+<h2>I tuoi diritti</h2>
+<p>Puoi chiederci in qualsiasi momento di:</p>
+<ul>
+<li>sapere quali dati abbiamo su di te e riceverne una copia;</li>
+<li>correggerli;</li>
+<li>cancellarli, account compreso;</li>
+<li>opporti alle statistiche o limitarne l'uso.</li>
+</ul>
+<p>Scrivi a <b>[EMAIL DI CONTATTO]</b> indicando il tuo nome da giocatore. Rispondiamo entro 30 giorni.</p>
+<p>Se pensi che i tuoi dati non siano trattati bene, puoi anche fare un reclamo al <a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">Garante per la protezione dei dati personali</a>.</p>
+</div>
+
+<div class="box">
+<h2>Modifiche</h2>
+<p>Se cambiamo questa pagina, aggiorniamo la data in alto. Per i cambiamenti importanti lo diremo anche dentro il gioco.</p>
+</div>
+
+<a class="torna" href="./">◀ Torna al gioco</a>
+</div>
+</body>
+</html>
