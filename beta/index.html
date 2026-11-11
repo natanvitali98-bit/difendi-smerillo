@@ -9085,7 +9085,7 @@ const ACC = window.ACC = (() => {
     const vai = nome => { FINE = null; chiudi(); entraAnim(CANC.ld, nome, entra); };
     if (tab === 'dentro' && A){ g.innerHTML = `<div class="acc-bt">Bentornato,</div><div class="acc-nome">${A.nome.replace(/[<>&]/g, '')}</div><button class="acc-entra" id="accGo">Entra nel portale</button><button type="button" class="acc-link" id="accAltro">Non sei tu? Cambia giocatore</button>`;
       g.querySelector('#accGo').onclick = () => vai(A.nome); g.querySelector('#accAltro').onclick = () => { A = null; salvaA(); segna('off'); disegnaCancello('entra'); }; return; }
-    if (tab === 'crea' && !A && /[?&]da=itch/i.test(location.search)){ g.innerHTML = `<button class="acc-entra" id="accGo">▶ Gioca subito</button><div class="acc-itch">Gratis · si gioca subito</div><button type="button" class="acc-link" id="accHo">Ho già un account</button><a class="acc-priv" href="https://natanvitali98-bit.github.io/difendi-smerillo/privacy.html" target="_blank" rel="noopener">Privacy e cookie</a>`;
+    if (tab === 'crea' && !A){ g.innerHTML = `<button class="acc-entra" id="accGo">▶ Gioca subito</button><div class="acc-itch">Gratis · si gioca subito</div><button type="button" class="acc-link" id="accHo">Ho già un account</button><a class="acc-priv" href="https://natanvitali98-bit.github.io/difendi-smerillo/privacy.html" target="_blank" rel="noopener">Privacy e cookie</a>`;
       g.querySelector('#accGo').onclick = e => { e.preventDefault(); e.stopPropagation(); const bt = e.currentTarget; if (bt.disabled) return; bt.disabled = true; FINE = null; chiudi();
         // da itch si va dritti nella missione: una sola transizione (quella della missione), niente menu in mezzo
         // il telefono a volte manda un secondo tocco "fantasma" subito dopo: per un attimo si ignorano tutti i tocchi
@@ -9397,7 +9397,7 @@ const RITORNO = window.RITORNO = (() => {
   function partita(modo, vinto, x = {}){ sc('difendi-smerillo-partite', String((+lg('difendi-smerillo-partite') || 0) + 1)); traccia('partita', Object.assign({modo, v: vinto ? 1 : 0, sec: Math.round((Date.now() - T0)/1000)}, x)); puntiFrazione(puntiDi(modo, vinto, x)); invitoSalva(); }
   // chi gioca da itch: dopo 5 partite deve creare il giocatore (senza account non entra in classifica)
   const MAX_OSPITE = 5;
-  function devRegistrarsi(){ if (DA !== 'itch') return false; try { if (ACC.account) return false; } catch(e){ return false; } return (+lg('difendi-smerillo-partite') || 0) >= MAX_OSPITE; }
+  function devRegistrarsi(){ try { if (ACC.account) return false; } catch(e){ return false; } return (+lg('difendi-smerillo-partite') || 0) >= MAX_OSPITE; }
   function invitoSalva(){ if (!devRegistrarsi()) return; traccia('obbligo_account', {}); quandoPronto(() => { if (devRegistrarsi()) try { ACC.apri('crea', {obbligo: true}); } catch(e){} }); }
 
   // ---------- voto e schermata Home: lo chiedo una volta sola, dopo qualche partita
@@ -9542,7 +9542,7 @@ const RITORNO = window.RITORNO = (() => {
   function finestraPasso(){ const s = stato(); if (s.passo > 3) return false; if (s.in){ s.in = null; salvaS(s); } // riaperto il gioco a metà: si riparte da questo passo
     if (s.passo >= 3){ finestraFine(); return true; }
     const k = PASSI[s.passo], I = INFO[k], u = s.ultimo; let su = '';
-    if (DA === 'itch' && s.passo === 0 && !u){ avviaPasso(k); return true; }
+    if (s.passo === 0 && !u){ avviaPasso(k); return true; }
     if (s.passo === 0 && !u) su = `<span class="fd-k">BENVENUTO A SMERILLO</span><h2>Ti faccio provare il gioco</h2><p class="acc-sub">Tre assaggi brevi delle modalità. Poi entri nel menu e scegli tu come continuare.</p>`;
     else if (s.torna && s.passo === 1 && !u) su = `<span class="fd-k">BENTORNATO</span><h2>Hai provato solo le missioni</h2><p class="acc-sub">Difendi Smerillo ha anche altre modalità. Ti faccio fare due assaggi veloci, poi scegli tu.</p>`;
     else su = `<span class="fd-k">ASSAGGIO ${s.passo} DI 3 FATTO</span><h2>${u && u.come === 'perso' ? 'Ci hai provato!' : 'Bravo!'}</h2>${u && u.come === 'perso' ? '<p class="acc-sub">Non è andata, ma ora sai come funziona: la riprovi quando vuoi dal menu.</p>' : ''}`;
