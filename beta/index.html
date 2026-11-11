@@ -6275,7 +6275,10 @@ function aiuto(){ if (!aiutoOk()) return; if (guida >= 0){ fineGuida(); COACH_TB
       else { f = 'mov'; cfg = {testo: 'Tocca qui per <b>spostarti</b>.', sotto: 'Così vai incontro al nemico e gli blocchi la strada.', dove: punto(m.nodo)}; } }
     if (f !== fase){ fase = f; COACH.mostra(Object.assign({testo: '', pausa: () => !attivo || ovAperto || !S, salta: () => aiutoStop()}, cfg)); } };
   AIUTO = {t: setInterval(giro, 150)}; giro(); }
-function aggiornaAiuto(){ const b = el('tbAiuto'); if (!b) return; const ok = aiutoOk(); b.hidden = !ok; if (!ok && AIUTO) aiutoStop(); b.classList.toggle('pulsa', ok && S.turno <= 3 && MI === 0); }
+// il tasto Aiuto sta sempre appena sopra il riquadro del personaggio, mai sopra
+function postoAiuto(){ const b = el('tbAiuto'), i = el('tbInfo'); if (!b || b.hidden || !i || !b.offsetParent) return; const pr = b.offsetParent.getBoundingClientRect(), ir = i.getBoundingClientRect(); if (!ir.height) return; b.style.bottom = Math.max(8, pr.bottom - ir.top + 8) + 'px'; }
+try { new ResizeObserver(postoAiuto).observe(el('tbInfo')); } catch(e){} addEventListener('resize', postoAiuto);
+function aggiornaAiuto(){ const b = el('tbAiuto'); if (!b) return; const ok = aiutoOk(); b.hidden = !ok; postoAiuto(); if (!ok && AIUTO) aiutoStop(); b.classList.toggle('pulsa', ok && S.turno <= 3 && MI === 0); }
 
 /* ---------- pannello e barra ---------- */
 const cuori = (n, max, col = '#e04830') => Array.from({length:max}, (_, i) => `<i style="background:${i < n ? col : '#8d95a6'}"></i>`).join('');
