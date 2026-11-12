@@ -5248,7 +5248,7 @@ const MAPPA_NORD ={num:1, titolo:'La Porta Nord', livello:'Facile: impari a gioc
    ['lupia1','lupia2',[[63,69],[69.6,55],[76,41.5],[81.5,30]]], ['bivio','tornante',[[51,100],[56,98],[61,93],[65,86],[69.5,81],[74,79]]],
    ['tornante','monte1',[[74,79],[75,83],[73.5,87],[71,96],[67.5,108]]], ['monte1','monte2',[[67.5,108],[64.5,120],[62,131],[60,140]]]],
   // tutorial: pochi nemici, uno alla volta, il cavaliere solo alla fine
-  arrivi:{0:[['fante','fessa']], 2:[['fante','monte2']], 4:[['fante','lupia2']], 6:[['fante','fessa']], 8:[['cavaliere','monte2']]}};
+  arrivi:{0:[['fante','fessa']], 1:[['fante','monte2']], 3:[['fante','lupia2']], 4:[['fante','fessa']]}};
 const MAPPA_CENTRO ={num:2, titolo:'Il cuore del paese', livello:'Media', meta:'comune', corto:'Comune', caduta:'Il Municipio è caduto', metaNome:'il Municipio', metaLabel:'MUNICIPIO', dentro:[],
   intro:'La Porta Nord ha resistito, ma i nemici entrano in paese da <b>Via Cortellucci</b>, da <b>Via dei Caduti</b> e dal sud. Difendi il <b>Municipio</b>, in piazza. Arriva il <b>Balestriere</b>: tira da lontano. Hai due Lancieri.',
   consiglio:'Tieni un difensore in piazza: tutti i nemici devono passare da lì. Colpisci prima i balestrieri.',
@@ -6115,9 +6115,10 @@ function spriteBordato(tipo, im, w, h, o){ const k = tipo + '|' + Math.round(w*4
   x.drawImage(im, oi, oi, w, h); CACHE_BORDO.set(k, c); return c; }
 function disegnaUnita(u, k, T){
   const im = IMG[u.tipo], s = K*sc*1.1*scalaU; let e, n, z;
-  if (ev && ev.k === 'passo' && ev.id === u.id){ const q = lungoVia(ev.da, ev.a, Math.min(1, evT/DUR.passo)); e = q.e; n = q.n; z = q.z; }
+  let saltello = 0; // i nemici marciano: partono e arrivano morbidi, con due piccoli passi
+  if (ev && ev.k === 'passo' && ev.id === u.id){ const tq = Math.min(1, evT/DUR.passo), te = riduci ? tq : tq*tq*(3 - 2*tq); const q = lungoVia(ev.da, ev.a, te); e = q.e; n = q.n; z = q.z; if (!riduci) saltello = Math.abs(Math.sin(tq*Math.PI*2))*4; }
   else { const N = NODI[u.nodo]; e = N.e; n = N.n; z = N.z; }
-  let [x,y] = scr(e, n, z);
+  let [x,y] = scr(e, n, z); y -= saltello;
   const ora_ = adesso(), PA = POS.get(u.id);
   if (PA){ const q = (ora_ - PA.t0)/PA.d; if (q >= 1) POS.delete(u.id);
     else if (PA.k === 'mossa'){ const N0 = NODI[PA.da]; if (N0){ const [x0, y0] = scr(N0.e, N0.n, N0.z), qq = Math.max(0, q), f = 1 - (1 - qq)*(1 - qq); x = x0 + (x - x0)*f; y = y0 + (y - y0)*f - Math.sin(qq*Math.PI)*10; } }
@@ -6126,7 +6127,7 @@ function disegnaUnita(u, k, T){
   let squash = 1; if (ev && ev.k === 'colpo' && ev.a === u.id && ev.da){ const A = [...(V || S).dif, ...(V || S).nem].find(q => q.id === ev.da); if (A){ const NA = NODI[A.nodo], [ax, ay] = scr(NA.e, NA.n, NA.z), q = Math.min(1, evT/DUR.colpo); if (q > .45){ const k2 = Math.sin((q - .45)/.55*Math.PI), dl = Math.hypot(x - ax, y - ay) || 1; x += (x - ax)/dl*7*k2; y += (y - ay)/dl*4*k2; squash = 1 - .18*k2; } } }
   let flashC = false; { const CA = COLP.get(u.id); if (CA){ const q = (ora_ - CA.t0)/.34; if (q >= 1) COLP.delete(u.id); else if (q >= 0){ const NA = NODI[CA.da]; if (NA){ const [ax, ay] = scr(NA.e, NA.n, NA.z), k2 = Math.sin(Math.min(1, q*1.6)*Math.PI)*(1 - q*.4), dl = Math.hypot(x - ax, y - ay) || 1; x += (x - ax)/dl*10*k2; y += (y - ay)/dl*5*k2; squash = Math.min(squash, 1 - .22*k2); } flashC = q < .3; } } }
   const flash = flashC || (ev && ev.k === 'colpo' && ev.a === u.id && evT > DUR.colpo*.45 && evT < DUR.colpo*.75);
-  const nuovo = ev && ev.k === 'arriva' && ev.x.id === u.id; if (nuovo) g.globalAlpha = Math.min(1, evT/DUR.arriva);
+  const nuovo = ev && ev.k === 'arriva' && ev.x.id === u.id; let pop = 1; if (nuovo){ const qa = Math.min(1, evT/DUR.arriva); g.globalAlpha = qa; if (!riduci) pop = 1 + .55*(1 - qa)*(1 - qa); } // chi arriva entra con un piccolo balzo
   // anello sotto i piedi: giallo = può ancora agire, grigio = ha finito
   const amico = online() && NET.modo === 'coop' && k === 'dif' && u.own && u.own !== NET.io;
   const base = k === 'nem' ? '#e04830' : k === 'bar' ? '#8c643c' : amico ? '#3d8bfd' : online() && NET.modo === 'coop' ? '#f5b301' : '#3d8bfd';
@@ -6139,7 +6140,7 @@ function disegnaUnita(u, k, T){
   const bob = (k === 'nem' && !riduci ? Math.round(Math.sin(T*3 + u.id.length)*1) : k === 'dif' && !riduci && !(sel && sel.id === u.id) ? Math.round(Math.sin(T*2.4 + u.id.charCodeAt(u.id.length - 1)*1.7)*.9) : 0) - (vola ? 14 + Math.round(Math.sin(T*5)*2) : 0) - (k === 'dif' && sel && sel.id === u.id && !riduci ? Math.round(Math.abs(Math.sin(T*7))*4) : 0);
   if (celata) g.globalAlpha = .35;
   const w = im.width*s, h = im.height*s, flip = k === 'nem';
-  g.save(); g.translate(Math.round(x), Math.round(y + 2 + bob)); g.scale((flip ? -1 : 1)*(2 - squash), squash); g.translate(0, -h);
+  g.save(); g.translate(Math.round(x), Math.round(y + 2 + bob)); g.scale((flip ? -1 : 1)*(2 - squash)*pop, squash*pop); g.translate(0, -h);
   if (!celata && !flash && BIANCHI[u.tipo]){ const o = Math.max(1.5, s*.55), c = spriteBordato(u.tipo, im, w, h, o); g.drawImage(c, Math.round(-w/2) - c._o, -c._o); } // contorno bianco già pronto: un solo disegno per unità
   else { if (!celata && BIANCHI[u.tipo]){ const o = Math.max(1.5, s*.55); for (const [dx, dy] of [[-o,0],[o,0],[0,-o],[0,o]]) g.drawImage(BIANCHI[u.tipo], Math.round(-w/2 + dx), dy, w, h); }
     g.drawImage(flash ? BIANCHI[u.tipo] : im, Math.round(-w/2), 0, w, h); }
@@ -9450,7 +9451,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261110185218';
+  const VERSIONE = window.DS_VER = '20261111142016';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
