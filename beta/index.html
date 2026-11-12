@@ -19,6 +19,7 @@
 .mis-piu-in{display:flex;flex-direction:column;gap:12px;padding:6px 0 10px}
 .mis-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tbruolo{display:block;font-size:14.5px;line-height:1.3;margin:2px 0 4px;color:var(--testo)}
+body.tb-prova #tbFine,body.tb-prova #tbUndo,body.tb-prova #tbShop,body.tb-prova #tbAiuto{visibility:hidden}
 </style>
 <style>
 #caricamento{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(180deg,#0b1240 0%,#1a2f86 45%,#3d6fe0 75%,#f0a060 100%);transition:opacity .45s,transform .45s}
@@ -5828,7 +5829,7 @@ function colpisci(S, o, danno, evs, da){
       conta(S, 'monete', g); conta(S, 'k'); if (lont) conta(S, 'lontani'); conta(S, 'k:' + u.tipo); const dd = S.dif.find(q => q.id === da); if (dd){ conta(S, 'kd:' + dd.tipo); conta(S, 'k:' + dd.tipo + ':' + u.tipo); } } }
 }
 function conta(S, k, n = 1){ S.st = S.st || {}; S.st[k] = (S.st[k] || 0) + n; }
-function esito(S){ if (S.porta <= 0) S.esito = 'perso'; else if (S.vs){ if (S.turno > S.vs.turni) S.esito = 'vinto'; } else if (!S.nem.length && !S.coda.length) S.esito = 'vinto'; }
+function esito(S){ if (S.prova != null) return; if (S.porta <= 0) S.esito = 'perso'; else if (S.vs){ if (S.turno > S.vs.turni) S.esito = 'vinto'; } else if (!S.nem.length && !S.coda.length) S.esito = 'vinto'; }
 // ogni nemico sceglie la strada più conveniente: se un difensore blocca la via e c'è un giro, lo prende
 const volaOra = (S, x) => { const T = TIPI[x.tipo]; return !!(T.vola || (T.salta && S.turno % 2 === 0)); }; // il Gatto Mammone salta nei turni pari
 function prossimoPasso(S, x){
@@ -6241,20 +6242,56 @@ const GUIDAKEY = 'difendi-smerillo-guida';
 let guida = (() => { try { return localStorage.getItem(GUIDAKEY) ? -1 : 0; } catch(e){ return 0; } })();
 const dif = t => S && S.dif.find(d => d.tipo === t);
 const GUIDA = [
-  {t:'Questi sono i tuoi <b>Lancieri</b>: toccali.', sub:'I soldati con lo scudo blu sono tuoi. Quelli rossi sono i nemici: vogliono arrivare alla <b>Chiesa</b>.', punta:() => dif('lanciere') && dif('lanciere').nodo, ok:() => !dif('lanciere') || (sel && sel.id === dif('lanciere').id) || dif('lanciere').agito},
-  {t:'Tocca il <b>nemico con il mirino rosso</b>.', sub:'Il mirino rosso vuol dire: da qui puoi colpirlo. Ogni soldato, a ogni turno, fa 1 passo e 1 colpo.', punta:() => S.nem[0] && S.nem[0].nodo, ok:() => !dif('lanciere') || dif('lanciere').agito},
-  {t:'Colpito! Ora tocca i <b>Carpentieri</b>.', sub:'Non combattono: costruiscono <b>barricate</b> per chiudere le strade.', punta:() => dif('carpentiere') && dif('carpentiere').nodo, ok:() => !dif('carpentiere') || (sel && sel.id === dif('carpentiere').id) || dif('carpentiere').agito},
-  {t:'Tocca il <b>cerchio giallo</b> sulla strada.', sub:'La barricata blocca la strada: i nemici devono fermarsi a romperla, e intanto tu li colpisci.', punta:() => 'bivio', ok:() => !dif('carpentiere') || dif('carpentiere').agito},
-  {t:'Hai usato i tuoi soldati: tocca <b>Fine turno</b>.', sub:'Si gioca a turni: prima muovi tu, poi si muovono i nemici. Guarda dove vanno!', punta:'fine', ok:() => S.turno >= 2},
-  {t:'Le <b>linee rosse</b> mostrano cosa faranno i nemici al prossimo turno.', sub:'Dove vanno e chi colpiscono. Mettiti sulla loro strada e colpiscili prima che arrivino alla Chiesa.', punta:null, ok:() => false, bottone:'Ok'},
+  {t:'Ora difendi la <b>Chiesa</b>!', sub:'Usa i soldati come hai appena provato. Quando li hai usati tutti, tocca <b>Fine turno</b>: si muovono i nemici.', punta:null, ok:() => false, bottone:'Vai!'},
+  {quando:() => S.turno >= 2, t:'Le <b>linee rosse</b> mostrano cosa faranno i nemici al prossimo turno.', sub:'Dove vanno e chi colpiscono. Mettiti sulla loro strada e colpiscili prima che arrivino alla Chiesa.', punta:null, ok:() => false, bottone:'Ok'},
   {t:'Non sai cosa fare? Tocca <b>💡 Aiuto</b>.', sub:'Ti mostro col dito una mossa buona. Lo trovi sempre qui nelle prime missioni. Adesso giochi tu!', punta:'aiuto', ok:() => false, bottone:'Ho capito, gioco!'},
 ];
-function passoGuida(){ if (!S || guida < 0 || MI !== 0 || NET) return null; while (guida < GUIDA.length && GUIDA[guida].ok()) guida++; if (guida >= GUIDA.length){ fineGuida(); return null; } if (guida === 3) modoC = true; return GUIDA[guida]; }
+function passoGuida(){ if (!S || guida < 0 || MI !== 0 || NET) return null; while (guida < GUIDA.length && GUIDA[guida].ok()) guida++; if (guida >= GUIDA.length){ fineGuida(); return null; } if (PROVA) return null; if (GUIDA[guida].quando && !GUIDA[guida].quando()) return null; return GUIDA[guida]; }
 let COACH_TB = -1;
+// ---------- Prova i soldati: prima della missione 1 provi i tre personaggi, uno alla volta, in mezzo minuto ----------
+let PROVA = null;
+const PROVE = [
+  {tipo:'lanciere', da:'piazzale', nem:'fessa', hp:2,
+   sel:['Prova 1 di 3: i <b>Lancieri</b>. Toccali.', 'Sono i soldati da battaglia: colpiscono forte, da vicino.'],
+   az:['Ora tocca il <b>nemico</b> con il mirino rosso.', 'I Lancieri colpiscono solo i nemici accanto a loro.'],
+   ok:['💥 Abbattuto!', 'I <b>Lancieri</b> colpiscono forte, ma solo da vicino.']},
+  {tipo:'arciere', da:'porta', nem:'fessa', hp:1,
+   sel:['Prova 2 di 3: gli <b>Arcieri</b>. Toccali.', 'Tirano le frecce da lontano.'],
+   az:['Tocca il <b>nemico</b> lontano, con il mirino rosso.', 'Gli Arcieri lo colpiscono anche da due strade di distanza.'],
+   ok:['🏹 Colpito da lontano!', 'Gli <b>Arcieri</b> tirano da lontano, ma sono fragili: tienili dietro.']},
+  {tipo:'carpentiere', da:'porta', nem:'fessa', hp:2,
+   sel:['Prova 3 di 3: i <b>Carpentieri</b>. Toccali.', 'Non combattono: costruiscono.'],
+   az:['Tocca il <b>cerchio giallo</b> sulla strada del nemico.', 'Lì costruiscono una barricata con le punte.'],
+   ok:['🔨 Il nemico si è fermato!', 'La <b>barricata</b> chiude la strada, e chi la colpisce perde 1 vita.']},
+];
+function provaVia(k){ const P = PROVE[k]; PROVA = {k, vis:'', turno:false}; document.body.classList.add('tb-prova');
+  S = nuovo(); S.prova = k; S.coda = []; S.bar = []; S.nem = []; const mx = vitaDi(P.tipo);
+  S.dif = [{id:'d' + (S.nid++), tipo:P.tipo, nodo:P.da, hp:mx, max:mx, mosso:false, agito:false}];
+  S.nem = [{id:'n' + (S.nid++), tipo:'fante', nodo:P.nem, hp:P.hp, max:P.hp, da:null}];
+  piazza = null; V = null; storia = []; sel = null; fx = []; coda = []; ev = null; modoC = k === 2; modoS = false; aggiornaAnteprima(); try { RITORNO.traccia('prova', {k}); } catch(e){} render(); }
+function provaFine(salta){ const era = PROVA; PROVA = null; document.body.classList.remove('tb-prova'); COACH_TB = -1; try { COACH.nascondi(); } catch(e){}
+  try { RITORNO.traccia('prova', {k: salta ? 'salta' : 'fine', da: era ? era.k : null}); } catch(e){}
+  moneteViste = null; S = nuovo(); piazza = null; V = null; storia = []; sel = null; fx = []; coda = []; ev = null; modoC = false; ultimoAnn = ''; nuovoTempo(); aggiornaAnteprima();
+  if (salta) fineGuida(); else { SUONI.suona('banner'); EPICO.banner('Missione ' + M.num, M.titolo); } render(); }
+function provaCoach(){ if (!PROVA || !S) return; const P = PROVE[PROVA.k], u = S.dif[0], x = S.nem[0]; let f;
+  if (!u){ provaFine(false); return; }
+  if (PROVA.k === 2 && PROVA.turno) f = V || S.turno < 2 ? 'att' : 'ok'; // dopo il turno dei nemici la prova è finita
+  else if (!u.agito){ f = sel && sel.id === u.id ? 'az' : 'sel'; if (PROVA.k === 2) modoC = true; }
+  else if (PROVA.k === 2 && !PROVA.turno){ PROVA.turno = true; f = 'att'; setTimeout(() => { if (PROVA && S && S.prova === 2 && !V) fineTurno(); }, 900); }
+  else f = PROVA.k === 2 && (V || S.turno < 2) ? 'att' : 'ok';
+  if (PROVA.vis === f) return; PROVA.vis = f;
+  if (f === 'att'){ COACH.nascondi(); return; }
+  const ultima = PROVA.k === PROVE.length - 1, tx = P[f], colpita = !!(x && x.hp < x.max) || !x;
+  const testo = f === 'ok' && PROVA.k === 2 && !colpita ? '🔨 Barricata costruita!' : tx[0], sotto = f === 'ok' && PROVA.k === 2 && !colpita ? 'La <b>barricata</b> chiude la strada: i nemici devono fermarsi a romperla, e chi la colpisce perde 1 vita.' : tx[1];
+  COACH.mostra({passo: PROVA.k + 1, tot: PROVE.length, testo, sotto,
+    salta: f === 'ok' ? null : () => provaFine(true), bottone: f === 'ok' ? (ultima ? 'Inizia la missione!' : 'Avanti') : null,
+    ok: () => { if (!PROVA) return; if (ultima) provaFine(false); else provaVia(PROVA.k + 1); },
+    pausa: () => !attivo || ovAperto || !S || !!V,
+    dove: () => { if (!S || !PROVA || f === 'ok') return null; const id = f === 'sel' ? u.nodo : PROVA.k === 2 ? 'piazzale' : (S.nem[0] && S.nem[0].nodo); if (!id || !NODI[id]) return null; const [px, py] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + px, y: r.top + py - 8, r: 30}; }}); }
 function fineGuida(){ guida = -1; if (COACH_TB !== -1){ COACH_TB = -1; try { COACH.nascondi(); } catch(e){} } try { localStorage.setItem(GUIDAKEY, '1'); } catch(e){} el('tbFine').classList.remove('guida'); }
 // ---------- 💡 Aiuto: nelle prime missioni ti mostra col dito una mossa buona ----------
 let AIUTO = null;
-function aiutoOk(){ return !!S && !S.esito && !V && !online() && !RUN && !SFIDA && !M.evento && MI <= 2 && (guida < 0 || guida === GUIDA.length - 1); }
+function aiutoOk(){ return !PROVA && !!S && !S.esito && !V && !online() && !RUN && !SFIDA && !M.evento && MI <= 2 && (guida < 0 || guida === GUIDA.length - 1); }
 function mossaBuona(){
   if (!S.nem.length) return {k:'fine'};
   // 1) un soldato che può già colpire un nemico
@@ -6314,12 +6351,12 @@ function info(){
     if (online()){ const vs = NET.modo === 'vs', mio = !V && mioTurno(), lui = !V && !mio, am = (ULTIMO.amico || 'Amico').slice(0, 9);
       const h = `<span class="olt ${mio ? 'att' : ''}">${vs ? (NET.ruolo === 'd' ? '🛡️' : '🐴') : '🟡'} Tu</span><span class="olv">vs</span><span class="olt ${lui ? 'att' : ''}">${vs ? (NET.ruolo === 'd' ? '🐴' : '🛡️') : '🔵'} ${am}</span>`;
       const t = el('tbTit'); if (t._h !== h){ t._h = h; t.innerHTML = h; } }
-    if (st && !ovAperto && !S.esito && st.k !== ultimoAnn){ ultimoAnn = st.k; if (online() || guida < 0 || S.turno > 1) annuncia(st.t, st.c); } } // il cartello "Tocca a te" ora c'è anche quando giochi da solo
+    if (st && !ovAperto && !S.esito && st.k !== ultimoAnn){ ultimoAnn = st.k; if (S.prova == null && (online() || guida < 0 || S.turno > 1)) annuncia(st.t, st.c); } } // il cartello "Tocca a te" ora c'è anche quando giochi da solo
   metti(el('tbPorta'), ico(R.porta > 0 ? 'cuore' : 'cuoreV') + `<b>${R.porta}<small>/${S.portaMax}</small></b>`);
   const rimasti = R.nem.length + S.coda.length; metti(el('tbNem'), ico('teschio') + ' ' + rimasti);
   el('tbUndo').disabled = !storia.length || !!V || !!S.esito; aggiornaAiuto();
   { const b = el('tbShop'), m = (R.monete ?? S.monete) || 0; if (b.dataset.m !== String(m)){ const su = b.dataset.m !== undefined && m > +b.dataset.m; b.dataset.m = m; b.innerHTML = ico('moneta', 3) + ' ' + m; if (su){ b.classList.remove('anim-su'); void b.offsetWidth; b.classList.add('anim-su'); } } b.disabled = !!V || !!S.esito; b.classList.toggle('pronto', !V && OFFERTE.some(f => m >= f.costo && f.ok(S))); }
-  { const m = S.monete || 0; if (moneteViste === null || V) moneteViste = moneteViste === null ? m : moneteViste; if (!V && m > moneteViste){ if (!S.moneteSpiegate){ S.moneteSpiegate = true; suggerisci('🪙 Moneta! Spendila nella Bottega, in basso'); } moneteViste = m; } else if (m < moneteViste) moneteViste = m; }
+  { const m = S.monete || 0; if (moneteViste === null || V) moneteViste = moneteViste === null ? m : moneteViste; if (!V && m > moneteViste){ if (!S.moneteSpiegate && S.prova == null){ S.moneteSpiegate = true; suggerisci('🪙 Moneta! Spendila nella Bottega, in basso'); } moneteViste = m; } else if (m < moneteViste) moneteViste = m; }
   const liberi = S.dif.filter(d => (!d.mosso || !d.agito) && (!online() || puoComandare(d) || NET.modo === 'vs')).length;
   el('tbFine').disabled = !!V || !!S.esito; el('tbFine').classList.toggle('pronto', !V && liberi === 0);
   box.classList.remove('mini', 'su');
@@ -6336,10 +6373,11 @@ function info(){
   if (online() && infoOnline(box)) return; if (!online()) aggiornaOlBar();
   if (piazza && S.turno === 1 && !S.esito){ const f = S.dif.find(d => d.id === piazza.id);
     if (f){ box.classList.remove('mini'); if (metti(box, `<div class="tbguida"><p>🦅 <b>Dove metti il ${TIPI[f.tipo].nome}?</b> Tocca un <b>cerchio giallo</b>. Non si muoverà più per tutta la partita, ma colpisce i nemici ovunque. Mettilo al sicuro, oppure usalo per bloccare una strada.</p><button class="big alt" id="tbPzOk">Lascialo qui</button></div>`)){ box.querySelector('#tbPzOk').onclick = () => { piazza = null; SUONI.suona('tocco'); render(); }; } return; } }
+  if (PROVA){ box.classList.add('mini'); metti(box, `<p class="tbtip">👆 Segui il dito</p>`); provaCoach(); return; }
   const pg = passoGuida(); el('tbFine').classList.toggle('guida', !!(pg && pg.punta === 'fine'));
   if (pg){ box.classList.add('mini'); metti(box, `<p class="tbtip">👆 Segui il dito</p>`);
     if (COACH_TB !== guida){ COACH_TB = guida; const fine = () => { COACH_TB = -1; COACH.nascondi(); fineGuida(); info(); render(); };
-      const avanti = () => { if (guida >= GUIDA.length - 1) return fine(); guida++; COACH_TB = -1; info(); render(); };
+      const g0 = guida, avanti = () => { if (guida !== g0) return; if (guida >= GUIDA.length - 1) return fine(); guida++; COACH_TB = -1; info(); render(); }; // un doppio tocco non salta un passo
       COACH.mostra({passo: guida + 1, tot: GUIDA.length, testo: pg.t, sotto: pg.sub, salta: pg.bottone ? null : fine, bottone: pg.bottone || null, ok: avanti,
         pausa: () => !attivo || ovAperto || !S, dove: () => { if (!S) return null; if (pg.punta === 'fine') return el('tbFine'); if (pg.punta === 'aiuto'){ const ba = el('tbAiuto'); return ba && !ba.hidden ? ba : null; } if (typeof pg.punta === 'function'){ const id = pg.punta(); if (!id || !NODI[id]) return null; const [x, y] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + x, y: r.top + y - 8, r: 30}; } return null; }}); }
     return; }
@@ -6666,12 +6704,12 @@ function intro(){
   const o = prima ? overlay(`<div class="dlg box mis mis-prima">
     <button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>
     <div class="mis-top"><span class="mis-n">Missione 1 · Si impara</span></div>
-    <h2 class="mis-t">Come si gioca</h2>
-    <div class="mp-r"><span class="mp-i">⛪</span><span><b>Difendi la Chiesa</b>I nemici rossi vogliono arrivarci. Se ci entrano le tolgono vite: ne ha ${S.portaMax}. Se finiscono, perdi.</span></div>
-    <div class="mp-r"><span class="mp-i">🔁</span><span><b>Si gioca a turni</b>Prima muovi i tuoi soldati blu. Poi tocchi <em class="mp-k">Fine turno</em> e si muovono i nemici.</span></div>
-    <div class="mp-r"><span class="mp-i">🏆</span><span><b>Vinci</b>quando hai fermato tutti i nemici.</span></div>
-    <p class="mp-g">👆 Ti guido io con il dito, passo passo.</p>
-    <button class="big" id="tbVia">Inizia ${ico('play')}</button></div>`) : overlay(`<div class="dlg box mis">
+    <h2 class="mis-t">Prova i tuoi soldati</h2>
+    <div class="mp-r"><span class="mp-i">⚔️</span><span><b>Lancieri</b>Colpiscono forte, da vicino.</span></div>
+    <div class="mp-r"><span class="mp-i">🏹</span><span><b>Arcieri</b>Tirano da lontano.</span></div>
+    <div class="mp-r"><span class="mp-i">🔨</span><span><b>Carpentieri</b>Costruiscono barricate.</span></div>
+    <p class="mp-g">👆 Li provi uno alla volta: bastano 30 secondi. Poi difendi la Chiesa.</p>
+    <button class="big" id="tbVia">Prova ${ico('play')}</button></div>`) : overlay(`<div class="dlg box mis">
     ${RUN ? '' : `<button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>`}
     <div class="mis-top"><span class="mis-n">${SFIDA ? ico('calendario') + ' Sfida del giorno' : M.evento ? '🌰 Evento a tempo' : SFIDA_AMICO ? '⚔️ Sfida di ' + escH(SFIDA_AMICO.n || 'un amico') + ': ' + (+SFIDA_AMICO.p || 0) + ' punti' : 'Missione ' + M.num + ' di ' + MISSIONI.length}</span><span class="mis-d" aria-label="Difficoltà: ${M.livello}">${pallini}<em>${M.livello.split(':')[0]}</em></span></div>
     <h2 class="mis-t">${M.titolo}</h2>
@@ -6715,7 +6753,7 @@ function intro(){
   { const di = o.querySelector('#dlgIc'); if (di) di.append(icona(M.dlg[0], 3)); }
   // se c'è un nemico nuovo, lo presento subito
   const primoNuovo = o.querySelector('.mis-pg.nuovo'); if (primoNuovo) primoNuovo.click();
-  o.querySelector('#tbVia').onclick = () => { chiudiOv(); usaTalismano(); if (!RUN){ SUONI.suona('banner'); EPICO.banner(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
+  o.querySelector('#tbVia').onclick = () => { chiudiOv(); if (prima){ provaVia(0); return; } usaTalismano(); if (!RUN){ SUONI.suona('banner'); EPICO.banner(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
   const bk = o.querySelector('#misBack'); if (bk) bk.onclick = () => { if (provenienza === 'missioni') scelta(M.evento ? undefined : (M.luogo || 'smerillo')); else esci(); };
   const bq = o.querySelector('#tbSqC'); if (bq) bq.onclick = () => { chiudiOv(); squadra(MI); };
 }
