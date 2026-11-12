@@ -9456,11 +9456,14 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261111142016';
+  const VERSIONE = window.DS_VER = '20261112100632';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
-    try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){ nuovaV = j.v; avvisaVersione(); } } catch(e){} }
-  function aggiorna(){ traccia('aggiorna', {da: VERSIONE, a: nuovaV}, true); const u = new window.URL(location.href); u.searchParams.set('v', nuovaV || Date.now()); u.hash = ''; location.replace(u.toString()); }
+    try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){
+        // se ho già ricaricato per questa versione e il file è ancora quello vecchio (la rete lo sta ancora distribuendo), non lo richiedo all'infinito
+        let provata = null; try { provata = sessionStorage.getItem('ds-agg'); } catch(e){}
+        if (provata === j.v) return; nuovaV = j.v; avvisaVersione(); } } catch(e){} }
+  function aggiorna(){ traccia('aggiorna', {da: VERSIONE, a: nuovaV}, true); try { sessionStorage.setItem('ds-agg', nuovaV || ''); } catch(e){} const u = new window.URL(location.href); u.searchParams.set('v', nuovaV || Date.now()); u.hash = ''; location.replace(u.toString()); }
   function avvisaVersione(){ if (!nuovaV) return;
     // nel menu chiedo subito; durante una partita metto solo una striscia in alto, così non si perde niente
     if (nelMenu() && !aperta()){ const b = finestra(`<span class="fd-k">AGGIORNAMENTO</span><h2>C’è una versione nuova!</h2><p class="acc-sub">Tocca Aggiorna per avere le ultime novità. I tuoi progressi restano.</p><button class="big" data-ok>Aggiorna ora</button><button class="as-salta" data-no>Dopo</button>`);
