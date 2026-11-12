@@ -2060,19 +2060,24 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 #coach.lato .co-t{font-size:16px}#coach.lato .co-s{font-size:13px}
 #coach.stretto .co-s{display:none}
 /* ===== guida col dito ===== */
-#coach{position:fixed;left:12px;right:12px;z-index:100001;max-width:460px;margin:0 auto;background:#fff;color:#141433;border:4px solid #141433;border-radius:20px;box-shadow:0 6px 0 #141433;padding:12px 14px 14px;font-family:var(--f-body,system-ui);pointer-events:auto}
+#coach{position:fixed;left:12px;right:12px;z-index:100001;max-width:440px;margin:0 auto;background:#fff;color:#141433;border:3px solid #141433;border-radius:16px;box-shadow:0 4px 0 #141433;padding:8px 12px 10px;font-family:var(--f-body,system-ui);pointer-events:auto}
 #coach[hidden]{display:none}
-#coach.sopra{top:calc(env(safe-area-inset-top) + 64px)}
+#coach.sopra{top:calc(env(safe-area-inset-top) + 58px)}
 #coach.sotto{bottom:calc(env(safe-area-inset-bottom) + 96px)}
 #coach.entra{animation:coIn .3s cubic-bezier(.2,1.4,.4,1)}
 @keyframes coIn{from{transform:translateY(-12px) scale(.96);opacity:0}}
-.co-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
-.co-n{font-family:var(--f-pixel,monospace);font-size:12px;font-weight:900;letter-spacing:.6px;background:#ffd03a;border:2px solid #141433;border-radius:8px;padding:3px 8px}
-.co-salta{background:none;border:0;color:#5a6080;font-size:13px;text-decoration:underline;padding:4px;cursor:pointer}
-.co-t{margin:0;font-size:20px;line-height:1.25;font-weight:800}
+.co-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px}
+.co-n{font-family:var(--f-pixel,monospace);font-size:10.5px;font-weight:900;letter-spacing:.5px;background:#ffd03a;border:2px solid #141433;border-radius:7px;padding:1px 6px}
+.co-salta{background:none;border:0;color:#5a6080;font-size:12.5px;text-decoration:underline;padding:2px 4px;cursor:pointer}
+.co-t{margin:0;font-size:17px;line-height:1.22;font-weight:800}
 .co-t b{color:#d0342a}
-.co-s{margin:6px 0 0;font-size:15px;line-height:1.35;color:#3a3f60}
-.co-ok{margin-top:10px;width:100%;min-height:48px;border:3px solid #141433;border-radius:14px;background:#ffd03a;color:#141433;font-weight:900;font-size:18px;box-shadow:0 4px 0 #141433;cursor:pointer}
+.co-s{margin:3px 0 0;font-size:13.5px;line-height:1.3;color:#3a3f60}
+/* dopo qualche secondo la nuvoletta si fa piccola: resta solo cosa toccare, e la mappa si vede. Se la tocchi si riapre */
+#coach.mini{padding:6px 12px;border-radius:999px;width:max-content;max-width:calc(100vw - 24px);box-shadow:0 3px 0 #141433;cursor:pointer}
+#coach.mini .co-h,#coach.mini .co-s{display:none}
+#coach.mini .co-t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#coach.mini{top:calc(env(safe-area-inset-top) + 58px) !important;bottom:auto !important} /* da piccola sta sempre in alto, sotto la barra: lì non copre né i tasti né la mappa */
+.co-ok{margin-top:8px;width:100%;min-height:44px;border:3px solid #141433;border-radius:14px;background:#ffd03a;color:#141433;font-weight:900;font-size:18px;box-shadow:0 4px 0 #141433;cursor:pointer}
 #coachRing{position:fixed;z-index:100000;pointer-events:none;border:5px solid #ffd03a;box-shadow:0 0 0 3px #141433,0 0 22px 6px rgba(255,208,58,.8);animation:coRing 1.1s ease-in-out infinite}
 #coachRing[hidden],#coachDito[hidden]{display:none}
 @keyframes coRing{50%{transform:scale(1.12);box-shadow:0 0 0 3px #141433,0 0 34px 12px rgba(255,208,58,.55)}}
@@ -9380,9 +9385,11 @@ document.addEventListener('keydown', e => {
 });
 // ===== COACH: la guida che indica col dito cosa toccare (usata da missioni, tempo reale e Conquista) =====
 const COACH = window.COACH = (() => {
-  let box = null, ring = null, dito = null, cfg = null, raf = 0;
+  let box = null, ring = null, dito = null, cfg = null, raf = 0, tMini = 0;
+  const MINI_DOPO = 4200; // millisecondi di lettura prima di farsi piccola
   function crea(){ if (box) return;
     box = document.createElement('div'); box.id = 'coach'; box.hidden = true; document.body.append(box);
+    box.addEventListener('click', () => { if (box.classList.contains('mini')){ box.classList.remove('mini'); armaMini(); } });
     ring = document.createElement('div'); ring.id = 'coachRing'; ring.hidden = true; document.body.append(ring);
     dito = document.createElement('div'); dito.id = 'coachDito'; dito.hidden = true; dito.innerHTML = '<svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10l.5-.1a1.5 1.5 0 0 1 2.9.6l.1.1a1.5 1.5 0 0 1 2.8.8l.2.1a1.4 1.4 0 0 1 2.5.9V16a6 6 0 0 1-6 6h-1.2a6 6 0 0 1-4.6-2.2L5 15.4a1.5 1.5 0 0 1 2.2-2L9 15" fill="#fff" stroke="#141433" stroke-width="1.6" stroke-linejoin="round"/></svg>'; document.body.append(dito); }
   // dove sta il bersaglio: un elemento della pagina oppure un punto {x, y} sullo schermo
@@ -9401,14 +9408,15 @@ const COACH = window.COACH = (() => {
       else { box.classList.remove('lato', 'dx', 'sx'); const alto = !b || b.y > innerHeight*.45; box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
         // se la nuvoletta copre comunque il punto da toccare, la accorcio
         if (b){ const r = box.getBoundingClientRect(); box.classList.toggle('stretto', b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8); } } } }
-  function mostra(c){ crea(); cfg = c;
+  function armaMini(){ clearTimeout(tMini); if (cfg && !cfg.bottone) tMini = setTimeout(() => { if (cfg && !cfg.bottone && box && !box.hidden) box.classList.add('mini'); }, MINI_DOPO + (cfg.sotto ? 1200 : 0)); }
+  function mostra(c){ crea(); cfg = c; box.classList.remove('mini');
     box.innerHTML = `<div class="co-h"><span class="co-n">${c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : 'GUIDA'}</span>${c.salta ? '<button type="button" class="co-salta">Salta la guida</button>' : ''}</div>
       <p class="co-t">${c.testo}</p>${c.sotto ? `<p class="co-s">${c.sotto}</p>` : ''}${c.bottone ? `<button type="button" class="co-ok">${c.bottone}</button>` : ''}`;
     const s = box.querySelector('.co-salta'); if (s) s.onclick = e => { e.stopPropagation(); const f = c.salta; nascondi(); f(); };
     const o = box.querySelector('.co-ok'); if (o) o.onclick = e => { e.stopPropagation(); const f = c.ok; if (f) f(); };
-    box.hidden = false; box.classList.remove('entra'); void box.offsetWidth; box.classList.add('entra');
+    box.hidden = false; box.classList.remove('entra'); void box.offsetWidth; box.classList.add('entra'); armaMini();
     if (!raf) giro(); }
-  function nascondi(){ cfg = null; if (box){ box.hidden = true; ring.hidden = true; dito.hidden = true; } if (raf){ cancelAnimationFrame(raf); raf = 0; } }
+  function nascondi(){ cfg = null; clearTimeout(tMini); if (box){ box.hidden = true; ring.hidden = true; dito.hidden = true; } if (raf){ cancelAnimationFrame(raf); raf = 0; } }
   return {mostra, nascondi, get attivo(){ return !!cfg; }};
 })();
 
