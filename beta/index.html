@@ -6291,7 +6291,7 @@ function provaCoach(){ if (!PROVA || !S) return; const P = PROVE[PROVA.k], u = S
 function fineGuida(){ guida = -1; if (COACH_TB !== -1){ COACH_TB = -1; try { COACH.nascondi(); } catch(e){} } try { localStorage.setItem(GUIDAKEY, '1'); } catch(e){} el('tbFine').classList.remove('guida'); }
 // ---------- 💡 Aiuto: nelle prime missioni ti mostra col dito una mossa buona ----------
 let AIUTO = null;
-function aiutoOk(){ return !PROVA && !!S && !S.esito && !V && !online() && !RUN && !SFIDA && !M.evento && MI <= 2 && (guida < 0 || guida === GUIDA.length - 1); }
+function aiutoOk(){ return !PROVA && !!S && !S.esito && !V && !online() && !RUN && !SFIDA && !M.evento && MI <= 2 && (guida < 0 || guida >= 1); }
 function mossaBuona(){
   if (!S.nem.length) return {k:'fine'};
   // 1) un soldato che può già colpire un nemico
@@ -6377,7 +6377,7 @@ function info(){
   const pg = passoGuida(); el('tbFine').classList.toggle('guida', !!(pg && pg.punta === 'fine'));
   if (pg){ box.classList.add('mini'); metti(box, `<p class="tbtip">👆 Segui il dito</p>`);
     if (COACH_TB !== guida){ COACH_TB = guida; const fine = () => { COACH_TB = -1; COACH.nascondi(); fineGuida(); info(); render(); };
-      const g0 = guida, avanti = () => { if (guida !== g0) return; if (guida >= GUIDA.length - 1) return fine(); guida++; COACH_TB = -1; info(); render(); }; // un doppio tocco non salta un passo
+      const g0 = guida, avanti = () => { if (guida !== g0) return; if (guida >= GUIDA.length - 1) return fine(); guida++; COACH_TB = -1; COACH.nascondi(); info(); render(); }; // un doppio tocco non salta un passo
       COACH.mostra({passo: guida + 1, tot: GUIDA.length, testo: pg.t, sotto: pg.sub, salta: pg.bottone ? null : fine, bottone: pg.bottone || null, ok: avanti,
         pausa: () => !attivo || ovAperto || !S, dove: () => { if (!S) return null; if (pg.punta === 'fine') return el('tbFine'); if (pg.punta === 'aiuto'){ const ba = el('tbAiuto'); return ba && !ba.hidden ? ba : null; } if (typeof pg.punta === 'function'){ const id = pg.punta(); if (!id || !NODI[id]) return null; const [x, y] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + x, y: r.top + y - 8, r: 30}; } return null; }}); }
     return; }
