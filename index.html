@@ -18,10 +18,14 @@
 .mis .mis-foot{background:linear-gradient(180deg,rgba(26,42,138,0) 0,var(--carta,#1a2a8a) 16px);z-index:2}
 .mis-piu-in{display:flex;flex-direction:column;gap:12px;padding:6px 0 10px}
 .mis-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tbruolo{display:block;font-size:14.5px;line-height:1.3;margin:2px 0 4px;color:var(--testo)}
+body.tb-prova #tbFine,body.tb-prova #tbUndo,body.tb-prova #tbShop,body.tb-prova #tbAiuto{visibility:hidden}
+.cq-casd #cqOk{position:sticky;bottom:0;z-index:3;box-shadow:0 -10px 14px 6px var(--cq-carta,#1a2466),0 5px 0 #141433}
 </style>
 <style>
 #caricamento{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(180deg,#0b1240 0%,#1a2f86 45%,#3d6fe0 75%,#f0a060 100%);transition:opacity .45s,transform .45s}
 #caricamento.via{opacity:0;transform:scale(1.06);pointer-events:none}
+#caricamento:not(.pronto) .ld-su,#caricamento:not(.pronto) .ld-giu{opacity:0}#caricamento .ld-su,#caricamento .ld-giu{transition:opacity .3s}#caricamento:not(.pronto) .ld-logo span{animation:none} /* le scritte compaiono solo quando i caratteri sono pronti: niente scritte che cambiano forma */
 .ld-cielo{position:absolute;inset:0;pointer-events:none}
 .ld-stelle{position:absolute;inset:0 0 45% 0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 50%,transparent),radial-gradient(1px 1px at 30% 8%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 52% 22%,#fff 50%,transparent),radial-gradient(1px 1px at 70% 12%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 86% 26%,#fff 50%,transparent),radial-gradient(1px 1px at 20% 34%,#fff 50%,transparent),radial-gradient(1px 1px at 62% 36%,#fff 50%,transparent),radial-gradient(1px 1px at 92% 6%,#fff 50%,transparent);animation:ldBrilla 3s ease-in-out infinite}
 @keyframes ldBrilla{50%{opacity:.5}}
@@ -70,7 +74,7 @@
   color-scheme:dark;
 }
 [hidden]{display:none!important}
-html{height:100%;box-sizing:border-box}
+html{height:100%;box-sizing:border-box;background:#0b1240}
 /* gioco aperto dalla Home: il fondo della pagina ha lo stesso blu della barra in basso, così iOS non lascia strisce nere */
 @media (display-mode: standalone){ html, body{background:#141f52!important} body::after{content:'';position:fixed;left:0;right:0;top:0;height:22px;background:linear-gradient(#141f52,rgba(20,31,82,0));z-index:2147483000;pointer-events:none} }
 *,*::before,*::after{box-sizing:inherit}
@@ -1069,7 +1073,7 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .cr-tab.nov::after{content:'';position:absolute;top:2px;right:10px;width:14px;height:14px;border-radius:50%;background:#d93636;border:2px solid var(--linea)}
 @media (max-height:640px){ .cr-arena .logo{font-size:clamp(32px,10vw,44px)!important} .cr-arena{gap:8px} }
 /* ===== animazioni di transizione ===== */
-.tr-velo{position:fixed;inset:0;z-index:100000;background:radial-gradient(circle at 50% 45%,#2f54d6,#141f52 70%);display:grid;place-items:center;pointer-events:all;clip-path:circle(0px at 50% 50%)}
+.tr-velo{position:fixed;inset:0;z-index:100010;background:radial-gradient(circle at 50% 45%,#2f54d6,#141f52 70%);display:grid;place-items:center;pointer-events:all;clip-path:circle(0px at 50% 50%)}
 .tr-velo .tr-ic{animation:trIc .7s ease-in-out infinite alternate;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
 @keyframes trIc{from{transform:translateY(0) scale(1)}to{transform:translateY(-8px) scale(1.08)}}
 .cr-nav{position:relative}
@@ -1349,7 +1353,8 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-az .big:only-child,.cq-az .big:last-child:nth-child(odd){grid-column:1 / -1}
 .cq-nota{margin:0;font-size:13px;color:var(--grigio);grid-column:1 / -1;line-height:1.35}
 .cq-warn{margin:0;padding:8px 10px;border-radius:12px;background:#ffe8e3;border:2px solid #ff4d4d;font-size:14px;color:#7a1d10!important;font-weight:700}
-.cq-bar{display:grid;grid-template-columns:1fr 1.35fr;gap:10px}
+.cq-bar{display:grid;grid-template-columns:58px 1fr 1.35fr;gap:8px}
+.cq-bar .cq-cosa{padding:0;background:#ffd03a;color:#141433}
 .cq-bar .big{min-height:58px;font-size:19px;padding:6px;display:flex;align-items:center;justify-content:center;gap:6px}
 #cqFine.pronto{animation:tbpulse 1s ease-in-out infinite}
 #cqOv{inset:0;z-index:8;background:rgba(14,22,70,.55);padding:64px 10px calc(12px + env(safe-area-inset-bottom))}
@@ -2058,19 +2063,26 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 #coach.lato .co-t{font-size:16px}#coach.lato .co-s{font-size:13px}
 #coach.stretto .co-s{display:none}
 /* ===== guida col dito ===== */
-#coach{position:fixed;left:12px;right:12px;z-index:100001;max-width:460px;margin:0 auto;background:#fff;color:#141433;border:4px solid #141433;border-radius:20px;box-shadow:0 6px 0 #141433;padding:12px 14px 14px;font-family:var(--f-body,system-ui);pointer-events:auto}
+#coach{position:fixed;left:12px;right:12px;z-index:100001;max-width:440px;margin:0 auto;background:#fff;color:#141433;border:3px solid #141433;border-radius:16px;box-shadow:0 4px 0 #141433;padding:8px 12px 10px;font-family:var(--f-body,system-ui);pointer-events:auto}
 #coach[hidden]{display:none}
-#coach.sopra{top:calc(env(safe-area-inset-top) + 64px)}
+.cq-it.cq-cons{outline:4px solid #ffd03a;box-shadow:0 0 0 7px rgba(20,20,51,.9),0 0 22px 6px rgba(255,208,58,.7);animation:cqCons 1.1s ease-in-out infinite}@keyframes cqCons{50%{outline-color:#fff}}
+#coach .co-salta.co-sic{color:#c2261b;font-weight:800}#coach{pointer-events:none}#coach .co-salta,#coach .co-ok,#coach.mini{pointer-events:auto} /* la nuvoletta non blocca mai i tocchi su mappa e tasti */
+#coach.sopra{top:calc(env(safe-area-inset-top) + 58px)}
 #coach.sotto{bottom:calc(env(safe-area-inset-bottom) + 96px)}
 #coach.entra{animation:coIn .3s cubic-bezier(.2,1.4,.4,1)}
 @keyframes coIn{from{transform:translateY(-12px) scale(.96);opacity:0}}
-.co-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
-.co-n{font-family:var(--f-pixel,monospace);font-size:12px;font-weight:900;letter-spacing:.6px;background:#ffd03a;border:2px solid #141433;border-radius:8px;padding:3px 8px}
-.co-salta{background:none;border:0;color:#5a6080;font-size:13px;text-decoration:underline;padding:4px;cursor:pointer}
-.co-t{margin:0;font-size:20px;line-height:1.25;font-weight:800}
+.co-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px}
+.co-n{font-family:var(--f-pixel,monospace);font-size:10.5px;font-weight:900;letter-spacing:.5px;background:#ffd03a;border:2px solid #141433;border-radius:7px;padding:1px 6px}
+.co-salta{background:none;border:0;color:#5a6080;font-size:12.5px;text-decoration:underline;padding:2px 4px;cursor:pointer}
+.co-t{margin:0;font-size:17px;line-height:1.22;font-weight:800}
 .co-t b{color:#d0342a}
-.co-s{margin:6px 0 0;font-size:15px;line-height:1.35;color:#3a3f60}
-.co-ok{margin-top:10px;width:100%;min-height:48px;border:3px solid #141433;border-radius:14px;background:#ffd03a;color:#141433;font-weight:900;font-size:18px;box-shadow:0 4px 0 #141433;cursor:pointer}
+.co-s{margin:3px 0 0;font-size:13.5px;line-height:1.3;color:#3a3f60}
+/* dopo qualche secondo la nuvoletta si fa piccola: resta solo cosa toccare, e la mappa si vede. Se la tocchi si riapre */
+#coach.mini{padding:6px 12px;border-radius:999px;width:max-content;max-width:calc(100vw - 24px);box-shadow:0 3px 0 #141433;cursor:pointer}
+#coach.mini .co-h,#coach.mini .co-s{display:none}
+#coach.mini .co-t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#coach.mini{top:calc(env(safe-area-inset-top) + 58px) !important;bottom:auto !important} /* da piccola sta sempre in alto, sotto la barra: lì non copre né i tasti né la mappa */
+.co-ok{margin-top:8px;width:100%;min-height:44px;border:3px solid #141433;border-radius:14px;background:#ffd03a;color:#141433;font-weight:900;font-size:18px;box-shadow:0 4px 0 #141433;cursor:pointer}
 #coachRing{position:fixed;z-index:100000;pointer-events:none;border:5px solid #ffd03a;box-shadow:0 0 0 3px #141433,0 0 22px 6px rgba(255,208,58,.8);animation:coRing 1.1s ease-in-out infinite}
 #coachRing[hidden],#coachDito[hidden]{display:none}
 @keyframes coRing{50%{transform:scale(1.12);box-shadow:0 0 0 3px #141433,0 0 34px 12px rgba(255,208,58,.55)}}
@@ -2169,12 +2181,9 @@ body.itch-va .tr-velo,body.itch-va #coach,body.itch-va #coachRing,body.itch-va #
 #caricamento.acc-entrando.via{opacity:1!important}
 .acc-portale{display:none!important}
 .acc-in{position:fixed;inset:0;z-index:200000;pointer-events:none;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.acc-in-griglia{position:absolute;inset:0}
-.acc-in-griglia i{position:absolute;width:calc(var(--l) + 1px);height:calc(var(--l) + 1px);background:#141433;transform:scale(0);transition:transform .32s cubic-bezier(.5,0,.6,1.3);transition-delay:calc((1 - var(--d)) * .28s)}
-.acc-in-griglia i.b{background:#17193f}
-.acc-in-griglia i.o{background:#1f2360}
-.acc-in.copri .acc-in-griglia i{transform:scale(1)}
-.acc-in.scopri .acc-in-griglia i{transform:scale(0);transition:transform .3s cubic-bezier(.5,-.3,.6,1);transition-delay:calc(var(--d) * .38s)}
+.acc-in-griglia{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,#22307a,#141433 72%);opacity:0;transition:opacity .35s ease} /* ingresso: una dissolvenza pulita, niente quadretti */
+.acc-in.copri .acc-in-griglia{opacity:1}
+.acc-in.scopri .acc-in-griglia{opacity:0;transition:opacity .45s ease}
 .acc-in-testo{position:relative;z-index:2;text-align:center;transform:translateY(10px);opacity:0;transition:opacity .25s,transform .4s cubic-bezier(.2,1.3,.4,1)}
 .acc-in.su .acc-in-testo{opacity:1;transform:none}
 .acc-in-et{font:700 15px "Pixelify Sans",monospace;letter-spacing:4px;text-transform:uppercase;color:#cfe0ff;text-shadow:2px 2px 0 #141433;margin-bottom:6px;opacity:0;transform:translateY(8px);transition:all .3s .1s}
@@ -2185,7 +2194,7 @@ body.itch-va .tr-velo,body.itch-va #coach,body.itch-va #coachRing,body.itch-va #
 @keyframes accLett{to{opacity:1;transform:none}}
 .acc-in-riga{height:5px;margin:14px auto 0;width:0;background:#ffd03a;box-shadow:0 3px 0 #141433;transition:width .5s cubic-bezier(.3,0,.2,1) .55s}
 .acc-in.su .acc-in-riga{width:min(70%,260px)}
-.acc-in-testo b{position:absolute;left:50%;top:50%;width:8px;height:8px;box-shadow:0 0 0 2px #141433;opacity:0}
+.acc-in-testo b{display:none;position:absolute;left:50%;top:50%;width:8px;height:8px;box-shadow:0 0 0 2px #141433;opacity:0}
 .acc-in.su .acc-in-testo b{animation:accScint .75s ease-out var(--t) forwards}
 @keyframes accScint{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.4)}}
 .acc-in.scopri .acc-in-testo{opacity:0;transform:scale(1.25);transition:opacity .3s,transform .4s ease-in}
@@ -2431,6 +2440,7 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
     <button type="button" id="ldVia" class="ld-via" hidden>Tocca per entrare</button>
   </div>
 </div>
+<script>(function(){ var c = document.getElementById('caricamento'), ok = function(){ if (c) c.classList.add('pronto'); }; try { document.fonts.ready.then(function(){ requestAnimationFrame(ok); }); } catch(e){ ok(); } setTimeout(ok, 1500); })();</script>
 <div id="giraTel" aria-live="polite"><div class="gt-ic"></div>Gira il telefono<small>In orizzontale si gioca solo la Difesa in tempo reale. Per il resto tieni il telefono in verticale.</small></div>
 <div id="app">
   <header class="hud box">
@@ -3786,7 +3796,7 @@ const CE = (() => {
 
 /* ================= STATO ================= */
 let S = null, scena = null, MOD = false, modSel = null, storia = [];
-function nuovaPartita(diff){ mappaRT(CMIS); try { RITORNO.inizio('tempo'); } catch(e){}
+function nuovaPartita(diff){ mappaRT(CMIS); try { RITORNO.inizio('tempo'); } catch(e){} setTimeout(() => { try { window.aggOriz && window.aggOriz(); } catch(e){} }, 0); // il tipo di comandi giusto subito, non dopo mezzo secondo
   const D = DIFF[diff || (S && S.diff) || 'normale'];
   S = { miss: CMIS, diff: diff || (S && S.diff) || 'normale', hpDiff: D.hp, viteMax: D.vite, castagne:D.cast, vite:D.vite, ondata:0, prossima:null, vieAttive:[], inCorso:false, coda:[], timer:0, intervallo:1, multVita:1, multVel:1,
         nemici:[], proj:[], fx:[], part:[], morti:[], monete:[], soldati:[], trappole:[], ordini:2, modo:null, assalti:[], shake:0, pausa:false, camT:null, luoghi: [], // niente posti fissi: le difese le costruisci tu dove vuoi
@@ -3809,6 +3819,7 @@ function preparaOndata(){
 }
 function avviaOndata(){
   if (!S || S.inCorso || S.fine || S.attesaCarta || S.ondata >= ONDATE) return;
+  if (S.ondata === 0 && (S.avvisoDif || 0) < 2 && !S.luoghi.some(l => l.lvl)){ let g = false; try { g = localStorage.getItem(GKEY_CL) === '1'; } catch(e){} if (!g){ S.avvisoDif = (S.avvisoDif || 0) + 1; try { toastMenu('Prima costruisci una difesa: tocca un pallino bianco.'); } catch(e){} return; } }
   if (!S.prossima) preparaOndata();
   const pr = S.prossima; S.prossima = null;
   S.ondata = pr.n; S.inCorso = true; S.ev = pr.ev; S.ultimoEv = pr.ev; S.vieAttive = pr.vie;
@@ -5827,7 +5838,7 @@ function colpisci(S, o, danno, evs, da){
       conta(S, 'monete', g); conta(S, 'k'); if (lont) conta(S, 'lontani'); conta(S, 'k:' + u.tipo); const dd = S.dif.find(q => q.id === da); if (dd){ conta(S, 'kd:' + dd.tipo); conta(S, 'k:' + dd.tipo + ':' + u.tipo); } } }
 }
 function conta(S, k, n = 1){ S.st = S.st || {}; S.st[k] = (S.st[k] || 0) + n; }
-function esito(S){ if (S.porta <= 0) S.esito = 'perso'; else if (S.vs){ if (S.turno > S.vs.turni) S.esito = 'vinto'; } else if (!S.nem.length && !S.coda.length) S.esito = 'vinto'; }
+function esito(S){ if (S.prova != null) return; if (S.porta <= 0) S.esito = 'perso'; else if (S.vs){ if (S.turno > S.vs.turni) S.esito = 'vinto'; } else if (!S.nem.length && !S.coda.length) S.esito = 'vinto'; }
 // ogni nemico sceglie la strada più conveniente: se un difensore blocca la via e c'è un giro, lo prende
 const volaOra = (S, x) => { const T = TIPI[x.tipo]; return !!(T.vola || (T.salta && S.turno % 2 === 0)); }; // il Gatto Mammone salta nei turni pari
 function prossimoPasso(S, x){
@@ -5919,7 +5930,7 @@ function usaSpeciale(S, d, evs){
   else { for (const x of S.nem.slice()) if (gdist(d.nodo, x.nodo) === 1 || (s === 'frana' && gdist(d.nodo, x.nodo) <= 1)) colpisci(S, {k:'nem', u:x}, 2, evs, d.id); }
   esito(S);
 }
-function mossePer(S, d){
+function mossePer(S, d){ if (S.prova != null) return [];
   const T = TIPI[d.tipo]; if (!T.passo) return [];
   if (!d.mosso){ const out = raggiungibili(S, d).map(nodo => ({nodo, k:'passo'}));
     for (const c of ADJ[d.nodo]){ const o = occ(S, c); if (o && o.k === 'dif' && TIPI[o.u.tipo].passo && !ARRIVO.has(d.nodo)) out.push({nodo:c, k:'scambio'}); } return out; }
@@ -5965,7 +5976,8 @@ function fitCam(){
   let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
   for (const N of Object.values(NODI)){ const [x,y] = P(N.e, N.n, N.z); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
   x0 -= 24; x1 += 24; y0 -= 74; y1 += 30;
-  const tp = 64, bp = 120; fitS = Math.min(SW/(x1-x0), (SH-tp-bp)/(y1-y0)); if (M && M.luogo === 'ce' && SH > SW){ fitS = Math.min(SW/((x1-x0)*.45), (SH-tp-bp)/(y1-y0)); sc = fitS; const C = NODI[META] || Object.values(NODI)[0]; const [cx] = P(C.e, C.n, C.z); camX = cx; camY = (y0+y1)/2 - (tp-bp)/2/fitS; limitaCam(); return; } // Ceresola è larga: sul telefono si vede più grande e si scorre di lato sc = fitS; camX = (x0+x1)/2; camY = (y0+y1)/2 - (tp-bp)/2/fitS; limitaCam();
+  const tp = 64, bp = 120; fitS = Math.min(SW/(x1-x0), (SH-tp-bp)/(y1-y0)); if (M && M.luogo === 'ce' && SH > SW){ fitS = Math.min(SW/((x1-x0)*.45), (SH-tp-bp)/(y1-y0)); sc = fitS; const C = NODI[META] || Object.values(NODI)[0]; const [cx] = P(C.e, C.n, C.z); camX = cx; camY = (y0+y1)/2 - (tp-bp)/2/fitS; limitaCam(); return; } // Ceresola è larga: sul telefono si vede più grande e si scorre di lato
+  sc = fitS; camX = (x0+x1)/2; camY = (y0+y1)/2 - (tp-bp)/2/fitS; limitaCam(); // tutte le altre mappe: si vedono intere
 }
 let SCENA_SM = null, SCENA_CE = null; const sfondo = () => M && M.luogo === 'sm' ? (SCENA_SM || (SCENA_SM = SM.crea())) : M && M.luogo === 'ce' ? (SCENA_CE || (SCENA_CE = CE.crea())) : (scena || (scena = creaScena()));
 function limitaCam(){ const LG = M && M.luogo === 'sm' ? SM : M && M.luogo === 'ce' ? CE : null, W = LG ? LG.W : 480, H = LG ? LG.H : 690; sc = Math.max(fitS*.8, Math.min(fitS*3, sc)); camX = Math.max(0, Math.min(W, camX)); { const hw = SW/2/sc, hh = SH/2/sc; if (W > 2*hw) camX = Math.max(hw, Math.min(W - hw, camX)); else camX = W/2; /* schermo più largo della mappa (PC): la mappa sta al centro, niente metà vuota */ { const mt = 70/sc, mb = 150/sc; camY = Math.max(hh - mt, Math.min(H - hh + mb, camY)); } } /* si può trascinare oltre il bordo: niente resta sotto i bottoni */ ox = SW/2 - camX*sc; oy = SH/2 - camY*sc; }
@@ -6051,6 +6063,7 @@ function perche(d, nodo){ const T = TIPI[d.tipo], st = stat(d.tipo), nome = T.no
 function annulla(){ if (ev || !storia.length || !mioTurno()) return; POS.clear(); COLP.clear(); FANT = []; S = storia.pop(); sel = null; aggiornaAnteprima(); render(); if (online()) invia({t:'stato', S}); }
 function fineTurno(){
   if (!S || ev || S.esito || ovAperto) return; piazza = null;
+  if (MI === 0 && !RUN && !SFIDA && !M.evento && !online() && S.prova == null && S.avvisoFine !== S.turno && S.dif.some(d => !d.agito && !TIPI[d.tipo].costruisce && bersagli(S, d).length)){ S.avvisoFine = S.turno; try { toastMenu('Aspetta! Puoi ancora colpire un nemico.'); aiuto(); } catch(e){} return; }
   if (online() && fineTurnoOnline()) return; annotaTurno(S);
   uccisiT = 0; V = clona(S); sel = null; storia = []; coda = faseNemici(S); ev = null; evT = 0; prossimo(); render();
 }
@@ -6240,20 +6253,56 @@ const GUIDAKEY = 'difendi-smerillo-guida';
 let guida = (() => { try { return localStorage.getItem(GUIDAKEY) ? -1 : 0; } catch(e){ return 0; } })();
 const dif = t => S && S.dif.find(d => d.tipo === t);
 const GUIDA = [
-  {t:'Questi sono i tuoi <b>Lancieri</b>: toccali.', sub:'I soldati con lo scudo blu sono tuoi. Quelli rossi sono i nemici: vogliono arrivare alla <b>Chiesa</b>.', punta:() => dif('lanciere') && dif('lanciere').nodo, ok:() => !dif('lanciere') || (sel && sel.id === dif('lanciere').id) || dif('lanciere').agito},
-  {t:'Tocca il <b>nemico con il mirino rosso</b>.', sub:'Il mirino rosso vuol dire: da qui puoi colpirlo. Ogni soldato, a ogni turno, fa 1 passo e 1 colpo.', punta:() => S.nem[0] && S.nem[0].nodo, ok:() => !dif('lanciere') || dif('lanciere').agito},
-  {t:'Colpito! Ora tocca i <b>Carpentieri</b>.', sub:'Non combattono: costruiscono <b>barricate</b> per chiudere le strade.', punta:() => dif('carpentiere') && dif('carpentiere').nodo, ok:() => !dif('carpentiere') || (sel && sel.id === dif('carpentiere').id) || dif('carpentiere').agito},
-  {t:'Tocca il <b>cerchio giallo</b> sulla strada.', sub:'La barricata blocca la strada: i nemici devono fermarsi a romperla, e intanto tu li colpisci.', punta:() => 'bivio', ok:() => !dif('carpentiere') || dif('carpentiere').agito},
-  {t:'Hai usato i tuoi soldati: tocca <b>Fine turno</b>.', sub:'Si gioca a turni: prima muovi tu, poi si muovono i nemici. Guarda dove vanno!', punta:'fine', ok:() => S.turno >= 2},
-  {t:'Le <b>linee rosse</b> mostrano cosa faranno i nemici al prossimo turno.', sub:'Dove vanno e chi colpiscono. Mettiti sulla loro strada e colpiscili prima che arrivino alla Chiesa.', punta:null, ok:() => false, bottone:'Ok'},
+  {t:'Ora difendi la <b>Chiesa</b>!', sub:'Usa i soldati come hai appena provato. Quando li hai usati tutti, tocca <b>Fine turno</b>: si muovono i nemici.', punta:null, ok:() => false, bottone:'Vai!'},
+  {quando:() => S.turno >= 2, t:'Le <b>linee rosse</b> mostrano cosa faranno i nemici al prossimo turno.', sub:'Dove vanno e chi colpiscono. Mettiti sulla loro strada e colpiscili prima che arrivino alla Chiesa.', punta:null, ok:() => false, bottone:'Ok'},
   {t:'Non sai cosa fare? Tocca <b>💡 Aiuto</b>.', sub:'Ti mostro col dito una mossa buona. Lo trovi sempre qui nelle prime missioni. Adesso giochi tu!', punta:'aiuto', ok:() => false, bottone:'Ho capito, gioco!'},
 ];
-function passoGuida(){ if (!S || guida < 0 || MI !== 0 || NET) return null; while (guida < GUIDA.length && GUIDA[guida].ok()) guida++; if (guida >= GUIDA.length){ fineGuida(); return null; } if (guida === 3) modoC = true; return GUIDA[guida]; }
+function passoGuida(){ if (!S || guida < 0 || MI !== 0 || NET) return null; while (guida < GUIDA.length && GUIDA[guida].ok()) guida++; if (guida >= GUIDA.length){ fineGuida(); return null; } if (PROVA) return null; if (GUIDA[guida].quando && !GUIDA[guida].quando()) return null; return GUIDA[guida]; }
 let COACH_TB = -1;
+// ---------- Prova i soldati: prima della missione 1 provi i tre personaggi, uno alla volta, in mezzo minuto ----------
+let PROVA = null;
+const PROVE = [
+  {tipo:'lanciere', da:'piazzale', nem:'fessa', hp:2,
+   sel:['Prova 1 di 3: i <b>Lancieri</b>. Toccali.', 'Sono i soldati da battaglia: colpiscono forte, da vicino.'],
+   az:['Ora tocca il <b>nemico</b> con il mirino rosso.', 'I Lancieri colpiscono solo i nemici accanto a loro.'],
+   ok:['💥 Abbattuto!', 'I <b>Lancieri</b> colpiscono forte, ma solo da vicino.']},
+  {tipo:'arciere', da:'porta', nem:'fessa', hp:1,
+   sel:['Prova 2 di 3: gli <b>Arcieri</b>. Toccali.', 'Tirano le frecce da lontano.'],
+   az:['Tocca il <b>nemico</b> lontano, con il mirino rosso.', 'Gli Arcieri lo colpiscono anche da due strade di distanza.'],
+   ok:['🏹 Colpito da lontano!', 'Gli <b>Arcieri</b> tirano da lontano, ma sono fragili: tienili dietro.']},
+  {tipo:'carpentiere', da:'porta', nem:'fessa', hp:2,
+   sel:['Prova 3 di 3: i <b>Carpentieri</b>. Toccali.', 'Non combattono: costruiscono.'],
+   az:['Tocca il <b>cerchio giallo</b> sulla strada del nemico.', 'Lì costruiscono una barricata con le punte.'],
+   ok:['🔨 Il nemico si è fermato!', 'La <b>barricata</b> chiude la strada, e chi la colpisce perde 1 vita.']},
+];
+function provaVia(k){ const P = PROVE[k]; PROVA = {k, vis:'', turno:false}; document.body.classList.add('tb-prova');
+  S = nuovo(); S.prova = k; S.coda = []; S.bar = []; S.nem = []; const mx = vitaDi(P.tipo);
+  S.dif = [{id:'d' + (S.nid++), tipo:P.tipo, nodo:P.da, hp:mx, max:mx, mosso:false, agito:false}];
+  S.nem = [{id:'n' + (S.nid++), tipo:'fante', nodo:P.nem, hp:P.hp, max:P.hp, da:null}];
+  piazza = null; V = null; storia = []; sel = null; fx = []; coda = []; ev = null; modoC = k === 2; modoS = false; aggiornaAnteprima(); try { RITORNO.traccia('prova', {k}); } catch(e){} render(); }
+function provaFine(salta){ const era = PROVA; PROVA = null; document.body.classList.remove('tb-prova'); COACH_TB = -1; try { COACH.nascondi(); } catch(e){}
+  try { RITORNO.traccia('prova', {k: salta ? 'salta' : 'fine', da: era ? era.k : null}); } catch(e){}
+  moneteViste = null; S = nuovo(); piazza = null; V = null; storia = []; sel = null; fx = []; coda = []; ev = null; modoC = false; ultimoAnn = ''; nuovoTempo(); aggiornaAnteprima();
+  if (salta) fineGuida(); else { SUONI.suona('banner'); EPICO.banner('Missione ' + M.num, M.titolo); } render(); }
+function provaCoach(){ if (!PROVA || !S) return; const P = PROVE[PROVA.k], u = S.dif[0], x = S.nem[0]; let f;
+  if (!u){ provaFine(false); return; }
+  if (PROVA.k === 2 && PROVA.turno) f = V || S.turno < 2 ? 'att' : 'ok'; // dopo il turno dei nemici la prova è finita
+  else if (!u.agito){ f = sel && sel.id === u.id ? 'az' : 'sel'; if (PROVA.k === 2) modoC = true; }
+  else if (PROVA.k === 2 && !PROVA.turno){ PROVA.turno = true; f = 'att'; setTimeout(() => { if (PROVA && S && S.prova === 2 && !V) fineTurno(); }, 900); }
+  else f = PROVA.k === 2 && (V || S.turno < 2) ? 'att' : 'ok';
+  if (PROVA.vis === f) return; PROVA.vis = f;
+  if (f === 'att'){ COACH.nascondi(); return; }
+  const ultima = PROVA.k === PROVE.length - 1, tx = P[f], colpita = !!(x && x.hp < x.max) || !x;
+  const testo = f === 'ok' && PROVA.k === 2 && !colpita ? '🔨 Barricata costruita!' : tx[0], sotto = f === 'ok' && PROVA.k === 2 && !colpita ? 'La <b>barricata</b> chiude la strada: i nemici devono fermarsi a romperla, e chi la colpisce perde 1 vita.' : tx[1];
+  COACH.mostra({passo: PROVA.k + 1, tot: PROVE.length, testo, sotto,
+    salta: f === 'ok' ? null : () => provaFine(true), bottone: f === 'ok' ? (ultima ? 'Inizia la missione!' : 'Avanti') : null,
+    ok: () => { if (!PROVA) return; if (ultima) provaFine(false); else provaVia(PROVA.k + 1); },
+    pausa: () => !attivo || ovAperto || !S || !!V,
+    dove: () => { if (!S || !PROVA || f === 'ok') return null; const id = f === 'sel' ? u.nodo : PROVA.k === 2 ? 'piazzale' : (S.nem[0] && S.nem[0].nodo); if (!id || !NODI[id]) return null; const [px, py] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + px, y: r.top + py - 8, r: 30}; }}); }
 function fineGuida(){ guida = -1; if (COACH_TB !== -1){ COACH_TB = -1; try { COACH.nascondi(); } catch(e){} } try { localStorage.setItem(GUIDAKEY, '1'); } catch(e){} el('tbFine').classList.remove('guida'); }
 // ---------- 💡 Aiuto: nelle prime missioni ti mostra col dito una mossa buona ----------
 let AIUTO = null;
-function aiutoOk(){ return !!S && !S.esito && !V && !online() && !RUN && !SFIDA && !M.evento && MI <= 2 && (guida < 0 || guida === GUIDA.length - 1); }
+function aiutoOk(){ return !PROVA && !!S && !S.esito && !V && !online() && !RUN && !SFIDA && !M.evento && MI <= 2 && (guida < 0 || guida >= 1); }
 function mossaBuona(){
   if (!S.nem.length) return {k:'fine'};
   // 1) un soldato che può già colpire un nemico
@@ -6292,6 +6341,8 @@ const cuori = (n, max, col = '#e04830') => Array.from({length:max}, (_, i) => `<
 let infoDett = false;
 const metti = (box, html) => { if (box._h === html) return false; const nuovoSel = box.id === 'tbInfo' && (html.slice(0, 120) !== (box._h || '').slice(0, 120)); box._h = html; box.innerHTML = html; if (nuovoSel) box.scrollTop = 0; return true; };
 let ultimoAnn = '', moneteViste = null, piazza = null;
+// cosa fa ogni personaggio, in parole semplici (si legge appena lo tocchi)
+const RUOLO = {lanciere:'⚔️ <b>Colpiscono forte</b> i nemici vicini e li spingono indietro.', arciere:'🏹 <b>Tirano da lontano</b>, ma sono fragili: tienili dietro.', carpentiere:'🔨 <b>Non combattono</b>: costruiscono barricate per chiudere le strade.'};
 // prima del turno 1: il giocatore sceglie dove mettere il Falco (che poi non si muove più)
 const postoFalcoOk = n => n && NODI[n] && !occ(S, n) && !ARRIVO.has(n) && n !== META;
 function disegnaPiazza(){ if (!piazza || !S || V || S.turno > 1) return; const t = performance.now()/1000, f = S.dif.find(d => d.id === piazza.id); if (!f){ piazza = null; return; }
@@ -6307,16 +6358,16 @@ let annT = 0; function annuncia(t, c){ const b = el('tbBanner'); if (!b) return;
 function info(){
   const box = el('tbInfo'); if (!S) return;
   const R = V || S;
-  { const st = statoTurno(); el('tbTurno').innerHTML = 'Turno ' + Math.min(S.turno, 99) + (st && online() ? ` · <span class="tbst2 ${st.c}">${st.p}</span>` : '');
+  { const st = statoTurno(); el('tbTurno').innerHTML = 'Turno ' + Math.min(S.turno, 99) + (st && !S.esito ? ` · <span class="tbst2 ${st.c}">${st.p}</span>` : '');
     if (online()){ const vs = NET.modo === 'vs', mio = !V && mioTurno(), lui = !V && !mio, am = (ULTIMO.amico || 'Amico').slice(0, 9);
       const h = `<span class="olt ${mio ? 'att' : ''}">${vs ? (NET.ruolo === 'd' ? '🛡️' : '🐴') : '🟡'} Tu</span><span class="olv">vs</span><span class="olt ${lui ? 'att' : ''}">${vs ? (NET.ruolo === 'd' ? '🐴' : '🛡️') : '🔵'} ${am}</span>`;
       const t = el('tbTit'); if (t._h !== h){ t._h = h; t.innerHTML = h; } }
-    if (st && online() && !ovAperto && !S.esito && st.k !== ultimoAnn){ ultimoAnn = st.k; annuncia(st.t, st.c); } }
+    if (st && !ovAperto && !S.esito && st.k !== ultimoAnn){ ultimoAnn = st.k; if (S.prova == null && (online() || guida < 0 || S.turno > 1)) annuncia(st.t, st.c); } } // il cartello "Tocca a te" ora c'è anche quando giochi da solo
   metti(el('tbPorta'), ico(R.porta > 0 ? 'cuore' : 'cuoreV') + `<b>${R.porta}<small>/${S.portaMax}</small></b>`);
   const rimasti = R.nem.length + S.coda.length; metti(el('tbNem'), ico('teschio') + ' ' + rimasti);
   el('tbUndo').disabled = !storia.length || !!V || !!S.esito; aggiornaAiuto();
   { const b = el('tbShop'), m = (R.monete ?? S.monete) || 0; if (b.dataset.m !== String(m)){ const su = b.dataset.m !== undefined && m > +b.dataset.m; b.dataset.m = m; b.innerHTML = ico('moneta', 3) + ' ' + m; if (su){ b.classList.remove('anim-su'); void b.offsetWidth; b.classList.add('anim-su'); } } b.disabled = !!V || !!S.esito; b.classList.toggle('pronto', !V && OFFERTE.some(f => m >= f.costo && f.ok(S))); }
-  { const m = S.monete || 0; if (moneteViste === null || V) moneteViste = moneteViste === null ? m : moneteViste; if (!V && m > moneteViste){ if (!S.moneteSpiegate){ S.moneteSpiegate = true; suggerisci('🪙 Moneta! Spendila nella Bottega, in basso'); } moneteViste = m; } else if (m < moneteViste) moneteViste = m; }
+  { const m = S.monete || 0; if (moneteViste === null || V) moneteViste = moneteViste === null ? m : moneteViste; if (!V && m > moneteViste){ if (!S.moneteSpiegate && S.prova == null){ S.moneteSpiegate = true; suggerisci('🪙 Moneta! Spendila nella Bottega, in basso'); } moneteViste = m; } else if (m < moneteViste) moneteViste = m; }
   const liberi = S.dif.filter(d => (!d.mosso || !d.agito) && (!online() || puoComandare(d) || NET.modo === 'vs')).length;
   el('tbFine').disabled = !!V || !!S.esito; el('tbFine').classList.toggle('pronto', !V && liberi === 0);
   box.classList.remove('mini', 'su');
@@ -6333,10 +6384,11 @@ function info(){
   if (online() && infoOnline(box)) return; if (!online()) aggiornaOlBar();
   if (piazza && S.turno === 1 && !S.esito){ const f = S.dif.find(d => d.id === piazza.id);
     if (f){ box.classList.remove('mini'); if (metti(box, `<div class="tbguida"><p>🦅 <b>Dove metti il ${TIPI[f.tipo].nome}?</b> Tocca un <b>cerchio giallo</b>. Non si muoverà più per tutta la partita, ma colpisce i nemici ovunque. Mettilo al sicuro, oppure usalo per bloccare una strada.</p><button class="big alt" id="tbPzOk">Lascialo qui</button></div>`)){ box.querySelector('#tbPzOk').onclick = () => { piazza = null; SUONI.suona('tocco'); render(); }; } return; } }
+  if (PROVA){ box.classList.add('mini'); metti(box, `<p class="tbtip">👆 Segui il dito</p>`); provaCoach(); return; }
   const pg = passoGuida(); el('tbFine').classList.toggle('guida', !!(pg && pg.punta === 'fine'));
   if (pg){ box.classList.add('mini'); metti(box, `<p class="tbtip">👆 Segui il dito</p>`);
     if (COACH_TB !== guida){ COACH_TB = guida; const fine = () => { COACH_TB = -1; COACH.nascondi(); fineGuida(); info(); render(); };
-      const avanti = () => { if (guida >= GUIDA.length - 1) return fine(); guida++; COACH_TB = -1; info(); render(); };
+      const g0 = guida, avanti = () => { if (guida !== g0) return; if (guida >= GUIDA.length - 1) return fine(); guida++; COACH_TB = -1; COACH.nascondi(); info(); render(); }; // un doppio tocco non salta un passo
       COACH.mostra({passo: guida + 1, tot: GUIDA.length, testo: pg.t, sotto: pg.sub, salta: pg.bottone ? null : fine, bottone: pg.bottone || null, ok: avanti,
         pausa: () => !attivo || ovAperto || !S, dove: () => { if (!S) return null; if (pg.punta === 'fine') return el('tbFine'); if (pg.punta === 'aiuto'){ const ba = el('tbAiuto'); return ba && !ba.hidden ? ba : null; } if (typeof pg.punta === 'function'){ const id = pg.punta(); if (!id || !NODI[id]) return null; const [x, y] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + x, y: r.top + y - 8, r: 30}; } return null; }}); }
     return; }
@@ -6347,7 +6399,8 @@ function info(){
     box.classList.toggle('dett', infoDett);
     let stato = '';
     if (!T.nemico){ const mm = mossePer(S, u), m = mm.length, b = bersagli(S, u).length;
-      stato = (T.costruisce && (b || m) ? `<div class="tbmodo"><button type="button" data-mc="0" aria-pressed="${!modoC}">${ico('muovi')} Muovi</button><button type="button" data-mc="1" aria-pressed="${modoC}">${ico('martello')} Costruisci</button></div>` : '') + `<span class="tbst">${u.mosso ? (m ? ico('ok') + ' Passo fatto · <b>Scatto</b>: usa l’azione per un altro passo' : ico('ok') + ' Passo fatto') : m ? '<b>Verde</b> = vai lì' : 'Nessun passo libero'} · ${u.agito ? ico('ok') + ' Azione fatta' : b ? (T.costruisce ? '<b>Giallo</b> = costruisci (legno: ' + S.legname + ')' : T.ferma ? '<b>Mirino</b> = puoi fermare' : '<b>Mirino</b> = puoi colpire') : T.costruisce && !S.legname ? 'Legno finito' : 'Nessun nemico a tiro'}</span>`;
+      stato = (T.costruisce && (b || m) ? `<div class="tbmodo"><button type="button" data-mc="0" aria-pressed="${!modoC}">${ico('muovi')} Muovi</button><button type="button" data-mc="1" aria-pressed="${modoC}">${ico('martello')} Costruisci</button></div>` : '') + `<span class="tbst">${u.mosso ? (m ? ico('ok') + ' Passo fatto · <b>Scatto</b>: usa l’azione per un altro passo' : ico('ok') + ' Passo fatto') : m ? '<b>Cerchio verde</b> = spostati lì' : 'Nessun passo libero'} · ${u.agito ? ico('ok') + ' Azione fatta' : b ? (T.costruisce ? '<b>Giallo</b> = costruisci (legno: ' + S.legname + ')' : T.ferma ? '<b>Mirino</b> = puoi fermare' : '<b>Mirino rosso</b> = tocca il nemico per colpirlo') : T.costruisce && !S.legname ? 'Legno finito' : 'Nessun nemico vicino: avvicinati, oppure aspettalo qui'}</span>`;
+      stato = `<span class="tbruolo">${RUOLO[u.tipo] || T.corto || ''}</span>` + stato;
       if (mm.some(x => x.k === 'scambio')) stato += `<button type="button" class="tbscb" id="tbScambia" aria-pressed="${modoS}">${modoS ? 'Tocca il compagno (cerchio blu)' : 'Scambia posto con un compagno'}</button>`;
       { const sp = specialeDi(S, u); if (sp) stato = `<button type="button" class="tbspec" id="tbSpec">${ico(SPECIALI[sp].icona, 2)} ${SPECIALI[sp].nome} <small>(1 volta)</small></button><span class="tbst tbreg">${SPECIALI[sp].desc}</span>` + stato; }
       if (!u.mosso && !u.agito && u.hp < (u.max || T.hp)) stato += `<span class="tbst">Se resta fermo, non agisce e non viene colpito, recupera 1 vita.</span>`;
@@ -6362,7 +6415,12 @@ function info(){
     const c = box.querySelector('canvas'), im = IMG[u.tipo]; c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); c.style.width = im.width*2 + 'px';
     return; }
   if (sel && sel.k === 'nodo'){ box.classList.add('mini'); const N = NODI[sel.id]; metti(box, `<p class="tbtip"><b>${N.nome}</b>${N.id === META ? ' – è la meta dei nemici: se la colpiscono perde vite. Se ci metti un difensore, il nemico colpisce lui.' : N.arrivo ? ' – da qui arrivano i nemici. È fuori dal paese: i tuoi difensori non possono andarci.' : ''}</p>`); return; }
-  const tip = S.turno <= 2 ? 'Tocca un tuo difensore (cerchio giallo)' : liberi ? `Ancora ${liberi} ${liberi === 1 ? 'difensore' : 'difensori'} da muovere` : 'Hai fatto tutto. Tocca <b>Fine turno</b>.';
+  // dico sempre cosa conviene fare adesso, e perché a volte si passa il turno senza colpire
+  const puoColpire = S.dif.some(d => !d.agito && !TIPI[d.tipo].costruisce && bersagli(S, d).length);
+  const tip = !liberi ? 'Hai fatto tutto. Tocca <b>Fine turno</b>.'
+    : puoColpire ? '🎯 <b>Puoi colpire un nemico!</b> Tocca un soldato con il cerchio giallo.'
+    : S.nem.length ? 'I nemici sono ancora lontani. Sposta i soldati verso le loro strade, poi tocca <b>Fine turno</b>: così si avvicinano.'
+    : 'Nessun nemico in vista. Tocca <b>Fine turno</b> per farli arrivare.';
   box.classList.add('mini'); metti(box, `<p class="tbtip">${tip}</p>`);
 }
 const _render = render; render = (T) => { _render(T); disegnaOnline(); disegnaPiazza(); info(); };
@@ -6657,12 +6715,12 @@ function intro(){
   const o = prima ? overlay(`<div class="dlg box mis mis-prima">
     <button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>
     <div class="mis-top"><span class="mis-n">Missione 1 · Si impara</span></div>
-    <h2 class="mis-t">Come si gioca</h2>
-    <div class="mp-r"><span class="mp-i">⛪</span><span><b>Difendi la Chiesa</b>I nemici rossi vogliono arrivarci. Se ci entrano le tolgono vite: ne ha ${S.portaMax}. Se finiscono, perdi.</span></div>
-    <div class="mp-r"><span class="mp-i">🔁</span><span><b>Si gioca a turni</b>Prima muovi i tuoi soldati blu. Poi tocchi <em class="mp-k">Fine turno</em> e si muovono i nemici.</span></div>
-    <div class="mp-r"><span class="mp-i">🏆</span><span><b>Vinci</b>quando hai fermato tutti i nemici.</span></div>
-    <p class="mp-g">👆 Ti guido io con il dito, passo passo.</p>
-    <button class="big" id="tbVia">Inizia ${ico('play')}</button></div>`) : overlay(`<div class="dlg box mis">
+    <h2 class="mis-t">Prova i tuoi soldati</h2>
+    <div class="mp-r"><span class="mp-i">⚔️</span><span><b>Lancieri</b>Colpiscono forte, da vicino.</span></div>
+    <div class="mp-r"><span class="mp-i">🏹</span><span><b>Arcieri</b>Tirano da lontano.</span></div>
+    <div class="mp-r"><span class="mp-i">🔨</span><span><b>Carpentieri</b>Costruiscono barricate.</span></div>
+    <p class="mp-g">👆 Li provi uno alla volta: bastano 30 secondi. Poi difendi la Chiesa.</p>
+    <button class="big" id="tbVia">Prova ${ico('play')}</button></div>`) : overlay(`<div class="dlg box mis">
     ${RUN ? '' : `<button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>`}
     <div class="mis-top"><span class="mis-n">${SFIDA ? ico('calendario') + ' Sfida del giorno' : M.evento ? '🌰 Evento a tempo' : SFIDA_AMICO ? '⚔️ Sfida di ' + escH(SFIDA_AMICO.n || 'un amico') + ': ' + (+SFIDA_AMICO.p || 0) + ' punti' : 'Missione ' + M.num + ' di ' + MISSIONI.length}</span><span class="mis-d" aria-label="Difficoltà: ${M.livello}">${pallini}<em>${M.livello.split(':')[0]}</em></span></div>
     <h2 class="mis-t">${M.titolo}</h2>
@@ -6706,7 +6764,7 @@ function intro(){
   { const di = o.querySelector('#dlgIc'); if (di) di.append(icona(M.dlg[0], 3)); }
   // se c'è un nemico nuovo, lo presento subito
   const primoNuovo = o.querySelector('.mis-pg.nuovo'); if (primoNuovo) primoNuovo.click();
-  o.querySelector('#tbVia').onclick = () => { chiudiOv(); usaTalismano(); if (!RUN){ SUONI.suona('banner'); EPICO.banner(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
+  o.querySelector('#tbVia').onclick = () => { chiudiOv(); if (prima){ provaVia(0); return; } usaTalismano(); if (!RUN){ SUONI.suona('banner'); EPICO.banner(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
   const bk = o.querySelector('#misBack'); if (bk) bk.onclick = () => { if (provenienza === 'missioni') scelta(M.evento ? undefined : (M.luogo || 'smerillo')); else esci(); };
   const bq = o.querySelector('#tbSqC'); if (bq) bq.onclick = () => { chiudiOv(); squadra(MI); };
 }
@@ -8026,7 +8084,7 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
   const dif = D*mult, p = D === 0 ? 1 : Math.max(.02, Math.min(.98, att**2.2/(att**2.2 + dif**2.2)));
   return {p, att, dif, kill, A, D, voci}; }
 const PACE_FIERA = 3, inPace = f => S.turno - (S.fz[f].guerra || -99) >= PACE_FIERA;
-function battaglia(f, da, t, n, cap){ if (cap === undefined && f !== S.io && !umano(f)) cap = capIAscegli(f, n);  if (partePace(f, da)) rompiPromessa(da, 'sei partito all’attacco da lì'); const pr = previsione(f, n, t, cap, da), df = S.terre[t].own, vinto = rnd() < pr.p, borgo = eBorgo(t); let persiA, persiD; if (df){ S.fz[f].guerra = S.turno; S.fz[df].guerra = S.turno; }
+function battaglia(f, da, t, n, cap){ if (cap === undefined && f !== S.io && !umano(f)) cap = capIAscegli(f, n);  if (partePace(f, da)) rompiPromessa(da, 'sei partito all’attacco da lì'); const pr = previsione(f, n, t, cap, da), df = S.terre[t].own, guidato = f === S.io && !!CG && CG.k === 3 && t === CG.terra && pr.p >= .3, vinto = guidato || rnd() < pr.p, borgo = eBorgo(t); // il primo attacco della guida riesce: serve a imparare, non a scoraggiare let persiA, persiD; if (df){ S.fz[f].guerra = S.turno; S.fz[df].guerra = S.turno; }
   S.terre[da].sold -= n; diplomaziaAttacco(f, df); { const st = S.terre[t]; if (st.lv > 1) st.lv--; st.cresc = 0; st.guerra = S.turno; }
   if (vinto){ persiA = pr.kill + Math.min(pr.A - 1, Math.round(pr.A*Math.min(.85, .55*pr.dif/Math.max(.1, pr.att))*(.75 + rnd()*.5))); if (haAb(cap, 'saggio')) persiA = Math.max(pr.kill, Math.round(persiA*.7)); persiD = pr.D; S.terre[t].own = f; S.terre[t].sold = n - persiA; dopoPresa(f, t, df);
     if (borgo && df){ eliminato(df, f); if (f === S.io) S.ultB = t; }
@@ -8391,7 +8449,7 @@ function dlgArruola(dove = S.io){ const F = S.fz[S.io], max = Math.min(capRecl(S
   o.querySelector('#cqNo').onclick = chiudiOv; o.querySelector('#cqOk').onclick = () => { const n = +o.querySelector('#cqN').value; F.monete -= n*COSTO_SOLD; S.terre[dove].sold += n; suona('moneta'); chiudiOv(); FLASH.push({a:dove, t:0, col:FZ[S.io].col}); usaMossa(); toast(`+${sol(n)} a ${TERRE[dove].nome}`); }; }
 function dlgStruttura(t){ const F = S.fz[S.io], st = S.terre[t], ks = st.str ? [st.str] : Object.keys(STR).filter(k => STR[k].dove(t) && sbloccato(k)), chiusi = st.str ? [] : Object.keys(STR).filter(k => STR[k].dove(t) && !sbloccato(k)), lv = st.str ? (st.sl || 1) : 0;
   const o = ov(`<div class="dlg box cq-dlg"><h2>${st.str ? 'Migliora' : 'Costruisci'} a ${TERRE[t].nome}</h2><p>Hai ${prezzo(F.monete, F.legna)}. ${st.str ? 'Ogni livello produce di più.' : 'In ogni terra c’è posto per una sola struttura, che poi puoi migliorare.'} Se perdi la terra, passa a chi la conquista. Usa 1 mossa.</p><div class="cq-list">${ks.map(k => { const c = costoStr(S.io, k, lv);
-    return `<button class="cq-it" data-s="${k}" ${!c || !puoPagare(F, c[0], c[1]) ? 'disabled' : ''}><span class="cq-ii">${ico(STR[k].ic, 3)}</span><span class="cq-it-t"><b>${STR[k].nome}${STR[k].max > 1 ? ` <small>livello ${lv + 1} di ${STR[k].max}</small>` : ''}</b><small>${STR[k].desc}</small><small class="cq-eff">${effetto(k, t)}</small></span><span class="cq-pr">${c ? prezzo(c[0], c[1]) : 'Max'}</span></button>`; }).join('')}
+    return `<button class="cq-it${CONS_STR === k ? ' cq-cons' : ''}" data-s="${k}" ${!c || !puoPagare(F, c[0], c[1]) ? 'disabled' : ''}><span class="cq-ii">${ico(STR[k].ic, 3)}</span><span class="cq-it-t"><b>${STR[k].nome}${STR[k].max > 1 ? ` <small>livello ${lv + 1} di ${STR[k].max}</small>` : ''}</b><small>${STR[k].desc}</small><small class="cq-eff">${effetto(k, t)}</small></span><span class="cq-pr">${c ? prezzo(c[0], c[1]) : 'Max'}</span></button>`; }).join('')}
     ${chiusi.map(k => `<div class="cq-it cq-chiuso"><span class="cq-ii">${ico(STR[k].ic, 3)}</span><span class="cq-it-t"><b>${STR[k].nome} <small>da sbloccare</small></b><small>${STR[k].desc}</small><small class="cq-sbl">${ico('lucchetto', 2)} ${STR[k].sblT}: si sblocca per sempre.</small></span><span class="cq-pr cq-prl">${ico('lucchetto', 2)}</span></div>`).join('')}</div><button class="big alt" id="cqNo">Indietro</button></div>`);
   o.querySelector('#cqNo').onclick = chiudiOv;
   o.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { const k = b.dataset.s, c = costoStr(S.io, k, lv); if (!c || !puoPagare(F, c[0], c[1])) return; paga(F, c[0], c[1]); st.str = k; st.sl = lv + 1; nasce(t, k); suona('costruisci'); chiudiOv(); FLASH.push({a:t, t:0, col:'#f8d048'}); usaMossa(); stat('costr'); toast(`${STR[k].nome}${lv ? ' livello ' + (lv + 1) : ''} a ${TERRE[t].nome}`); }); }
@@ -8573,7 +8631,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
   o.querySelectorAll('[data-dc]').forEach(b => b.onclick = () => { const [i, j] = b.dataset.dc.split('|').map(Number), c = D[i]; if (!c || c.fatto || !c.scelte[j][1]()) return; const r = c.scelte[j][2](); c.fatto = true; suona(j ? 'tocco' : 'stella1');
     const box = o.querySelector(`.cq-dec[data-i="${i}"]`); box.classList.add('fatto'); box.querySelector('.cq-decb').outerHTML = `<p class="cq-decr">${ico('ok', 2)} ${r}</p>`; salva(); aggiornaUI(); aggiorna(); });
   aggiorna();
-  ok.onclick = () => { if (resta()) return; chiudiOv(); if (S.mp && !mpAttesa()) proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); pannello(); if (!S.mp) try { RITORNO.dopoStagione(); } catch(e){} }; aggiornaUI(); }
+  ok.onclick = () => { if (resta()) return; chiudiOv(); if (S.mp && !mpAttesa()) proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); pannello(); if (!S.mp && !CG) try { RITORNO.dopoStagione(); } catch(e){} }; aggiornaUI(); } // con la guida ancora aperta non ti chiedo di uscire
 function rivediStagione(){ if (!ULTIMO_REP) return; const o = ov(`<div class="dlg box cq-dlg cq-notizie">${ULTIMO_REP}<button class="big" id="cqOk">Chiudi</button></div>`); o.querySelector('#cqOk').onclick = chiudiOv; }
 function proposte(){ let p; if (S.mp){ const i = S.proposte.findIndex(x => !x.per || x.per === S.io); p = i >= 0 ? S.proposte.splice(i, 1)[0] : null; } else p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
   if (!p){ richieste(); return; }
@@ -8681,7 +8739,7 @@ function chiudiGenerazione(){ leggiCas(); if (!CAS || S.chiusa) return null; S.c
 // creare o cambiare lo stemma e il nome della casata
 function dlgStemma(dopo){ const nuovaC = !leggiCas(); const st = nuovaC ? {c1:0, c2:3, f:'partito', sim:'torre'} : {...CAS.stemma}; let nome = nuovaC ? '' : CAS.nome;
   const o = ov(`<div class="dlg box cq-dlg cq-casd"><span class="kicker">${ico('bandiera', 2)} ${nuovaC ? 'Prima di cominciare' : 'La tua casata'}</span><h2>${nuovaC ? 'Fonda la tua casata' : 'Cambia stemma'}</h2>
-    <p>${nuovaC ? 'La tua famiglia vivrà partita dopo partita: ogni partita è una generazione. Vinci o perdi, la casata guadagna gloria e la sua storia viene scritta nella cronaca.' : 'Nome e stemma compaiono sulla mappa e nella cronaca.'}</p>
+    <p>${nuovaC ? 'Scegli un nome e uno stemma per la tua famiglia, oppure tocca subito <b>Fonda la casata</b>: li cambi quando vuoi.' : 'Nome e stemma compaiono sulla mappa e nella cronaca.'}</p>
     <div class="cq-stp"><span id="cqStPrev"></span><label class="cq-nomec">Casata <input id="cqNomeC" maxlength="16" autocomplete="off" placeholder="Vitali" value="${nome.replace(/"/g, '')}"></label></div>
     <div class="cq-sts"><small>Scudo</small><div class="cq-stg cq-sag">${SSAG.map(([k, n, lk]) => `<button type="button" data-sa="${k}" aria-label="${n}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}><span class="cq-sagi"></span><small>${lk && !haPremio(lk) ? ico('lucchetto', 1) + ' ' : ''}${n}</small></button>`).join('')}</div>
       <small>Forma</small><div class="cq-stg">${SFOR.map(([k, n, lk]) => `<button type="button" data-fo="${k}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}>${lk && !haPremio(lk) ? ico('lucchetto', 2) + ' ' : ''}${n}</button>`).join('')}</div>
@@ -8690,12 +8748,14 @@ function dlgStemma(dopo){ const nuovaC = !leggiCas(); const st = nuovaC ? {c1:0,
       <small>Simbolo</small><div class="cq-stg cq-sim">${SSIM.map(([k, n, lk]) => `<button type="button" data-si="${k}" aria-label="${n}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}>${ico(k, 2)}</button>`).join('')}</div></div>
     <p class="cq-warn" id="cqStErr" hidden>Scrivi il nome della casata (almeno 2 lettere).</p>
     <button class="big" id="cqOk">${nuovaC ? 'Fonda la casata' : 'Salva'}</button>${nuovaC ? '' : '<button class="big alt" id="cqNo">Indietro</button>'}</div>`, false);
-  const agg = () => { o.querySelector('#cqStPrev').innerHTML = imgStemma(st, 5); o.querySelectorAll('[data-fo]').forEach(b => b.classList.toggle('on', b.dataset.fo === st.f)); o.querySelectorAll('[data-c1]').forEach(b => b.classList.toggle('on', +b.dataset.c1 === st.c1)); o.querySelectorAll('[data-c2]').forEach(b => b.classList.toggle('on', +b.dataset.c2 === st.c2)); o.querySelectorAll('[data-si]').forEach(b => b.classList.toggle('on', b.dataset.si === st.sim)); o.querySelectorAll('[data-sa]').forEach(b => { b.classList.toggle('on', b.dataset.sa === (st.s || 'classico')); const c = stemma({...st, s: b.dataset.sa}, 2); const sp = b.querySelector('.cq-sagi'); if (c && sp){ sp.innerHTML = ''; const im = document.createElement('img'); im.src = c.toDataURL(); im.width = c.width; im.height = c.height; sp.append(im); } }); };
+  const agg = () => { const pv = o.querySelector('#cqStPrev'); if (!pv) return; pv.innerHTML = imgStemma(st, 5); o.querySelectorAll('[data-fo]').forEach(b => b.classList.toggle('on', b.dataset.fo === st.f)); o.querySelectorAll('[data-c1]').forEach(b => b.classList.toggle('on', +b.dataset.c1 === st.c1)); o.querySelectorAll('[data-c2]').forEach(b => b.classList.toggle('on', +b.dataset.c2 === st.c2)); o.querySelectorAll('[data-si]').forEach(b => b.classList.toggle('on', b.dataset.si === st.sim)); o.querySelectorAll('[data-sa]').forEach(b => { b.classList.toggle('on', b.dataset.sa === (st.s || 'classico')); const c = stemma({...st, s: b.dataset.sa}, 2); const sp = b.querySelector('.cq-sagi'); if (c && sp){ sp.innerHTML = ''; const im = document.createElement('img'); im.src = c.toDataURL(); im.width = c.width; im.height = c.height; sp.append(im); } }); };
   o.querySelectorAll('[data-fo]').forEach(b => b.onclick = () => { st.f = b.dataset.fo; suona('tocco'); agg(); }); o.querySelectorAll('[data-c1]').forEach(b => b.onclick = () => { st.c1 = +b.dataset.c1; suona('tocco'); agg(); });
   o.querySelectorAll('[data-c2]').forEach(b => b.onclick = () => { st.c2 = +b.dataset.c2; suona('tocco'); agg(); }); o.querySelectorAll('[data-si]').forEach(b => b.onclick = () => { st.sim = b.dataset.si; suona('tocco'); agg(); }); o.querySelectorAll('[data-sa]').forEach(b => b.onclick = () => { st.s = b.dataset.sa; suona('tocco'); agg(); });
   agg(); setTimeout(agg, 120);
   const inp = o.querySelector('#cqNomeC'); inp.oninput = () => { if (inp.value.trim().length >= 2) o.querySelector('#cqStErr').hidden = true; }; inp.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); o.querySelector('#cqOk').click(); } };
-  o.querySelector('#cqOk').onclick = () => { const n = inp.value.trim().replace(/\s+/g, ' ').replace(/[<>"]/g, ''); if (n.length < 2){ o.querySelector('#cqStErr').hidden = false; inp.focus(); return; }
+  o.querySelector('#cqOk').onclick = () => { let n = inp.value.trim().replace(/\s+/g, ' ').replace(/[<>"]/g, '');
+    if (n.length < 2 && nuovaC){ let a = ''; try { a = (ACC.account && ACC.account.nome) || ''; } catch(e){} n = (a.length >= 2 ? a : 'Del Borgo').slice(0, 16); } // chi non scrive niente parte lo stesso: il nome si cambia quando vuoi
+    if (n.length < 2){ o.querySelector('#cqStErr').hidden = false; inp.focus(); return; }
     const nm = n.charAt(0).toUpperCase() + n.slice(1); if (nuovaC){ CAS = {nome:nm, stemma:st, gloria:0, gen:0, vittorie:0, storia:[]}; if (S && S.cron){ for (const x of S.cron) x.txt = x.txt.replace(/La tua casata/g, 'La casata ' + nm).replace(/la tua casata/g, 'la casata ' + nm); } } else { CAS.nome = nm; CAS.stemma = st; }
     salvaCas(); for (const k in STM) delete STM[k]; suona('stella2'); chiudiOv(); if (S) aggiornaUI(); if (dopo) dopo(); };
   const no = o.querySelector('#cqNo'); if (no) no.onclick = () => dlgCasata(); }
@@ -8717,10 +8777,52 @@ function dlgCasata(daFine){ leggiCas(); if (!CAS){ dlgStemma(() => dlgCasata());
 // ===== guida della prima partita di Conquista: il dito indica cosa toccare, un passo alla volta =====
 let CG = null;
 function coachCQ(){ if (CG) return; let fatto = false; try { fatto = localStorage.getItem(KGUIDA + '4') === '1'; } catch(e){} if (fatto || !S || S.mp) return;
-  CG = {k: 0, mosse: S.mosse, turno: S.turno, terra: null, iv: setInterval(passoCG, 250)}; passoCG(); }
-function fineCG(){ if (!CG) return; clearInterval(CG.iv); CG = null; COACH.nascondi(); try { localStorage.setItem(KGUIDA + '4', '1'); localStorage.setItem(KGUIDA + '3', '1'); } catch(e){} }
+  const via = () => { if (CG || !S) return; CG = {k: 0, mosse: S.mosse, turno: S.turno, terra: null, iv: setInterval(passoCG, 250)}; passoCG(); };
+  let visto = false; try { visto = localStorage.getItem(KGUIDA + '5') === '1'; } catch(e){}
+  if (visto || ovAperto()){ via(); return; } try { localStorage.setItem(KGUIDA + '5', '1'); } catch(e){}
+  // prima di tutto: cosa devi fare, in tre righe
+  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('spade', 2)} Conquista</span><h2>Cosa devi fare</h2><div class="how">
+    <span>1</span><span>Hai <b>un borgo</b>. Sulla mappa ci sono altri <b>2 borghi rivali</b>.</span>
+    <span>2</span><span><b>Vinci</b> se conquisti i loro borghi. Ci arrivi prendendo <b>una terra alla volta</b>.</span>
+    <span>3</span><span>Si gioca a <b>stagioni</b>: ogni stagione hai <b>${MOSSE_N()} mosse</b>. Poi muovono gli altri borghi.</span></div>
+    <p class="cq-nota">Ci sono anche altri modi di vincere: li scopri giocando.</p><button class="big" id="cqOk">Ti guido io ${ico('play', 2)}</button></div>`, false);
+  o.querySelector('#cqOk').onclick = () => { chiudiOv(); via(); }; }
+// ===== 💡 Cosa faccio?: in Conquista ti indico col dito una mossa buona, quando vuoi =====
+let CH = null;
+function stopCH(){ if (!CH) return; setTimeout(() => { CONS_STR = null; }, 0); clearInterval(CH.iv); CH = null; if (!CG) COACH.nascondi(); }
+let CH_ATT = {turno: 0, n: 0}, CONS_STR = null; // CONS_STR: la struttura consigliata, si illumina nella finestra Costruisci // quante volte in questa stagione ho già consigliato di attaccare
+function mossaCQ(){ const f = S.io, F = S.fz[f]; if (CH_ATT.turno !== S.turno) CH_ATT = {turno: S.turno, n: 0};
+  if (S.mosse <= 0) return {k:'fine', t:'Hai finito le mosse: tocca <b>Fine stagione</b>.', s:'Poi muovono gli altri borghi e tu incassi monete, cibo e legna.'};
+  const recMax = Math.min(capRecl(f), Math.floor(F.monete/COSTO_SOLD)), casa = S.terre[f].own === f;
+  if (casa && recMax >= 1 && minaccia(f) > S.terre[f].sold*1.1) return {k:'btn', terra:f, btn:'cqRec', t1:'Il tuo borgo è in pericolo. <b>Toccalo.</b>', t2:'Tocca <b>Arruola</b>, poi conferma.', s:'I nemici vicini sono più forti di te: ti servono soldati.'};
+  if (!neve() && (CH_ATT.n < 2 || S.mosse <= 1)){ let best = null, bv = -1; // un attacco che vinci quasi di sicuro (al massimo due per stagione: poi si costruisce e si arruola)
+    for (const t of IDS){ const st = S.terre[t]; if (st.own === f) continue; if (TERRE[t].borgo && eBorgo(t) && (S.turno <= TREGUA() || !puoAssediare(t, f))) continue; if (st.own && (alleati(f, st.own) || patto(f, st.own))) continue;
+      const fonti = VIC[t].filter(v => S.terre[v].own === f && S.terre[v].sold > 1).sort((a, b) => S.terre[b].sold - S.terre[a].sold); if (!fonti.length) continue;
+      let p = 0; try { p = previsione(f, S.terre[fonti[0]].sold - 1, t, null, fonti[0]).p; } catch(e){}
+      const v = p - st.sold*.01 + (st.own ? .03 : 0); if (p >= .7 && v > bv){ bv = v; best = t; } }
+    if (best){ CH_ATT.n++; return {k:'btn', terra:best, btn:'cqAtt', t1:'Conquista questa <b>terra</b>: è debole. Toccala.', t2:'Tocca <b>Attacca</b>, poi conferma.', s:'Hai abbastanza soldati per vincere quasi di sicuro.'}; } }
+  { const dc = prodCibo(f, S.turno + 1) - mangia(f); let best = null, bk = null; // una struttura che ti puoi permettere
+    for (const t of IDS){ const st = S.terre[t]; if (st.own !== f || TERRE[t].borgo || st.str) continue;
+      for (const k of ['fattoria', 'segheria', 'mercato']){ if (!STR[k].dove(t) || !sbloccato(k)) continue; const c = costoStr(f, k, 0); if (!c || !puoPagare(F, c[0], c[1])) continue;
+        if (!best || (k === 'fattoria' && dc < 2 && bk !== 'fattoria')){ best = t; bk = k; } } }
+    if (best){ CONS_STR = bk; return {k:'btn', terra:best, btn:'cqStr', t1:'Costruisci in questa tua <b>terra</b>. Toccala.', t2:'Tocca <b>Costruisci qui</b> e scegli ' + (bk === 'fattoria' ? 'il <b>Castagneto</b> (cibo)' : bk === 'segheria' ? 'la <b>Segheria</b> (legna)' : 'il <b>Mercato</b> (monete)') + '.', s:'Le strutture ti danno risorse a ogni stagione.'}; } }
+  if (casa && recMax >= 1) return {k:'btn', terra:f, btn:'cqRec', t1:'Arruola soldati: tocca il tuo <b>borgo</b>.', t2:'Tocca <b>Arruola</b>, poi conferma.', s:'Con più soldati potrai conquistare le terre vicine.'};
+  if (CH_ATT.n >= 2){ CH_ATT.n = 0; return mossaCQ(); } // niente altro da fare: allora si attacca ancora
+  return {k:'fine', t:'Ora conviene aspettare: tocca <b>Fine stagione</b>.', s:'Alla prossima stagione avrai più monete, cibo e legna.'}; }
+function cosaFaccio(){ if (!S || GIOCA || SCELTA || ovAperto() || mpAttesa()) return; if (CG) fineCG(); stopCH(); suona('tocco'); try { RITORNO.traccia('aiuto', {modo:'conquista'}); } catch(e){}
+  CONS_STR = null; const m = mossaCQ(), mosse0 = S.mosse, turno0 = S.turno;
+  const giro = () => { if (!CH || !S || !attivo || S.turno !== turno0 || S.mosse !== mosse0 || GIOCA){ stopCH(); return; }
+    const f = m.k === 'fine' ? 'fine' : sel !== m.terra ? 't' : 'b';
+    if (f === 'b' && (ovAperto() || !el(m.btn))){ stopCH(); return; }
+    if (CH.f === f) return; CH.f = f; if (f === 't'){ if (sel){ sel = null; pannello(); } vaiA(m.terra); }
+    COACH.mostra({testo: f === 'fine' ? m.t : f === 't' ? m.t1 : m.t2, sotto: m.s, salta: stopCH, saltaT: 'Chiudi', tag: 'CONSIGLIO', pausa: () => !attivo || ovAperto() || !!GIOCA,
+      dove: f === 'fine' ? () => el('cqFine') : f === 't' ? () => puntoTerra(m.terra) : () => el(m.btn)}); };
+  CH = {f: '', iv: setInterval(giro, 200)}; giro(); }
+
+function fineCG(){ if (!CG) return; const finita = CG.k >= 6; clearInterval(CG.iv); CG = null; COACH.nascondi(); try { localStorage.setItem(KGUIDA + '4', '1'); localStorage.setItem(KGUIDA + '3', '1'); } catch(e){}
+  if (finita && S && !S.mp) try { RITORNO.dopoStagione(); } catch(e){} }
 function vicinaCG(){ const mie = IDS.filter(t => S.terre[t].own === S.io); let best = null, bs = 1e9;
-  for (const t of mie){ if (S.terre[t].sold < 2) continue; for (const v of VIC[t]){ const st = S.terre[v]; if (st.own === S.io || (TERRE[v].borgo && eBorgo(v))) continue; const sc = st.sold + (st.own ? 5 : 0); if (sc < bs){ bs = sc; best = v; } } }
+  for (const t of mie){ if (S.terre[t].sold < 2) continue; for (const v of VIC[t]){ const st = S.terre[v]; if (st.own === S.io || (TERRE[v].borgo && eBorgo(v))) continue; let pp = 0; try { pp = previsione(S.io, S.terre[t].sold - 1, v, null, t).p; } catch(e){} const sc = st.sold + (st.own ? 5 : 0) - pp*6; if (sc < bs){ bs = sc; best = v; } } }
   return best; }
 function puntoTerra(t){ if (!t || !TERRE[t]) return null; const st = el('cqStage'); if (!st) return null; const r = st.getBoundingClientRect(), [x, y] = aSchermo(TERRE[t].x, TERRE[t].y); if (x < 10 || y < 10 || x > r.width - 10 || y > r.height - 10) return null; return {x: r.left + x, y: r.top + y, r: 34}; }
 function passoCG(){ if (!CG || !S) return; if (!attivo){ COACH.nascondi(); CG.vista = -1; return; }
@@ -8730,21 +8832,24 @@ function passoCG(){ if (!CG || !S) return; if (!attivo){ COACH.nascondi(); CG.vi
   if (CG.k === 1 && usate >= 1){ CG.k = 2; CG.terra = vicinaCG(); CG.m2 = S.mosse; if (CG.terra) vaiA(CG.terra); else CG.k = 4; }
   if (CG.k === 2 && sel && sel === CG.terra) CG.k = 3;
   if (CG.k === 2 && sel && sel !== CG.terra && S.terre[sel].own !== S.io && VIC[sel].some(v => S.terre[v].own === S.io)){ CG.terra = sel; CG.k = 3; }
+  if ((CG.k === 2 || CG.k === 3) && CG.terra && S.terre[CG.terra].own !== S.io && S.mosse < CG.m2 && S.mosse > 0 && !ovAperto()){ const t2 = vicinaCG(); if (t2){ CG.terra = t2; CG.m2 = S.mosse; CG.k = 2; } }
   if (CG.k === 3 && (S.mosse < CG.m2 || S.terre[CG.terra].own === S.io)) CG.k = 4;
+  if (CG.k === 2 && S.mosse <= 0) CG.k = 4;
   if (CG.k === 3 && sel !== CG.terra && !ovAperto()){ CG.k = 2; }
   if (CG.k <= 4 && S.turno > CG.turno) CG.k = 5;
   if (CG.vista === CG.k) return; CG.vista = CG.k;
-  const pausa = () => !attivo || ovAperto() || !!GIOCA || !!SCELTA;
+  const pausa = () => !attivo || ovAperto() || !!GIOCA || !!SCELTA || !!modo;
   const P = [
     {t:'Questo è il tuo borgo. <b>Toccalo.</b>', s:'Le terre del tuo colore sono tue. Le altre sono dei borghi rivali o libere.', dove: () => puntoTerra(S.io)},
-    {t:'Tocca <b>Arruola</b>.', s:'Prendi nuovi soldati. Ogni azione usa una mossa: le mosse sono i rombi gialli in alto.', dove: () => el('cqRec')},
+    {t:'Tocca <b>Arruola</b>, poi conferma.', s:'Prendi nuovi soldati: servono per conquistare e per difenderti. Ogni azione usa una mossa.', dove: () => { const b = el('cqRec'); return b && b.offsetWidth && sel === S.io ? b : puntoTerra(S.io); }},
     {t:'Ora tocca questa <b>terra vicina</b>.', s:'Non è tua: puoi conquistarla con i tuoi soldati.', dove: () => puntoTerra(CG && CG.terra)},
-    {t:'Tocca <b>Attacca</b>.', s:'Poi scegli quanti soldati mandare e conferma. Più soldati mandi, più è facile vincere.', dove: () => el('cqAtt')},
+    {t:'Tocca <b>Attacca</b>.', s:'Poi scegli quanti soldati mandare e conferma. Più soldati mandi, più è facile vincere.', dove: () => { const b = el('cqAtt'); return b && b.offsetWidth ? b : puntoTerra(CG && CG.terra); }},
     {t:'Quando hai finito le mosse tocca <b>Fine stagione</b>.', s:'Poi muovono gli altri borghi e leggi cosa è successo.', dove: () => el('cqFine')},
-    {t:'Bravo! Ora <b>giochi da solo</b>.', s:'Ogni stagione: arruola, costruisci, conquista. Il pulsante con il punto di domanda spiega tutto.', dove: null, ok:true}];
+    {t:'Nuova stagione! Guarda in alto: <b>monete, cibo e legna</b>.', s:'Le monete servono per i soldati. Il cibo li sfama: se finisce, se ne vanno. La legna serve per costruire. Le tue terre te ne danno a ogni stagione.', dove: () => el('cqRis'), btn:'Ok', next: () => { if (CG){ CG.k = 6; CG.vista = -1; passoCG(); } }},
+    {t:'Non sai cosa fare? Tocca <b>💡 Cosa faccio?</b>', s:'Ti indico col dito una mossa buona, ogni volta che vuoi. Ogni stagione: arruola, conquista, costruisci.', dove: () => el('cqCosa'), btn:'Ho capito', next: fineCG}];
   const x = P[CG.k]; if (!x){ fineCG(); return; }
   if (CG.k === 0) vaiA(S.io);
-  COACH.mostra({passo: CG.k + 1, tot: P.length, testo: x.t, sotto: x.s, dove: x.dove, pausa, bottone: x.ok ? 'Ho capito' : null, ok: fineCG, salta: x.ok ? null : fineCG}); }
+  COACH.mostra({passo: CG.k + 1, tot: P.length, testo: x.t, sotto: x.s, dove: x.dove, pausa, su: true, bottone: x.btn || null, ok: x.next || fineCG, salta: x.btn ? null : fineCG}); }
 function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioca</h2><div class="how">
     <span>1</span><span>Si gioca a <b>stagioni</b>: hai <b>${MOSSE_N()} mosse</b>, poi premi <b>Fine stagione</b> e muovono gli altri borghi.</span>
     <span>2</span><span>Hai tre risorse: <b>monete</b>, <b>cibo</b> e <b>legna</b>. Ogni ${MANGIANO} soldati mangiano 1 cibo: senza cibo i soldati se ne vanno. Tocca le risorse in alto per il bilancio.</span>
@@ -8826,13 +8931,14 @@ function costruisciDom(){ root = document.createElement('section'); root.id = 'c
     <header class="cq-hud"><div class="cq-r1"><div class="cq-hl"><b><span class="cq-flag" id="cqFlag"></span><span id="cqTit"></span></b><small id="cqStag"></small></div><button id="cqPausa" aria-label="Pausa">II</button></div>
       <div class="cq-r2"><button type="button" class="cq-pill cq-ris" id="cqRis" aria-label="Le tue risorse: tocca per il bilancio"></button><span class="cq-pill cq-mos" id="cqMos"></span></div></header>
     <div id="cqToast" class="cq-toast" aria-live="polite"></div><div class="cq-zoom"><button type="button" id="cqZin" aria-label="Ingrandisci">+</button><button type="button" id="cqZout" aria-label="Rimpicciolisci">−</button></div><button class="cq-centra" id="cqCentra" aria-label="Rivedi tutta la mappa">${ico('centra', 2)}</button>
-    <div class="cq-side"><div id="cqPan"></div><nav class="cq-bar"><button class="big alt" id="cqDip">${ico('amici', 2)} Diplomazia</button><button class="big" id="cqFine">Fine stagione ${ico('play', 2)}</button></nav></div>
+    <div class="cq-side"><div id="cqPan"></div><nav class="cq-bar"><button class="big alt cq-cosa" id="cqCosa" aria-label="Cosa faccio? Ti indico una mossa buona">${ico('lampadina', 2)}</button><button class="big alt" id="cqDip">${ico('amici', 2)} Diplomazia</button><button class="big" id="cqFine">Fine stagione ${ico('play', 2)}</button></nav></div>
     <section id="cqOv" class="overlay" hidden></section>`;
   document.body.append(root); cv = el('cqCv'); ctx = cv.getContext('2d'); inputMappa();
   root.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b || b.disabled || !root.contains(b)) return; const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height)*2.2, sp = document.createElement('span'); sp.className = 'cq-rip'; sp.style.cssText = `left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px;width:${d}px;height:${d}px`; b.append(sp); setTimeout(() => sp.remove(), 520);
     const bu = document.createElement('div'); bu.className = 'cq-burst'; bu.style.cssText = `left:${e.clientX}px;top:${e.clientY}px`; for (let i = 0; i < 8; i++){ const q = document.createElement('i'), a = i/8*Math.PI*2 + Math.random()*.4, v = 22 + Math.random()*16; q.style.setProperty('--dx', Math.cos(a)*v + 'px'); q.style.setProperty('--dy', Math.sin(a)*v + 'px'); q.style.background = ['#ffd03a', '#ffffff', '#ffe98a'][i % 3]; bu.append(q); } root.append(bu); setTimeout(() => bu.remove(), 560); }, {passive: true});
-  el('cqZin').onclick = () => zoomIn(1.3); el('cqZout').onclick = () => zoomIn(1/1.3); el('cqPausa').onclick = pausa; el('cqRis').onclick = dlgBilancio; el('cqDip').onclick = () => dlgDiplomazia(); el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
-  el('cqFine').onclick = () => { if (GIOCA || !S || mpAttesa()) return; const fs = S.mp ? mpFine : fineStagione; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
+  el('cqZin').onclick = () => zoomIn(1.3); el('cqZout').onclick = () => zoomIn(1/1.3); el('cqPausa').onclick = pausa; el('cqRis').onclick = () => { if (CG && CG.k <= 4) return; dlgBilancio(); }; el('cqDip').onclick = () => { if (CG && CG.k <= 4){ toast('Prima segui il dito: la Diplomazia la vediamo dopo.'); return; } dlgDiplomazia(); }; el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
+  el('cqCosa').onclick = cosaFaccio;
+  el('cqFine').onclick = () => { stopCH(); if (GIOCA || !S || mpAttesa()) return; const fs = S.mp ? mpFine : fineStagione; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
       o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fs(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fs(); };
   new ResizeObserver(() => { if (attivo) misura(); }).observe(el('cqStage')); new ResizeObserver(() => { if (attivo){ insets(); limita(); } }).observe(root.querySelector('.cq-side')); }
 let PRIMA_SNAP = null;
@@ -8856,7 +8962,7 @@ function avviaCQ(){ SCELTA_MP = false; if (APRI_DOPO === 'crea' || APRI_DOPO ===
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
     o.querySelector('#cqCo').onclick = () => { chiudiOv(); proposte(); if (S) coachCQ(); }; o.querySelector('#cqNu').onclick = () => { try { localStorage.removeItem(KEY); } catch(e){} S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
   else { S = null; aggiornaUI(); scegli(); misura(); centra(); } }
-function esci(tab){ mpChiudi(); if (CG){ clearInterval(CG.iv); CG = null; COACH.nascondi(); } if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', typeof tab === 'string' ? tab : 'gioca'); } catch(e){} mostraMenu(); }
+function esci(tab){ mpChiudi(); if (CG){ clearInterval(CG.iv); CG = null; COACH.nascondi(); } if (SCELTA){ SCELTA = null; SCELTA_MOSTRA = null; S = null; } VOLO = null; attivo = false; GIOCA = null; ANIM.length = 0; VISTA = null; chiudiOv(); { const tt = el('cqToast'); if (tt) tt.className = 'cq-toast'; } if (root) root.hidden = true; try { sessionStorage.setItem('ds-tab', typeof tab === 'string' ? tab : 'gioca'); } catch(e){} mostraMenu(); }
 function tasto(e, k){ const o = el('cqOv');
   if (o && !o.hidden){ if (k === 'Escape'){ e.preventDefault(); const b = o.querySelector('#cqNo, #cqRi'); if (b) b.click(); } else if (k === 'Enter'){ const b = o.querySelector('.big:not(.alt):not(:disabled)'); if (b){ e.preventDefault(); b.click(); } } return; }
   if (k === ' ' || k === 'Enter'){ e.preventDefault(); el('cqFine').click(); } else if (k === 'Escape'){ e.preventDefault(); if (modo){ modo = null; pannello(); } else if (sel){ sel = null; pannello(); } else pausa(); }
@@ -9121,11 +9227,7 @@ const ACC = window.ACC = (() => {
     const lettere = (n || 'Smerillo').split('').map((c, i) => `<span style="--i:${i}">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
     ov.innerHTML = `<div class="acc-in-griglia"></div><div class="acc-in-testo"><div class="acc-in-et">${n ? 'Bentornato' : 'Si parte per'}</div><div class="acc-in-nome" style="--n:${Math.max(6, (n || 'Smerillo').length)}">${lettere}</div><div class="acc-in-riga"></div></div>`;
     const g = ov.firstElementChild, cx = (C - 1) / 2, cy = (R - 1) / 2, dmax = Math.hypot(cx, cy) || 1, fr = document.createDocumentFragment(), celle = [];
-    for (let y = 0; y < R; y++) for (let x = 0; x < C; x++){ const q = document.createElement('i'), d = Math.hypot(x - cx, y - cy) / dmax;
-      q.style.left = x * L + 'px'; q.style.top = y * L + 'px'; q.style.setProperty('--d', d.toFixed(3)); if ((x + y) % 2) q.className = 'b'; if (Math.random() < .06) q.className = 'o'; fr.append(q); celle.push(q); }
-    g.append(fr);
     const tx = ov.querySelector('.acc-in-testo');
-    for (let i = 0; i < 26; i++){ const q = document.createElement('b'), a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 170; q.style.setProperty('--dx', Math.cos(a) * d + 'px'); q.style.setProperty('--dy', Math.sin(a) * d * .7 + 'px'); q.style.setProperty('--t', (.5 + Math.random() * .25) + 's'); q.style.background = ['#ffd03a', '#fff3a8', '#ffffff', '#7ccf6a'][i % 4]; tx.append(q); }
     document.body.append(ov);
     ld.classList.add('acc-entrando');
     requestAnimationFrame(() => ov.classList.add('su'));
@@ -9333,9 +9435,11 @@ document.addEventListener('keydown', e => {
 });
 // ===== COACH: la guida che indica col dito cosa toccare (usata da missioni, tempo reale e Conquista) =====
 const COACH = window.COACH = (() => {
-  let box = null, ring = null, dito = null, cfg = null, raf = 0;
+  let box = null, ring = null, dito = null, cfg = null, raf = 0, tMini = 0;
+  const MINI_DOPO = 4200; // millisecondi di lettura prima di farsi piccola
   function crea(){ if (box) return;
     box = document.createElement('div'); box.id = 'coach'; box.hidden = true; document.body.append(box);
+    box.addEventListener('click', () => { if (box.classList.contains('mini')){ box.classList.remove('mini'); armaMini(); } });
     ring = document.createElement('div'); ring.id = 'coachRing'; ring.hidden = true; document.body.append(ring);
     dito = document.createElement('div'); dito.id = 'coachDito'; dito.hidden = true; dito.innerHTML = '<svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true"><path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V10l.5-.1a1.5 1.5 0 0 1 2.9.6l.1.1a1.5 1.5 0 0 1 2.8.8l.2.1a1.4 1.4 0 0 1 2.5.9V16a6 6 0 0 1-6 6h-1.2a6 6 0 0 1-4.6-2.2L5 15.4a1.5 1.5 0 0 1 2.2-2L9 15" fill="#fff" stroke="#141433" stroke-width="1.6" stroke-linejoin="round"/></svg>'; document.body.append(dito); }
   // dove sta il bersaglio: un elemento della pagina oppure un punto {x, y} sullo schermo
@@ -9351,17 +9455,18 @@ const COACH = window.COACH = (() => {
     // la nuvoletta sta dalla parte opposta al bersaglio
     if (!nascosto){ const basso = innerHeight < 560 && innerWidth > innerHeight;
       if (basso){ const dx = !b || b.x < innerWidth/2; box.classList.add('lato'); box.classList.remove('sopra', 'sotto'); box.classList.toggle('dx', dx); box.classList.toggle('sx', !dx); }
-      else { box.classList.remove('lato', 'dx', 'sx'); const alto = !b || b.y > innerHeight*.45; box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
+      else { box.classList.remove('lato', 'dx', 'sx'); const alto = !!(!b || b.y > innerHeight*.45 || (cfg.su && b.y > 150)); box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
         // se la nuvoletta copre comunque il punto da toccare, la accorcio
         if (b){ const r = box.getBoundingClientRect(); box.classList.toggle('stretto', b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8); } } } }
-  function mostra(c){ crea(); cfg = c;
-    box.innerHTML = `<div class="co-h"><span class="co-n">${c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : 'GUIDA'}</span>${c.salta ? '<button type="button" class="co-salta">Salta la guida</button>' : ''}</div>
+  function armaMini(){ clearTimeout(tMini); if (cfg && !cfg.bottone) tMini = setTimeout(() => { if (cfg && !cfg.bottone && box && !box.hidden) box.classList.add('mini'); }, MINI_DOPO + (cfg.sotto ? 1200 : 0)); }
+  function mostra(c){ crea(); cfg = c; box.classList.remove('mini');
+    box.innerHTML = `<div class="co-h"><span class="co-n">${c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : (c.tag || 'GUIDA')}</span>${c.salta ? '<button type="button" class="co-salta">' + (c.saltaT || 'Salta la guida') + '</button>' : ''}</div>
       <p class="co-t">${c.testo}</p>${c.sotto ? `<p class="co-s">${c.sotto}</p>` : ''}${c.bottone ? `<button type="button" class="co-ok">${c.bottone}</button>` : ''}`;
-    const s = box.querySelector('.co-salta'); if (s) s.onclick = e => { e.stopPropagation(); const f = c.salta; nascondi(); f(); };
+    const s = box.querySelector('.co-salta'); if (s) s.onclick = e => { e.stopPropagation(); if (!s.dataset.sicuro && !c.tag){ s.dataset.sicuro = '1'; const t0 = s.textContent; s.textContent = 'Sicuro? Tocca ancora'; s.classList.add('co-sic'); setTimeout(() => { if (s.isConnected){ delete s.dataset.sicuro; s.textContent = t0; s.classList.remove('co-sic'); } }, 2500); return; } const f = c.salta; nascondi(); f(); }; // un tocco per sbaglio non salta la guida: chiede conferma
     const o = box.querySelector('.co-ok'); if (o) o.onclick = e => { e.stopPropagation(); const f = c.ok; if (f) f(); };
-    box.hidden = false; box.classList.remove('entra'); void box.offsetWidth; box.classList.add('entra');
+    box.hidden = false; box.classList.remove('entra'); void box.offsetWidth; box.classList.add('entra'); armaMini();
     if (!raf) giro(); }
-  function nascondi(){ cfg = null; if (box){ box.hidden = true; ring.hidden = true; dito.hidden = true; } if (raf){ cancelAnimationFrame(raf); raf = 0; } }
+  function nascondi(){ cfg = null; clearTimeout(tMini); if (box){ box.hidden = true; ring.hidden = true; dito.hidden = true; } if (raf){ cancelAnimationFrame(raf); raf = 0; } }
   return {mostra, nascondi, get attivo(){ return !!cfg; }};
 })();
 
@@ -9456,7 +9561,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261112100632';
+  const VERSIONE = window.DS_VER = '20261115003802';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){
@@ -9491,7 +9596,7 @@ const RITORNO = window.RITORNO = (() => {
   function chiudi(){ if (ov){ ov.hidden = true; ov.innerHTML = ''; } }
   const aperta = () => !!(ov && !ov.hidden) || !!(document.getElementById('accOv') && !document.getElementById('accOv').hidden);
   const titolo = () => document.getElementById('title');
-  const nelMenu = () => { const t = titolo(); return !!t && !t.hidden && !document.getElementById('caricamento') && !document.querySelector('.tr-velo, .acc-in, .acc-gate'); };
+  const nelMenu = () => { const t = titolo(); return !!t && !t.hidden && !document.getElementById('caricamento') && !document.querySelector('.tr-velo, .acc-in, .acc-gate, #tb:not([hidden]), #cq:not([hidden]), #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), .scr-stage'); }; // dentro una partita non si apre niente sopra
   // aspetta che il menu sia caricato davvero (niente finestre sopra la schermata di caricamento)
   function quandoPronto(f, prove = 0){ if (prove > 150) return; if (!nelMenu() || aperta()){ setTimeout(() => quandoPronto(f, prove + 1), 400); return; } setTimeout(() => { if (nelMenu() && !aperta()) f(); else quandoPronto(f, prove + 1); }, 700); }
 
@@ -9535,22 +9640,26 @@ const RITORNO = window.RITORNO = (() => {
       const bi = b.querySelector('[data-in]'); if (bi) bi.onclick = () => { i--; disegna(); };
       const bs = b.querySelector('[data-sk]'); if (bs) bs.onclick = () => { chiudi(); poi(); }; };
     disegna(); }
-  function avviaPasso(k){ if (TUT[k] && !avviaPasso.visto){ avviaPasso.visto = {}; } if (TUT[k] && !avviaPasso.visto[k]){ avviaPasso.visto[k] = true; tutorial(k, () => avviaPasso(k)); return; }
+  function avviaPasso(k){ if (TUT[k] && !avviaPasso.visto){ avviaPasso.visto = {}; } if (TUT[k] && k !== 'conquista' && !avviaPasso.visto[k]){ avviaPasso.visto[k] = true; tutorial(k, () => avviaPasso(k)); return; }
     if (k === 'conquista') sc('difendi-smerillo-conquista-guida3', '1'); // il tutorial ha già spiegato: niente muro di testo all'inizio
     const t = titolo(), s = stato(); s.in = k; salvaS(s); chiudi(); traccia('assaggio', {passo: k, ev:'via'});
+    if (k === 'tempo'){ CARICA(() => { if (t) t.hidden = true; try { avviaRT(); } catch(e){ console.error(e); } try { window.aggOriz && window.aggOriz(); } catch(e){} }, 'Carico la difesa…'); setTimeout(mostraChip, 1800); return; } // dietro la schermata di caricamento: niente menu sotto, niente mappa a metà
     if (t) t.hidden = true;
     if (k === 'turni') TB.apri(stato().rivedi ? 'prima' : 'gioca');
     else if (k === 'tempo'){ try { avviaRT(); } catch(e){ console.error(e); } }
     else if (k === 'conquista') CQ.apri();
     setTimeout(mostraChip, 1200); }
   function mostraChip(){ const s = stato(); if (!s.in || s.passo >= 3){ togliChip(); return; } const i = PASSI.indexOf(s.in);
-    if (!chip){ chip = document.createElement('button'); chip.type = 'button'; chip.id = 'asChip'; document.body.append(chip); chip.onclick = () => salta(); }
+    if (!chip){ chip = document.createElement('button'); chip.type = 'button'; chip.id = 'asChip'; document.body.append(chip); chip.onclick = () => chiediSalta(); }
     chip.innerHTML = `<span>${i + 1}/3</span><b>▸</b>`; chip.title = `Assaggio ${i + 1} di 3: ${i < 2 ? 'vai al prossimo' : 'finisci'}`; chip.setAttribute('aria-label', chip.title); chip.hidden = false;
     // sparisce quando c'è altro sopra (scrigni, finestre, fine partita)
-    if (!chip._t) chip._t = setInterval(() => { if (!chip || chip.hidden) return; chip.classList.toggle('via', !!document.querySelector('.scr-stage, #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), #rtOv:not([hidden]), #accOv:not([hidden])')); }, 400); }
+    if (!chip._t) chip._t = setInterval(() => { if (!chip || chip.hidden) return; chip.classList.toggle('via', !!document.querySelector('.scr-stage, #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), #rtOv:not([hidden]), #accOv:not([hidden]), #coach:not([hidden]), body.tb-prova')); }, 400); }
   function togliChip(){ if (chip) chip.hidden = true; }
   // il passo è finito (o saltato): si torna al menu e si vede il prossimo
   function fatto(k, come){ const s = stato(); if (s.passo >= 3 || PASSI[s.passo] !== k) return false; s.passo++; s.in = null; s.ultimo = {k, come}; salvaS(s); togliChip(); traccia('assaggio', {passo: k, ev: come}); return true; }
+  // toccata per sbaglio non ti butta fuori: prima chiede
+  function chiediSalta(){ const s = stato(); if (!s.in) return; const b = finestra(`<span class="fd-k">PROVA ${PASSI.indexOf(s.in) + 1} DI 3</span><h2>Vuoi passare alla prossima prova?</h2><p class="acc-sub">Questa partita finisce qui.</p><button class="big" data-no>No, continuo a giocare</button><button class="as-salta" data-si>Sì, vai avanti</button>`);
+    b.querySelector('[data-no]').onclick = chiudi; b.querySelector('[data-si]').onclick = () => { chiudi(); salta(); }; }
   function salta(){ const s = stato(); if (!s.in) return; const k = s.in; fatto(k, 'avanti'); chiudi();
     if (k === 'turni') TB.esci(); else if (k === 'tempo') mostraMenu(); else if (k === 'conquista') CQ.esci(); }
   function finestraPasso(){ const s = stato(); if (s.passo > 3) return false; if (s.in){ s.in = null; salvaS(s); } // riaperto il gioco a metà: si riparte da questo passo
@@ -9577,7 +9686,7 @@ const RITORNO = window.RITORNO = (() => {
     b.querySelector('[data-x]').onclick = () => { const s2 = stato(); s2.passo = 9; s2.in = null; salvaS(s2); if (scelta) scegliFrazione(scelta);
       if (!lg('difendi-smerillo-benvenuto')){ sc('difendi-smerillo-benvenuto', '1'); try { regalaScrigno('argento', 'Regalo di benvenuto'); } catch(e){} }
       const g = giorni(); g.p = g.u; scJ(GKEY, g); // il giorno 1 è già questo regalo
-      traccia('assaggio', {passo:'fine', fz: scelta || null}); chiudi(); RIENTRA('premi'); }; }
+      traccia('assaggio', {passo:'fine', fz: scelta || null}); chiudi(); if (nelMenu()) RIENTRA('gioca'); }; soloMenu(); }
   // dopo ogni partita: se è un passo dell'assaggio, lo chiude
   function fineTurni(vinto){ const s = stato(); if (s.in !== 'turni') return false; fatto('turni', vinto ? 'vinto' : 'perso'); try { TB.esci(); } catch(e){ mostraMenu(); } return true; }
   function ondataRT(n, continua){ const s = stato(); if (s.in !== 'tempo' || n < 2) return false; fatto('tempo', 'vinto');
@@ -9586,11 +9695,8 @@ const RITORNO = window.RITORNO = (() => {
     b.querySelector('[data-go]').onclick = () => { chiudi(); mostraMenu(); };
     b.querySelector('[data-st]').onclick = () => { chiudi(); continua(); }; return true; }
   function persoRT(){ const s = stato(); if (s.in !== 'tempo') return false; fatto('tempo', 'perso'); mostraMenu(); return true; }
-  function dopoStagione(){ const s = stato(); if (s.in !== 'conquista') return; fatto('conquista', 'vinto');
-    const b = finestra(`<span class="fd-k">ASSAGGIO 3 DI 3 FATTO</span><h2>La tua prima stagione!</h2><p class="acc-sub">La partita resta salvata: la continui quando vuoi da <b>Gioca → Conquista</b>.</p>${pallini(3)}
-      <button class="big" data-go>Vai al menu ▸</button><button class="big alt" data-st>Resto qui a giocare</button>`);
-    b.querySelector('[data-go]').onclick = () => { chiudi(); CQ.esci(); };
-    b.querySelector('[data-st]').onclick = chiudi; }
+  // la prova della Conquista finisce in silenzio: chi sta giocando continua a giocare, il regalo lo trova quando torna al menu
+  function dopoStagione(){ const s = stato(); if (s.in !== 'conquista') return; fatto('conquista', 'vinto'); }
 
   // ---------- nel menu: assaggio, giorni di fila, sfida delle frazioni, la modalità da provare
   let gVisto = false, vVisto = false, hVisto = false, aspettaPasso = false;
@@ -9619,7 +9725,7 @@ const RITORNO = window.RITORNO = (() => {
     const b = finestra(`<span class="fd-k">${g.s === 1 ? 'BENTORNATO' : 'SEI TORNATO'}</span><h2>${g.s === 1 ? 'Il premio di oggi' : g.s + ' giorni di fila!'}</h2>
       <div class="gf-pop"><span class="gf-raggi"></span>${cassa(tipo)}<b>Scrigno di ${NOMEG[tipo]}</b><div class="gf-st">${strisciaG(g)}</div></div>
       <p class="acc-sub">${g.s % 7 === 0 ? 'Hai completato la settimana!' : `Torna ogni giorno: al giorno ${Math.ceil(g.s/7)*7} c’è lo scrigno d’oro. Se salti un giorno si ricomincia.`}</p><button class="big" data-x>Ritira lo scrigno</button>`, true);
-    b.querySelector('[data-x]').onclick = () => { ritiraG(); chiudi(); RIENTRA('premi'); }; }
+    b.querySelector('[data-x]').onclick = () => { ritiraG(); chiudi(); if (nelMenu()) RIENTRA('premi'); }; soloMenu(); }
   async function disegnaFz(d){ const f = frazione(), a = acc();
     const scegli = `<div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" class="${f === k ? 'on' : ''}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div>`;
     const testa = (fine) => `<div class="fz-h"><b>${ico('bandiera', 2)} Sfida delle frazioni</b><small>${fine}</small></div>`;
@@ -9633,6 +9739,8 @@ const RITORNO = window.RITORNO = (() => {
       + (r.migliori && r.migliori.length ? `<p class="fz-mig">${r.migliori.slice(0, 3).map(m => `<span style="--fc:${(FZ[m.fr] || {}).c}">${esc(m.nome)} <b>${m.v}</b></span>`).join('')}</p>` : '')
       + (!f ? `<p class="fz-p">Per quale frazione giochi?</p>${scegli}` : !a ? `<p class="fz-p">Crea un account per far contare i tuoi punti. <button type="button" class="fz-acc">Crea account</button></p>` : `<p class="fz-p">I tuoi punti questa settimana: <b>${r.mia ? r.mia.punti : 0}</b>. Vinci partite per farne di più.</p>`);
     lega(); const ba = d.querySelector('.fz-acc'); if (ba) ba.onclick = () => { try { ACC.apri(); } catch(e){} }; }
+  // una finestra aperta dal menu si chiude da sola se intanto è partita una partita: niente finestre del menu sopra il gioco
+  function soloMenu(){ const mia = ov && ov.firstElementChild; const iv = setInterval(() => { if (!ov || ov.hidden || ov.firstElementChild !== mia){ clearInterval(iv); return; } if (!nelMenu()){ clearInterval(iv); chiudi(); } }, 300); }
   function RIENTRA(tab){ try { sessionStorage.setItem('ds-tab', tab); } catch(e){} mostraMenu('home'); }
   function avviaRT(){ CMIS = 1; S = null; nuovaPartita('facile'); }
 
@@ -9685,7 +9793,7 @@ for (const t of ['gesturestart','gesturechange','gestureend']) document.addEvent
         setTimeout(() => { if (document.body.contains(d)) d.remove(); }, 9000); } }
     if (g && (oriz || !rt)) g.remove();
     if (!rt){ avvisato = false; if (document.fullscreenElement && screen.orientation && screen.orientation.unlock){ try { screen.orientation.unlock(); } catch(e){} } } };
-  addEventListener('resize', agg); addEventListener('orientationchange', () => setTimeout(agg, 200)); setInterval(agg, 700); })();
+  window.aggOriz = agg; addEventListener('resize', agg); addEventListener('orientationchange', () => setTimeout(agg, 200)); setInterval(agg, 700); })();
 
 document.addEventListener('selectstart', e => { if (!(e.target.closest && e.target.closest('input,textarea'))) e.preventDefault(); });
 document.addEventListener('contextmenu', e => { if (!(e.target.closest && e.target.closest('input,textarea'))) e.preventDefault(); });
