@@ -20,6 +20,7 @@
 .mis-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tbruolo{display:block;font-size:14.5px;line-height:1.3;margin:2px 0 4px;color:var(--testo)}
 body.tb-prova #tbFine,body.tb-prova #tbUndo,body.tb-prova #tbShop,body.tb-prova #tbAiuto{visibility:hidden}
+.cq-casd #cqOk{position:sticky;bottom:0;z-index:3;box-shadow:0 -10px 14px 6px var(--cq-carta,#1a2466),0 5px 0 #141433}
 </style>
 <style>
 #caricamento{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(180deg,#0b1240 0%,#1a2f86 45%,#3d6fe0 75%,#f0a060 100%);transition:opacity .45s,transform .45s}
@@ -3817,6 +3818,7 @@ function preparaOndata(){
 }
 function avviaOndata(){
   if (!S || S.inCorso || S.fine || S.attesaCarta || S.ondata >= ONDATE) return;
+  if (S.ondata === 0 && (S.avvisoDif || 0) < 2 && !S.luoghi.some(l => l.lvl)){ let g = false; try { g = localStorage.getItem(GKEY_CL) === '1'; } catch(e){} if (!g){ S.avvisoDif = (S.avvisoDif || 0) + 1; try { toastMenu('Prima costruisci una difesa: tocca un pallino bianco.'); } catch(e){} return; } }
   if (!S.prossima) preparaOndata();
   const pr = S.prossima; S.prossima = null;
   S.ondata = pr.n; S.inCorso = true; S.ev = pr.ev; S.ultimoEv = pr.ev; S.vieAttive = pr.vie;
@@ -5927,7 +5929,7 @@ function usaSpeciale(S, d, evs){
   else { for (const x of S.nem.slice()) if (gdist(d.nodo, x.nodo) === 1 || (s === 'frana' && gdist(d.nodo, x.nodo) <= 1)) colpisci(S, {k:'nem', u:x}, 2, evs, d.id); }
   esito(S);
 }
-function mossePer(S, d){
+function mossePer(S, d){ if (S.prova != null) return [];
   const T = TIPI[d.tipo]; if (!T.passo) return [];
   if (!d.mosso){ const out = raggiungibili(S, d).map(nodo => ({nodo, k:'passo'}));
     for (const c of ADJ[d.nodo]){ const o = occ(S, c); if (o && o.k === 'dif' && TIPI[o.u.tipo].passo && !ARRIVO.has(d.nodo)) out.push({nodo:c, k:'scambio'}); } return out; }
@@ -6059,6 +6061,7 @@ function perche(d, nodo){ const T = TIPI[d.tipo], st = stat(d.tipo), nome = T.no
 function annulla(){ if (ev || !storia.length || !mioTurno()) return; POS.clear(); COLP.clear(); FANT = []; S = storia.pop(); sel = null; aggiornaAnteprima(); render(); if (online()) invia({t:'stato', S}); }
 function fineTurno(){
   if (!S || ev || S.esito || ovAperto) return; piazza = null;
+  if (MI === 0 && !RUN && !SFIDA && !M.evento && !online() && S.prova == null && S.avvisoFine !== S.turno && S.dif.some(d => !d.agito && !TIPI[d.tipo].costruisce && bersagli(S, d).length)){ S.avvisoFine = S.turno; try { toastMenu('Aspetta! Puoi ancora colpire un nemico.'); aiuto(); } catch(e){} return; }
   if (online() && fineTurnoOnline()) return; annotaTurno(S);
   uccisiT = 0; V = clona(S); sel = null; storia = []; coda = faseNemici(S); ev = null; evT = 0; prossimo(); render();
 }
@@ -8626,7 +8629,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
   o.querySelectorAll('[data-dc]').forEach(b => b.onclick = () => { const [i, j] = b.dataset.dc.split('|').map(Number), c = D[i]; if (!c || c.fatto || !c.scelte[j][1]()) return; const r = c.scelte[j][2](); c.fatto = true; suona(j ? 'tocco' : 'stella1');
     const box = o.querySelector(`.cq-dec[data-i="${i}"]`); box.classList.add('fatto'); box.querySelector('.cq-decb').outerHTML = `<p class="cq-decr">${ico('ok', 2)} ${r}</p>`; salva(); aggiornaUI(); aggiorna(); });
   aggiorna();
-  ok.onclick = () => { if (resta()) return; chiudiOv(); if (S.mp && !mpAttesa()) proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); pannello(); if (!S.mp) try { RITORNO.dopoStagione(); } catch(e){} }; aggiornaUI(); }
+  ok.onclick = () => { if (resta()) return; chiudiOv(); if (S.mp && !mpAttesa()) proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); pannello(); if (!S.mp && !CG) try { RITORNO.dopoStagione(); } catch(e){} }; aggiornaUI(); } // con la guida ancora aperta non ti chiedo di uscire
 function rivediStagione(){ if (!ULTIMO_REP) return; const o = ov(`<div class="dlg box cq-dlg cq-notizie">${ULTIMO_REP}<button class="big" id="cqOk">Chiudi</button></div>`); o.querySelector('#cqOk').onclick = chiudiOv; }
 function proposte(){ let p; if (S.mp){ const i = S.proposte.findIndex(x => !x.per || x.per === S.io); p = i >= 0 ? S.proposte.splice(i, 1)[0] : null; } else p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
   if (!p){ richieste(); return; }
@@ -8734,7 +8737,7 @@ function chiudiGenerazione(){ leggiCas(); if (!CAS || S.chiusa) return null; S.c
 // creare o cambiare lo stemma e il nome della casata
 function dlgStemma(dopo){ const nuovaC = !leggiCas(); const st = nuovaC ? {c1:0, c2:3, f:'partito', sim:'torre'} : {...CAS.stemma}; let nome = nuovaC ? '' : CAS.nome;
   const o = ov(`<div class="dlg box cq-dlg cq-casd"><span class="kicker">${ico('bandiera', 2)} ${nuovaC ? 'Prima di cominciare' : 'La tua casata'}</span><h2>${nuovaC ? 'Fonda la tua casata' : 'Cambia stemma'}</h2>
-    <p>${nuovaC ? 'La tua famiglia vivrà partita dopo partita: ogni partita è una generazione. Vinci o perdi, la casata guadagna gloria e la sua storia viene scritta nella cronaca.' : 'Nome e stemma compaiono sulla mappa e nella cronaca.'}</p>
+    <p>${nuovaC ? 'Scegli un nome e uno stemma per la tua famiglia, oppure tocca subito <b>Fonda la casata</b>: li cambi quando vuoi.' : 'Nome e stemma compaiono sulla mappa e nella cronaca.'}</p>
     <div class="cq-stp"><span id="cqStPrev"></span><label class="cq-nomec">Casata <input id="cqNomeC" maxlength="16" autocomplete="off" placeholder="Vitali" value="${nome.replace(/"/g, '')}"></label></div>
     <div class="cq-sts"><small>Scudo</small><div class="cq-stg cq-sag">${SSAG.map(([k, n, lk]) => `<button type="button" data-sa="${k}" aria-label="${n}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}><span class="cq-sagi"></span><small>${lk && !haPremio(lk) ? ico('lucchetto', 1) + ' ' : ''}${n}</small></button>`).join('')}</div>
       <small>Forma</small><div class="cq-stg">${SFOR.map(([k, n, lk]) => `<button type="button" data-fo="${k}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}>${lk && !haPremio(lk) ? ico('lucchetto', 2) + ' ' : ''}${n}</button>`).join('')}</div>
@@ -8743,12 +8746,14 @@ function dlgStemma(dopo){ const nuovaC = !leggiCas(); const st = nuovaC ? {c1:0,
       <small>Simbolo</small><div class="cq-stg cq-sim">${SSIM.map(([k, n, lk]) => `<button type="button" data-si="${k}" aria-label="${n}" ${lk && !haPremio(lk) ? `disabled class="chiuso" title="${titoloChiuso(lk)}"` : ''}>${ico(k, 2)}</button>`).join('')}</div></div>
     <p class="cq-warn" id="cqStErr" hidden>Scrivi il nome della casata (almeno 2 lettere).</p>
     <button class="big" id="cqOk">${nuovaC ? 'Fonda la casata' : 'Salva'}</button>${nuovaC ? '' : '<button class="big alt" id="cqNo">Indietro</button>'}</div>`, false);
-  const agg = () => { o.querySelector('#cqStPrev').innerHTML = imgStemma(st, 5); o.querySelectorAll('[data-fo]').forEach(b => b.classList.toggle('on', b.dataset.fo === st.f)); o.querySelectorAll('[data-c1]').forEach(b => b.classList.toggle('on', +b.dataset.c1 === st.c1)); o.querySelectorAll('[data-c2]').forEach(b => b.classList.toggle('on', +b.dataset.c2 === st.c2)); o.querySelectorAll('[data-si]').forEach(b => b.classList.toggle('on', b.dataset.si === st.sim)); o.querySelectorAll('[data-sa]').forEach(b => { b.classList.toggle('on', b.dataset.sa === (st.s || 'classico')); const c = stemma({...st, s: b.dataset.sa}, 2); const sp = b.querySelector('.cq-sagi'); if (c && sp){ sp.innerHTML = ''; const im = document.createElement('img'); im.src = c.toDataURL(); im.width = c.width; im.height = c.height; sp.append(im); } }); };
+  const agg = () => { const pv = o.querySelector('#cqStPrev'); if (!pv) return; pv.innerHTML = imgStemma(st, 5); o.querySelectorAll('[data-fo]').forEach(b => b.classList.toggle('on', b.dataset.fo === st.f)); o.querySelectorAll('[data-c1]').forEach(b => b.classList.toggle('on', +b.dataset.c1 === st.c1)); o.querySelectorAll('[data-c2]').forEach(b => b.classList.toggle('on', +b.dataset.c2 === st.c2)); o.querySelectorAll('[data-si]').forEach(b => b.classList.toggle('on', b.dataset.si === st.sim)); o.querySelectorAll('[data-sa]').forEach(b => { b.classList.toggle('on', b.dataset.sa === (st.s || 'classico')); const c = stemma({...st, s: b.dataset.sa}, 2); const sp = b.querySelector('.cq-sagi'); if (c && sp){ sp.innerHTML = ''; const im = document.createElement('img'); im.src = c.toDataURL(); im.width = c.width; im.height = c.height; sp.append(im); } }); };
   o.querySelectorAll('[data-fo]').forEach(b => b.onclick = () => { st.f = b.dataset.fo; suona('tocco'); agg(); }); o.querySelectorAll('[data-c1]').forEach(b => b.onclick = () => { st.c1 = +b.dataset.c1; suona('tocco'); agg(); });
   o.querySelectorAll('[data-c2]').forEach(b => b.onclick = () => { st.c2 = +b.dataset.c2; suona('tocco'); agg(); }); o.querySelectorAll('[data-si]').forEach(b => b.onclick = () => { st.sim = b.dataset.si; suona('tocco'); agg(); }); o.querySelectorAll('[data-sa]').forEach(b => b.onclick = () => { st.s = b.dataset.sa; suona('tocco'); agg(); });
   agg(); setTimeout(agg, 120);
   const inp = o.querySelector('#cqNomeC'); inp.oninput = () => { if (inp.value.trim().length >= 2) o.querySelector('#cqStErr').hidden = true; }; inp.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); o.querySelector('#cqOk').click(); } };
-  o.querySelector('#cqOk').onclick = () => { const n = inp.value.trim().replace(/\s+/g, ' ').replace(/[<>"]/g, ''); if (n.length < 2){ o.querySelector('#cqStErr').hidden = false; inp.focus(); return; }
+  o.querySelector('#cqOk').onclick = () => { let n = inp.value.trim().replace(/\s+/g, ' ').replace(/[<>"]/g, '');
+    if (n.length < 2 && nuovaC){ let a = ''; try { a = (ACC.account && ACC.account.nome) || ''; } catch(e){} n = (a.length >= 2 ? a : 'Del Borgo').slice(0, 16); } // chi non scrive niente parte lo stesso: il nome si cambia quando vuoi
+    if (n.length < 2){ o.querySelector('#cqStErr').hidden = false; inp.focus(); return; }
     const nm = n.charAt(0).toUpperCase() + n.slice(1); if (nuovaC){ CAS = {nome:nm, stemma:st, gloria:0, gen:0, vittorie:0, storia:[]}; if (S && S.cron){ for (const x of S.cron) x.txt = x.txt.replace(/La tua casata/g, 'La casata ' + nm).replace(/la tua casata/g, 'la casata ' + nm); } } else { CAS.nome = nm; CAS.stemma = st; }
     salvaCas(); for (const k in STM) delete STM[k]; suona('stella2'); chiudiOv(); if (S) aggiornaUI(); if (dopo) dopo(); };
   const no = o.querySelector('#cqNo'); if (no) no.onclick = () => dlgCasata(); }
@@ -8810,7 +8815,8 @@ function cosaFaccio(){ if (!S || GIOCA || SCELTA || ovAperto() || mpAttesa()) re
       dove: f === 'fine' ? () => el('cqFine') : f === 't' ? () => puntoTerra(m.terra) : () => el(m.btn)}); };
   CH = {f: '', iv: setInterval(giro, 200)}; giro(); }
 
-function fineCG(){ if (!CG) return; clearInterval(CG.iv); CG = null; COACH.nascondi(); try { localStorage.setItem(KGUIDA + '4', '1'); localStorage.setItem(KGUIDA + '3', '1'); } catch(e){} }
+function fineCG(){ if (!CG) return; const finita = CG.k >= 6; clearInterval(CG.iv); CG = null; COACH.nascondi(); try { localStorage.setItem(KGUIDA + '4', '1'); localStorage.setItem(KGUIDA + '3', '1'); } catch(e){}
+  if (finita && S && !S.mp) try { RITORNO.dopoStagione(); } catch(e){} }
 function vicinaCG(){ const mie = IDS.filter(t => S.terre[t].own === S.io); let best = null, bs = 1e9;
   for (const t of mie){ if (S.terre[t].sold < 2) continue; for (const v of VIC[t]){ const st = S.terre[v]; if (st.own === S.io || (TERRE[v].borgo && eBorgo(v))) continue; let pp = 0; try { pp = previsione(S.io, S.terre[t].sold - 1, v, null, t).p; } catch(e){} const sc = st.sold + (st.own ? 5 : 0) - pp*6; if (sc < bs){ bs = sc; best = v; } } }
   return best; }
@@ -8818,11 +8824,14 @@ function puntoTerra(t){ if (!t || !TERRE[t]) return null; const st = el('cqStage
 function passoCG(){ if (!CG || !S) return; if (!attivo){ COACH.nascondi(); CG.vista = -1; return; }
   const usate = CG.mosse - S.mosse;
   // avanzamento
+  if (CG.k === 1 && sel !== S.io && usate < 1 && !ovAperto()) CG.k = 0; // hai toccato altrove: ti riporto al tuo borgo
   if (CG.k === 0 && sel === S.io) CG.k = 1;
   if (CG.k === 1 && usate >= 1){ CG.k = 2; CG.terra = vicinaCG(); CG.m2 = S.mosse; if (CG.terra) vaiA(CG.terra); else CG.k = 4; }
   if (CG.k === 2 && sel && sel === CG.terra) CG.k = 3;
   if (CG.k === 2 && sel && sel !== CG.terra && S.terre[sel].own !== S.io && VIC[sel].some(v => S.terre[v].own === S.io)){ CG.terra = sel; CG.k = 3; }
+  if ((CG.k === 2 || CG.k === 3) && CG.terra && S.terre[CG.terra].own !== S.io && S.mosse < CG.m2 && S.mosse > 0 && !ovAperto()){ const t2 = vicinaCG(); if (t2){ CG.terra = t2; CG.m2 = S.mosse; CG.k = 2; CG.vista = -1; vaiA(t2); } } // hai usato la mossa per altro: l'attacco te lo faccio provare lo stesso
   if (CG.k === 3 && (S.mosse < CG.m2 || S.terre[CG.terra].own === S.io)) CG.k = 4;
+  if (CG.k === 2 && S.mosse <= 0) CG.k = 4;
   if (CG.k === 3 && sel !== CG.terra && !ovAperto()){ CG.k = 2; }
   if (CG.k <= 4 && S.turno > CG.turno) CG.k = 5;
   if (CG.vista === CG.k) return; CG.vista = CG.k;
@@ -8924,7 +8933,7 @@ function costruisciDom(){ root = document.createElement('section'); root.id = 'c
   document.body.append(root); cv = el('cqCv'); ctx = cv.getContext('2d'); inputMappa();
   root.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b || b.disabled || !root.contains(b)) return; const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height)*2.2, sp = document.createElement('span'); sp.className = 'cq-rip'; sp.style.cssText = `left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px;width:${d}px;height:${d}px`; b.append(sp); setTimeout(() => sp.remove(), 520);
     const bu = document.createElement('div'); bu.className = 'cq-burst'; bu.style.cssText = `left:${e.clientX}px;top:${e.clientY}px`; for (let i = 0; i < 8; i++){ const q = document.createElement('i'), a = i/8*Math.PI*2 + Math.random()*.4, v = 22 + Math.random()*16; q.style.setProperty('--dx', Math.cos(a)*v + 'px'); q.style.setProperty('--dy', Math.sin(a)*v + 'px'); q.style.background = ['#ffd03a', '#ffffff', '#ffe98a'][i % 3]; bu.append(q); } root.append(bu); setTimeout(() => bu.remove(), 560); }, {passive: true});
-  el('cqZin').onclick = () => zoomIn(1.3); el('cqZout').onclick = () => zoomIn(1/1.3); el('cqPausa').onclick = pausa; el('cqRis').onclick = dlgBilancio; el('cqDip').onclick = () => dlgDiplomazia(); el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
+  el('cqZin').onclick = () => zoomIn(1.3); el('cqZout').onclick = () => zoomIn(1/1.3); el('cqPausa').onclick = pausa; el('cqRis').onclick = () => { if (CG && CG.k <= 4) return; dlgBilancio(); }; el('cqDip').onclick = () => { if (CG && CG.k <= 4){ toast('Prima segui il dito: la Diplomazia la vediamo dopo.'); return; } dlgDiplomazia(); }; el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
   el('cqCosa').onclick = cosaFaccio;
   el('cqFine').onclick = () => { stopCH(); if (GIOCA || !S || mpAttesa()) return; const fs = S.mp ? mpFine : fineStagione; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
       o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fs(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fs(); };
@@ -9632,7 +9641,7 @@ const RITORNO = window.RITORNO = (() => {
       const bi = b.querySelector('[data-in]'); if (bi) bi.onclick = () => { i--; disegna(); };
       const bs = b.querySelector('[data-sk]'); if (bs) bs.onclick = () => { chiudi(); poi(); }; };
     disegna(); }
-  function avviaPasso(k){ if (TUT[k] && !avviaPasso.visto){ avviaPasso.visto = {}; } if (TUT[k] && !avviaPasso.visto[k]){ avviaPasso.visto[k] = true; tutorial(k, () => avviaPasso(k)); return; }
+  function avviaPasso(k){ if (TUT[k] && !avviaPasso.visto){ avviaPasso.visto = {}; } if (TUT[k] && k !== 'conquista' && !avviaPasso.visto[k]){ avviaPasso.visto[k] = true; tutorial(k, () => avviaPasso(k)); return; }
     if (k === 'conquista') sc('difendi-smerillo-conquista-guida3', '1'); // il tutorial ha già spiegato: niente muro di testo all'inizio
     const t = titolo(), s = stato(); s.in = k; salvaS(s); chiudi(); traccia('assaggio', {passo: k, ev:'via'});
     if (t) t.hidden = true;
@@ -9641,13 +9650,16 @@ const RITORNO = window.RITORNO = (() => {
     else if (k === 'conquista') CQ.apri();
     setTimeout(mostraChip, 1200); }
   function mostraChip(){ const s = stato(); if (!s.in || s.passo >= 3){ togliChip(); return; } const i = PASSI.indexOf(s.in);
-    if (!chip){ chip = document.createElement('button'); chip.type = 'button'; chip.id = 'asChip'; document.body.append(chip); chip.onclick = () => salta(); }
+    if (!chip){ chip = document.createElement('button'); chip.type = 'button'; chip.id = 'asChip'; document.body.append(chip); chip.onclick = () => chiediSalta(); }
     chip.innerHTML = `<span>${i + 1}/3</span><b>▸</b>`; chip.title = `Assaggio ${i + 1} di 3: ${i < 2 ? 'vai al prossimo' : 'finisci'}`; chip.setAttribute('aria-label', chip.title); chip.hidden = false;
     // sparisce quando c'è altro sopra (scrigni, finestre, fine partita)
-    if (!chip._t) chip._t = setInterval(() => { if (!chip || chip.hidden) return; chip.classList.toggle('via', !!document.querySelector('.scr-stage, #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), #rtOv:not([hidden]), #accOv:not([hidden])')); }, 400); }
+    if (!chip._t) chip._t = setInterval(() => { if (!chip || chip.hidden) return; chip.classList.toggle('via', !!document.querySelector('.scr-stage, #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), #rtOv:not([hidden]), #accOv:not([hidden]), #coach:not([hidden]), body.tb-prova')); }, 400); }
   function togliChip(){ if (chip) chip.hidden = true; }
   // il passo è finito (o saltato): si torna al menu e si vede il prossimo
   function fatto(k, come){ const s = stato(); if (s.passo >= 3 || PASSI[s.passo] !== k) return false; s.passo++; s.in = null; s.ultimo = {k, come}; salvaS(s); togliChip(); traccia('assaggio', {passo: k, ev: come}); return true; }
+  // toccata per sbaglio non ti butta fuori: prima chiede
+  function chiediSalta(){ const s = stato(); if (!s.in) return; const b = finestra(`<span class="fd-k">PROVA ${PASSI.indexOf(s.in) + 1} DI 3</span><h2>Vuoi passare alla prossima prova?</h2><p class="acc-sub">Questa partita finisce qui.</p><button class="big" data-no>No, continuo a giocare</button><button class="as-salta" data-si>Sì, vai avanti</button>`);
+    b.querySelector('[data-no]').onclick = chiudi; b.querySelector('[data-si]').onclick = () => { chiudi(); salta(); }; }
   function salta(){ const s = stato(); if (!s.in) return; const k = s.in; fatto(k, 'avanti'); chiudi();
     if (k === 'turni') TB.esci(); else if (k === 'tempo') mostraMenu(); else if (k === 'conquista') CQ.esci(); }
   function finestraPasso(){ const s = stato(); if (s.passo > 3) return false; if (s.in){ s.in = null; salvaS(s); } // riaperto il gioco a metà: si riparte da questo passo
@@ -9684,8 +9696,8 @@ const RITORNO = window.RITORNO = (() => {
     b.querySelector('[data-st]').onclick = () => { chiudi(); continua(); }; return true; }
   function persoRT(){ const s = stato(); if (s.in !== 'tempo') return false; fatto('tempo', 'perso'); mostraMenu(); return true; }
   function dopoStagione(){ const s = stato(); if (s.in !== 'conquista') return; fatto('conquista', 'vinto');
-    const b = finestra(`<span class="fd-k">ASSAGGIO 3 DI 3 FATTO</span><h2>La tua prima stagione!</h2><p class="acc-sub">La partita resta salvata: la continui quando vuoi da <b>Gioca → Conquista</b>.</p>${pallini(3)}
-      <button class="big" data-go>Vai al menu ▸</button><button class="big alt" data-st>Resto qui a giocare</button>`);
+    const b = finestra(`<span class="fd-k">ASSAGGIO 3 DI 3 FATTO</span><h2>Ora sai giocare a Conquista!</h2><p class="acc-sub">La partita resta salvata: la continui quando vuoi da <b>Gioca → Conquista</b>.</p>${pallini(3)}
+      <button class="big" data-st>Continuo a giocare ▸</button><button class="big alt" data-go>Vai al menu</button>`);
     b.querySelector('[data-go]').onclick = () => { chiudi(); CQ.esci(); };
     b.querySelector('[data-st]').onclick = chiudi; }
 
