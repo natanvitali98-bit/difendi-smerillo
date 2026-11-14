@@ -25,6 +25,7 @@ body.tb-prova #tbFine,body.tb-prova #tbUndo,body.tb-prova #tbShop,body.tb-prova 
 <style>
 #caricamento{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(180deg,#0b1240 0%,#1a2f86 45%,#3d6fe0 75%,#f0a060 100%);transition:opacity .45s,transform .45s}
 #caricamento.via{opacity:0;transform:scale(1.06);pointer-events:none}
+#caricamento:not(.pronto) .ld-su,#caricamento:not(.pronto) .ld-giu{opacity:0}#caricamento .ld-su,#caricamento .ld-giu{transition:opacity .3s}#caricamento:not(.pronto) .ld-logo span{animation:none} /* le scritte compaiono solo quando i caratteri sono pronti: niente scritte che cambiano forma */
 .ld-cielo{position:absolute;inset:0;pointer-events:none}
 .ld-stelle{position:absolute;inset:0 0 45% 0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 50%,transparent),radial-gradient(1px 1px at 30% 8%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 52% 22%,#fff 50%,transparent),radial-gradient(1px 1px at 70% 12%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 86% 26%,#fff 50%,transparent),radial-gradient(1px 1px at 20% 34%,#fff 50%,transparent),radial-gradient(1px 1px at 62% 36%,#fff 50%,transparent),radial-gradient(1px 1px at 92% 6%,#fff 50%,transparent);animation:ldBrilla 3s ease-in-out infinite}
 @keyframes ldBrilla{50%{opacity:.5}}
@@ -73,7 +74,7 @@ body.tb-prova #tbFine,body.tb-prova #tbUndo,body.tb-prova #tbShop,body.tb-prova 
   color-scheme:dark;
 }
 [hidden]{display:none!important}
-html{height:100%;box-sizing:border-box}
+html{height:100%;box-sizing:border-box;background:#0b1240}
 /* gioco aperto dalla Home: il fondo della pagina ha lo stesso blu della barra in basso, così iOS non lascia strisce nere */
 @media (display-mode: standalone){ html, body{background:#141f52!important} body::after{content:'';position:fixed;left:0;right:0;top:0;height:22px;background:linear-gradient(#141f52,rgba(20,31,82,0));z-index:2147483000;pointer-events:none} }
 *,*::before,*::after{box-sizing:inherit}
@@ -1072,7 +1073,7 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .cr-tab.nov::after{content:'';position:absolute;top:2px;right:10px;width:14px;height:14px;border-radius:50%;background:#d93636;border:2px solid var(--linea)}
 @media (max-height:640px){ .cr-arena .logo{font-size:clamp(32px,10vw,44px)!important} .cr-arena{gap:8px} }
 /* ===== animazioni di transizione ===== */
-.tr-velo{position:fixed;inset:0;z-index:100000;background:radial-gradient(circle at 50% 45%,#2f54d6,#141f52 70%);display:grid;place-items:center;pointer-events:all;clip-path:circle(0px at 50% 50%)}
+.tr-velo{position:fixed;inset:0;z-index:100010;background:radial-gradient(circle at 50% 45%,#2f54d6,#141f52 70%);display:grid;place-items:center;pointer-events:all;clip-path:circle(0px at 50% 50%)}
 .tr-velo .tr-ic{animation:trIc .7s ease-in-out infinite alternate;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
 @keyframes trIc{from{transform:translateY(0) scale(1)}to{transform:translateY(-8px) scale(1.08)}}
 .cr-nav{position:relative}
@@ -2180,12 +2181,9 @@ body.itch-va .tr-velo,body.itch-va #coach,body.itch-va #coachRing,body.itch-va #
 #caricamento.acc-entrando.via{opacity:1!important}
 .acc-portale{display:none!important}
 .acc-in{position:fixed;inset:0;z-index:200000;pointer-events:none;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.acc-in-griglia{position:absolute;inset:0}
-.acc-in-griglia i{position:absolute;width:calc(var(--l) + 1px);height:calc(var(--l) + 1px);background:#141433;transform:scale(0);transition:transform .32s cubic-bezier(.5,0,.6,1.3);transition-delay:calc((1 - var(--d)) * .28s)}
-.acc-in-griglia i.b{background:#17193f}
-.acc-in-griglia i.o{background:#1f2360}
-.acc-in.copri .acc-in-griglia i{transform:scale(1)}
-.acc-in.scopri .acc-in-griglia i{transform:scale(0);transition:transform .3s cubic-bezier(.5,-.3,.6,1);transition-delay:calc(var(--d) * .38s)}
+.acc-in-griglia{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,#22307a,#141433 72%);opacity:0;transition:opacity .35s ease} /* ingresso: una dissolvenza pulita, niente quadretti */
+.acc-in.copri .acc-in-griglia{opacity:1}
+.acc-in.scopri .acc-in-griglia{opacity:0;transition:opacity .45s ease}
 .acc-in-testo{position:relative;z-index:2;text-align:center;transform:translateY(10px);opacity:0;transition:opacity .25s,transform .4s cubic-bezier(.2,1.3,.4,1)}
 .acc-in.su .acc-in-testo{opacity:1;transform:none}
 .acc-in-et{font:700 15px "Pixelify Sans",monospace;letter-spacing:4px;text-transform:uppercase;color:#cfe0ff;text-shadow:2px 2px 0 #141433;margin-bottom:6px;opacity:0;transform:translateY(8px);transition:all .3s .1s}
@@ -2196,7 +2194,7 @@ body.itch-va .tr-velo,body.itch-va #coach,body.itch-va #coachRing,body.itch-va #
 @keyframes accLett{to{opacity:1;transform:none}}
 .acc-in-riga{height:5px;margin:14px auto 0;width:0;background:#ffd03a;box-shadow:0 3px 0 #141433;transition:width .5s cubic-bezier(.3,0,.2,1) .55s}
 .acc-in.su .acc-in-riga{width:min(70%,260px)}
-.acc-in-testo b{position:absolute;left:50%;top:50%;width:8px;height:8px;box-shadow:0 0 0 2px #141433;opacity:0}
+.acc-in-testo b{display:none;position:absolute;left:50%;top:50%;width:8px;height:8px;box-shadow:0 0 0 2px #141433;opacity:0}
 .acc-in.su .acc-in-testo b{animation:accScint .75s ease-out var(--t) forwards}
 @keyframes accScint{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.4)}}
 .acc-in.scopri .acc-in-testo{opacity:0;transform:scale(1.25);transition:opacity .3s,transform .4s ease-in}
@@ -2442,6 +2440,7 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
     <button type="button" id="ldVia" class="ld-via" hidden>Tocca per entrare</button>
   </div>
 </div>
+<script>(function(){ var c = document.getElementById('caricamento'), ok = function(){ if (c) c.classList.add('pronto'); }; try { document.fonts.ready.then(function(){ requestAnimationFrame(ok); }); } catch(e){ ok(); } setTimeout(ok, 1500); })();</script>
 <div id="giraTel" aria-live="polite"><div class="gt-ic"></div>Gira il telefono<small>In orizzontale si gioca solo la Difesa in tempo reale. Per il resto tieni il telefono in verticale.</small></div>
 <div id="app">
   <header class="hud box">
@@ -3797,7 +3796,7 @@ const CE = (() => {
 
 /* ================= STATO ================= */
 let S = null, scena = null, MOD = false, modSel = null, storia = [];
-function nuovaPartita(diff){ mappaRT(CMIS); try { RITORNO.inizio('tempo'); } catch(e){}
+function nuovaPartita(diff){ mappaRT(CMIS); try { RITORNO.inizio('tempo'); } catch(e){} setTimeout(() => { try { window.aggOriz && window.aggOriz(); } catch(e){} }, 0); // il tipo di comandi giusto subito, non dopo mezzo secondo
   const D = DIFF[diff || (S && S.diff) || 'normale'];
   S = { miss: CMIS, diff: diff || (S && S.diff) || 'normale', hpDiff: D.hp, viteMax: D.vite, castagne:D.cast, vite:D.vite, ondata:0, prossima:null, vieAttive:[], inCorso:false, coda:[], timer:0, intervallo:1, multVita:1, multVel:1,
         nemici:[], proj:[], fx:[], part:[], morti:[], monete:[], soldati:[], trappole:[], ordini:2, modo:null, assalti:[], shake:0, pausa:false, camT:null, luoghi: [], // niente posti fissi: le difese le costruisci tu dove vuoi
@@ -9228,11 +9227,7 @@ const ACC = window.ACC = (() => {
     const lettere = (n || 'Smerillo').split('').map((c, i) => `<span style="--i:${i}">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
     ov.innerHTML = `<div class="acc-in-griglia"></div><div class="acc-in-testo"><div class="acc-in-et">${n ? 'Bentornato' : 'Si parte per'}</div><div class="acc-in-nome" style="--n:${Math.max(6, (n || 'Smerillo').length)}">${lettere}</div><div class="acc-in-riga"></div></div>`;
     const g = ov.firstElementChild, cx = (C - 1) / 2, cy = (R - 1) / 2, dmax = Math.hypot(cx, cy) || 1, fr = document.createDocumentFragment(), celle = [];
-    for (let y = 0; y < R; y++) for (let x = 0; x < C; x++){ const q = document.createElement('i'), d = Math.hypot(x - cx, y - cy) / dmax;
-      q.style.left = x * L + 'px'; q.style.top = y * L + 'px'; q.style.setProperty('--d', d.toFixed(3)); if ((x + y) % 2) q.className = 'b'; if (Math.random() < .06) q.className = 'o'; fr.append(q); celle.push(q); }
-    g.append(fr);
     const tx = ov.querySelector('.acc-in-testo');
-    for (let i = 0; i < 26; i++){ const q = document.createElement('b'), a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 170; q.style.setProperty('--dx', Math.cos(a) * d + 'px'); q.style.setProperty('--dy', Math.sin(a) * d * .7 + 'px'); q.style.setProperty('--t', (.5 + Math.random() * .25) + 's'); q.style.background = ['#ffd03a', '#fff3a8', '#ffffff', '#7ccf6a'][i % 4]; tx.append(q); }
     document.body.append(ov);
     ld.classList.add('acc-entrando');
     requestAnimationFrame(() => ov.classList.add('su'));
@@ -9648,6 +9643,7 @@ const RITORNO = window.RITORNO = (() => {
   function avviaPasso(k){ if (TUT[k] && !avviaPasso.visto){ avviaPasso.visto = {}; } if (TUT[k] && k !== 'conquista' && !avviaPasso.visto[k]){ avviaPasso.visto[k] = true; tutorial(k, () => avviaPasso(k)); return; }
     if (k === 'conquista') sc('difendi-smerillo-conquista-guida3', '1'); // il tutorial ha già spiegato: niente muro di testo all'inizio
     const t = titolo(), s = stato(); s.in = k; salvaS(s); chiudi(); traccia('assaggio', {passo: k, ev:'via'});
+    if (k === 'tempo'){ CARICA(() => { if (t) t.hidden = true; try { avviaRT(); } catch(e){ console.error(e); } try { window.aggOriz && window.aggOriz(); } catch(e){} }, 'Carico la difesa…'); setTimeout(mostraChip, 1800); return; } // dietro la schermata di caricamento: niente menu sotto, niente mappa a metà
     if (t) t.hidden = true;
     if (k === 'turni') TB.apri(stato().rivedi ? 'prima' : 'gioca');
     else if (k === 'tempo'){ try { avviaRT(); } catch(e){ console.error(e); } }
@@ -9797,7 +9793,7 @@ for (const t of ['gesturestart','gesturechange','gestureend']) document.addEvent
         setTimeout(() => { if (document.body.contains(d)) d.remove(); }, 9000); } }
     if (g && (oriz || !rt)) g.remove();
     if (!rt){ avvisato = false; if (document.fullscreenElement && screen.orientation && screen.orientation.unlock){ try { screen.orientation.unlock(); } catch(e){} } } };
-  addEventListener('resize', agg); addEventListener('orientationchange', () => setTimeout(agg, 200)); setInterval(agg, 700); })();
+  window.aggOriz = agg; addEventListener('resize', agg); addEventListener('orientationchange', () => setTimeout(agg, 200)); setInterval(agg, 700); })();
 
 document.addEventListener('selectstart', e => { if (!(e.target.closest && e.target.closest('input,textarea'))) e.preventDefault(); });
 document.addEventListener('contextmenu', e => { if (!(e.target.closest && e.target.closest('input,textarea'))) e.preventDefault(); });
