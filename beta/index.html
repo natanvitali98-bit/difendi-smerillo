@@ -9460,7 +9460,7 @@ const COACH = window.COACH = (() => {
     // la nuvoletta sta dalla parte opposta al bersaglio
     if (!nascosto){ const basso = innerHeight < 560 && innerWidth > innerHeight;
       if (basso){ const dx = !b || b.x < innerWidth/2; box.classList.add('lato'); box.classList.remove('sopra', 'sotto'); box.classList.toggle('dx', dx); box.classList.toggle('sx', !dx); }
-      else { box.classList.remove('lato', 'dx', 'sx'); const alto = !b || b.y > innerHeight*.45 || (cfg.su && b.y > 150); box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
+      else { box.classList.remove('lato', 'dx', 'sx'); const alto = !!(!b || b.y > innerHeight*.45 || (cfg.su && b.y > 150)); box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
         // se la nuvoletta copre comunque il punto da toccare, la accorcio
         if (b){ const r = box.getBoundingClientRect(); box.classList.toggle('stretto', b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8); } } } }
   function armaMini(){ clearTimeout(tMini); if (cfg && !cfg.bottone) tMini = setTimeout(() => { if (cfg && !cfg.bottone && box && !box.hidden) box.classList.add('mini'); }, MINI_DOPO + (cfg.sotto ? 1200 : 0)); }
