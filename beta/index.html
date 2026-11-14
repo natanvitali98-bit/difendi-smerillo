@@ -1351,7 +1351,8 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-az .big:only-child,.cq-az .big:last-child:nth-child(odd){grid-column:1 / -1}
 .cq-nota{margin:0;font-size:13px;color:var(--grigio);grid-column:1 / -1;line-height:1.35}
 .cq-warn{margin:0;padding:8px 10px;border-radius:12px;background:#ffe8e3;border:2px solid #ff4d4d;font-size:14px;color:#7a1d10!important;font-weight:700}
-.cq-bar{display:grid;grid-template-columns:1fr 1.35fr;gap:10px}
+.cq-bar{display:grid;grid-template-columns:58px 1fr 1.35fr;gap:8px}
+.cq-bar .cq-cosa{padding:0;background:#ffd03a;color:#141433}
 .cq-bar .big{min-height:58px;font-size:19px;padding:6px;display:flex;align-items:center;justify-content:center;gap:6px}
 #cqFine.pronto{animation:tbpulse 1s ease-in-out infinite}
 #cqOv{inset:0;z-index:8;background:rgba(14,22,70,.55);padding:64px 10px calc(12px + env(safe-area-inset-bottom))}
@@ -8078,7 +8079,7 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
   const dif = D*mult, p = D === 0 ? 1 : Math.max(.02, Math.min(.98, att**2.2/(att**2.2 + dif**2.2)));
   return {p, att, dif, kill, A, D, voci}; }
 const PACE_FIERA = 3, inPace = f => S.turno - (S.fz[f].guerra || -99) >= PACE_FIERA;
-function battaglia(f, da, t, n, cap){ if (cap === undefined && f !== S.io && !umano(f)) cap = capIAscegli(f, n);  if (partePace(f, da)) rompiPromessa(da, 'sei partito all’attacco da lì'); const pr = previsione(f, n, t, cap, da), df = S.terre[t].own, vinto = rnd() < pr.p, borgo = eBorgo(t); let persiA, persiD; if (df){ S.fz[f].guerra = S.turno; S.fz[df].guerra = S.turno; }
+function battaglia(f, da, t, n, cap){ if (cap === undefined && f !== S.io && !umano(f)) cap = capIAscegli(f, n);  if (partePace(f, da)) rompiPromessa(da, 'sei partito all’attacco da lì'); const pr = previsione(f, n, t, cap, da), df = S.terre[t].own, guidato = f === S.io && !!CG && CG.k === 3 && t === CG.terra && pr.p >= .3, vinto = guidato || rnd() < pr.p, borgo = eBorgo(t); // il primo attacco della guida riesce: serve a imparare, non a scoraggiare let persiA, persiD; if (df){ S.fz[f].guerra = S.turno; S.fz[df].guerra = S.turno; }
   S.terre[da].sold -= n; diplomaziaAttacco(f, df); { const st = S.terre[t]; if (st.lv > 1) st.lv--; st.cresc = 0; st.guerra = S.turno; }
   if (vinto){ persiA = pr.kill + Math.min(pr.A - 1, Math.round(pr.A*Math.min(.85, .55*pr.dif/Math.max(.1, pr.att))*(.75 + rnd()*.5))); if (haAb(cap, 'saggio')) persiA = Math.max(pr.kill, Math.round(persiA*.7)); persiD = pr.D; S.terre[t].own = f; S.terre[t].sold = n - persiA; dopoPresa(f, t, df);
     if (borgo && df){ eliminato(df, f); if (f === S.io) S.ultB = t; }
@@ -8769,10 +8770,49 @@ function dlgCasata(daFine){ leggiCas(); if (!CAS){ dlgStemma(() => dlgCasata());
 // ===== guida della prima partita di Conquista: il dito indica cosa toccare, un passo alla volta =====
 let CG = null;
 function coachCQ(){ if (CG) return; let fatto = false; try { fatto = localStorage.getItem(KGUIDA + '4') === '1'; } catch(e){} if (fatto || !S || S.mp) return;
-  CG = {k: 0, mosse: S.mosse, turno: S.turno, terra: null, iv: setInterval(passoCG, 250)}; passoCG(); }
+  const via = () => { if (CG || !S) return; CG = {k: 0, mosse: S.mosse, turno: S.turno, terra: null, iv: setInterval(passoCG, 250)}; passoCG(); };
+  let visto = false; try { visto = localStorage.getItem(KGUIDA + '5') === '1'; } catch(e){}
+  if (visto || ovAperto()){ via(); return; } try { localStorage.setItem(KGUIDA + '5', '1'); } catch(e){}
+  // prima di tutto: cosa devi fare, in tre righe
+  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('spade', 2)} Conquista</span><h2>Cosa devi fare</h2><div class="how">
+    <span>1</span><span>Hai <b>un borgo</b>. Sulla mappa ci sono altri <b>2 borghi rivali</b>.</span>
+    <span>2</span><span><b>Vinci</b> se conquisti i loro borghi. Ci arrivi prendendo <b>una terra alla volta</b>.</span>
+    <span>3</span><span>Si gioca a <b>stagioni</b>: ogni stagione hai <b>${MOSSE_N()} mosse</b>. Poi muovono gli altri borghi.</span></div>
+    <p class="cq-nota">Ci sono anche altri modi di vincere: li scopri giocando.</p><button class="big" id="cqOk">Ti guido io ${ico('play', 2)}</button></div>`, false);
+  o.querySelector('#cqOk').onclick = () => { chiudiOv(); via(); }; }
+// ===== 💡 Cosa faccio?: in Conquista ti indico col dito una mossa buona, quando vuoi =====
+let CH = null;
+function stopCH(){ if (!CH) return; clearInterval(CH.iv); CH = null; if (!CG) COACH.nascondi(); }
+function mossaCQ(){ const f = S.io, F = S.fz[f];
+  if (S.mosse <= 0) return {k:'fine', t:'Hai finito le mosse: tocca <b>Fine stagione</b>.', s:'Poi muovono gli altri borghi e tu incassi monete, cibo e legna.'};
+  const recMax = Math.min(capRecl(f), Math.floor(F.monete/COSTO_SOLD)), casa = S.terre[f].own === f;
+  if (casa && recMax >= 1 && minaccia(f) > S.terre[f].sold*1.1) return {k:'btn', terra:f, btn:'cqRec', t1:'Il tuo borgo è in pericolo. <b>Toccalo.</b>', t2:'Tocca <b>Arruola</b>, poi conferma.', s:'I nemici vicini sono più forti di te: ti servono soldati.'};
+  if (!neve()){ let best = null, bv = -1; // un attacco che vinci quasi di sicuro
+    for (const t of IDS){ const st = S.terre[t]; if (st.own === f) continue; if (TERRE[t].borgo && eBorgo(t) && (S.turno <= TREGUA() || !puoAssediare(t, f))) continue; if (st.own && (alleati(f, st.own) || patto(f, st.own))) continue;
+      const fonti = VIC[t].filter(v => S.terre[v].own === f && S.terre[v].sold > 1).sort((a, b) => S.terre[b].sold - S.terre[a].sold); if (!fonti.length) continue;
+      let p = 0; try { p = previsione(f, S.terre[fonti[0]].sold - 1, t, null, fonti[0]).p; } catch(e){}
+      const v = p - st.sold*.01 + (st.own ? .03 : 0); if (p >= .7 && v > bv){ bv = v; best = t; } }
+    if (best) return {k:'btn', terra:best, btn:'cqAtt', t1:'Conquista questa <b>terra</b>: è debole. Toccala.', t2:'Tocca <b>Attacca</b>, poi conferma.', s:'Hai abbastanza soldati per vincere quasi di sicuro.'}; }
+  { const dc = prodCibo(f, S.turno + 1) - mangia(f); let best = null, bk = null; // una struttura che ti puoi permettere
+    for (const t of IDS){ const st = S.terre[t]; if (st.own !== f || TERRE[t].borgo || st.str) continue;
+      for (const k of ['fattoria', 'segheria', 'mercato']){ if (!STR[k].dove(t) || !sbloccato(k)) continue; const c = costoStr(f, k, 0); if (!c || !puoPagare(F, c[0], c[1])) continue;
+        if (!best || (k === 'fattoria' && dc < 2 && bk !== 'fattoria')){ best = t; bk = k; } } }
+    if (best) return {k:'btn', terra:best, btn:'cqStr', t1:'Costruisci in questa tua <b>terra</b>. Toccala.', t2:'Tocca <b>Costruisci qui</b> e scegli ' + (bk === 'fattoria' ? 'il <b>Castagneto</b> (cibo)' : bk === 'segheria' ? 'la <b>Segheria</b> (legna)' : 'il <b>Mercato</b> (monete)') + '.', s:'Le strutture ti danno risorse a ogni stagione.'}; }
+  if (casa && recMax >= 1) return {k:'btn', terra:f, btn:'cqRec', t1:'Arruola soldati: tocca il tuo <b>borgo</b>.', t2:'Tocca <b>Arruola</b>, poi conferma.', s:'Con più soldati potrai conquistare le terre vicine.'};
+  return {k:'fine', t:'Ora conviene aspettare: tocca <b>Fine stagione</b>.', s:'Alla prossima stagione avrai più monete, cibo e legna.'}; }
+function cosaFaccio(){ if (!S || GIOCA || SCELTA || ovAperto() || mpAttesa()) return; if (CG) fineCG(); stopCH(); suona('tocco'); try { RITORNO.traccia('aiuto', {modo:'conquista'}); } catch(e){}
+  const m = mossaCQ(), mosse0 = S.mosse, turno0 = S.turno;
+  const giro = () => { if (!CH || !S || !attivo || S.turno !== turno0 || S.mosse !== mosse0 || GIOCA){ stopCH(); return; }
+    const f = m.k === 'fine' ? 'fine' : sel !== m.terra ? 't' : 'b';
+    if (f === 'b' && (ovAperto() || !el(m.btn))){ stopCH(); return; }
+    if (CH.f === f) return; CH.f = f; if (f === 't'){ if (sel){ sel = null; pannello(); } vaiA(m.terra); }
+    COACH.mostra({testo: f === 'fine' ? m.t : f === 't' ? m.t1 : m.t2, sotto: m.s, salta: stopCH, saltaT: 'Chiudi', tag: 'CONSIGLIO', pausa: () => !attivo || ovAperto() || !!GIOCA,
+      dove: f === 'fine' ? () => el('cqFine') : f === 't' ? () => puntoTerra(m.terra) : () => el(m.btn)}); };
+  CH = {f: '', iv: setInterval(giro, 200)}; giro(); }
+
 function fineCG(){ if (!CG) return; clearInterval(CG.iv); CG = null; COACH.nascondi(); try { localStorage.setItem(KGUIDA + '4', '1'); localStorage.setItem(KGUIDA + '3', '1'); } catch(e){} }
 function vicinaCG(){ const mie = IDS.filter(t => S.terre[t].own === S.io); let best = null, bs = 1e9;
-  for (const t of mie){ if (S.terre[t].sold < 2) continue; for (const v of VIC[t]){ const st = S.terre[v]; if (st.own === S.io || (TERRE[v].borgo && eBorgo(v))) continue; const sc = st.sold + (st.own ? 5 : 0); if (sc < bs){ bs = sc; best = v; } } }
+  for (const t of mie){ if (S.terre[t].sold < 2) continue; for (const v of VIC[t]){ const st = S.terre[v]; if (st.own === S.io || (TERRE[v].borgo && eBorgo(v))) continue; let pp = 0; try { pp = previsione(S.io, S.terre[t].sold - 1, v, null, t).p; } catch(e){} const sc = st.sold + (st.own ? 5 : 0) - pp*6; if (sc < bs){ bs = sc; best = v; } } }
   return best; }
 function puntoTerra(t){ if (!t || !TERRE[t]) return null; const st = el('cqStage'); if (!st) return null; const r = st.getBoundingClientRect(), [x, y] = aSchermo(TERRE[t].x, TERRE[t].y); if (x < 10 || y < 10 || x > r.width - 10 || y > r.height - 10) return null; return {x: r.left + x, y: r.top + y, r: 34}; }
 function passoCG(){ if (!CG || !S) return; if (!attivo){ COACH.nascondi(); CG.vista = -1; return; }
@@ -8789,14 +8829,15 @@ function passoCG(){ if (!CG || !S) return; if (!attivo){ COACH.nascondi(); CG.vi
   const pausa = () => !attivo || ovAperto() || !!GIOCA || !!SCELTA;
   const P = [
     {t:'Questo è il tuo borgo. <b>Toccalo.</b>', s:'Le terre del tuo colore sono tue. Le altre sono dei borghi rivali o libere.', dove: () => puntoTerra(S.io)},
-    {t:'Tocca <b>Arruola</b>.', s:'Prendi nuovi soldati. Ogni azione usa una mossa: le mosse sono i rombi gialli in alto.', dove: () => el('cqRec')},
+    {t:'Tocca <b>Arruola</b>, poi conferma.', s:'Prendi nuovi soldati: servono per conquistare e per difenderti. Ogni azione usa una mossa.', dove: () => el('cqRec')},
     {t:'Ora tocca questa <b>terra vicina</b>.', s:'Non è tua: puoi conquistarla con i tuoi soldati.', dove: () => puntoTerra(CG && CG.terra)},
     {t:'Tocca <b>Attacca</b>.', s:'Poi scegli quanti soldati mandare e conferma. Più soldati mandi, più è facile vincere.', dove: () => el('cqAtt')},
     {t:'Quando hai finito le mosse tocca <b>Fine stagione</b>.', s:'Poi muovono gli altri borghi e leggi cosa è successo.', dove: () => el('cqFine')},
-    {t:'Bravo! Ora <b>giochi da solo</b>.', s:'Ogni stagione: arruola, costruisci, conquista. Il pulsante con il punto di domanda spiega tutto.', dove: null, ok:true}];
+    {t:'Nuova stagione! Guarda in alto: <b>monete, cibo e legna</b>.', s:'Le monete servono per i soldati. Il cibo li sfama: se finisce, se ne vanno. La legna serve per costruire. Le tue terre te ne danno a ogni stagione.', dove: () => el('cqRis'), btn:'Ok', next: () => { if (CG){ CG.k = 6; CG.vista = -1; passoCG(); } }},
+    {t:'Non sai cosa fare? Tocca <b>💡 Cosa faccio?</b>', s:'Ti indico col dito una mossa buona, ogni volta che vuoi. Ogni stagione: arruola, conquista, costruisci.', dove: () => el('cqCosa'), btn:'Ho capito', next: fineCG}];
   const x = P[CG.k]; if (!x){ fineCG(); return; }
   if (CG.k === 0) vaiA(S.io);
-  COACH.mostra({passo: CG.k + 1, tot: P.length, testo: x.t, sotto: x.s, dove: x.dove, pausa, bottone: x.ok ? 'Ho capito' : null, ok: fineCG, salta: x.ok ? null : fineCG}); }
+  COACH.mostra({passo: CG.k + 1, tot: P.length, testo: x.t, sotto: x.s, dove: x.dove, pausa, bottone: x.btn || null, ok: x.next || fineCG, salta: x.btn ? null : fineCG}); }
 function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioca</h2><div class="how">
     <span>1</span><span>Si gioca a <b>stagioni</b>: hai <b>${MOSSE_N()} mosse</b>, poi premi <b>Fine stagione</b> e muovono gli altri borghi.</span>
     <span>2</span><span>Hai tre risorse: <b>monete</b>, <b>cibo</b> e <b>legna</b>. Ogni ${MANGIANO} soldati mangiano 1 cibo: senza cibo i soldati se ne vanno. Tocca le risorse in alto per il bilancio.</span>
@@ -8878,13 +8919,14 @@ function costruisciDom(){ root = document.createElement('section'); root.id = 'c
     <header class="cq-hud"><div class="cq-r1"><div class="cq-hl"><b><span class="cq-flag" id="cqFlag"></span><span id="cqTit"></span></b><small id="cqStag"></small></div><button id="cqPausa" aria-label="Pausa">II</button></div>
       <div class="cq-r2"><button type="button" class="cq-pill cq-ris" id="cqRis" aria-label="Le tue risorse: tocca per il bilancio"></button><span class="cq-pill cq-mos" id="cqMos"></span></div></header>
     <div id="cqToast" class="cq-toast" aria-live="polite"></div><div class="cq-zoom"><button type="button" id="cqZin" aria-label="Ingrandisci">+</button><button type="button" id="cqZout" aria-label="Rimpicciolisci">−</button></div><button class="cq-centra" id="cqCentra" aria-label="Rivedi tutta la mappa">${ico('centra', 2)}</button>
-    <div class="cq-side"><div id="cqPan"></div><nav class="cq-bar"><button class="big alt" id="cqDip">${ico('amici', 2)} Diplomazia</button><button class="big" id="cqFine">Fine stagione ${ico('play', 2)}</button></nav></div>
+    <div class="cq-side"><div id="cqPan"></div><nav class="cq-bar"><button class="big alt cq-cosa" id="cqCosa" aria-label="Cosa faccio? Ti indico una mossa buona">${ico('lampadina', 2)}</button><button class="big alt" id="cqDip">${ico('amici', 2)} Diplomazia</button><button class="big" id="cqFine">Fine stagione ${ico('play', 2)}</button></nav></div>
     <section id="cqOv" class="overlay" hidden></section>`;
   document.body.append(root); cv = el('cqCv'); ctx = cv.getContext('2d'); inputMappa();
   root.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b || b.disabled || !root.contains(b)) return; const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height)*2.2, sp = document.createElement('span'); sp.className = 'cq-rip'; sp.style.cssText = `left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px;width:${d}px;height:${d}px`; b.append(sp); setTimeout(() => sp.remove(), 520);
     const bu = document.createElement('div'); bu.className = 'cq-burst'; bu.style.cssText = `left:${e.clientX}px;top:${e.clientY}px`; for (let i = 0; i < 8; i++){ const q = document.createElement('i'), a = i/8*Math.PI*2 + Math.random()*.4, v = 22 + Math.random()*16; q.style.setProperty('--dx', Math.cos(a)*v + 'px'); q.style.setProperty('--dy', Math.sin(a)*v + 'px'); q.style.background = ['#ffd03a', '#ffffff', '#ffe98a'][i % 3]; bu.append(q); } root.append(bu); setTimeout(() => bu.remove(), 560); }, {passive: true});
   el('cqZin').onclick = () => zoomIn(1.3); el('cqZout').onclick = () => zoomIn(1/1.3); el('cqPausa').onclick = pausa; el('cqRis').onclick = dlgBilancio; el('cqDip').onclick = () => dlgDiplomazia(); el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
-  el('cqFine').onclick = () => { if (GIOCA || !S || mpAttesa()) return; const fs = S.mp ? mpFine : fineStagione; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
+  el('cqCosa').onclick = cosaFaccio;
+  el('cqFine').onclick = () => { stopCH(); if (GIOCA || !S || mpAttesa()) return; const fs = S.mp ? mpFine : fineStagione; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
       o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fs(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fs(); };
   new ResizeObserver(() => { if (attivo) misura(); }).observe(el('cqStage')); new ResizeObserver(() => { if (attivo){ insets(); limita(); } }).observe(root.querySelector('.cq-side')); }
 let PRIMA_SNAP = null;
@@ -9410,7 +9452,7 @@ const COACH = window.COACH = (() => {
         if (b){ const r = box.getBoundingClientRect(); box.classList.toggle('stretto', b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8); } } } }
   function armaMini(){ clearTimeout(tMini); if (cfg && !cfg.bottone) tMini = setTimeout(() => { if (cfg && !cfg.bottone && box && !box.hidden) box.classList.add('mini'); }, MINI_DOPO + (cfg.sotto ? 1200 : 0)); }
   function mostra(c){ crea(); cfg = c; box.classList.remove('mini');
-    box.innerHTML = `<div class="co-h"><span class="co-n">${c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : 'GUIDA'}</span>${c.salta ? '<button type="button" class="co-salta">Salta la guida</button>' : ''}</div>
+    box.innerHTML = `<div class="co-h"><span class="co-n">${c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : (c.tag || 'GUIDA')}</span>${c.salta ? '<button type="button" class="co-salta">' + (c.saltaT || 'Salta la guida') + '</button>' : ''}</div>
       <p class="co-t">${c.testo}</p>${c.sotto ? `<p class="co-s">${c.sotto}</p>` : ''}${c.bottone ? `<button type="button" class="co-ok">${c.bottone}</button>` : ''}`;
     const s = box.querySelector('.co-salta'); if (s) s.onclick = e => { e.stopPropagation(); const f = c.salta; nascondi(); f(); };
     const o = box.querySelector('.co-ok'); if (o) o.onclick = e => { e.stopPropagation(); const f = c.ok; if (f) f(); };
