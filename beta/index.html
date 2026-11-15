@@ -9694,13 +9694,13 @@ const RITORNO = window.RITORNO = (() => {
   function finestraFine(){ const s = stato(), f = frazione(), saltato = s.saltato;
     const b = finestra(`<div class="fd-festa"><span class="as-scr"></span></div><span class="fd-k">${saltato ? 'REGALO DI BENVENUTO' : 'HAI PROVATO TUTTO'}</span><h2>${saltato ? 'Eccoti a Smerillo!' : 'Ora scegli tu!'}</h2>
       ${lg('difendi-smerillo-benvenuto') ? '' : '<p class="acc-sub">Per cominciare ti regalo uno <b>scrigno d’argento</b>: lo apri nella pagina Premi.</p>'}
-      <div class="as-fz"><b>Per quale frazione giochi?</b><small>Ogni partita dà punti alla tua frazione. La domenica si vede chi ha vinto la settimana.</small>
-        <div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" class="${f === k ? 'on' : ''}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div></div>
+      ${f ? '' : `<div class="as-fz"><b>Per quale frazione giochi?</b><small>Ogni partita dà punti alla tua frazione. La domenica si vede chi ha vinto la settimana.</small>
+        <div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div></div>`}
       <p class="as-dom">${ico('calendario', 2)} Torna anche domani: ogni giorno di fila lo scrigno è più ricco.</p>
       <button class="big" data-x>Entra nel gioco ▸</button>`);
     let scelta = f; b.querySelectorAll('[data-fz]').forEach(x => x.onclick = () => { scelta = x.dataset.fz; b.querySelectorAll('[data-fz]').forEach(y => y.classList.toggle('on', y === x)); try { SUONI.suona('tocco'); } catch(e){} });
     try { SUONI.suona('leggenda'); EPICO.coriandoli(120); } catch(e){}
-    b.querySelector('[data-x]').onclick = () => { const s2 = stato(); s2.passo = 9; s2.in = null; salvaS(s2); if (scelta) scegliFrazione(scelta);
+    b.querySelector('[data-x]').onclick = () => { const s2 = stato(); s2.passo = 9; s2.in = null; salvaS(s2); if (scelta && scelta !== f) scegliFrazione(scelta); // la frazione si sceglie solo la prima volta (e a fine settimana): rivedendo la guida non si richiede
       if (!lg('difendi-smerillo-benvenuto')){ sc('difendi-smerillo-benvenuto', '1'); try { regalaScrigno('argento', 'Regalo di benvenuto'); } catch(e){} }
       const g = giorni(); g.p = g.u; scJ(GKEY, g); // il giorno 1 è già questo regalo
       traccia('assaggio', {passo:'fine', fz: scelta || null}); chiudi(); if (nelMenu()) RIENTRA('gioca'); }; soloMenu(); }
@@ -9762,7 +9762,7 @@ const RITORNO = window.RITORNO = (() => {
   function avviaRT(){ CMIS = 1; S = null; nuovaPartita('facile'); }
 
   // rivedere tutte le guide (anche dal link ...?tutorial=1): i progressi restano
-  function rivediGuide(){ for (const k of ['difendi-smerillo-guida', 'difendi-smerillo-guida-classica', 'difendi-smerillo-conquista-guida3', 'difendi-smerillo-conquista-guida4']){ try { localStorage.removeItem(k); } catch(e){} }
+  function rivediGuide(){ for (const k of ['difendi-smerillo-guida', 'difendi-smerillo-guida-classica', 'difendi-smerillo-conquista-guida3', 'difendi-smerillo-conquista-guida4', 'difendi-smerillo-prova']){ try { localStorage.removeItem(k); } catch(e){} }
     try { TB.resetGuida(); } catch(e){} scJ(SKEY, {passo:0, nuovo:1, rivedi:1}); traccia('guide', {ev:'rivedi'}); try { history.replaceState(null, '', location.pathname); } catch(e){} mostraMenu('home'); }
   if (/[?&]tutorial=1/.test(location.search)){ setTimeout(rivediGuide, 300); }
   // all'avvio
