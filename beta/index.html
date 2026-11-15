@@ -1004,7 +1004,25 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .rt-ruota{position:absolute;inset:0;border-radius:50%;border:5px solid var(--linea);box-shadow:0 6px 0 var(--linea),inset 0 0 0 4px rgba(255,255,255,.5);will-change:transform}
 .rt-ic{position:absolute;left:50%;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;display:grid;place-items:center}
 .rt-centro{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:#fff;border:4px solid var(--linea);display:grid;place-items:center}
-.rt-freccia{position:absolute;left:50%;top:-10px;margin-left:-13px;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:24px solid var(--rosso,#e04848);z-index:2;filter:drop-shadow(0 2px 0 var(--linea))}
+.rt-freccia{position:absolute;left:50%;top:-10px;margin-left:-13px;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:24px solid var(--rosso,#e04848);z-index:3;filter:drop-shadow(0 2px 0 var(--linea));transform-origin:50% 0}
+.rt-freccia.tic{animation:rtTic .16s ease-out}
+@keyframes rtTic{30%{transform:rotate(-22deg)}100%{transform:none}}
+/* luci attorno alla ruota: corrono mentre gira, lampeggiano quando vinci */
+.rt-luci{position:absolute;inset:-9px;pointer-events:none;z-index:2}
+.rt-luci i{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;background:#fff6c8;border:2px solid var(--linea);transform:rotate(var(--a)) translateY(calc(-50% - 0px)) translateY(-50%);box-shadow:0 0 6px #ffd03a}
+.rt-box .rt-luci i{transform:rotate(var(--a)) translateY(-119px)}
+.pr-rbox .rt-luci i{transform:rotate(var(--a)) translateY(-97px)}
+.rt-gira .rt-luci i{animation:rtLuce .5s steps(1) infinite;animation-delay:calc(var(--k) * -.03s)}
+.rt-vinto .rt-luci i{animation:rtLuce .3s steps(1) infinite alternate;animation-delay:calc(mod(var(--k), 2) * -.15s)}
+@keyframes rtLuce{0%{background:#fff6c8;box-shadow:0 0 10px 2px #ffd03a}50%{background:#7a5a1a;box-shadow:none}}
+.rt-gira .rt-ruota{filter:blur(calc(var(--vel, 0) * 1.6px))}
+.rt-vinto .rt-ruota{animation:rtBotta .5s ease-out}
+@keyframes rtBotta{30%{scale:1.07}60%{scale:.98}100%{scale:1}}
+.rt-vinto::after{content:'';position:absolute;left:50%;top:-4px;width:64px;height:52%;margin-left:-32px;clip-path:polygon(50% 100%,0 0,100% 0);background:linear-gradient(#fff9,#fff0);z-index:2;pointer-events:none;animation:rtSpicchio .6s ease-in-out infinite alternate}
+@keyframes rtSpicchio{from{opacity:.35}to{opacity:.95}}
+.rt-esito.vinto,.pr-esito.vinto{animation:rtPremio .55s cubic-bezier(.2,1.6,.4,1) both;font-size:1.12em}
+@keyframes rtPremio{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){ .rt-luci i,.rt-vinto .rt-ruota,.rt-vinto::after,.rt-freccia.tic{animation:none!important} }
 .rt-esito{text-align:center;font-size:17px;min-height:26px;margin:6px 0}
 .rt-premi{display:flex;flex-wrap:wrap;gap:4px 10px;justify-content:center;font-size:13px;color:var(--grigio)}
 .rt-premi span{display:inline-flex;align-items:center;gap:3px}
@@ -4854,10 +4872,9 @@ function mostraMenu(pannello){
       { const bs = c.querySelector('#prScr'); if (bs) bs.onclick = () => { const x = prendiScrigno(); if (!x) return; const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(x.tipo); }; } // il menu resta sotto: dietro il riepilogo si vede la pagina Premi, non pezzi di altre schermate
       { const W = c.querySelector('#prW'), go = c.querySelector('#prGira'), es = c.querySelector('#prEs');
         if (go) go.onclick = () => { try { PROF.pausaAvvisi(matchMedia('(prefers-reduced-motion: reduce)').matches ? 400 : 4000); } catch(e){} const r = TB.giraRuota(); if (!r) return; go.disabled = true; go.textContent = '…'; const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
-          const giri = 5*360 + (360 - (r.i + .5)*360/r.n) + (Math.random() - .5)*(300/r.n); try { SUONI.suona('carica1'); } catch(e){}
-          W.style.transition = lento ? 'none' : 'transform 3.6s cubic-bezier(.12,.75,.12,1)'; requestAnimationFrame(() => { W.style.transform = `rotate(${giri}deg)`; });
-          setTimeout(() => { es.innerHTML = r.msg; go.textContent = 'Domani'; c.querySelector('#prRuota').classList.remove('pronta'); try { SUONI.suona(r.x.k === 'fort' || r.x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(r.x.k === 'fort' || r.x.v === 'oro' ? 160 : 70); } catch(e){}
-            if (r.x.k === 'scr') setTimeout(() => { const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 900); else setTimeout(() => { if (!t.hidden && document.body.contains(go)){ const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; mostraMenu('home'); } }, 2200); }, lento ? 300 : 3700); };
+          try { SUONI.suona('carica1'); } catch(e){}
+          animaRuota(W, r.i, r.n, () => { es.innerHTML = r.msg; es.classList.add('vinto'); go.textContent = 'Domani'; c.querySelector('#prRuota').classList.remove('pronta'); try { SUONI.suona(r.x.k === 'fort' || r.x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(r.x.k === 'fort' || r.x.v === 'oro' ? 160 : 70); } catch(e){}
+            if (r.x.k === 'scr') setTimeout(() => { if (!document.body.contains(go)) return; scrignoRuotaTogli(r.x.v); const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 1300); else setTimeout(() => { if (!t.hidden && document.body.contains(go)){ const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; mostraMenu('home'); } }, 2600); }); };
         const riga = (box, x) => { const d = document.createElement('div'); d.className = 'pr-q' + (x.stato === 'preso' ? ' ok' : '');
           d.innerHTML = `<span class="pr-qt">${x.stato === 'preso' ? TB.ico('ok', 2) : ''}${x.t}${x.max ? ' <small>' + '★'.repeat(x.stelle) + '☆'.repeat(x.max - x.stelle) + '</small>' : ''}</span><span class="pr-qr"><span class="pr-bar"><i style="width:${Math.min(100, x.v/x.n*100)}%"></i><em>${Math.min(x.v, x.n)}/${x.n}</em></span></span>`;
           const b = document.createElement('button'); b.type = 'button'; b.className = 'pr-rit ' + x.premio; b.disabled = x.stato !== 'pronto';
@@ -5131,6 +5148,31 @@ function scrigniAttesa(){ try { const L = JSON.parse(localStorage.getItem(KSCR))
 function regalaScrigno(tipo, da){ if (!SCRIGNI_N[tipo]) return; const L = scrigniAttesa(); if (L.length >= 15) return; L.push({tipo, da}); try { localStorage.setItem(KSCR, JSON.stringify(L)); } catch(e){}
   try { PROF.avviso(`${SCRIGNI_N[tipo]}!`, `${da}: lo apri nella pagina Premi`); } catch(e){} }
 window.regalaScrigno = regalaScrigno;
+// ---- ruota della fortuna: animazione condivisa (pagina Premi e finestra) ----
+// carica all'indietro, gira veloce, rallenta con il "tic" della freccia a ogni spicchio, luci che corrono, spicchio vincente che brilla
+function animaRuota(W, i, n, fine){
+  const box = W.parentElement, fr = box.querySelector('.rt-freccia'), lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const a0 = (parseFloat((W.style.transform.match(/-?[\d.]+/) || [0])[0]) || 0) % 360;
+  const fineA = 360*6 + (360 - (i + .5)*360/n) + (Math.random() - .5)*(260/n); // dentro lo spicchio, mai sul bordo
+  box.classList.remove('rt-vinto'); box.classList.add('rt-gira'); W.style.transition = 'none';
+  if (!box.querySelector('.rt-luci')){ const L = document.createElement('div'); L.className = 'rt-luci'; for (let k = 0; k < 16; k++){ const b = document.createElement('i'); b.style.setProperty('--a', (k*22.5) + 'deg'); b.style.setProperty('--k', k); L.append(b); } box.append(L); }
+  if (lento){ W.style.transform = `rotate(${fineA}deg)`; setTimeout(() => { box.classList.remove('rt-gira'); box.classList.add('rt-vinto'); fine(); }, 300); return; }
+  const T1 = 380, T2 = 4300, t0 = performance.now(); let ultimo = -1, tic = 0;
+  const ease = q => 1 - Math.pow(1 - q, 4);
+  (function passo(now){ const t = now - t0; let a;
+    if (t < T1){ const q = t/T1; a = a0 - 16*Math.sin(q*Math.PI/2); } // carica all'indietro
+    else { const q = Math.min(1, (t - T1)/T2); a = a0 - 16 + (fineA - a0 + 16)*ease(q); }
+    W.style.transform = `rotate(${a}deg)`;
+    const sp = Math.floor(((a % 360) + 360) % 360 / (360/n)); // spicchio che passa sotto la freccia
+    if (t >= T1 && sp !== ultimo){ ultimo = sp; if (fr){ fr.classList.remove('tic'); void fr.offsetWidth; fr.classList.add('tic'); } if (now - tic > 70){ tic = now; try { SUONI.suona('tocco'); } catch(e){} } }
+    box.style.setProperty('--vel', t < T1 ? 0 : (1 - Math.min(1, (t - T1)/T2)).toFixed(2));
+    if (t < T1 + T2) requestAnimationFrame(passo);
+    else { box.classList.remove('rt-gira'); box.classList.add('rt-vinto'); if (navigator.vibrate) try { navigator.vibrate(40); } catch(e){} fine(); }
+  })(t0);
+}
+// lo scrigno vinto alla ruota va subito nella lista dei Premi: se esci mentre gira non lo perdi
+function scrignoRuotaSalva(tipo){ const L = scrigniAttesa(); L.push({tipo, da:'Ruota della fortuna'}); try { localStorage.setItem(KSCR, JSON.stringify(L)); } catch(e){} }
+function scrignoRuotaTogli(tipo){ const L = scrigniAttesa(); for (let k = L.length - 1; k >= 0; k--) if (L[k].tipo === tipo && L[k].da === 'Ruota della fortuna'){ L.splice(k, 1); break; } try { localStorage.setItem(KSCR, JSON.stringify(L)); } catch(e){} }
 function prendiScrigno(){ const L = scrigniAttesa(), x = L.shift(); try { localStorage.setItem(KSCR, JSON.stringify(L)); } catch(e){} return x; }
 const SCRIGNI_N = {legno:'Scrigno di legno', argento:'Scrigno d’argento', oro:'Scrigno d’oro'};
 function giornoOggi(){ const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
@@ -6698,19 +6740,13 @@ function ruota(){
     <p class="rt-fort">${ico('trifoglio')} Premi fortunati trovati: <b>${fa} di ${ft}</b></p>
     <button class="big" id="rtGo" ${pronta ? '' : 'disabled'}>Gira!</button><button class="big alt" id="rtNo">Torna al menu</button></div>`);
   o.querySelector('#rtBack').onclick = esci; o.querySelector('#rtNo').onclick = esci;
-  const go = o.querySelector('#rtGo'); go.onclick = () => { if (!ruotaPronta()) return; go.disabled = true; try { localStorage.setItem(RUOTAKEY, oggiStr()); } catch(e){}
-    const tot = RUOTA.reduce((s, x) => s + x.w, 0); let r = Math.random()*tot, i = 0; while ((r -= RUOTA[i].w) >= 0) i++;
-    const x = RUOTA[i], w = o.querySelector('#rtW'), giri = 5*360 + (360 - (i + .5)*360/n) + (Math.random() - .5)*(300/n), lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    SUONI.suona('carica1'); w.style.transition = lento ? 'none' : 'transform 3.6s cubic-bezier(.12,.75,.12,1)'; requestAnimationFrame(() => { w.style.transform = `rotate(${giri}deg)`; });
-    setTimeout(() => { let msg = '';
-      if (x.k === 'xp'){ PROF.daiXP(x.v); msg = `Hai vinto <b>${x.v} punti</b>!`; }
-      else if (x.k === 'tal'){ const ids = []; for (let k = 0; k < x.v; k++) ids.push(daiTal()); msg = 'Hai vinto: <b>' + ids.map(id => TAL[id].n).join('</b> e <b>') + '</b>!'; }
-      else if (x.k === 'fort'){ const nome = PROF.fortuna(); msg = nome ? `<b>Premio fortunato:</b> ${nome}!` : 'Hai già tutti i premi fortunati: <b>200 punti</b>!'; }
-      else if (x.k === 'scr'){ msg = `Hai vinto lo <b>${SCRIGNI[x.v].nome}</b>!`; }
+  const go = o.querySelector('#rtGo'); go.onclick = () => { const r = giraRuota(); if (!r) return; go.disabled = true; const x = r.x;
+    try { SUONI.suona('carica1'); } catch(e){}
+    animaRuota(o.querySelector('#rtW'), r.i, r.n, () => {
       SUONI.suona(x.k === 'fort' || x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(x.k === 'fort' || x.v === 'oro' ? 160 : 70);
-      const es = o.querySelector('#rtEs'); if (es) es.innerHTML = msg;
-      if (x.k === 'scr') setTimeout(() => { chiudiOv(); mostraScrigno(x.v, ruota); }, 1100); else setTimeout(() => { if (!el('tbOv').hidden) ruota(); }, 1800);
-    }, lento ? 300 : 3700); };
+      const es = o.querySelector('#rtEs'); if (es){ es.innerHTML = r.msg; es.classList.add('vinto'); }
+      if (x.k === 'scr') setTimeout(() => { if (el('tbOv').hidden) return; scrignoRuotaTogli(x.v); chiudiOv(); mostraScrigno(x.v, ruota); }, 1300); else setTimeout(() => { if (!el('tbOv').hidden) ruota(); }, 2400);
+    }); };
 }
 function intro(){
   const visti = new Set(MISSIONI.slice(0, MI).flatMap(m => Object.values(m.arrivi).flat().map(a => a[0]).concat((m.extra || []).map(a => a[1]))).concat(['fante']));
@@ -6886,7 +6922,7 @@ function giraRuota(){ if (!ruotaPronta()) return null; try { localStorage.setIte
   if (x.k === 'xp'){ PROF.daiXP(x.v); msg = `Hai vinto <b>${x.v} punti</b>!`; }
   else if (x.k === 'tal'){ const ids = []; for (let k = 0; k < x.v; k++) ids.push(daiTal()); msg = 'Hai vinto: <b>' + ids.map(id => TAL[id].n).join('</b> e <b>') + '</b>!'; }
   else if (x.k === 'fort'){ const nome = PROF.fortuna(); msg = nome ? `<b>Premio fortunato:</b> ${nome}!` : 'Hai già tutti i premi fortunati: <b>200 punti</b>!'; }
-  else if (x.k === 'scr') msg = `Hai vinto lo <b>${SCRIGNI[x.v].nome}</b>!`;
+  else if (x.k === 'scr'){ msg = `Hai vinto lo <b>${SCRIGNI[x.v].nome}</b>!`; scrignoRuotaSalva(x.v); }
   return {i, n:RUOTA.length, x, msg}; }
 function apriSopra(modo){ root.classList.add('sopra'); root.hidden = false; attivo = false; RUN = null; SFIDA = null; SEME_FISSO = null; if (modo === 'ruota') ruota(); else if (modo === 'incarichi') incarichi(); else if (modo === 'profilo'){ } }
 function esci(ev){ if (root.classList.contains('sopra')){ root.classList.remove('sopra'); el('tbOv').hidden = true; ovAperto = false; attivo = false; root.hidden = true; S = null; mostraMenu(); return; }
