@@ -1007,22 +1007,53 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .rt-freccia{position:absolute;left:50%;top:-10px;margin-left:-13px;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:24px solid var(--rosso,#e04848);z-index:3;filter:drop-shadow(0 2px 0 var(--linea));transform-origin:50% 0}
 .rt-freccia.tic{animation:rtTic .16s ease-out}
 @keyframes rtTic{30%{transform:rotate(-22deg)}100%{transform:none}}
-/* luci attorno alla ruota: corrono mentre gira, lampeggiano quando vinci */
-.rt-luci{position:absolute;inset:-9px;pointer-events:none;z-index:2}
-.rt-luci i{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;background:#fff6c8;border:2px solid var(--linea);transform:rotate(var(--a)) translateY(calc(-50% - 0px)) translateY(-50%);box-shadow:0 0 6px #ffd03a}
-.rt-box .rt-luci i{transform:rotate(var(--a)) translateY(-119px)}
-.pr-rbox .rt-luci i{transform:rotate(var(--a)) translateY(-97px)}
-.rt-gira .rt-luci i{animation:rtLuce .5s steps(1) infinite;animation-delay:calc(var(--k) * -.03s)}
-.rt-vinto .rt-luci i{animation:rtLuce .3s steps(1) infinite alternate;animation-delay:calc(mod(var(--k), 2) * -.15s)}
-@keyframes rtLuce{0%{background:#fff6c8;box-shadow:0 0 10px 2px #ffd03a}50%{background:#7a5a1a;box-shadow:none}}
-.rt-gira .rt-ruota{filter:blur(calc(var(--vel, 0) * 1.6px))}
-.rt-vinto .rt-ruota{animation:rtBotta .5s ease-out}
-@keyframes rtBotta{30%{scale:1.07}60%{scale:.98}100%{scale:1}}
-.rt-vinto::after{content:'';position:absolute;left:50%;top:-4px;width:64px;height:52%;margin-left:-32px;clip-path:polygon(50% 100%,0 0,100% 0);background:linear-gradient(#fff9,#fff0);z-index:2;pointer-events:none;animation:rtSpicchio .6s ease-in-out infinite alternate}
-@keyframes rtSpicchio{from{opacity:.35}to{opacity:.95}}
+/* ruota da sala giochi: cornice d'oro con lampadine, pioli, vetro, raggi dietro, premio che esplode fuori */
+.rt-box,.pr-rbox{isolation:isolate}
+.rt-box{margin:34px auto 18px!important}.pr-rbox{margin:34px auto 18px!important}.dlg.rt{overflow-x:clip}
+.rt-raggi{position:absolute;inset:-70%;z-index:-1;pointer-events:none;border-radius:50%;background:repeating-conic-gradient(rgba(255,230,140,.22) 0 9deg,transparent 9deg 18deg);-webkit-mask:radial-gradient(circle,#000 25%,transparent 68%);mask:radial-gradient(circle,#000 25%,transparent 68%);animation:rtRaggi 14s linear infinite;opacity:.7}
+.rt-gira .rt-raggi{animation-duration:2.2s;opacity:1}
+.rt-vinto .rt-raggi{animation-duration:5s;opacity:1;background:repeating-conic-gradient(rgba(255,240,170,.5) 0 9deg,transparent 9deg 18deg)}
+@keyframes rtRaggi{to{transform:rotate(360deg)}}
+.rt-cornice{position:absolute;inset:-14px;border-radius:50%;background:conic-gradient(#ffe27a,#c98a12,#fff1b0,#b87a0c,#ffe27a,#c98a12,#fff1b0,#b87a0c,#ffe27a);box-shadow:0 0 0 4px var(--linea),0 8px 0 4px var(--linea),0 0 30px rgba(255,200,60,.55);z-index:0}
+.rt-box .rt-ruota,.pr-rbox .rt-ruota{z-index:1;border-color:#7a4a08;box-shadow:inset 0 0 0 3px rgba(255,255,255,.35),inset 0 0 22px rgba(0,0,0,.35)}
+.rt-sep{position:absolute;inset:0;border-radius:50%;pointer-events:none}
+.rt-perno{position:absolute;width:9px;height:9px;margin:-4.5px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#d9d9d9 55%,#8a8a8a);box-shadow:0 1px 0 rgba(0,0,0,.5)}
+.rt-ic{z-index:1}
+.rt-centro{z-index:2;background:radial-gradient(circle at 35% 30%,#fff7d0,#ffd03a 45%,#b8790a)!important;border-color:#7a4a08!important;box-shadow:0 3px 0 rgba(0,0,0,.35),inset 0 0 0 3px rgba(255,255,255,.5)}
+.rt-vetro{position:absolute;inset:0;border-radius:50%;z-index:2;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 32% 22%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%),radial-gradient(circle,transparent 62%,rgba(0,0,0,.18))}
+.rt-luci{position:absolute;inset:0;z-index:3;pointer-events:none}
+.rt-luci i{position:absolute;width:9px;height:9px;margin:-4.5px;border-radius:50%;background:#fff3b0;box-shadow:0 0 0 2px #6a3f06,0 0 8px 2px rgba(255,220,90,.9)}
+.rt-luci i:nth-child(odd){background:#ff8a5a;box-shadow:0 0 0 2px #6a3f06,0 0 8px 2px rgba(255,120,80,.9)}
+.rt-luci i{animation:rtLuceLenta 1.6s ease-in-out infinite;animation-delay:calc(var(--k) * -.08s)}
+.rt-gira .rt-luci i{animation:rtLuce .42s steps(1) infinite;animation-delay:calc(var(--k) * -.021s)}
+.rt-vinto .rt-luci i{animation:rtLuce .24s steps(1) infinite}
+.rt-vinto .rt-luci i:nth-child(odd){animation-delay:-.12s}
+@keyframes rtLuce{0%{opacity:1;filter:brightness(1.3)}50%{opacity:.25;filter:none}}
+@keyframes rtLuceLenta{50%{opacity:.45}}
+.rt-freccia{top:-24px!important;margin-left:-15px!important;border-left-width:15px!important;border-right-width:15px!important;border-top-width:34px!important;border-top-color:#e63b2e!important;z-index:5!important;filter:drop-shadow(0 0 0 #fff) drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 3px 0 var(--linea))!important}
+.rt-freccia::after{content:'';position:absolute;left:-9px;top:-46px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff7d0,#ffd03a 50%,#b8790a);box-shadow:0 0 0 3px var(--linea)}
+.rt-freccia.tic{animation:rtTic .14s ease-out}
+@keyframes rtTic{25%{transform:rotate(-26deg)}100%{transform:none}}
+.rt-gira .rt-ruota{filter:blur(calc(var(--vel, 0) * 2px)) saturate(calc(1 + var(--vel, 0) * .4))}
+.rt-vinto .rt-ruota{animation:rtBotta .55s ease-out}
+@keyframes rtBotta{25%{scale:1.08}55%{scale:.97}100%{scale:1}}
+.rt-vinto::after{content:'';position:absolute;left:50%;top:0;width:44%;height:50%;margin-left:-22%;clip-path:polygon(50% 100%,8% 0,92% 0);background:linear-gradient(rgba(255,255,255,.85),rgba(255,255,255,.1));z-index:2;pointer-events:none;animation:rtSpicchio .45s ease-in-out infinite alternate;mix-blend-mode:screen}
+@keyframes rtSpicchio{from{opacity:.25}to{opacity:.9}}
+/* il premio che esce dalla ruota */
+.rt-premio{position:absolute;left:50%;top:50%;width:0;height:0;z-index:6;pointer-events:none}
+.rt-premio > *{position:absolute;left:0;top:0;transform:translate(-50%,-50%)}
+.rt-pr-raggi{width:230px;height:230px;border-radius:50%;background:repeating-conic-gradient(rgba(255,240,170,.9) 0 10deg,transparent 10deg 20deg);-webkit-mask:radial-gradient(circle,#000 20%,transparent 70%);mask:radial-gradient(circle,#000 20%,transparent 70%);opacity:0}
+.rt-pr-ic{width:96px;height:96px;display:grid;place-items:center;border-radius:28px;background:radial-gradient(circle at 35% 30%,#fffbe6,#ffd03a 60%,#d99a12);box-shadow:0 0 0 5px var(--linea),0 10px 0 5px var(--linea),0 0 40px rgba(255,220,90,.9);opacity:0}
+.rt-pr-t{top:72px!important;white-space:nowrap;font-family:"Lilita One",sans-serif;font-weight:400;font-size:20px;color:#fff;background:#e63b2e;padding:4px 14px;border-radius:12px;box-shadow:0 0 0 3px var(--linea),0 4px 0 3px var(--linea);opacity:0}
+.rt-premio.su .rt-pr-raggi{animation:rtPrRaggi 2.6s ease-out forwards}
+.rt-premio.su .rt-pr-ic{animation:rtPrIc 2.6s cubic-bezier(.2,1.5,.4,1) forwards}
+.rt-premio.su .rt-pr-t{animation:rtPrT 2.6s ease-out forwards}
+@keyframes rtPrRaggi{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(0)}15%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.15) rotate(120deg)}}
+@keyframes rtPrIc{0%{opacity:0;transform:translate(-50%,-50%) scale(.1) rotate(-30deg)}14%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(6deg)}24%{transform:translate(-50%,-50%) scale(1) rotate(0)}82%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.6) translateY(-30px)}}
+@keyframes rtPrT{0%,14%{opacity:0;transform:translate(-50%,-50%) scale(.4)}26%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}34%{transform:translate(-50%,-50%) scale(1)}82%{opacity:1}100%{opacity:0}}
 .rt-esito.vinto,.pr-esito.vinto{animation:rtPremio .55s cubic-bezier(.2,1.6,.4,1) both;font-size:1.12em}
 @keyframes rtPremio{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion: reduce){ .rt-luci i,.rt-vinto .rt-ruota,.rt-vinto::after,.rt-freccia.tic{animation:none!important} }
+@media (prefers-reduced-motion: reduce){ .rt-raggi,.rt-luci i,.rt-vinto .rt-ruota,.rt-vinto::after,.rt-freccia.tic,.rt-premio > *{animation:none!important} .rt-premio.su > *{opacity:1} }
 .rt-esito{text-align:center;font-size:17px;min-height:26px;margin:6px 0}
 .rt-premi{display:flex;flex-wrap:wrap;gap:4px 10px;justify-content:center;font-size:13px;color:var(--grigio)}
 .rt-premi span{display:inline-flex;align-items:center;gap:3px}
@@ -4872,9 +4903,10 @@ function mostraMenu(pannello){
       { const bs = c.querySelector('#prScr'); if (bs) bs.onclick = () => { const x = prendiScrigno(); if (!x) return; const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(x.tipo); }; } // il menu resta sotto: dietro il riepilogo si vede la pagina Premi, non pezzi di altre schermate
       { const W = c.querySelector('#prW'), go = c.querySelector('#prGira'), es = c.querySelector('#prEs');
         if (go) go.onclick = () => { try { PROF.pausaAvvisi(matchMedia('(prefers-reduced-motion: reduce)').matches ? 400 : 4000); } catch(e){} const r = TB.giraRuota(); if (!r) return; go.disabled = true; go.textContent = '…'; const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
-          try { SUONI.suona('carica1'); } catch(e){}
+          try { SUONI.suona('carica1'); } catch(e){} go.textContent = 'Gira…';
           animaRuota(W, r.i, r.n, () => { es.innerHTML = r.msg; es.classList.add('vinto'); go.textContent = 'Domani'; c.querySelector('#prRuota').classList.remove('pronta'); try { SUONI.suona(r.x.k === 'fort' || r.x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(r.x.k === 'fort' || r.x.v === 'oro' ? 160 : 70); } catch(e){}
-            if (r.x.k === 'scr') setTimeout(() => { if (!document.body.contains(go)) return; scrignoRuotaTogli(r.x.v); const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 1300); else setTimeout(() => { if (!t.hidden && document.body.contains(go)){ const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; mostraMenu('home'); } }, 2600); }); };
+            if (r.x.k === 'scr') setTimeout(() => { if (!document.body.contains(go)) return; scrignoRuotaTogli(r.x.v); const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 1700); else setTimeout(() => { if (!t.hidden && document.body.contains(go)){ const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; mostraMenu('home'); } }, 2900); }, TB.ico(r.x.ic, 4), r.x.t); };
+        try { decoraRuota(W, TB.RUOTA.length); } catch(e){}
         const riga = (box, x) => { const d = document.createElement('div'); d.className = 'pr-q' + (x.stato === 'preso' ? ' ok' : '');
           d.innerHTML = `<span class="pr-qt">${x.stato === 'preso' ? TB.ico('ok', 2) : ''}${x.t}${x.max ? ' <small>' + '★'.repeat(x.stelle) + '☆'.repeat(x.max - x.stelle) + '</small>' : ''}</span><span class="pr-qr"><span class="pr-bar"><i style="width:${Math.min(100, x.v/x.n*100)}%"></i><em>${Math.min(x.v, x.n)}/${x.n}</em></span></span>`;
           const b = document.createElement('button'); b.type = 'button'; b.className = 'pr-rit ' + x.premio; b.disabled = x.stato !== 'pronto';
@@ -5150,24 +5182,37 @@ function regalaScrigno(tipo, da){ if (!SCRIGNI_N[tipo]) return; const L = scrign
 window.regalaScrigno = regalaScrigno;
 // ---- ruota della fortuna: animazione condivisa (pagina Premi e finestra) ----
 // carica all'indietro, gira veloce, rallenta con il "tic" della freccia a ogni spicchio, luci che corrono, spicchio vincente che brilla
-function animaRuota(W, i, n, fine){
-  const box = W.parentElement, fr = box.querySelector('.rt-freccia'), lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function decoraRuota(W, n){ if (!W || W.dataset.dec) return; W.dataset.dec = '1'; n = n || 8; const box = W.parentElement;
+  const mk = (cl, dove, prima) => { const d = document.createElement('div'); d.className = cl; prima ? dove.insertBefore(d, prima) : dove.append(d); return d; };
+  mk('rt-raggi', box, box.firstChild); mk('rt-cornice', box, W);
+  const sep = mk('rt-sep', W, W.firstChild); sep.style.background = `repeating-conic-gradient(from -1deg, rgba(255,255,255,.9) 0 2deg, transparent 2deg ${360/n}deg)`;
+  for (let k = 0; k < n; k++){ const a = (k*360/n - 90)*Math.PI/180, q = document.createElement('i'); q.className = 'rt-perno'; q.style.left = `calc(50% + ${Math.cos(a).toFixed(4)} * (50% - 9px))`; q.style.top = `calc(50% + ${Math.sin(a).toFixed(4)} * (50% - 9px))`; W.append(q); }
+  mk('rt-vetro', box); const L = mk('rt-luci', box);
+  for (let k = 0; k < 20; k++){ const a = (k*18 - 90)*Math.PI/180, b = document.createElement('i'); b.style.left = `calc(50% + ${Math.cos(a).toFixed(4)} * (50% + 7px))`; b.style.top = `calc(50% + ${Math.sin(a).toFixed(4)} * (50% + 7px))`; b.style.setProperty('--k', k); L.append(b); }
+  mk('rt-premio', box);
+}
+// carica all'indietro, gira veloce, rallenta con il "tic" della freccia sui pioli, luci che corrono, premio che esplode fuori
+function animaRuota(W, i, n, fine, icona, nome){
+  decoraRuota(W, n);
+  const box = W.parentElement, fr = box.querySelector('.rt-freccia'), lento = matchMedia('(prefers-reduced-motion: reduce)').matches, pr = box.querySelector('.rt-premio');
   const a0 = (parseFloat((W.style.transform.match(/-?[\d.]+/) || [0])[0]) || 0) % 360;
-  const fineA = 360*6 + (360 - (i + .5)*360/n) + (Math.random() - .5)*(260/n); // dentro lo spicchio, mai sul bordo
+  const fineA = 360*7 + (360 - (i + .5)*360/n) + (Math.random() - .5)*(240/n); // dentro lo spicchio, mai sul bordo
   box.classList.remove('rt-vinto'); box.classList.add('rt-gira'); W.style.transition = 'none';
-  if (!box.querySelector('.rt-luci')){ const L = document.createElement('div'); L.className = 'rt-luci'; for (let k = 0; k < 16; k++){ const b = document.createElement('i'); b.style.setProperty('--a', (k*22.5) + 'deg'); b.style.setProperty('--k', k); L.append(b); } box.append(L); }
-  if (lento){ W.style.transform = `rotate(${fineA}deg)`; setTimeout(() => { box.classList.remove('rt-gira'); box.classList.add('rt-vinto'); fine(); }, 300); return; }
-  const T1 = 380, T2 = 4300, t0 = performance.now(); let ultimo = -1, tic = 0;
-  const ease = q => 1 - Math.pow(1 - q, 4);
+  const vinci = () => { box.classList.remove('rt-gira'); box.classList.add('rt-vinto');
+    if (pr && icona){ pr.innerHTML = `<div class="rt-pr-raggi"></div><div class="rt-pr-ic">${icona}</div><b class="rt-pr-t">${nome || ''}</b>`; pr.classList.remove('su'); void pr.offsetWidth; pr.classList.add('su'); }
+    if (navigator.vibrate) try { navigator.vibrate([30, 40, 60]); } catch(e){} fine(); };
+  if (lento){ W.style.transform = `rotate(${fineA}deg)`; setTimeout(vinci, 300); return; }
+  const T1 = 420, T2 = 4600, t0 = performance.now(); let ultimo = null, tic = 0;
+  const ease = q => 1 - Math.pow(1 - q, 4.2);
   (function passo(now){ const t = now - t0; let a;
-    if (t < T1){ const q = t/T1; a = a0 - 16*Math.sin(q*Math.PI/2); } // carica all'indietro
-    else { const q = Math.min(1, (t - T1)/T2); a = a0 - 16 + (fineA - a0 + 16)*ease(q); }
+    if (t < T1){ const q = t/T1; a = a0 - 22*Math.sin(q*Math.PI/2); } // carica all'indietro
+    else { const q = Math.min(1, (t - T1)/T2); a = a0 - 22 + (fineA - a0 + 22)*ease(q); }
     W.style.transform = `rotate(${a}deg)`;
-    const sp = Math.floor(((a % 360) + 360) % 360 / (360/n)); // spicchio che passa sotto la freccia
-    if (t >= T1 && sp !== ultimo){ ultimo = sp; if (fr){ fr.classList.remove('tic'); void fr.offsetWidth; fr.classList.add('tic'); } if (now - tic > 70){ tic = now; try { SUONI.suona('tocco'); } catch(e){} } }
-    box.style.setProperty('--vel', t < T1 ? 0 : (1 - Math.min(1, (t - T1)/T2)).toFixed(2));
-    if (t < T1 + T2) requestAnimationFrame(passo);
-    else { box.classList.remove('rt-gira'); box.classList.add('rt-vinto'); if (navigator.vibrate) try { navigator.vibrate(40); } catch(e){} fine(); }
+    const sp = Math.floor((a + 360*20) / (360/n)); // ogni piolo che passa sotto la freccia
+    if (t >= T1 && ultimo !== null && sp !== ultimo){ if (fr){ fr.classList.remove('tic'); void fr.offsetWidth; fr.classList.add('tic'); } if (now - tic > 65){ tic = now; try { SUONI.suona('tocco'); } catch(e){} } }
+    ultimo = sp;
+    const v = t < T1 ? 0 : 1 - Math.min(1, (t - T1)/T2); box.style.setProperty('--vel', v.toFixed(3));
+    if (t < T1 + T2) requestAnimationFrame(passo); else vinci();
   })(t0);
 }
 // lo scrigno vinto alla ruota va subito nella lista dei Premi: se esci mentre gira non lo perdi
@@ -6742,11 +6787,12 @@ function ruota(){
   o.querySelector('#rtBack').onclick = esci; o.querySelector('#rtNo').onclick = esci;
   const go = o.querySelector('#rtGo'); go.onclick = () => { const r = giraRuota(); if (!r) return; go.disabled = true; const x = r.x;
     try { SUONI.suona('carica1'); } catch(e){}
-    animaRuota(o.querySelector('#rtW'), r.i, r.n, () => {
+    go.textContent = 'Gira…'; animaRuota(o.querySelector('#rtW'), r.i, r.n, () => {
       SUONI.suona(x.k === 'fort' || x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(x.k === 'fort' || x.v === 'oro' ? 160 : 70);
       const es = o.querySelector('#rtEs'); if (es){ es.innerHTML = r.msg; es.classList.add('vinto'); }
-      if (x.k === 'scr') setTimeout(() => { if (el('tbOv').hidden) return; scrignoRuotaTogli(x.v); chiudiOv(); mostraScrigno(x.v, ruota); }, 1300); else setTimeout(() => { if (!el('tbOv').hidden) ruota(); }, 2400);
-    }); };
+      if (x.k === 'scr') setTimeout(() => { if (el('tbOv').hidden) return; scrignoRuotaTogli(x.v); chiudiOv(); mostraScrigno(x.v, ruota); }, 1700); else setTimeout(() => { if (!el('tbOv').hidden) ruota(); }, 2800);
+    }, ico(x.ic, 4), x.t); };
+  try { decoraRuota(o.querySelector('#rtW'), n); } catch(e){}
 }
 function intro(){
   const visti = new Set(MISSIONI.slice(0, MI).flatMap(m => Object.values(m.arrivi).flat().map(a => a[0]).concat((m.extra || []).map(a => a[1]))).concat(['fante']));
