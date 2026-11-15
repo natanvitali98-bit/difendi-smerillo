@@ -1090,6 +1090,7 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .cr-arena.entra .logo{animation:pgLogo .6s cubic-bezier(.2,.9,.3,1.3) both}
 @keyframes pgLogo{from{opacity:0;transform:translateY(-26px) scale(.85) rotate(-3deg)}to{opacity:1;transform:none}}
 .cr-top{animation:crTop .45s ease-out both}
+.cr.fermo .cr-top,.cr.fermo .cr-nav{animation:none!important} /* tornando sulla stessa pagina la barra non rientra di nuovo */
 .cr.quieto .cr-top,.cr.quieto .cr-nav,.cr.quieto .cr-pg > *,.cr.quieto .logo{animation:none!important}
 .cr-nav{animation:crNav .45s cubic-bezier(.2,.9,.3,1.2) both}
 @keyframes crTop{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
@@ -4841,11 +4842,11 @@ function mostraMenu(pannello){
           const cv = document.getElementById('titleCv'); if (cv){ cv.style.transition = 'none'; cv.style.transform = innerWidth >= 900 && innerWidth > innerHeight ? `translateX(${(2 - f)*6}px) scale(1.02)` : `translateX(${(2 - f)*8}px) scale(1.12)`; } });
         clearTimeout(tmr); tmr = setTimeout(() => { const eraAuto = auto; auto = false; ind.style.transition = ''; const cv = document.getElementById('titleCv'); if (cv) cv.style.transition = ''; const i = Math.round(pag.scrollLeft / Math.max(1, pag.clientWidth)); const k = pgs[i] && pgs[i].dataset.tab; if (k && !eraAuto){ segna(k, false); try { sessionStorage.setItem('ds-tab', k); } catch(e){} } }, 120); }, {passive:true});
       const R0 = RIENTRO; RIENTRO = null; let quieto = !!R0; if (R0){ const cr = c.querySelector('.cr'); if (cr) cr.classList.add('quieto'); }
-      let k0 = 'gioca'; try { k0 = sessionStorage.getItem('ds-tab') || 'gioca'; } catch(e){} requestAnimationFrame(() => { vai(R0 ? R0.tab : k0, false); if (R0){ const pg = pgs.find(s => s.dataset.tab === R0.tab); if (pg) pg.scrollTop = R0.top; requestAnimationFrame(() => { if (pg) pg.scrollTop = R0.top; quieto = false; setTimeout(() => { const cr = c.querySelector('.cr'); if (cr) cr.classList.remove('quieto'); }, 300); }); } });
+      let k0 = 'gioca'; try { k0 = sessionStorage.getItem('ds-tab') || 'gioca'; } catch(e){} requestAnimationFrame(() => { vai(R0 ? R0.tab : k0, false); if (R0){ const pg = pgs.find(s => s.dataset.tab === R0.tab); if (pg) pg.scrollTop = R0.top; requestAnimationFrame(() => { if (pg) pg.scrollTop = R0.top; quieto = false; setTimeout(() => { const cr = c.querySelector('.cr'); if (cr){ cr.classList.add('fermo'); cr.classList.remove('quieto'); } }, 300); }); } });
       { const bt = c.querySelector('#crTorri'); if (bt){ const T = leggiTorri(); for (const k of ['vedetta','piazza','logge','nido','milizia','campanile']){ const x = T[k] || {liv:1, copie:0}, d = document.createElement('div'); d.className = 'cr-dif cr-tor'; d.style.setProperty('--rc', ['#6b7280','#3d8bfd','#a855f7'][{vedetta:0,piazza:0,logge:0,nido:1,milizia:1,campanile:2}[k]]);
           d.innerHTML = `<span class="cr-di"></span><b>${{vedetta:'Balestra',piazza:'Braciere',logge:'Castagneto',nido:'Falco',milizia:'Soldati',campanile:'Campana'}[k]}</b><small>liv. ${x.liv}${x.liv < 5 ? ' · ' + (x.copie || 0) + '/' + (x.liv + 1) : ' MAX'}</small>`; try { d.querySelector('.cr-di').append(iconaTorre(k, 40)); } catch(e){} bt.append(d); } } }
       c.querySelectorAll('.cr-dif[data-dif]').forEach(b => { const im = TB.icona(b.dataset.dif, 3); if (b.classList.contains('no')) im.style.filter = 'brightness(0) opacity(.35)'; b.querySelector('.cr-di').append(im); b.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('collezione'); }); });
-      { const bs = c.querySelector('#prScr'); if (bs) bs.onclick = () => { const x = prendiScrigno(); if (!x) return; const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; t.hidden = true; TB.premiaSopra(x.tipo); }; }
+      { const bs = c.querySelector('#prScr'); if (bs) bs.onclick = () => { const x = prendiScrigno(); if (!x) return; const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(x.tipo); }; } // il menu resta sotto: dietro il riepilogo si vede la pagina Premi, non pezzi di altre schermate
       { const W = c.querySelector('#prW'), go = c.querySelector('#prGira'), es = c.querySelector('#prEs');
         if (go) go.onclick = () => { try { PROF.pausaAvvisi(matchMedia('(prefers-reduced-motion: reduce)').matches ? 400 : 4000); } catch(e){} const r = TB.giraRuota(); if (!r) return; go.disabled = true; go.textContent = '…'; const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
           const giri = 5*360 + (360 - (r.i + .5)*360/r.n) + (Math.random() - .5)*(300/r.n); try { SUONI.suona('carica1'); } catch(e){}
@@ -6523,21 +6524,23 @@ function mostraScrigno(tipo, poi){
     await att(650); prossima(0);
   }
   // --- 4. le carte escono una alla volta, coperte: tocca per girarle ---
-  function prossima(i){ if (i >= carte.length){ chiudi(); return; }
+  function prossima(i){ if (finito) return; if (i >= carte.length){ chiudi(); return; }
     const c = carte[i], rar = cartaRar(c), r = RARITA[rar]; zonaC.innerHTML = '';
     const k = document.createElement('div'); k.className = 'scr-carta'; k.style.setProperty('--rc', r.col);
     k.innerHTML = `<div class="sc-in"><div class="sc-dorso"><span>?</span></div><div class="sc-fronte"><div class="sc-testa"><span class="sc-rar">${r.nome}</span><span class="sc-modo sc-m-${c.m}">${cartaModo(c)}</span></div><div class="sc-img"></div><small class="sc-tipo">${cartaTipo(c)}</small><b>${cartaNome(c)}</b><span class="sc-es">${cartaEsito(c)}</span></div></div><small class="sc-conta">${carte.length - i - 1 ? 'Ancora ' + (carte.length - i - 1) : 'Ultima!'}</small>`;
     k.querySelector('.sc-img').append(cartaImg(c, 6)); zonaC.append(k); hint.textContent = 'Tocca la carta'; hint.classList.add('su');
     k.animate([{transform:'translateY(80px) scale(.2) rotate(-25deg)', opacity:0}, {transform:'translateY(-30px) scale(1.08) rotate(4deg)', opacity:1, offset:.7}, {transform:'none', opacity:1}], {duration:calma ? 1 : 520, easing:'cubic-bezier(.2,.9,.3,1.2)', fill:'both'});
     SUONI.suona('esce');
-    let girata = false;
-    k.onclick = async () => { if (!girata){ girata = true; hint.classList.remove('su');
+    let girata = false, occupata = true, via = false; setTimeout(() => { occupata = false; }, calma ? 0 : 450); // la carta deve prima arrivare
+    k.onclick = async () => { if (occupata || via || finito) return; // tocchi troppo veloci: si ignorano, nessuna carta saltata
+      if (!girata){ girata = true; occupata = true; hint.classList.remove('su'); setTimeout(() => { occupata = false; }, calma ? 150 : (rar >= 2 ? 1150 : 650));
         if (rar >= 2){ k.classList.add('attesa'); SUONI.suona('carica3'); await att(500); k.classList.remove('attesa'); } // per le rare un attimo di suspense
         k.classList.add('girata'); SUONI.suona(rar >= 3 ? 'leggenda' : rar >= 2 ? 'epico' : rar >= 1 ? 'scrigno' : 'flip');
         const b = k.getBoundingClientRect(), s = st.getBoundingClientRect(), x = b.left - s.left + b.width/2, y = b.top - s.top + b.height/2;
         setTimeout(() => { scoppio(x, y, 20 + rar*35, [r.col, '#ffffff', rar >= 2 ? '#ffd03a' : r.col], 6 + rar*2.5, .2, 60, 5); if (rar >= 2){ flash(r.col, 500); trema(10, 400); } if (c.esito === 'nuovo') k.classList.add('nuovo'); }, calma ? 0 : 230);
-        setTimeout(() => { hint.textContent = i + 1 < carte.length ? 'Tocca per la prossima' : 'Tocca per continuare'; hint.classList.add('su'); }, 700);
+        setTimeout(() => { if (!k.isConnected) return; hint.textContent = i + 1 < carte.length ? 'Tocca per la prossima' : 'Tocca per continuare'; hint.classList.add('su'); }, 700);
         return; }
+      via = true;
       k.animate([{transform:'none', opacity:1}, {transform:'translateX(-120%) rotate(-20deg) scale(.6)', opacity:0}], {duration:calma ? 1 : 300, easing:'ease-in', fill:'forwards'}); await att(260); prossima(i + 1); };
   }
   $('.scr-salta').onclick = () => { SUONI.suona('tocco'); chiudi(); };
@@ -6711,7 +6714,8 @@ function intro(){
   const dif = {}; for (const t of sq) dif[t] = (dif[t] || 0) + 1;
   const diffN = /difficilissima/i.test(M.livello) ? 4 : /difficile/i.test(M.livello) ? 3 : /media/i.test(M.livello) ? 2 : 1;
   const pallini = [1,2,3,4].map(k => `<i class="${k <= diffN ? 'on' : ''}"></i>`).join('');
-  const prima = MI === 0 && guida >= 0 && !RUN && !SFIDA && !M.evento && !online();
+  let provaVista = false; try { provaVista = localStorage.getItem('difendi-smerillo-prova') === '1'; } catch(e){}
+  const prima = MI === 0 && guida >= 0 && !RUN && !SFIDA && !M.evento && !online() && !provaVista; // la prova dei soldati si fa una volta sola: se esci e rientri non ricomincia
   const o = prima ? overlay(`<div class="dlg box mis mis-prima">
     <button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>
     <div class="mis-top"><span class="mis-n">Missione 1 · Si impara</span></div>
@@ -6764,7 +6768,7 @@ function intro(){
   { const di = o.querySelector('#dlgIc'); if (di) di.append(icona(M.dlg[0], 3)); }
   // se c'è un nemico nuovo, lo presento subito
   const primoNuovo = o.querySelector('.mis-pg.nuovo'); if (primoNuovo) primoNuovo.click();
-  o.querySelector('#tbVia').onclick = () => { chiudiOv(); if (prima){ provaVia(0); return; } usaTalismano(); if (!RUN){ SUONI.suona('banner'); EPICO.banner(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
+  o.querySelector('#tbVia').onclick = () => { chiudiOv(); if (prima){ try { localStorage.setItem('difendi-smerillo-prova', '1'); } catch(e){} provaVia(0); return; } usaTalismano(); if (!RUN){ SUONI.suona('banner'); EPICO.banner(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
   const bk = o.querySelector('#misBack'); if (bk) bk.onclick = () => { if (provenienza === 'missioni') scelta(M.evento ? undefined : (M.luogo || 'smerillo')); else esci(); };
   const bq = o.querySelector('#tbSqC'); if (bq) bq.onclick = () => { chiudiOv(); squadra(MI); };
 }
@@ -9561,7 +9565,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261115003802';
+  const VERSIONE = window.DS_VER = '20261115010155';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){
@@ -9662,7 +9666,11 @@ const RITORNO = window.RITORNO = (() => {
     b.querySelector('[data-no]').onclick = chiudi; b.querySelector('[data-si]').onclick = () => { chiudi(); salta(); }; }
   function salta(){ const s = stato(); if (!s.in) return; const k = s.in; fatto(k, 'avanti'); chiudi();
     if (k === 'turni') TB.esci(); else if (k === 'tempo') mostraMenu(); else if (k === 'conquista') CQ.esci(); }
-  function finestraPasso(){ const s = stato(); if (s.passo > 3) return false; if (s.in){ s.in = null; salvaS(s); } // riaperto il gioco a metà: si riparte da questo passo
+  function finestraPasso(){ const s = stato(); if (s.passo > 3) return false;
+    // è tornato al menu a metà di un assaggio (o ha chiuso il gioco): vuole scegliere lui. Niente più assaggi che ripartono da soli
+    if (s.in){ traccia('assaggio', {passo: s.in, ev:'uscito'}); s.passo = 9; s.in = null; s.saltato = 1; salvaS(s); togliChip();
+      if (!lg('difendi-smerillo-benvenuto')){ sc('difendi-smerillo-benvenuto', '1'); try { regalaScrigno('argento', 'Regalo di benvenuto'); } catch(e){} }
+      return false; }
     if (s.passo >= 3){ finestraFine(); return true; }
     const k = PASSI[s.passo], I = INFO[k], u = s.ultimo; let su = '';
     if (s.passo === 0 && !u){ avviaPasso(k); return true; }
