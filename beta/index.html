@@ -1187,14 +1187,50 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 /* ===== menu più leggibile: sfondo velato fuori dalla pagina Gioca, titoli in una fascia, barra in basso chiara ===== */
 #titleVelo{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .35s ease;background:linear-gradient(rgba(14,20,60,.58),rgba(10,14,44,.78));-webkit-backdrop-filter:blur(3px) saturate(.85);backdrop-filter:blur(3px) saturate(.85)}
 #title:not(.cr-on) #titleVelo{display:none}
-.cr-h{align-self:flex-start;background:linear-gradient(#3460e6,#2340b8);padding:2px 16px 6px;border:3px solid var(--linea);border-radius:14px;box-shadow:0 4px 0 var(--linea),inset 0 3px 0 rgba(255,255,255,.25);-webkit-text-stroke:0;text-shadow:0 3px 0 var(--linea)}
-.cr-h small{color:#dfe6ff}
+.cr-pg > .cr-h{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0;padding:0}
+.cr-pg{padding-top:12px}
 .cr-tab:not(.on) .cr-ti{opacity:.72;filter:saturate(.8)}.cr-tab:not(.on) .cr-tn{opacity:.7}
 .cr-tab.on .cr-tn{opacity:1;font-weight:400}
 .cr-tab[data-tab="gioca"]:not(.on){background:rgba(255,208,58,.14)!important;color:#ffd03a;box-shadow:inset 0 0 0 2px rgba(255,208,58,.55)!important}
 .cr-tab[data-tab="gioca"]:not(.on) .cr-ti{opacity:1;filter:none;animation:crGiocaRespira 2.4s ease-in-out infinite}
 @keyframes crGiocaRespira{50%{transform:scale(1.08)}}
 @media (prefers-reduced-motion: reduce){ #titleVelo{transition:none} .cr-tab[data-tab="gioca"] .cr-ti{animation:none!important} }
+/* ===== pagina Amici ===== */
+.am-hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;background:radial-gradient(ellipse at 50% 0%,#3d66ee,#1f348f 70%);border:3px solid var(--linea);border-radius:20px;box-shadow:0 5px 0 var(--linea),inset 0 3px 0 rgba(255,255,255,.2);padding:16px 14px 14px;color:#fff}
+.am-hi{width:84px;height:84px;display:grid;place-items:center;border-radius:24px;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 3px rgba(255,255,255,.18);animation:amHi 2.6s ease-in-out infinite}
+@keyframes amHi{50%{transform:translateY(-4px) rotate(-2deg)}}
+.am-hero > b{font:400 26px var(--f-big);text-shadow:0 3px 0 var(--linea)}.am-hero > small{font-size:14px;color:#dfe6ff;max-width:34ch}
+.am-go{width:100%;margin-top:6px}
+.am-passi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.am-passi > div{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:rgba(20,20,51,.75);border-radius:16px;padding:12px 6px 10px;color:#fff}
+.am-passi i{position:absolute;top:-8px;left:-6px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#ffd03a;color:#141433;font:400 15px var(--f-big);font-style:normal;border:3px solid var(--linea)}
+.am-passi small{font-size:12px;line-height:1.25;color:#dfe6ff}.am-passi b{color:#fff}
+.am-riv{background:rgba(20,20,51,.8);border-radius:16px;padding:10px 12px;color:#fff;display:flex;flex-direction:column;gap:6px}
+.am-rh{font:400 17px var(--f-big);color:#ffd03a;display:flex;align-items:center;gap:6px}
+.am-rr{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;column-gap:10px;background:rgba(255,255,255,.07);border-radius:12px;padding:6px 10px;border-left:4px solid #8c96c8}
+.am-rr.su{border-left-color:#5fd36a}.am-rr.giu{border-left-color:#ff6a5a}
+.am-rr b{font-size:15px}.am-rr small{grid-row:2;color:#aab4e8;font-size:12px;font-weight:700}.am-rr span{grid-row:1/3;grid-column:2;align-self:center;font:400 18px var(--f-big)}.am-rr em{font-style:normal;color:#ffd03a}
+.am-rv{margin:0;font-size:13px;color:#cfd8ff}
+.am-inv{width:100%}.am-nota{font-size:13px}
+/* ===== classifica: podio ===== */
+.cl-podio{display:grid;grid-template-columns:1fr 1.1fr 1fr;align-items:end;gap:6px;margin:4px 0 10px}
+.cl-pd{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;color:#fff;min-width:0;animation:pgEntra .5s cubic-bezier(.2,.9,.3,1.3) both}
+.cl-pd.p1{animation-delay:.15s}.cl-pd.p3{animation-delay:.08s}
+.cl-pd > b{font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cl-pd .cl-pv b{font-size:12px;color:#ffd03a}.cl-pd .cl-pv small{display:none}
+.cl-pd .cl-av{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:rgba(255,255,255,.12);border:3px solid var(--linea)}
+.cl-pd.p1 .cl-av{width:62px;height:62px;background:#ffd03a;box-shadow:0 0 18px rgba(255,208,58,.7)}
+.cl-blocco{width:100%;display:grid;place-items:center;border:3px solid var(--linea);border-bottom:0;border-radius:12px 12px 0 0;box-shadow:inset 0 3px 0 rgba(255,255,255,.3)}
+.cl-blocco i{font:400 26px var(--f-big);font-style:normal;color:#fff;text-shadow:0 3px 0 var(--linea)}
+.cl-pd.p1 .cl-blocco{height:74px;background:linear-gradient(#ffd03a,#e0a500)}.cl-pd.p2 .cl-blocco{height:54px;background:linear-gradient(#d8dfee,#9aa5c4)}.cl-pd.p3 .cl-blocco{height:40px;background:linear-gradient(#e8a46a,#b56a32)}
+.cl-pd.io > b{color:#ffd03a}
+.cl-vuota{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;background:rgba(20,20,51,.8);border:3px dashed rgba(255,208,58,.6);border-radius:18px;padding:18px 14px;color:#fff}
+.cl-vuota > span{animation:amHi 2.6s ease-in-out infinite}.cl-vuota > b{font:400 22px var(--f-big);color:#ffd03a}.cl-vuota > small{font-size:13px;color:#dfe6ff;max-width:32ch}
+/* ===== collezione: carte trovate che brillano, carte da trovare col lucchetto ===== */
+.cr-dif:not(.no){box-shadow:0 4px 0 var(--linea),0 0 0 2px var(--rc) inset,0 0 16px -4px var(--rc)}
+.cr-dif.no{background:linear-gradient(#2a3270,#1d2358)!important;color:#aab4e8;position:relative}
+.cr-dif.no b{color:#cfd8ff}.cr-dif.no small{color:var(--rc)}
+.cr-dif.no::after{content:'';position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:5px;background:#141433 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23ffd03a' d='M5 7V5a3 3 0 0 1 6 0v2h1v7H4V7h1zm2 0h2V5a1 1 0 0 0-2 0v2z'/%3E%3C/svg%3E") center/12px no-repeat;opacity:.9}
+@media (prefers-reduced-motion: reduce){ .am-hi,.cl-vuota > span,.cl-pd{animation:none!important} }
 /* ===== su PC col mouse: tutto risponde quando ci passi sopra ===== */
 @media (hover:hover) and (pointer:fine){
   .big,.hbtn,.cr-tab,.cr-dif,.cr-ev,.hm-modo,.cq-it,.cq-prom,.tbmis,.cr-seg button,.pr-scr,.gf-go,.cq-annoc,.cq-ob,.cq-dec .big{transition:translate .14s ease-out,filter .14s ease-out,box-shadow .14s ease-out,border-color .14s}
@@ -4894,6 +4930,9 @@ function mostraMenu(pannello){
     const LUOGO = pm.luogo === 'sm' ? 'San Martino al Faggio' : pm.luogo === 'ce' ? 'Ceresola' : 'Smerillo';
     const tal = TB.talismani(), nTal = Object.values(tal).reduce((s, v) => s + (v || 0), 0), INCn = INC.daRitirare, rp = TB.ruotaPronta(), [fa, ft] = PROF.quantiFortunati();
     const card = (id, ic, tit, sub, extra = '') => `<button class="hm-card hm-modo ${extra}" id="${id}"><span class="hm-ic">${ic}</span><span class="hm-sx"><b>${tit}</b><small>${sub}</small></span></button>`;
+    const rivaliHtml = () => { let R = {}; try { R = JSON.parse(localStorage.getItem('difendi-smerillo-rivali')) || {}; } catch(e){} const L = Object.keys(R).filter(k => k !== '_rec').map(k => R[k]).filter(r => r && (r.v || r.p)).sort((a, b) => (b.v + b.p) - (a.v + a.p)).slice(0, 5);
+      const tit = r => { const t = r.v + r.p; return t >= 8 ? 'Nemici giurati' : t >= 3 ? 'Rivali' : 'Sfidanti'; }, esc2 = x => String(x || '').replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
+      return `<div class="am-riv"><div class="am-rh">${TB.ico('coppa', 2)} Le tue rivalità</div>${L.length ? L.map(r => `<div class="am-rr${r.v > r.p ? ' su' : r.p > r.v ? ' giu' : ''}"><b>${esc2(r.nome)}</b><small>${tit(r)}</small><span>Tu <em>${r.v}</em> – <em>${r.p}</em></span></div>`).join('') : '<p class="am-rv">Ancora nessuna: gioca una Conquista con un amico e qui vedrai chi vince di più.</p>'}</div>`; };
     const difs = TB.listaDif().map(d => `<button class="cr-dif ${d.liv ? '' : 'no'}" data-dif="${d.t}" style="--rc:${d.rar.col}"><span class="cr-di"></span><b>${d.liv ? d.nome : '???'}</b><small>${d.liv ? 'liv. ' + d.liv : d.rar.nome}</small></button>`).join('');
     const TABS = [['premi', 'trifoglio', 'Premi', rp || INCn || CQ.missPronte() || scrigniAttesa().length > 0], ['dif', 'scudo', 'Collezione', false], ['gioca', 'spade', 'Gioca', false], ['amici', 'amici', 'Amici', false], ['classifica', 'coppa', 'Classifica', false]];
     c.innerHTML = `<div class="cr">
@@ -4933,9 +4972,12 @@ function mostraMenu(pannello){
           </div>
         </section>
         <section class="cr-pg" data-tab="amici"><h2 class="cr-h">Amici</h2>
-          ${card('tAmi', TB.ico('amici', 3), 'Gioca con gli amici', 'Conquista in 2 o 3, missione insieme o uno contro l’altro. Ognuno dal suo telefono.')}
-          <p class="cr-p">Uno crea la stanza e sceglie a cosa giocare, poi manda il codice. Gli altri toccano <b>Entra con un codice</b>.</p>
-          <p class="cr-p">Dopo una vittoria puoi anche <b>sfidare un amico</b> a fare più punti di te nella stessa missione.</p></section>
+          <div class="am-hero"><div class="am-hi">${TB.ico('amici', 5)}</div><b>Gioca con gli amici</b><small>Conquista in 2 o 3, missione insieme o uno contro l’altro. Ognuno dal suo telefono.</small>
+            <button class="big am-go" id="tAmi">${TB.ico('play', 2)} Gioca con gli amici</button></div>
+          <div class="am-passi"><div><i>1</i><span>${TB.ico('casa', 3)}</span><small>Uno <b>crea la stanza</b></small></div><div><i>2</i><span>${TB.ico('pergamena', 3)}</span><small>Manda il <b>codice</b></small></div><div><i>3</i><span>${TB.ico('spade', 3)}</span><small>Gli altri <b>entrano</b> e si gioca</small></div></div>
+          ${rivaliHtml()}
+          <button class="big alt am-inv" id="amInv">${TB.ico('amici', 2)} Invita un amico su WhatsApp</button>
+          <p class="cr-p am-nota">Dopo una vittoria puoi anche <b>sfidare un amico</b> a fare più punti di te nella stessa missione.</p></section>
         <section class="cr-pg" data-tab="classifica"><h2 class="cr-h">Classifica</h2><div id="clBox" class="cl-box"></div></section>
       </div>
       <nav class="cr-nav">${TABS.map(([k, ic, n, nov]) => `<button class="cr-tab ${nov ? 'nov' : ''}" data-tab="${k}" aria-label="${n}"><span class="cr-ti">${TB.ico(ic, 3)}</span><span class="cr-tn">${n}</span></button>`).join('')}</nav>
@@ -5082,6 +5124,9 @@ function mostraMenu(pannello){
   const td = c.querySelector('#tDif'); if (td) td.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('collezione'); });
   const tcq = c.querySelector('#tCq'); if (tcq) tcq.onclick = (ev) => transizione(ev, () => { t.hidden = true; CQ.apri(); });
   const tam = c.querySelector('#tAmi'); if (tam) tam.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('amici'); });
+  { const inv = c.querySelector('#amInv'); if (inv) inv.onclick = async () => { const url = 'https://natanvitali98-bit.github.io/difendi-smerillo/', txt = 'Ti sfido a Difendi Smerillo! Difendi il comune e conquista i borghi con me: ' + url;
+      try { if (navigator.share){ await navigator.share({title:'Difendi Smerillo', text:'Ti sfido a Difendi Smerillo! Difendi il comune e conquista i borghi con me.', url}); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
+      window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank', 'noopener'); }; }
   const tr = c.querySelector('#tRun'); if (tr) tr.onclick = (ev) => transizione(ev, () => { t.hidden = true; TB.apri('assedio'); });
   const hp = c.querySelector('#hmProf'); if (hp){ const ch = PROF.chip(); ch.onclick = () => mostraMenu('profilo'); hp.append(ch); }
   const tin = c.querySelector('#tInc'); if (tin) tin.onclick = () => TB.apriSopra('incarichi');
@@ -9737,8 +9782,9 @@ const ACC = window.ACC = (() => {
       else io.innerHTML = `<div class="cl-card"><span><b>${esc(A.nome)}</b><small>${tipo === 'gloria' ? 'Gioca a Conquista per entrare in questa classifica.' : tipo === 'assedio' ? 'Gioca ad Assedio per entrare in questa classifica.' : 'Gioca una missione per entrare in classifica.'}</small></span></div>`;
       if (tipo === 'gloria') io.insertAdjacentHTML('beforeend', `<button type="button" class="fd-cl" data-targa>${med(0, 'mini')}<span><b>Targa dei Fondatori</b><small>I primi 10 a giocare a Conquista</small></span><i>Leggi</i></button>`);
       const b = io.querySelector('#clAcc'); if (b) b.onclick = () => apri('crea');
-      r.righe = r.righe || []; L.innerHTML = r.righe.length ? r.righe.map(x => `<div class="cl-r ${x.io ? 'io' : ''} ${x.pos <= 3 ? 'p' + x.pos : ''}"><span class="cl-pos">${x.pos}</span><span class="cl-av" data-av="${esc(x.av)}"></span><b class="cl-n">${esc(x.nome)}${x.fond ? med(x.fond, 'mini') : ''}</b><span class="cl-v">${valore(tipo, x.v)}</span></div>`).join('')
-        : `<p class="cl-vuoto">Ancora nessuno in questa classifica. Puoi essere il primo!</p>`;
+      r.righe = r.righe || []; const pod = r.righe.filter(x => x.pos <= 3); L.innerHTML = r.righe.length ? (pod.length >= 2 ? `<div class="cl-podio">${[2, 1, 3].map(n => { const x = pod.find(y => y.pos === n); return x ? `<div class="cl-pd p${n}${x.io ? ' io' : ''}"><span class="cl-av" data-av="${esc(x.av)}"></span><b>${esc(x.nome)}</b><span class="cl-pv">${valore(tipo, x.v)}</span><div class="cl-blocco"><i>${n}</i></div></div>` : '<div class="cl-pd vuoto"></div>'; }).join('')}</div>` : '') + r.righe.filter(x => pod.length < 2 || x.pos > 3).map(x => `<div class="cl-r ${x.io ? 'io' : ''} ${x.pos <= 3 ? 'p' + x.pos : ''}"><span class="cl-pos">${x.pos}</span><span class="cl-av" data-av="${esc(x.av)}"></span><b class="cl-n">${esc(x.nome)}${x.fond ? med(x.fond, 'mini') : ''}</b><span class="cl-v">${valore(tipo, x.v)}</span></div>`).join('')
+        : `<div class="cl-vuota"><span>${TB.ico('coppa', 5)}</span><b>Il podio è libero!</b><small>Nessuno è ancora in questa classifica: gioca e diventa il primo di Smerillo.</small><button type="button" class="big mini" data-vaigioca>${TB.ico('play', 2)} Gioca adesso</button></div>`;
+      { const vg = L.querySelector('[data-vaigioca]'); if (vg) vg.onclick = () => { const tg = document.querySelector('.cr-tab[data-tab="gioca"]'); if (tg) tg.click(); }; }
       L.querySelectorAll('[data-av]').forEach(e => { try { e.append(TB.icona(e.dataset.av, 2)); } catch(er){ try { e.append(TB.icona('lanciere', 2)); } catch(e2){} } }); };
     const c = CL.cache[tipo]; if (c && Date.now() - c.t < 60000){ disegna(c.r); return; }
     L.innerHTML = '<p class="cl-vuoto">Carico la classifica...</p>'; io.innerHTML = '';
