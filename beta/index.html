@@ -20,6 +20,11 @@
 .mis-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tbruolo{display:block;font-size:14.5px;line-height:1.3;margin:2px 0 4px;color:var(--testo)}
 body.tb-prova #tbFine,body.tb-prova #tbUndo,body.tb-prova #tbShop,body.tb-prova #tbAiuto{visibility:hidden}
+.cq-fev{grid-column:1/-1;background:linear-gradient(#3a2a10,#2a1d0a);border:3px solid #ffd03a;border-radius:16px;padding:10px 12px;margin:2px 0 8px;color:#fff;animation:cqFevIn .4s cubic-bezier(.2,1.5,.4,1) both}
+.cq-fevh{display:flex;align-items:center;gap:10px}.cq-fevh b{display:block;font:400 20px "Lilita One",sans-serif;color:#ffd03a}.cq-fevh small{color:#ffcf9a;font-weight:700}
+.cq-fev p{margin:6px 0 8px;font-size:14px;line-height:1.35}.cq-fevs{display:flex;flex-wrap:wrap;gap:6px}.cq-fevs .big{flex:1 1 auto}
+@keyframes cqFevIn{from{transform:scale(.85);opacity:0}}
+@media (prefers-reduced-motion: reduce){ .cq-fev{animation:none} }
 .cq-riv{font-size:13px;line-height:1.5;color:#e8eeff;padding:6px 4px 0}.cq-riv b{color:#fff}
 .cq-rec{display:block;margin-top:4px;color:#ffd03a;font-weight:700}
 .cq-rias{background:#141433;border-radius:16px;padding:10px 12px;margin:8px 0;color:#fff;display:flex;flex-direction:column;gap:6px}
@@ -7700,7 +7705,7 @@ const troppoForte = f => { const mie = terreDi(f).length, max = Math.max(0, ...v
 const accordo = (a, b) => !!(S.acc && S.acc[pk(a, b)]);
 const assediato = f => S.terre[f] && S.terre[f].own === f && terreDelBorgo(f).filter(x => { const o = S.terre[x].own; return o !== f && !(o && alleati(f, o)); }).length >= ASSEDIO;
 const capRecl = f => { const c = 4 + 2*S.fz[f].ed.armeria; return assediato(f) ? Math.ceil(c/2) : c; };
-function rendita(f, t = S.turno){ let r = 0, merc = 0; for (const x of terreDi(f)){ const st = S.terre[x]; r += (TERRE[x].rend + (st.str === 'mercato' ? 3*lvS(st) : 0) + (st.str === 'mulino' ? 2*lvS(st) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? 2*(prosp(x) - 1) : 0))*(st.prom === 'tasse' && RIBELLI() ? .5 : 1); if (st.str === 'mercato') merc++; }
+function rendita(f, t = S.turno){ let r = 0, merc = 0; for (const x of terreDi(f)){ const st = S.terre[x]; r += (TERRE[x].rend + (st.str === 'mercato' ? 3*lvS(st) : 0) + (st.str === 'mulino' ? 2*lvS(st) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? 2*(prosp(x) - 1) : 0) + (st.ill && RIBELLI() ? 4 : 0))*(st.prom === 'tasse' && RIBELLI() ? .5 : 1); if (st.str === 'mercato') merc++; }
   for (const g of vivi()) if (g !== f && accordo(f, g)) r += 3 + merc + (ANNO() === 'mercanti' ? 2 : 0); if (f === 'ceresola') r += 2;
   for (const g of vivi()) if (g !== f && alleati(f, g)) r += 2;
   return Math.max(2, Math.round(r*(f === S.io ? 1 : RIV()))); }
@@ -8222,7 +8227,9 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre); passoVolo(dt);
     if (T.borgo && S.mp && MPN && MPN.corone && MPN.corone.includes(t) && eBorgo(t)){ const im = icoImg('coppa'); if (im.complete && im.width){ const w = Math.round(im.width*1.6*u), h2 = Math.round(im.height*1.6*u); ctx.drawImage(im, Math.round(px - w/2), Math.round(ny - F1 - h2 - (ter[t].own === S.io && CAS ? 22*u : 2)), w, h2); } }
     if (T.borgo && CAS && ter[t].own === S.io){ const sc = stemma(CAS.stemma, 2); if (sc){ const sw = Math.round(sc.width*u*.9), sh = Math.round(sc.height*u*.9); ctx.drawImage(sc, Math.round(px - sw/2), Math.round(ny - F1 - sh - 2), sw, sh); } }
     if (T.borgo && ter[t].own === t && fondDi(t)){ const fb = spriteBandOro(Math.floor(performance.now()/300) % 2), z2 = Math.max(1, Math.round(u*1.7)), tw = ctx.measureText(nome).width; ctx.drawImage(fb, Math.round(px + tw/2 + 3*u), Math.round(ny - fb.height*z2 + 3*u), fb.width*z2, fb.height*z2); }
-    if (T.fraz && RIBELLI() && cam.s >= .35 && ((ter[t].aut && !ter[t].own) || (ter[t].own === S.io && fed(t) < 35))){ const F2 = Math.round(10*u), tx = ter[t].own ? 'scontenta' : 'autonoma'; ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.lineWidth = 3; ctx.strokeText(tx, px, ny - F1); ctx.fillStyle = ter[t].own ? '#ff8a6a' : '#ffb347'; ctx.fillText(tx, px, ny - F1); }
+    if (T.fraz && RIBELLI() && ter[t].fev && ter[t].own === S.io && !VISTA){ const r = Math.round(9*u + 3), cy = ny - F1 - r - 14*u, bob = Math.sin(performance.now()/220)*2*u; ctx.fillStyle = '#ffd03a'; ctx.strokeStyle = '#141433'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(px, cy + bob, r, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#141433'; ctx.font = `400 ${Math.round(r*1.5)}px "Lilita One", "Arial Black", sans-serif`; ctx.textAlign = 'center'; ctx.fillText('!', px, cy + bob + r*.55); }
+    if (T.fraz && RIBELLI() && ter[t].ill && ter[t].own && cam.s >= .35){ const im = icoImg('stella'); if (im.complete && im.width){ const w = Math.round(im.width*1.3*u), h2 = Math.round(im.height*1.3*u); ctx.drawImage(im, Math.round(px - w/2) + Math.round(30*u), Math.round(ny - F1 - h2), w, h2); } }
+    if (T.fraz && RIBELLI() && cam.s >= .35 && ((ter[t].aut && !ter[t].own) || (ter[t].own === S.io && fed(t) < 35))){ const F2 = Math.round(10*u), tx = ter[t].own ? 'scontenta' : ter[t].libero ? 'libero comune' : 'autonoma'; ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.lineWidth = 3; ctx.strokeText(tx, px, ny - F1); ctx.fillStyle = ter[t].own ? '#ff8a6a' : '#ffb347'; ctx.fillText(tx, px, ny - F1); }
     else if (T.fraz && ter[t].own && cam.s >= .45){ const F2 = Math.round(10*u), lv = ter[t].lv || 1; ctx.font = `400 ${F2}px "Lilita One", "Arial Black", sans-serif`; ctx.lineWidth = 3; ctx.strokeText(LIVF[lv - 1], px, ny - F1); ctx.fillStyle = lv >= 3 ? '#ffd03a' : '#cfe8ff'; ctx.fillText(LIVF[lv - 1], px, ny - F1); } }
   // soldati in marcia
   for (let i = ANIM.length - 1; i >= 0; i--){ const a = ANIM[i]; a.t += dt/a.dur; const k = Math.min(1, a.t), P = a.pts, n = 5;
@@ -8320,6 +8327,7 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
   if (borgo && df && df !== S.io && !umano(df)){ const cc = capCasa(df); if (cc){ const b2 = 1.06 + .03*capLiv(cc); mult *= b2; voci.push(`${capNome(cc)}, capitano di ${FZ[df].corto}, difende il borgo: +${Math.round((b2 - 1)*100)}%`); } }
   if (borgo){ const mu = Math.max(0, Ed.mura - Ef.meccanico - (sp ? 1 : 0)); if (Ed.mura){ voci.push(`Mura livello ${Ed.mura}` + (Ef.meccanico ? `, i tuoi arieti ne annullano ${Math.min(Ed.mura, Ef.meccanico)}` : '') + (mu ? `: +${30*mu}%` : ': niente bonus')); } mult *= 1 + .3*mu; if (df === 'smerillo'){ mult *= 1.25; voci.push('Smerillo è in alto: +25%'); } if (S.fz[df].assedio){ mult *= .85; voci.push('È sotto assedio da ' + S.fz[df].assedio + (S.fz[df].assedio === 1 ? ' stagione' : ' stagioni') + ': difesa −15%'); } }
   if (S.terre[t].str === 'torre'){ const dz = S.terre[t].dan; mult *= dz ? 1.25 : 1.5; voci.push(dz ? 'Torre di guardia danneggiata: +25%' : 'Torre di guardia: +50%'); }
+  if (S.terre[t].ill && S.terre[t].own && RIBELLI()){ mult *= 1.25; voci.push('Frazione illustre: si difende meglio, +25%'); }
   if (!df && S.terre[t].aut && RIBELLI()){ mult *= 1.25; voci.push(TERRE[t].fraz ? 'Frazione autonoma: si difende con rabbia, +25%' : 'Terra ribelle: si difende con rabbia, +25%'); const g = gruppo(S.terre, t); if (g && VIC[t].some(v => { const h = gruppo(S.terre, v); return h && h !== g && legaDi(h) === legaDi(g); })){ mult *= 1.2; voci.push('La Lega delle frazioni la aiuta: +20%'); } }
   if (df){ const ai = vivi().find(h => h !== df && h !== f && alleati(h, df) && !alleati(h, f) && VIC[t].some(v => S.terre[v].own === h)); if (ai){ mult *= 1.25; voci.push(`${FZ[ai].corto} difende i suoi alleati: +25%`); } }
   const dif = D*mult, p = D === 0 ? 1 : Math.max(.02, Math.min(.98, att**2.2/(att**2.2 + dif**2.2)));
@@ -8368,18 +8376,68 @@ const legaDi = g => (S.leghe && S.leghe[g]) || g;
 const gruppo = (ter, t) => ter[t] && !ter[t].own && ter[t].aut ? (ter[t].rib || (TERRE[t].fraz ? t : null)) : null;
 const colAut = (ter, t) => { if (!RIBELLI()) return null; const g = gruppo(ter, t); return g ? RIB_COL[IDS.indexOf(legaDi(g)) % RIB_COL.length] : null; };
 const nomeLega = g => { const L = legaDi(g), m = IDS.filter(x => TERRE[x].fraz && S.terre[x].aut && !S.terre[x].own && legaDi(x) === L); return m.map(x => TERRE[x].nome); };
-function ribellione(t, ev, sn){ const st = S.terre[t], f = st.own; st.own = null; st.aut = true; st.ribDa = f; st.ribT = S.turno; st.prom = null; st.fed = null; st.avvisata = false; st.sold = Math.max(st.sold, (TERRE[t].guar || 4) + 2*prosp(t)); st.rib = t; if (S.leghe) delete S.leghe[t];
+function ribellione(t, ev, sn){ const st = S.terre[t], f = st.own; st.own = null; st.aut = true; st.ribDa = f; st.ribT = S.turno; st.prom = null; st.fed = null; st.avvisata = false; st.sold = Math.max(st.sold, (TERRE[t].guar || 4) + 2*prosp(t)); st.rib = t; if (S.leghe) delete S.leghe[t]; const libero = !!st.ill; if (libero){ st.sold = Math.ceil(st.sold*1.5); st.libero = true; delete st.ill; } delete st.fev; delete st.vuole;
   if (f === S.io) cron(`${TERRE[t].nome} si ribella a ${nomeCas()} e diventa autonoma.`, 2); else cron(`${TERRE[t].nome} si ribella a ${FZ[f].corto} e diventa autonoma.`, 1);
-  ev.push({t:'ribelle', f, a:t, snap: sn(), testo: f === S.io ? `${TERRE[t].nome} si ribella e diventa autonoma: hai perso la frazione!` : `${TERRE[t].nome} si ribella a ${FZ[f].corto} e diventa autonoma`});
+  ev.push({t:'ribelle', f, a:t, snap: sn(), testo: libero ? `${TERRE[t].nome} era una frazione illustre: ora si proclama <b>libero comune</b>, con più soldati e più terre!${f === S.io ? ' L’hai persa.' : ''}` : f === S.io ? `${TERRE[t].nome} si ribella e diventa autonoma: hai perso la frazione!` : `${TERRE[t].nome} si ribella a ${FZ[f].corto} e diventa autonoma`}); domino(f, t, ev, sn);
   { // si porta dietro almeno 2 terre vicine (prima quelle del vecchio padrone, poi quelle libere)
     const ok = v => !TERRE[v].borgo && !TERRE[v].fraz && !TERRE[v].di && !(S.terre[v].aut && !S.terre[v].own), presi = [], visti = new Set([t]), ok2 = v => !TERRE[v].borgo && !TERRE[v].fraz && !(S.terre[v].aut && !S.terre[v].own); // se non basta, anche le terre di un borgo
-    for (const [anello, okk] of [VIC[t], [...new Set(VIC[t].flatMap(v => VIC[v]))], [...new Set(VIC[t].flatMap(v => VIC[v]).flatMap(v => VIC[v]))]].flatMap(an => [[an, ok]]).concat([[VIC[t], ok2], [[...new Set(VIC[t].flatMap(v => VIC[v]))], ok2]])){ const c = anello.filter(v => !visti.has(v) && okk(v)).sort((a, b) => ((S.terre[b].own === f) - (S.terre[a].own === f)) || (rnd() - .5)); for (const v of c){ if (presi.length >= 2) break; if (!VIC[t].includes(v) && !presi.some(p => VIC[p].includes(v))) continue; presi.push(v); visti.add(v); } if (presi.length >= 2) break; }
+    for (const [anello, okk] of [VIC[t], [...new Set(VIC[t].flatMap(v => VIC[v]))], [...new Set(VIC[t].flatMap(v => VIC[v]).flatMap(v => VIC[v]))]].flatMap(an => [[an, ok]]).concat([[VIC[t], ok2], [[...new Set(VIC[t].flatMap(v => VIC[v]))], ok2]])){ const c = anello.filter(v => !visti.has(v) && okk(v)).sort((a, b) => ((S.terre[b].own === f) - (S.terre[a].own === f)) || (rnd() - .5)); for (const v of c){ if (presi.length >= (libero ? 4 : 2)) break; if (!VIC[t].includes(v) && !presi.some(p => VIC[p].includes(v))) continue; presi.push(v); visti.add(v); } if (presi.length >= (libero ? 4 : 2)) break; }
     for (const v of presi){ const sv = S.terre[v]; sv.sold = sv.own === f ? Math.max(2, sv.sold) : Math.max(2, sv.sold); sv.own = null; sv.aut = true; sv.rib = t; } }
   { // le altre frazioni autonome: vicine si alleano spesso, lontane a volte
     const altri = [...new Set(IDS.filter(x => x !== t && TERRE[x].fraz && S.terre[x].aut && !S.terre[x].own).map(x => legaDi(x)))];
     for (const g of altri){ const mie = IDS.filter(x => S.terre[x].rib === t), sue = IDS.filter(x => gruppo(S.terre, x) && legaDi(gruppo(S.terre, x)) === g), vicine = mie.some(x => VIC[x].some(v => sue.includes(v)));
       if (rnd() < (vicine ? .7 : .35)){ (S.leghe = S.leghe || {})[t] = g; const nomi = nomeLega(t).join(', '); cron(`Nasce la Lega delle frazioni: ${nomi}.`, 2); ev.push({t:'ribelle', f, a:t, snap: sn(), testo:`${TERRE[t].nome} si allea con le altre frazioni ribelli: nasce la Lega delle frazioni (${nomi}). Si aiutano in battaglia.`}); break; } } } }
-function aggiornaFedelta(ev, sn){ if (!RIBELLI()) return;
+// ===== Difficile: la vita delle frazioni. Eventi da sistemare, frazioni illustri, effetto domino =====
+// ogni evento: testo, scelte [etichetta, costo {m,l,c,s}, effetto], e cosa succede se non rispondi in tempo (l'ultima scelta)
+const FEV = {
+  incendio:{ic:'fiamma', tit:'Incendio!', testo: t => `A ${TERRE[t].nome} è scoppiato un incendio: case e granai bruciati. La gente aspetta il tuo aiuto.`,
+    scelte:[['Ricostruisci', {l:8}, (t, st) => { st.fed = Math.min(100, fed(t) + 8); return 'Ricostruita: la gente ti ringrazia.'; }],
+            ['Lascia stare', {}, (t, st) => { st.fed = Math.max(0, fed(t) - 12); if (prosp(t) > 1) st.lv = prosp(t) - 1; st.cresc = 0; return 'Nessuno ha aiutato: la frazione è più povera e arrabbiata.'; }]]},
+  carestia:{ic:'castagna', tit:'Carestia', testo: t => `A ${TERRE[t].nome} il raccolto è andato male: la gente ha fame.`,
+    scelte:[['Manda cibo', {c:8}, (t, st) => { st.fed = Math.min(100, fed(t) + 10); return 'Il cibo è arrivato: la frazione non lo dimenticherà.'; }],
+            ['Non posso', {}, (t, st) => { st.fame = S.turno + 3; return 'Per 3 stagioni la fame farà calare la fedeltà.'; }]]},
+  capo:{ic:'campana', tit:'Il capopopolo', testo: t => `A ${TERRE[t].nome} un capopopolo gira per le piazze e parla contro di te. Sempre più gente lo ascolta.`,
+    scelte:[['Compralo', {m:10}, (t, st) => { st.fed = Math.min(100, fed(t) + 4); return 'Ha preso le monete e ora parla bene di te.'; }],
+            ['Arrestalo', {s:2}, (t, st) => { st.fed = Math.max(0, fed(t) - 8); st.calma = S.turno + 4; return 'Arrestato: la gente brontola, ma per 4 stagioni niente agitatori.'; }],
+            ['Ignoralo', {}, (t, st) => { st.capo = S.turno + 4; return 'Il capopopolo continua: la fedeltà calerà ogni stagione.'; }]]},
+  festa:{ic:'stella', tit:'La festa del patrono', testo: t => `${TERRE[t].nome} prepara la festa del patrono e chiede il tuo aiuto per pagarla.`,
+    scelte:[['Paga la festa', {m:6}, (t, st) => { st.fed = Math.min(100, fed(t) + 15); return 'Che festa! La frazione ti adora.'; }],
+            ['No', {}, (t, st) => { st.fed = Math.max(0, fed(t) - 8); return 'Si sono offesi: la festa l’hanno fatta senza di te.'; }]]},
+  mura:{ic:'torre', tit:'Vogliono una difesa', testo: t => `${TERRE[t].nome} ha paura e vuole una costruzione: una torre, una fattoria o un’altra opera, entro 3 stagioni.`,
+    scelte:[['Te lo prometto', {}, (t, st) => { st.vuole = S.turno + 3; return 'Hai 3 stagioni per costruire qualcosa a ' + TERRE[t].nome + '.'; }],
+            ['No', {}, (t, st) => { st.fed = Math.max(0, fed(t) - 7); return 'Delusi: pensavano di contare di più per te.'; }]]}};
+const FEV_K = Object.keys(FEV);
+const costoTxt = c => [c.m ? `${c.m} ${ico('moneta', 2)}` : '', c.l ? `${c.l} ${ico('albero', 2)}` : '', c.c ? `${c.c} ${ico('castagna', 2)}` : '', c.s ? `${c.s} soldati lì` : ''].filter(Boolean).join(' ');
+const puoCosto = (f, t, c) => { const F = S.fz[f]; return F.monete >= (c.m || 0) && F.legna >= (c.l || 0) && F.cibo >= (c.c || 0) && S.terre[t].sold >= (c.s || 0); };
+function risolviFev(f, t, i, ev){ const st = S.terre[t], E = st.fev && FEV[st.fev.k]; if (!E) return ''; const [, c, fn] = E.scelte[i]; if (!puoCosto(f, t, c)) return ''; const F = S.fz[f];
+  F.monete -= c.m || 0; F.legna -= c.l || 0; F.cibo -= c.c || 0; const txt = fn(t, st); delete st.fev; if (f === S.io) cron(`${TERRE[t].nome}, ${E.tit.toLowerCase().replace('!', '')}: ${txt}`, 1); return txt; }
+// ogni stagione: eventi nuovi, scadenze, frazioni illustri
+function vitaFrazioni(ev, sn){ if (!RIBELLI()) return;
+  for (const t of IDS){ if (!puoRibellarsi(t)) continue; const st = S.terre[t], f = st.own; if (!f || !S.fz[f]) { delete st.fev; continue; }
+    // effetti che durano
+    if (st.fame >= S.turno){ st.fed = Math.max(0, fed(t) - 6); (st.mot = st.mot || []).unshift('c’è la carestia e nessuno aiuta'); }
+    if (st.capo >= S.turno){ st.fed = Math.max(0, fed(t) - 5); (st.mot = st.mot || []).unshift('il capopopolo parla contro di te'); }
+    if (st.calma >= S.turno) st.fed = Math.min(100, fed(t) + 2);
+    if (st.vuole && S.turno >= st.vuole){ const ok = !!st.str; st.fed = ok ? Math.min(100, fed(t) + 12) : Math.max(0, fed(t) - 15); delete st.vuole;
+      if (f === S.io) ev.push({t:'fev', f, a:t, snap: sn(), testo: ok ? `${TERRE[t].nome} vede la nuova costruzione: promessa mantenuta, la fedeltà sale.` : `${TERRE[t].nome}: non hai costruito niente come promesso. La fedeltà crolla.`}); }
+    // scadenza: se non rispondi decide la frazione, e sceglie l'ultima opzione (la peggiore per te)
+    if (st.fev && S.turno > st.fev.scad){ const E = FEV[st.fev.k], txt = E.scelte[E.scelte.length - 1][2](t, st); delete st.fev; if (f === S.io) ev.push({t:'fev', f, a:t, snap: sn(), testo: `${TERRE[t].nome} non ha avuto risposta in tempo. ${txt}`}); }
+    // un evento nuovo, ogni tanto
+    if (!st.fev && S.turno > 2 && rnd() < .14){ const k = FEV_K[Math.floor(rnd()*FEV_K.length)]; if (k === 'mura' && st.str) continue; st.fev = {k, scad: S.turno + 2};
+      if (f === S.io) ev.push({t:'fev', f, a:t, snap: sn(), testo: `${FEV[k].tit} ${FEV[k].testo(t)} Tocca la frazione per decidere: hai 2 stagioni.`});
+      else { const E = FEV[k]; let i = E.scelte.findIndex(([, c]) => puoCosto(f, t, c) && Object.keys(c).length && rnd() < .7); if (i < 0) i = E.scelte.length - 1; risolviFev(f, t, i, ev); } }
+    // frazione illustre: ricca e fedele per 2 stagioni di fila
+    if (!st.ill){ if (prosp(t) >= 3 && fed(t) >= 75){ st.illK = (st.illK || 0) + 1; if (st.illK >= 2){ st.ill = true; if (f === S.io){ cron(`${TERRE[t].nome} diventa una frazione illustre.`, 3); ev.push({t:'fev', f, a:t, snap: sn(), testo: `${TERRE[t].nome} diventa una <b>frazione illustre</b>: produce quasi come un borgo e si difende meglio. Ma ora vuole sempre almeno 3 soldati, e se la trascuri può diventare un libero comune.`}); } } } else st.illK = 0; }
+    else if (st.sold < 3){ st.fed = Math.max(0, fed(t) - 6); (st.mot = st.mot || []).unshift('è illustre e vuole essere difesa come un borgo'); } } }
+// effetto domino: quando una frazione si ribella, le altre dello stesso padrone ci pensano
+function domino(f, t, ev, sn){ if (!f || !S.fz[f]) return; const altre = IDS.filter(x => x !== t && puoRibellarsi(x) && S.terre[x].own === f); if (!altre.length) return;
+  for (const x of altre){ S.terre[x].fed = Math.max(0, fed(x) - 10); }
+  if (f === S.io) ev.push({t:'fev', f, a:t, snap: sn(), testo: `La notizia corre: ${altre.map(x => TERRE[x].nome).join(', ')} ${altre.length === 1 ? 'pensa' : 'pensano'} «se ce l’hanno fatta loro...». La fedeltà scende di 10.`}); }
+function cartaFev(t){ const st = S.terre[t]; if (!st.fev || st.own !== S.io) return ''; const E = FEV[st.fev.k], resta = st.fev.scad - S.turno + 1;
+  return `<div class="cq-fev"><div class="cq-fevh">${ico(E.ic, 3)}<span><b>${E.tit}</b><small>${resta <= 1 ? 'Ultima stagione per decidere!' : 'Hai ' + resta + ' stagioni per decidere'}</small></span></div><p>${E.testo(t)}</p>
+    <div class="cq-fevs">${E.scelte.map(([n, c], i) => `<button type="button" class="big mini${i === E.scelte.length - 1 ? ' alt' : ''}" data-fev="${i}" ${puoCosto(S.io, t, c) ? '' : 'disabled'}>${n}${Object.keys(c).length ? ' · ' + costoTxt(c) : ''}</button>`).join('')}</div></div>`; }
+function aggiornaFedelta(ev, sn){ if (!RIBELLI()) return; aggiornaFedelta0(ev, sn); vitaFrazioni(ev, sn); }
+function aggiornaFedelta0(ev, sn){
   for (const t of IDS){ const sr = S.terre[t]; if (!sr.own && sr.aut && !puoRibellarsi(t) && sr.sold < 5 && rnd() < .35) sr.sold++; }
   for (const t of IDS){ if (!puoRibellarsi(t)) continue; const st = S.terre[t];
     if (!st.own){ if (st.aut && st.sold < 9 && rnd() < .5) st.sold++; continue; }
@@ -8395,7 +8453,7 @@ function aggiornaFedelta(ev, sn){ if (!RIBELLI()) return;
     { const mie = IDS.reduce((n, x) => n + (S.terre[x].own === f ? 1 : 0), 0); if (mie > IDS.length*.28){ d -= 3; mot.push('il tuo dominio è troppo grande per tenerlo tranquillo'); } }
     if (S.fz[f] && S.fz[f].cibo <= 0){ d -= 5; mot.push('c’è fame: manca il cibo'); }
     // ogni tanto arrivano gli agitatori: la fedeltà crolla di colpo (si vede nel resoconto)
-    if (S.turno > 4 && rnd() < .06){ d -= 14; mot.unshift('sono arrivati degli agitatori che parlano contro di te'); }
+    if (S.turno > 4 && !(st.calma >= S.turno) && rnd() < (st.capo >= S.turno ? .18 : .06)){ d -= 14; mot.unshift('sono arrivati degli agitatori che parlano contro di te'); }
     st.dfed = d; st.mot = mot.slice(0, 2);
     if (mot[0] && mot[0].startsWith('sono arrivati') && f === S.io && !S.sim) ev.push({t:'malc', f, a:t, snap: sn(), testo:`Agitatori a ${TERRE[t].nome}: parlano contro di te e la fedeltà crolla. Mantieni le promesse e lascia dei soldati.`});
     st.fed = Math.max(0, Math.min(100, fed(t) + d)); const v = st.fed;
@@ -8676,6 +8734,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()
   if ((T.fraz || T.borgo) && own) inf += `<div class="cq-rel">${T.fraz ? LIVF[prosp(sel) - 1] : 'Prosperità ' + prosp(sel) + ' di 3'}${prosp(sel) < 3 ? ` · in pace cresce (${st.cresc || 0}/${CRESCE} stagioni)` : ' · al massimo'}. La guerra la fa calare.</div>`;
   if (own && !mio && notoCar(own)) inf += `<div class="cq-rel">${ico(CARATTERI[S.car[own]].ic, 2)} <b>${CARATTERI[S.car[own]].nome}</b>: ${CARATTERI[S.car[own]].desc}</div>`;
   if (own && !mio) inf += `<div class="cq-rel">Con te: ${barraAmic(amic(S.io, own))}${alleati(S.io, own) ? ' <b class="cq-all">Alleato</b>' : ''}${patto(S.io, own) ? ' <b class="cq-all cq-pat">Patto</b>' : ''}</div>`;
+  h += cartaFev(sel);
   h += '<div class="cq-az">';
   if (borgoMio){ h += `<button class="big" id="cqCos" ${nm ? 'disabled' : ''}>${ico('martello', 2)} Costruisci</button><button class="big" id="cqRec" ${nm ? 'disabled' : ''}>${ico('spada', 2)} Arruola</button>`; }
   if (mio && st.str === 'caserma') h += `<button class="big" id="cqRec2" ${nm ? 'disabled' : ''}>${ico('spada', 2)} Arruola qui</button>`;
@@ -8696,6 +8755,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()
   p.innerHTML = h;
   const on = (id, fn) => { const b = el(id); if (b) b.onclick = fn; };
   on('cqCos', dlgCostruisci); on('cqRec', () => dlgArruola(S.io)); on('cqRec2', () => dlgArruola(sel)); on('cqStr', () => dlgStruttura(sel)); on('cqRip', () => { const st = S.terre[sel], rc = costoRip(sel); if (!st.dan || !puoPagare(S.fz[S.io], rc[0], rc[1])) return; paga(S.fz[S.io], rc[0], rc[1]); delete st.dan; nasce(sel, st.str); suona('costruisci'); FLASH.push({a:sel, t:0, col:'#f8d048'}); toast(`${STR[st.str].nome} riparat${FEM_STR.includes(st.str) ? 'a' : 'o'}`); usaMossa(); }); on('cqSpo', () => { modo = {tipo:'sposta', da:sel}; suona('tocco'); pannello(); }); on('cqEsp', () => { const F = S.fz[S.io]; if (F.monete < COSTO_ESP) return; F.monete -= COSTO_ESP; S.esp = S.esp || {}; S.esp[sel] = S.turno; tintKey = ''; suona('moneta'); cron(`Un esploratore spia ${TERRE[sel].nome}: ci sono ${sol(S.terre[sel].sold)}.`, 0); salva(); aggiornaUI(); });
+  p.querySelectorAll('[data-fev]').forEach(b => b.onclick = () => { const txt = risolviFev(S.io, sel, +b.dataset.fev, []); if (txt){ toast(txt); suona('stella1'); salva(); aggiornaUI(); pannello(); } });
   on('cqAtt', () => dlgAttacco(sel)); on('cqDip1', () => dlgDiplomazia(own)); on('cqMan', () => dlgManda(sel));
   on('cqTratta', () => { const t = sel; if (puoTrattare(S.io, t) !== 'ok' || S.mosse < 1) return; tratta(S.io, t); cron(`${TERRE[t].nome} torna con ${nomeCas()} dopo una trattativa.`, 2); suona('stella2'); usaMossa(); aggiornaUI(); if (S.promDa) dlgPromessa(); else pannello(); });
   on('cqNuovaProm', () => { const t = sel; if (S.mosse < 1 || S.fz[S.io].monete < 6) return; S.fz[S.io].monete -= 6; S.promDa = t; usaMossa(); dlgPromessa(); }); }
