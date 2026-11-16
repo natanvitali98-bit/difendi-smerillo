@@ -61,12 +61,7 @@ body.tb-prova #tbFine,body.tb-prova #tbUndo,body.tb-prova #tbShop,body.tb-prova 
 <style>
 #caricamento{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(180deg,#0b1240 0%,#1a2f86 45%,#3d6fe0 75%,#f0a060 100%);transition:opacity .45s,transform .45s}
 #caricamento.via{opacity:0;transform:scale(1.06);pointer-events:none}
-/* scritte e barra si vedono subito: senza di loro la mappa sembrava già il gioco, e il caricamento arrivava dopo */
-#caricamento:not(.js) .ld-bar{overflow:hidden}
-#caricamento:not(.js) .ld-bar::before{content:'';position:absolute;top:0;bottom:0;left:-60%;width:60%;border-radius:inherit;background:linear-gradient(90deg,transparent,rgba(255,208,58,.85),transparent);animation:ldAttesa 1.1s ease-in-out infinite;will-change:transform}
-@keyframes ldAttesa{to{transform:translateX(270%)}}
-#caricamento:not(.js) #ldPerc,#caricamento:not(.js) .ld-corre,#caricamento:not(.js) #ldBar{opacity:0}
-.ld-nuv,.ld-falco,.ld-logo,.ld-mappa{will-change:transform}
+#caricamento:not(.pronto) .ld-su,#caricamento:not(.pronto) .ld-giu{opacity:0}#caricamento .ld-su,#caricamento .ld-giu{transition:opacity .3s}#caricamento:not(.pronto) .ld-logo span{animation:none} /* le scritte compaiono solo quando i caratteri sono pronti: niente scritte che cambiano forma */
 .ld-cielo{position:absolute;inset:0;pointer-events:none}
 .ld-stelle{position:absolute;inset:0 0 45% 0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 50%,transparent),radial-gradient(1px 1px at 30% 8%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 52% 22%,#fff 50%,transparent),radial-gradient(1px 1px at 70% 12%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 86% 26%,#fff 50%,transparent),radial-gradient(1px 1px at 20% 34%,#fff 50%,transparent),radial-gradient(1px 1px at 62% 36%,#fff 50%,transparent),radial-gradient(1px 1px at 92% 6%,#fff 50%,transparent);animation:ldBrilla 3s ease-in-out infinite}
 @keyframes ldBrilla{50%{opacity:.5}}
@@ -2533,11 +2528,15 @@ button.cr-res{border:0;cursor:pointer;color:#fff}
 .olchi b{color:#ffd03a}
 /* schermata di caricamento */
 .ld2 .ld2-in{display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 28px;text-align:center;max-width:420px}
-.ld2 .ld2-t,.ld2 .ld2-bar,.ld2 .ld2-tip{opacity:0;transition:opacity .25s}
+.ld2 .ld2-t,.ld2 .ld2-bar,.ld2 .ld2-tip{opacity:0;transition:opacity .15s}
 .ld2.ld2-vedi .ld2-t,.ld2.ld2-vedi .ld2-bar,.ld2.ld2-vedi .ld2-tip{opacity:1}
 .ld2 .ld2-t{font-family:var(--f-big);font-size:24px;color:#fff;text-shadow:0 3px 0 #141433;letter-spacing:.3px}
 .ld2 .ld2-bar{display:block;width:220px;height:18px;background:#141433;border:3px solid #141433;box-shadow:0 0 0 3px #ffd03a;overflow:hidden}
-.ld2 .ld2-bar i{display:block;height:100%;width:10%;background:repeating-linear-gradient(90deg,#ffd03a 0 12px,#f5a600 12px 18px);transition:width .2s linear}
+.ld2 .ld2-bar i{display:block;height:100%;width:100%;transform-origin:0 50%;transform:scaleX(.06);background:repeating-linear-gradient(90deg,#ffd03a 0 12px,#f5a600 12px 18px);will-change:transform}
+.ld2.ld2-vedi .ld2-bar i{animation:ld2Riempi 3s cubic-bezier(.2,.7,.3,1) forwards}
+.ld2 .ld2-bar i.fine{animation:none!important;transform:scaleX(1);transition:transform .15s ease-out}
+@keyframes ld2Riempi{to{transform:scaleX(.92)}}
+.ld2 .tr-ic{will-change:transform}
 .ld2 .ld2-tip{font-family:var(--f-body);font-size:14px;line-height:1.4;color:#cfd7ff;max-width:300px}
 .pf-it{min-width:0;padding:4px 2px}.pf-it small{font-size:10px!important;letter-spacing:-.2px;max-width:100%}.pf-it small img{display:block;margin:0 auto 1px}
 #tb.tb-pan .tbhud{visibility:hidden}
@@ -4917,17 +4916,15 @@ function CARICA(fn, testo, ev){
   try { SUONI.suona('flip'); } catch(e){}
   const bar = v.querySelector('.ld2-bar i'); let fine = false, tMin = 0;
   const stato = CARICA_ON = {estendi(){ tMin = performance.now() + 500; }};
-  const chiudi = () => { if (fine) return; fine = true; CARICA_ON = null; if (bar) bar.style.width = '100%';
+  const chiudi = () => { if (fine) return; fine = true; CARICA_ON = null; if (bar) bar.classList.add('fine');
     if (lento || !v.animate){ v.remove(); return; }
     v.style.clipPath = 'none'; v.animate([{opacity:1, transform:'scale(1)'}, {opacity:0, transform:'scale(1.06)'}], {duration:300, easing:'ease-out', fill:'forwards'}).onfinish = () => v.remove(); };
   // aspetta che le immagini si muovano lisce: 12 fotogrammi di fila sotto i 34 ms (al massimo 7 secondi)
   const aspetta = () => { const t0 = performance.now(); tMin = t0 + 550; let ult = t0, buoni = 0;
     const giro = now => { if (fine) return; const dt = now - ult; ult = now; buoni = dt < 34 ? buoni + 1 : 0; const t = now - t0;
-      if (bar) bar.style.width = Math.min(92, 18 + t/40) + '%';
-      if (t > 300) v.classList.add('ld2-vedi');
       if ((now > tMin && buoni >= 12) || t > 7000) chiudi(); else requestAnimationFrame(giro); };
     requestAnimationFrame(giro); };
-  const vai = () => { requestAnimationFrame(() => requestAnimationFrame(() => { try { fn(); } catch(e){ console.error(e); } aspetta(); })); };
+  const vai = () => { v.classList.add('ld2-vedi'); requestAnimationFrame(() => requestAnimationFrame(() => { try { fn(); } catch(e){ console.error(e); } aspetta(); })); };
   if (lento || !v.animate){ v.style.clipPath = 'none'; vai(); return; }
   v.animate([{clipPath:`circle(0px at ${x}px ${y}px)`}, {clipPath:`circle(${r}px at ${x}px ${y}px)`}], {duration:230, easing:'cubic-bezier(.5,0,.3,1)', fill:'forwards'}).onfinish = vai;
 }
@@ -10284,7 +10281,7 @@ const RITORNO = window.RITORNO = (() => {
 
 fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){ console.error(e); }
 // caricamento: disegno subito il paese e aspetto i caratteri, poi tolgo la schermata (fino ad allora i tocchi sono bloccati)
-(async () => { const ld = document.getElementById('caricamento'); if (!ld) return; ld.classList.add('js'); const bar = document.getElementById('ldBar'), tx = document.getElementById('ldTxt');
+(async () => { const ld = document.getElementById('caricamento'); if (!ld) return; const bar = document.getElementById('ldBar'), tx = document.getElementById('ldTxt');
   const perc = document.getElementById('ldPerc'), corre = document.getElementById('ldCorre'); try { corre.append(TB.icona('lanciere', 3)); } catch(e){}
   { const tick = () => { if (!document.getElementById('caricamento')) return; const w = bar.parentElement.clientWidth || 1, v = Math.round(bar.offsetWidth / w * 100); if (perc) perc.textContent = Math.min(100, v) + '%'; if (corre) corre.style.left = Math.max(4, v) + '%'; requestAnimationFrame(tick); }; requestAnimationFrame(tick); } // numero e omino seguono la barra vera
   const passo = (p, t) => { bar.style.transition = 'width .18s ease-out'; bar.style.width = p + '%'; tx.textContent = t; return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 200)))); };
