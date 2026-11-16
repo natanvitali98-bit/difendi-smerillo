@@ -20,7 +20,9 @@
 .mis-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tbruolo{display:block;font-size:14.5px;line-height:1.3;margin:2px 0 4px;color:var(--testo)}
 body.tb-prova #tbFine,body.tb-prova #tbUndo,body.tb-prova #tbShop,body.tb-prova #tbAiuto{visibility:hidden}
-.cq-casd #cqOk{position:sticky;bottom:0;z-index:3;box-shadow:0 -10px 14px 6px var(--cq-carta,#1a2466),0 5px 0 #141433}
+.cq-casd{max-height:calc(100dvh - 90px - env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain}
+.cq-casd > *{flex-shrink:0}
+.cq-casd #cqOk{position:sticky;bottom:0;z-index:3;box-shadow:0 5px 0 #141433,inset 0 -6px 0 #e0a500,inset 0 3px 0 rgba(255,255,255,.6),0 -12px 14px 4px #141845,0 26px 0 16px #141845!important}
 </style>
 <style>
 #caricamento{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(180deg,#0b1240 0%,#1a2f86 45%,#3d6fe0 75%,#f0a060 100%);transition:opacity .45s,transform .45s}
@@ -692,7 +694,8 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
   #tb{max-width:none!important}
   #tbInfo{left:auto!important;right:16px!important;width:420px;bottom:96px!important;max-height:60%!important}
   #tbBar{left:auto!important;right:16px!important;width:420px;bottom:16px!important}
-  #tb > #tbOv{left:calc(50% - 300px)!important;right:calc(50% - 300px)!important;top:76px!important;bottom:16px!important}
+  #tb > #tbOv{left:0!important;right:0!important;top:0!important;bottom:0!important;padding:76px 16px 16px!important;background:rgba(10,16,52,.62)!important;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  #tb:has(#tbOv:not([hidden])) #tbStage > *{visibility:visible!important}
   #tb .tbhud{max-width:none}
   #title .hm-top,#titleC{max-width:520px;margin-left:auto;margin-right:auto}
   #pcTasti{display:block;position:fixed;left:16px;bottom:16px;z-index:26;background:rgba(20,20,51,.85);color:#fff;border:2px solid #141433;border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.5;pointer-events:none;max-width:300px}
@@ -1147,6 +1150,17 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .hm-modo:active,.cr-dif:active,.cr-ev:active{transform:translateY(3px) scale(.98)!important}
 #title:not(.cr-on) .pan{animation:pgEntra .4s cubic-bezier(.2,.9,.3,1.2) both}
 @media (prefers-reduced-motion: reduce){ .cr-pg.entra > *,.cr-arena.entra .logo,.cr-top,.cr-nav,.cr-tab.salta .cr-ti,#title:not(.cr-on) .pan{animation:none!important} .cr-ind,#titleCv{transition:none!important} }
+/* ===== su PC col mouse: tutto risponde quando ci passi sopra ===== */
+@media (hover:hover) and (pointer:fine){
+  .big,.hbtn,.cr-tab,.cr-dif,.cr-ev,.hm-modo,.cq-it,.cq-prom,.tbmis,.cr-seg button,.pr-scr,.gf-go,.cq-annoc,.cq-ob,.cq-dec .big{transition:translate .14s ease-out,filter .14s ease-out,box-shadow .14s ease-out,border-color .14s}
+  .big:hover:not(:disabled),.hbtn:hover:not(:disabled),.pr-scr:hover,.gf-go:hover:not(:disabled){translate:0 -2px;filter:brightness(1.08)}
+  .cr-dif:hover,.cr-ev:hover,.hm-modo:hover,.cq-it:not(:disabled):hover,.cq-prom:hover,.tbmis:not(:disabled):hover{translate:0 -3px;filter:brightness(1.1)}
+  .cr-tab:not(.on):hover .cr-ti{transform:scale(1.15) translateY(-2px)}
+  .cr-seg button:not(.on):hover,.cq-annoc:hover,.cq-ob:hover{filter:brightness(1.18)}
+  .big:active:not(:disabled),.cr-dif:active,.hm-modo:active{translate:0 1px;transition-duration:.05s}
+  button:not(:disabled),[role=button]{cursor:pointer}
+}
+@media (prefers-reduced-motion: reduce){ .big,.hbtn,.cr-tab,.cr-dif,.cr-ev,.hm-modo,.cq-it,.cq-prom,.tbmis{transition:none!important;translate:none!important} }
 /* ===== menu su PC: barra in alto larga, contenuto al centro, barra in basso a pillola ===== */
 @media (min-width:900px) and (min-height:560px){
   .cr{max-width:none;background:radial-gradient(ellipse 70% 80% at 50% 45%,rgba(8,12,40,0) 40%,rgba(8,12,40,.55) 100%)}
@@ -8086,8 +8100,8 @@ function* generaStagione(q){ const {src, LM, LB} = PRE, c = document.createEleme
       }
       else if (L < .13){} // contorni: restano
       else if (q === 0){ // primavera: verde tenero, fiori nei prati, alberi in fiore
-        if (bosco){ const n = vn(X/9, y/9), det = (L - lb)*1.4; tinta(70 + det*90, 132 + det*120, 58, .97); if (n > .7 && L > lb - .01 && h < .7){ const p = hashP(X >> 2, y >> 2); R = p < .5 ? 250 : 246; G = p < .5 ? 214 : 240; B = p < .5 ? 226 : 236; } }
-        else if (prato){ tinta(110, 166, 72, .97); if (h < .018){ const p = hashP(X + 7, y); if (p < .4){ R = 255; G = 255; B = 245; } else if (p < .75){ R = 255; G = 222; B = 60; } else { R = 245; G = 150; B = 200; } } }
+        if (bosco){ const n = vn(X/9, y/9), det = (L - lb)*1.4; R = mix(r, (70 + det*90)*(.55 + L*1.15), .5); G = mix(g, (128 + det*120)*(.55 + L*1.15), .5); B = mix(b, 58*(.55 + L*1.15), .5); if (n > .8 && lb < .3 && hashP(X >> 1, y >> 1) < .45){ const p = hashP(X >> 2, y >> 2); R = p < .5 ? 250 : 246; G = p < .5 ? 214 : 240; B = p < .5 ? 226 : 236; } }
+        else if (prato){ R = mix(r, 118*(.55 + L*1.15), .55); G = mix(g, 168*(.55 + L*1.15), .55); B = mix(b, 76*(.55 + L*1.15), .55); if (h < .018){ const p = hashP(X + 7, y); if (p < .4){ R = 255; G = 255; B = 245; } else if (p < .75){ R = 255; G = 222; B = 60; } else { R = 245; G = 150; B = 200; } } }
         else if (acqua){ R = r*.9; G = g*1.02 + 6; B = Math.min(255, b*1.08 + 10); } }
       else if (q === 1){ // estate: grano dorato a campi, erba secca, boschi scuri
         if (bosco){ const det = (L - lb)*1.4; tinta(46 + det*80, 104 + det*110, 42, .98); }
