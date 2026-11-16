@@ -7281,6 +7281,14 @@ const PAGANO = 4, COSTO_ESP = 2; // 1 moneta di paga ogni 4 soldati · un esplor
 const pagaSold = f => SERIO() && f === S.io ? Math.floor(soldDi(f)/PAGANO) : 0;
 const invernoDuro = f => SERIO() && f === S.io && (S.turno - 1) % 4 === 3 ? 2 : 1; // d'inverno i soldati mangiano il doppio
 const nebbia = t => SERIO() && !SCELTA && S.terre[t] && S.terre[t].own !== S.io && !(VIC[t] || []).some(v => S.terre[v] && S.terre[v].own === S.io) && !(S.esp && S.esp[t] >= S.turno);
+const lvS = st => (st.sl || 1)*(st.dan ? .5 : 1); // struttura danneggiata: produce la metà
+const FEM_STR = ['segheria', 'caserma', 'torre', 'scuderia', 'fornace'];
+const strDet = (k, m, f) => STR[k].nome + ' ' + (FEM_STR.includes(k) ? f : m);
+const PDANNO = () => ({facile:.15, normale:.3, difficile:.5})[S && S.dif] || .3;
+const costoRip = t => { const st = S.terre[t], c = STR[st.str] && STR[st.str].costi[(st.sl || 1) - 1]; return c ? [Math.ceil(c[0]/2), Math.ceil(c[1]/2)] : [3, 3]; };
+// dopo ogni battaglia: la terra si segna, e la struttura può essere danneggiata o distrutta
+function danniBattaglia(t, preso){ const st = S.terre[t]; st.bat = (st.bat || 0) + 1; if (!st.str) return null; if (rnd() >= PDANNO()*(preso ? 1 : .4)) return null;
+  const k = st.str; if (st.dan || rnd() < .25){ delete st.str; delete st.sl; delete st.dan; return {k, tipo:'distrutta'}; } st.dan = true; return {k, tipo:'danneggiata'}; }
 const stimaTesto = p => p >= .65 ? 'Buone' : p >= .4 ? 'Incerte' : 'Scarse';
 // più vittorie ha la casata, più i rivali la conoscono e si preparano
 const ESP_IA = () => (S && S.esp) || 0, ioInTesta = () => { const m = terreDi(S.io).length; return m >= 6 && Object.keys(S.fz).every(g => g === S.io || !S.fz[g].vivo || terreDi(g).length < m); }, RIV = () => DF().rend*(1 + ESP_IA());
@@ -7617,9 +7625,9 @@ const neve = () => ANNO() === 'inverno' && (S.turno - 1) % 4 === 3; // le tre fa
 const patto = (a, b) => !!(S.patti && S.patti[pk(a, b)] >= S.turno);
 const rep = f => S.rep ? (S.rep[f] == null ? 50 : S.rep[f]) : 50;
 const livRep = v => v >= 70 ? 'Affidabile' : v >= 45 ? 'Normale' : v >= 25 ? 'Poco affidabile' : 'Traditore';
-function prodCibo(f, t = S.turno){ let c = 0; for (const x of terreDi(f)){ const st = S.terre[x]; c += TERRE[x].c + (st.str === 'fattoria' ? 2*(st.sl || 1) : 0) + (st.str === 'mulino' ? (st.sl || 1) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? prosp(x) - 1 : 0); }
+function prodCibo(f, t = S.turno){ let c = 0; for (const x of terreDi(f)){ const st = S.terre[x]; c += TERRE[x].c + (st.str === 'fattoria' ? 2*lvS(st) : 0) + (st.str === 'mulino' ? lvS(st) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? prosp(x) - 1 : 0); }
   if ((t - 1) % 4 === 2) c += 2; if ((t - 1) % 4 === 3) c -= 2; const ma = ANNO() === 'carestia' ? .6 : ANNO() === 'abbondanza' ? 1.3 : 1; return Math.max(0, Math.round(c*ma*(f === S.io ? 1 : RIV()))); }
-function prodLegna(f){ let l = 0; for (const x of terreDi(f)){ const st = S.terre[x]; l += TERRE[x].l + (st.str === 'segheria' ? 2*(st.sl || 1) : 0); } return Math.round(l*(ANNO() === 'abbondanza' ? 1.3 : 1)*(f === S.io ? 1 : RIV())); }
+function prodLegna(f){ let l = 0; for (const x of terreDi(f)){ const st = S.terre[x]; l += TERRE[x].l + (st.str === 'segheria' ? 2*lvS(st) : 0); } return Math.round(l*(ANNO() === 'abbondanza' ? 1.3 : 1)*(f === S.io ? 1 : RIV())); }
 const puoPagare = (F, m, l = 0, c = 0) => F.monete >= m && F.legna >= l && F.cibo >= c;
 const paga = (F, m, l = 0, c = 0) => { F.monete -= m; F.legna -= l; F.cibo -= c; };
 const prezzo = (m, l = 0, c = 0) => `${ico('moneta', 2)} ${m}${l ? ' ' + ico('albero', 2) + ' ' + l : ''}${c ? ' ' + ico('castagna', 2) + ' ' + c : ''}`;
@@ -7648,7 +7656,7 @@ const troppoForte = f => { const mie = terreDi(f).length, max = Math.max(0, ...v
 const accordo = (a, b) => !!(S.acc && S.acc[pk(a, b)]);
 const assediato = f => S.terre[f] && S.terre[f].own === f && terreDelBorgo(f).filter(x => { const o = S.terre[x].own; return o !== f && !(o && alleati(f, o)); }).length >= ASSEDIO;
 const capRecl = f => { const c = 4 + 2*S.fz[f].ed.armeria; return assediato(f) ? Math.ceil(c/2) : c; };
-function rendita(f, t = S.turno){ let r = 0, merc = 0; for (const x of terreDi(f)){ const st = S.terre[x]; r += (TERRE[x].rend + (st.str === 'mercato' ? 3*(st.sl || 1) : 0) + (st.str === 'mulino' ? 2*(st.sl || 1) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? 2*(prosp(x) - 1) : 0))*(st.prom === 'tasse' && RIBELLI() ? .5 : 1); if (st.str === 'mercato') merc++; }
+function rendita(f, t = S.turno){ let r = 0, merc = 0; for (const x of terreDi(f)){ const st = S.terre[x]; r += (TERRE[x].rend + (st.str === 'mercato' ? 3*lvS(st) : 0) + (st.str === 'mulino' ? 2*lvS(st) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? 2*(prosp(x) - 1) : 0))*(st.prom === 'tasse' && RIBELLI() ? .5 : 1); if (st.str === 'mercato') merc++; }
   for (const g of vivi()) if (g !== f && accordo(f, g)) r += 3 + merc + (ANNO() === 'mercanti' ? 2 : 0); if (f === 'ceresola') r += 2;
   for (const g of vivi()) if (g !== f && alleati(f, g)) r += 2;
   return Math.max(2, Math.round(r*(f === S.io ? 1 : RIV()))); }
@@ -8013,6 +8021,13 @@ function telaMura(f, mu, to){ const key = f + mu + '|' + to; if (CMURA[key]) ret
     P('rgba(0,0,0,.32)', x - 4, y, 18, 6); P(RGB(PIETRA, .55), x - 9, y - 37, 18, 38); P(PIETRA, x - 8, y - 36, 16, 36); P(RGB(PIETRA, .78), x + 3, y - 36, 5, 36); for (let j = y - 34; j < y; j += 5) P(RGB(PIETRA, .88), x - 8 + ((j/5 | 0) % 2)*3, j, 4, 1);
     P(RGB(PIETRA, .55), x - 11, y - 43, 22, 8); P(RGB(PIETRA, 1.12), x - 10, y - 42, 20, 6); for (let i = -10; i < 10; i += 5) P(RGB(PIETRA, 1.2), x + i, y - 47, 3, 4); P([60,46,40], x - 2, y - 28, 3, 5); P([60,46,40], x - 2, y - 14, 3, 5); }
   return CMURA[key] = {c, x0, y0}; }
+// una struttura danneggiata: più scura, con buchi nel tetto e bruciature
+const ROTTI = new WeakMap();
+function spriteRotto(im){ let c = ROTTI.get(im); if (c) return c; c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+  x.globalCompositeOperation = 'source-atop'; x.fillStyle = 'rgba(28,18,12,.42)'; x.fillRect(0, 0, c.width, c.height);
+  for (let i = 0; i < 9; i++){ const px = Math.floor(hashP(i, c.width)*c.width), py = Math.floor(hashP(c.height, i)*c.height*.7), r = 1 + Math.floor(hashP(i, 3)*2); x.fillStyle = i % 3 ? 'rgba(10,6,4,.85)' : 'rgba(0,0,0,1)'; x.fillRect(px, py, r + 1, r); }
+  x.globalCompositeOperation = 'destination-out'; for (let i = 0; i < 4; i++){ const px = Math.floor(hashP(i + 20, c.width)*c.width), py = Math.floor(hashP(c.height, i + 20)*c.height*.35); x.fillRect(px, py, 2, 2); }
+  ROTTI.set(im, c); return c; }
 function disegnaCostruzioni(Tm){ const ter = VISTA || S.terre, now = performance.now(), z = cam.s*SCALA_STR; ctx.imageSmoothingEnabled = false;
   const anima = (t, k) => { const n = NATI[t + '|' + k]; return n ? Math.min(1, (now - n)/800) : 1; };
   // mura e torri
@@ -8026,7 +8041,7 @@ function disegnaCostruzioni(Tm){ const ter = VISTA || S.terre, now = performance
   for (const [t, k, lv] of L){ const sp = SPOT[t + '|' + k]; if (!sp) continue; const im = spriteStr(k, lv), [sx, sy] = aSchermo(sp.x, sp.y), zz = cam.s*(sp.s || SCALA_STR), w = im.width*zz, h = im.height*zz; if (sx < -100 || sy < -60 || sx > W + 100 || sy > H + 100) continue;
     const a = anima(t, k); if (a < 1){ const e = 1 + 2.2*Math.pow(a - 1, 3) + 1.2*Math.pow(a - 1, 2); ctx.save(); ctx.translate(sx, sy); ctx.scale(1, Math.max(0, e)); ctx.drawImage(im, -w/2, -h, w, h); ctx.restore();
       for (let i = 0; i < 10; i++){ const ang = i/10*Math.PI*2, r = (8 + a*30)*z; ctx.globalAlpha = (1 - a)*.8; ctx.fillStyle = i % 2 ? '#e8dcc4' : '#c8b898'; ctx.fillRect(sx + Math.cos(ang)*r - 2, sy - 4 + Math.sin(ang)*r*.35, 4, 4); } ctx.globalAlpha = 1; }
-    else ctx.drawImage(im, Math.round(sx - w/2), Math.round(sy - h), w, h); }
+    else { const dz = ter[t].str === k && ter[t].dan; ctx.drawImage(dz ? spriteRotto(im) : im, Math.round(sx - w/2), Math.round(sy - h), w, h); if (dz){ const fl = .5 + .5*Math.sin(Tm*14 + t.length); ctx.fillStyle = '#ff7a1a'; ctx.globalAlpha = .7 + .3*fl; ctx.fillRect(Math.round(sx - w*.12), Math.round(sy - h*.62), Math.max(2, w*.08), Math.max(2, h*(.1 + .06*fl))); ctx.fillStyle = '#ffd03a'; ctx.fillRect(Math.round(sx - w*.1), Math.round(sy - h*.56), Math.max(1, w*.04), Math.max(1, h*.05)); ctx.globalAlpha = 1; fumo(sx - w*.08, sy - h*.7, Tm, IDS.indexOf(t), Math.max(.8, Math.min(1.6, cam.s*1.4))); } } }
   disegnaSegni(ter); disegnaTarga(); }
 const ICOIMG = {}; function icoImg(k){ if (ICOIMG[k]) return ICOIMG[k]; const im = new Image(); const m = /src="([^"]+)"/.exec(ico(k, 1)); if (m) im.src = m[1]; return ICOIMG[k] = im; }
 const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); ctx.fill(); };
@@ -8040,11 +8055,37 @@ function bordoMondo(){ const mw = WW*cam.s, mh = WH*cam.s, d = 26; if (cam.x <= 
   const lin = (x0, y0, x1, y1, x, y, w, h) => { const g = ctx.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, 'rgba(8,20,12,.55)'); g.addColorStop(1, 'rgba(8,20,12,0)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); };
   if (cam.x > 0) lin(cam.x, 0, cam.x + d, 0, cam.x, cam.y, d, mh); if (cam.x + mw < W) lin(cam.x + mw, 0, cam.x + mw - d, 0, cam.x + mw - d, cam.y, d, mh);
   if (cam.y > 0) lin(0, cam.y, 0, cam.y + d, cam.x, cam.y, mw, d); if (cam.y + mh < H) lin(0, cam.y + mh, 0, cam.y + mh - d, cam.x, cam.y + mh - d, mw, d); }
+// ===== stagioni e segni della guerra sulla mappa =====
+const STAG = () => S ? (S.turno - 1) % 4 : 0; // 0 primavera, 1 estate, 2 autunno, 3 inverno
+function stagioneMappa(){ const q = STAG(), x = cam.x, y = cam.y, w = WW*cam.s, h = WH*cam.s; ctx.save();
+  const tinte = [['multiply', 'rgba(205,255,185,.22)'], ['multiply', 'rgba(255,228,150,.30)'], ['multiply', 'rgba(255,160,80,.42)'], ['screen', 'rgba(205,220,240,.55)']];
+  ctx.globalCompositeOperation = tinte[q][0]; ctx.fillStyle = tinte[q][1]; ctx.fillRect(x, y, w, h);
+  if (q === 3){ ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = 'rgba(245,250,255,.18)'; ctx.fillRect(x, y, w, h); }
+  ctx.restore(); }
+let cC = null, cicKey = '';
+const hashP = (x, y) => { let n = (x*374761393 + y*668265263) | 0; n = Math.imul(n ^ (n >>> 13), 1274126177); return ((n ^ (n >>> 16)) >>> 0)/4294967296; };
+function creaCicatrici(ter){ const lv = IDS.map(t => Math.min(4, Math.floor((ter[t].bat || 0)*2)/2)), key = MAPPA_ATT + lv.join(','); if (key === cicKey && cC) return; cicKey = key;
+  const K = .25; if (!cC || cC.width !== Math.ceil(WW*K) || cC.height !== Math.ceil(WH*K)){ cC = document.createElement('canvas'); cC.width = Math.ceil(WW*K); cC.height = Math.ceil(WH*K); } const c = cC.getContext('2d'); c.clearRect(0, 0, cC.width, cC.height);
+  const tmp = document.createElement('canvas'); tmp.width = cC.width; tmp.height = cC.height; const x = tmp.getContext('2d'), R = MP().passo*K;
+  IDS.forEach((t, k) => { const L = lv[k]; if (!L) return; const T = TERRE[t]; x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, tmp.width, tmp.height);
+    const n = Math.round(3 + L*3); for (let i = 0; i < n; i++){ const a = hashP(k, i)*6.283, d = Math.sqrt(hashP(i, k + 50))*R*.55, cx = T.x*K + Math.cos(a)*d, cy = T.y*K + Math.sin(a)*d, r = R*(.08 + .08*hashP(k + 9, i))*(.85 + L*.1);
+      const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, `rgba(46,32,20,${Math.min(.8, .4 + .1*L)})`); g.addColorStop(.7, `rgba(78,56,34,${Math.min(.55, .25 + .07*L)})`); g.addColorStop(1, 'rgba(70,50,30,0)'); x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill();
+      if (L >= 1 && hashP(i, k*3) < .5){ x.fillStyle = 'rgba(20,14,10,.7)'; x.beginPath(); x.ellipse(cx, cy, r*.4, r*.28, 0, 0, 7); x.fill(); x.fillStyle = 'rgba(150,120,90,.5)'; x.beginPath(); x.ellipse(cx - r*.08, cy - r*.12, r*.22, r*.1, 0, 0, 7); x.fill(); } }
+    x.globalCompositeOperation = 'destination-in'; x.imageSmoothingEnabled = true; x.drawImage(maschera(t, '#000000'), 0, 0, tmp.width, tmp.height); c.drawImage(tmp, 0, 0); }); }
+const PMETEO = Array.from({length: 46}, (_, i) => [hashP(i, 7), hashP(i, 13), .5 + hashP(i, 21), hashP(i, 31)]);
+function meteo(Tm){ const q = STAG(); if (q !== 2 && q !== 3) return; if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; ctx.save();
+  for (const [a, b, v, c] of PMETEO){ const sp = q === 3 ? 26 : 34, x = ((a*W + Math.sin(Tm*.8*v + c*9)*28 + Tm*(q === 3 ? 8 : 22)*v) % (W + 40) + W + 40) % (W + 40) - 20, y = ((b*H + Tm*sp*v) % (H + 40)) - 20;
+    if (q === 3){ ctx.globalAlpha = .55 + .35*c; ctx.fillStyle = '#ffffff'; const r = 1.5 + 1.5*c; ctx.fillRect(Math.round(x), Math.round(y), r, r); }
+    else { ctx.globalAlpha = .85; ctx.fillStyle = c < .33 ? '#d8692a' : c < .66 ? '#e8a23a' : '#a8461e'; const fl = Math.sin(Tm*3*v + c*7); ctx.fillRect(Math.round(x), Math.round(y), 4, Math.max(1, Math.round(3*Math.abs(fl)) + 1)); } }
+  ctx.restore(); }
+function fumo(sx, sy, Tm, k, forza){ for (let i = 0; i < 4; i++){ const ph = ((Tm*.5 + i/4 + k*.37) % 1), r = (3 + ph*9)*forza; ctx.globalAlpha = (1 - ph)*.5; ctx.fillStyle = i % 2 ? '#5a5652' : '#7a7470'; ctx.beginPath(); ctx.arc(sx + Math.sin(ph*4 + k)*5*forza, sy - ph*34*forza, r, 0, 7); ctx.fill(); } ctx.globalAlpha = 1; }
+function fumoGuerra(Tm, ter){ if (cam.s < .3) return; for (let k = 0; k < IDS.length; k++){ const t = IDS[k], st = ter[t]; if ((st.bat || 0) < 2.5 && !(S && (st.guerra || 0) >= S.turno - 1 && st.bat)) continue; const T = TERRE[t], [sx, sy] = aSchermo(T.x + 26, T.y + 14); if (sx < -60 || sy < -80 || sx > W + 60 || sy > H + 60) continue; fumo(sx, sy, Tm, k, Math.max(.7, Math.min(1.3, cam.s))); } }
 function disegna(Tm, dt){ const ter = VISTA || (S && S.terre); passoVolo(dt);
   if (CAMT){ const k = Math.min(1, dt*7); if (CAMT.s){ cam.s += (CAMT.s - cam.s)*k; if (CAMT.t){ const T = TERRE[CAMT.t] || CAMT.t; CAMT.x = INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s; CAMT.y = INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s; } } cam.x += (CAMT.x - cam.x)*k; cam.y += (CAMT.y - cam.y)*k; const ox = cam.x, oy = cam.y; limita(); const sOk = !CAMT.s || Math.abs(CAMT.s - cam.s) < .005; if ((Math.hypot(CAMT.x - cam.x, CAMT.y - cam.y) < 2 && sOk) || (ox !== cam.x && oy !== cam.y && sOk)) CAMT = null; }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#1f3a22'; ctx.fillRect(0, 0, W, H); sfondo(); ctx.imageSmoothingEnabled = cam.s < .7;
   ctx.drawImage(cB, cam.x, cam.y, WW*cam.s, WH*cam.s); bordoMondo(); ctx.imageSmoothingEnabled = false;
   if (!ter) return;
+  stagioneMappa(); creaCicatrici(ter); ctx.drawImage(cC, cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.imageSmoothingEnabled = false;
   creaTinta(); ctx.drawImage(cT, cam.x, cam.y, WW*cam.s, WH*cam.s);
   if (cam.s >= .45){ const et = (txt, x, y) => { const [sx, sy] = aSchermo(x, y); if (sx < -40 || sy < -20 || sx > W + 40 || sy > H + 20) return; ctx.font = '700 11px "Atkinson Hyperlegible", sans-serif'; const w = ctx.measureText(txt).width + 8; ctx.fillStyle = 'rgba(250,250,245,.92)'; rr(sx - w/2, sy - 8, w, 16, 4); ctx.strokeStyle = '#6f7268'; ctx.lineWidth = 1; ctx.strokeRect(sx - w/2 + .5, sy - 7.5, w - 1, 15); ctx.fillStyle = '#2a2e38'; ctx.textAlign = 'center'; ctx.fillText(txt, sx, sy + 4); };
     for (const R of STRADE) if (R.nome){ const m = R.p[Math.floor(R.p.length/2)]; et(R.nome, m[0], m[1]); } et('SP 239 Val di Tenna', 1040, fiumeY(1150) + 26); }
@@ -8056,7 +8097,7 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre); passoVolo(dt);
   if (modo && modo.da) evid(modo.da, '#ffd03a', 1);
   if (SCELTA){ for (const t of IDS){ const o = ter[t].own; if (o === SCELTA){ ctx.globalAlpha = .06 + .08*pul; ctx.drawImage(maschera(t, '#ffffff'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; evid(t, '#ffffff', .6 + .4*pul); } else { ctx.globalAlpha = .28; ctx.drawImage(maschera(t, '#0c1420'), cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; } } }
   if (cam.s >= .35) disegnaCostruzioni(Tm);
-  nuvole(Tm);
+  fumoGuerra(Tm, ter); nuvole(Tm); meteo(Tm);
   const u = Math.max(.78, Math.min(1.35, .7 + cam.s*.45)), mini = cam.s*MP().passo < 64;
   for (const t of IDS){ const T = TERRE[t], [px, py] = aSchermo(T.x, T.y), own = ter[t].own;
     if (px < -80 || py < -80 || px > W + 80 || py > H + 80) continue;
@@ -8179,7 +8220,7 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
   let mult = df ? 1 + .2*Ed.armeria : 1; if (df && Ed.armeria) voci.push(`La loro armeria: +${20*Ed.armeria}%`);
   if (borgo && df && df !== S.io && !umano(df)){ const cc = capCasa(df); if (cc){ const b2 = 1.06 + .03*capLiv(cc); mult *= b2; voci.push(`${capNome(cc)}, capitano di ${FZ[df].corto}, difende il borgo: +${Math.round((b2 - 1)*100)}%`); } }
   if (borgo){ const mu = Math.max(0, Ed.mura - Ef.meccanico - (sp ? 1 : 0)); if (Ed.mura){ voci.push(`Mura livello ${Ed.mura}` + (Ef.meccanico ? `, i tuoi arieti ne annullano ${Math.min(Ed.mura, Ef.meccanico)}` : '') + (mu ? `: +${30*mu}%` : ': niente bonus')); } mult *= 1 + .3*mu; if (df === 'smerillo'){ mult *= 1.25; voci.push('Smerillo è in alto: +25%'); } if (S.fz[df].assedio){ mult *= .85; voci.push('È sotto assedio da ' + S.fz[df].assedio + (S.fz[df].assedio === 1 ? ' stagione' : ' stagioni') + ': difesa −15%'); } }
-  if (S.terre[t].str === 'torre'){ mult *= 1.5; voci.push('Torre di guardia: +50%'); }
+  if (S.terre[t].str === 'torre'){ const dz = S.terre[t].dan; mult *= dz ? 1.25 : 1.5; voci.push(dz ? 'Torre di guardia danneggiata: +25%' : 'Torre di guardia: +50%'); }
   if (!df && S.terre[t].aut && RIBELLI()){ mult *= 1.25; voci.push('Frazione autonoma: si difende con rabbia, +25%'); }
   if (df){ const ai = vivi().find(h => h !== df && h !== f && alleati(h, df) && !alleati(h, f) && VIC[t].some(v => S.terre[v].own === h)); if (ai){ mult *= 1.25; voci.push(`${FZ[ai].corto} difende i suoi alleati: +25%`); } }
   const dif = D*mult, p = D === 0 ? 1 : Math.max(.02, Math.min(.98, att**2.2/(att**2.2 + dif**2.2)));
@@ -8192,7 +8233,8 @@ function battaglia(f, da, t, n, cap){ if (cap === undefined && f !== S.io && !um
     if (f === S.io){ if (borgo && df) cron(`${NomeCas()} conquista ${FZ[df].nome}.`, 3); else if (TERRE[t].fraz) cron(`${NomeCas()} prende la frazione di ${TERRE[t].nome}.`, 2); else if (df && TERRE[t].di === df) cron(`${NomeCas()} strappa a ${FZ[df].corto} ${TERRE[t].nome.charAt(0).toLowerCase() + TERRE[t].nome.slice(1)}.`, 1); }
     else if (df === S.io) cron(`${FZ[f].corto} toglie ${TERRE[t].fraz ? 'la frazione di ' + TERRE[t].nome : TERRE[t].nome.charAt(0).toLowerCase() + TERRE[t].nome.slice(1)} ${aCas()}.`, TERRE[t].fraz ? 2 : 1); }
   else { persiA = Math.max(pr.kill, Math.round(n*(.55 + rnd()*.4)*(haAb(cap, 'saggio') ? .7 : 1))); persiD = Math.min(pr.D - 1, Math.round(pr.D*Math.min(.8, .5*pr.att/Math.max(.1, pr.dif))*(.75 + rnd()*.5))); S.terre[t].sold = pr.D - Math.max(0, persiD); S.terre[da].sold += n - persiA; }
-  const ris = {vinto, persiA, persiD: Math.max(0, persiD), p: pr.p, borgo, df}; if (cap && cap.ia){ capIAdopo(f, cap, ris); ris.cap = cap; } return ris; }
+  const dn = danniBattaglia(t, vinto); if (dn && (f === S.io || df === S.io)) cron(`In battaglia a ${TERRE[t].nome}: ${dn.tipo === 'distrutta' ? strDet(dn.k, 'distrutto', 'distrutta') : strDet(dn.k, 'danneggiato', 'danneggiata')}.`, 1);
+  const ris = {vinto, persiA, persiD: Math.max(0, persiD), p: pr.p, borgo, df, dn}; if (cap && cap.ia){ capIAdopo(f, cap, ris); ris.cap = cap; } return ris; }
 function eliminato(g, f){ if (g !== S.io && f !== S.io) cron(`${FZ[f].corto} conquista ${FZ[g].nome}.`, 2); S.fz[g].vivo = false; S.fz[g].ed = {mura:0, torri:0, armeria:0, meccanico:0};
   for (const t of terreDi(g)){ S.terre[t].own = f; S.terre[t].sold = Math.ceil(S.terre[t].sold/2); }
   for (const k in S.all) if (k.split('|').includes(g)) delete S.all[k]; for (const k in (S.acc || {})) if (k.split('|').includes(g)) delete S.acc[k]; for (const k in (S.patti || {})) if (k.split('|').includes(g)) delete S.patti[k]; S.fz[g].opera = 0;
@@ -8409,6 +8451,8 @@ function calcolaStagione(ev, tutti = false){
   const ord = Object.keys(FZ).filter(f => (tutti || (f !== S.io && !umano(f))) && S.fz[f].vivo).sort(() => rnd() - .5);
   for (const f of ord){ if (!S.fz[f].vivo || S.vincitore) continue; turnoIA(f, ev); if (!S.fz[S.io].vivo) break; }
   const sn = () => JSON.parse(JSON.stringify(S.terre));
+  for (const t of IDS){ const st = S.terre[t]; if (st.bat && (st.guerra || 0) < S.turno - 1) st.bat = Math.max(0, st.bat - .25); // la terra guarisce piano, se c'è pace
+    if (st.dan && st.own && st.own !== S.io && !umano(st.own) && S.fz[st.own]){ const rc = costoRip(t), F = S.fz[st.own]; if (puoPagare(F, rc[0] + 4, rc[1] + 2) && rnd() < .6){ paga(F, rc[0], rc[1]); delete st.dan; } } }
   for (const f of vivi()) if (haStr(f, 'santuario')){ for (const g of vivi()) if (g !== f) setAmic(f, g, amic(f, g) + 2); S.rep[f] = Math.min(100, rep(f) + 1); }
   // i borghi assediati: fame e mura rovinate
   for (const f of vivi()){ if (!assediato(f)){ S.fz[f].assedio = 0; continue; } const F = S.fz[f], T = S.terre[f]; F.assedio = (F.assedio || 0) + 1; if (F.assedio === 1) cron(f === S.io ? `${FZ[f].nome} è circondato: comincia l’assedio.` : `${FZ[f].nome} finisce sotto assedio.`, f === S.io ? 2 : 1); const persi = Math.min(T.sold - 1, Math.max(1, Math.round(T.sold*.12)));
@@ -8509,7 +8553,8 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()
   h += '<div class="cq-az">';
   if (borgoMio){ h += `<button class="big" id="cqCos" ${nm ? 'disabled' : ''}>${ico('martello', 2)} Costruisci</button><button class="big" id="cqRec" ${nm ? 'disabled' : ''}>${ico('spada', 2)} Arruola</button>`; }
   if (mio && st.str === 'caserma') h += `<button class="big" id="cqRec2" ${nm ? 'disabled' : ''}>${ico('spada', 2)} Arruola qui</button>`;
-  if (mio && !TERRE[sel].borgo && (!st.str ? Object.values(STR).some(x => x.dove(sel)) : (st.sl || 1) < STR[st.str].max)) h += `<button class="big" id="cqStr" ${nm ? 'disabled' : ''}>${ico('martello', 2)} ${st.str ? 'Migliora' : 'Costruisci qui'}</button>`;
+  if (mio && st.str && st.dan){ const rc = costoRip(sel); h += `<p class="cq-warn" style="grid-column:1/-1">${ico('fiamma', 2)} ${strDet(st.str, 'danneggiato', 'danneggiata')} in battaglia: produce la metà.</p><button class="big" id="cqRip" ${nm || !puoPagare(S.fz[S.io], rc[0], rc[1]) ? 'disabled' : ''}>${ico('martello', 2)} Ripara ${prezzo(rc[0], rc[1])}</button>`; }
+  else if (mio && !TERRE[sel].borgo && (!st.str ? Object.values(STR).some(x => x.dove(sel)) : (st.sl || 1) < STR[st.str].max)) h += `<button class="big" id="cqStr" ${nm ? 'disabled' : ''}>${ico('martello', 2)} ${st.str ? 'Migliora' : 'Costruisci qui'}</button>`;
   if (nebbia(sel)) h += `<button class="big alt" id="cqEsp" ${S.fz[S.io].monete < COSTO_ESP ? 'disabled' : ''}>${ico('occhio', 2)} Esplora · ${ico('moneta', 2)} ${COSTO_ESP}</button>`;
   if (mio && VIC[sel].some(v => S.terre[v].own === S.io) && st.sold > 1) h += `<button class="big alt" id="cqSpo" ${nm ? 'disabled' : ''}>${ico('muovi', 2)} Sposta</button>`;
   if (!mio){ const fonti = VIC[sel].filter(v => S.terre[v].own === S.io && S.terre[v].sold > 1), tregua = T.borgo && eBorgo(sel) && S.turno <= TREGUA();
@@ -8523,11 +8568,11 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()
   h += inf;
   p.innerHTML = h;
   const on = (id, fn) => { const b = el(id); if (b) b.onclick = fn; };
-  on('cqCos', dlgCostruisci); on('cqRec', () => dlgArruola(S.io)); on('cqRec2', () => dlgArruola(sel)); on('cqStr', () => dlgStruttura(sel)); on('cqSpo', () => { modo = {tipo:'sposta', da:sel}; suona('tocco'); pannello(); }); on('cqEsp', () => { const F = S.fz[S.io]; if (F.monete < COSTO_ESP) return; F.monete -= COSTO_ESP; S.esp = S.esp || {}; S.esp[sel] = S.turno; tintKey = ''; suona('moneta'); cron(`Un esploratore spia ${TERRE[sel].nome}: ci sono ${sol(S.terre[sel].sold)}.`, 0); salva(); aggiornaUI(); });
+  on('cqCos', dlgCostruisci); on('cqRec', () => dlgArruola(S.io)); on('cqRec2', () => dlgArruola(sel)); on('cqStr', () => dlgStruttura(sel)); on('cqRip', () => { const st = S.terre[sel], rc = costoRip(sel); if (!st.dan || !puoPagare(S.fz[S.io], rc[0], rc[1])) return; paga(S.fz[S.io], rc[0], rc[1]); delete st.dan; nasce(sel, st.str); suona('costruisci'); FLASH.push({a:sel, t:0, col:'#f8d048'}); toast(`${STR[st.str].nome} riparat${FEM_STR.includes(st.str) ? 'a' : 'o'}`); usaMossa(); }); on('cqSpo', () => { modo = {tipo:'sposta', da:sel}; suona('tocco'); pannello(); }); on('cqEsp', () => { const F = S.fz[S.io]; if (F.monete < COSTO_ESP) return; F.monete -= COSTO_ESP; S.esp = S.esp || {}; S.esp[sel] = S.turno; tintKey = ''; suona('moneta'); cron(`Un esploratore spia ${TERRE[sel].nome}: ci sono ${sol(S.terre[sel].sold)}.`, 0); salva(); aggiornaUI(); });
   on('cqAtt', () => dlgAttacco(sel)); on('cqDip1', () => dlgDiplomazia(own));
   on('cqTratta', () => { const t = sel; if (puoTrattare(S.io, t) !== 'ok' || S.mosse < 1) return; tratta(S.io, t); cron(`${TERRE[t].nome} torna con ${nomeCas()} dopo una trattativa.`, 2); suona('stella2'); usaMossa(); aggiornaUI(); if (S.promDa) dlgPromessa(); else pannello(); });
   on('cqNuovaProm', () => { const t = sel; if (S.mosse < 1 || S.fz[S.io].monete < 6) return; S.fz[S.io].monete -= 6; S.promDa = t; usaMossa(); dlgPromessa(); }); }
-function prodTerra(t){ const T = TERRE[t], st = S.terre[t], c = T.c + (st.str === 'fattoria' ? 2*(st.sl || 1) : 0) + (st.str === 'mulino' ? (st.sl || 1) : 0) + ((T.fraz || T.borgo) ? prosp(t) - 1 : 0), l = T.l + (st.str === 'segheria' ? 2*(st.sl || 1) : 0), m = T.rend + (st.str === 'mercato' ? 3*(st.sl || 1) : 0) + (st.str === 'mulino' ? 2*(st.sl || 1) : 0) + ((T.fraz || T.borgo) ? 2*(prosp(t) - 1) : 0);
+function prodTerra(t){ const T = TERRE[t], st = S.terre[t], c = T.c + (st.str === 'fattoria' ? 2*lvS(st) : 0) + (st.str === 'mulino' ? lvS(st) : 0) + ((T.fraz || T.borgo) ? prosp(t) - 1 : 0), l = T.l + (st.str === 'segheria' ? 2*lvS(st) : 0), m = T.rend + (st.str === 'mercato' ? 3*lvS(st) : 0) + (st.str === 'mulino' ? 2*lvS(st) : 0) + ((T.fraz || T.borgo) ? 2*(prosp(t) - 1) : 0);
   return [m ? m + ' ' + (m === 1 ? 'moneta' : 'monete') : '', c ? c + ' cibo' : '', l ? l + ' legna' : ''].filter(Boolean).join(', ') + ' a stagione'; }
 function consigli(){ const f = S.io, F = S.fz[f], dc = prodCibo(f, S.turno + 1) - mangia(f), L = [];
   const fo = vivi().find(g => g !== f && (S.fz[g].opera || 0) >= 1); if (fo) L.push(`${ico('attenzione', 2)} ${FZ[fo].corto} costruisce la Grande Fiera (${S.fz[fo].opera}/3): attacca le sue terre per fermarla.`);
@@ -8602,6 +8647,7 @@ function dlgAttacco(t){ const fonti = VIC[t].filter(v => S.terre[v].own === S.io
   monta(); o.querySelectorAll('.cq-fo').forEach(b => b.onclick = () => { da = b.dataset.f; monta(); }); o.querySelectorAll('.cq-cch').forEach(b => b.onclick = () => { capSel = b.dataset.cap ? capDi(b.dataset.cap) : null; suona('tocco'); monta(); });
   o.querySelector('#cqNo').onclick = chiudiOv;
   o.querySelector('#cqOk').onclick = () => { const n = +o.querySelector('#cqN').value; chiudiOv(); attaccaIo(da, t, n, capSel); }; }
+const dn2 = (d, t) => d.tipo === 'distrutta' ? `${strDet(d.k, 'distrutto', 'distrutta')} nella battaglia: a ${TERRE[t].nome} non c’è più.` : `${strDet(d.k, 'danneggiato', 'danneggiata')}: produce la metà finché non lo ripari.`.replace('non lo ripari', FEM_STR.includes(d.k) ? 'non la ripari' : 'non lo ripari');
 function attaccaIo(da, t, n, cap){ const prima = JSON.parse(JSON.stringify(S.terre)), own = S.terre[t].own, trad = own && (alleati(S.io, own) || patto(S.io, own)), r = battaglia(S.io, da, t, n, cap), rc = capDopo(cap, r, t, da); if (r.vinto){ stat('batt'); if (TERRE[t].fraz) stat('fraz'); } S.mosse = Math.max(0, S.mosse - 1);
   let missOk = null; if (r.vinto && own){ const i = (S.missioni || []).findIndex(mi => mi.contro === own); if (i >= 0){ const mi = S.missioni.splice(i, 1)[0]; setAmic(S.io, mi.f, amic(S.io, mi.f) + 25); S.rep[S.io] = Math.min(100, rep(S.io) + 6); S.fz[S.io].monete += 10; missOk = mi.f; } }
   if (vivi().length === 1) S.fine = 'vinto'; if (S.mp) mpAttacco(da, t, own, r, trad); salva();
@@ -8611,7 +8657,7 @@ function attaccaIo(da, t, n, cap){ const prima = JSON.parse(JSON.stringify(S.ter
       const o = ov(`<div class="dlg box cq-dlg cq-esito ${r.vinto ? 'ok' : 'no'}"><span class="kicker">${trad ? 'Tradimento' : 'Battaglia'} · ${TERRE[t].nome}</span><h2>${r.vinto ? (r.borgo && own ? FZ[own].nome + ' è tuo!' : 'Conquistata!') : 'Respinti!'}</h2>
         <div class="cq-sold" style="--cc:${FZ[S.io].col}">${soldatini(n - r.persiA, n)}</div>
         <p>${r.vinto ? `Hai perso ${sol(r.persiA)} su ${n}. ${n - r.persiA === 1 ? '1 resta' : (n - r.persiA) + ' restano'} a guardia di ${TERRE[t].nome}.` : `Hai perso ${sol(r.persiA)} su ${n}. ${r.persiD ? `Anche loro ne hanno persi ${r.persiD}.` : ''} ${n - r.persiA ? (n - r.persiA === 1 ? '1 è tornato indietro.' : `${n - r.persiA} sono tornati indietro.`) : ''}`}</p>
-        ${r.vinto && r.borgo && own ? `<p>${FZ[own].nome} è fuori dal gioco: le sue terre ora sono tue.</p>` : ''}${missOk ? `<p class="cq-ok">Missione compiuta: ${FZ[missOk].corto} ti ringrazia e ti dà 10 monete.</p>` : ''}${trad ? '<p class="cq-warn">Hai tradito: la tua reputazione è crollata.</p>' : ''}${rc ? capCard(rc.c, `<span class="cq-capr"><b>+${rc.xp} esperienza</b>${rc.su ? ' · <b class="cq-nuovo">nuovo livello!</b>' : ''}${rc.bott.map(x => ' · ' + x).join('')}${rc.ferito ? ' · <b class="cq-nuovo">è ferito: riposa 2 stagioni</b>' : ''}${rc.morto ? ' · <b class="cq-morto">è caduto in battaglia: non tornerà più</b>' : ''}</span>`) : ''}${SERIO() ? '' : `<p class="cq-nota">La probabilità era ${Math.round(r.p*100)}%.</p>`}
+        ${r.vinto && r.borgo && own ? `<p>${FZ[own].nome} è fuori dal gioco: le sue terre ora sono tue.</p>` : ''}${missOk ? `<p class="cq-ok">Missione compiuta: ${FZ[missOk].corto} ti ringrazia e ti dà 10 monete.</p>` : ''}${trad ? '<p class="cq-warn">Hai tradito: la tua reputazione è crollata.</p>' : ''}${r.dn ? `<p class="cq-warn">${ico('fiamma', 2)} ${dn2(r.dn, t)}</p>` : ''}${rc ? capCard(rc.c, `<span class="cq-capr"><b>+${rc.xp} esperienza</b>${rc.su ? ' · <b class="cq-nuovo">nuovo livello!</b>' : ''}${rc.bott.map(x => ' · ' + x).join('')}${rc.ferito ? ' · <b class="cq-nuovo">è ferito: riposa 2 stagioni</b>' : ''}${rc.morto ? ' · <b class="cq-morto">è caduto in battaglia: non tornerà più</b>' : ''}</span>`) : ''}${SERIO() ? '' : `<p class="cq-nota">La probabilità era ${Math.round(r.p*100)}%.</p>`}
         <button class="big" id="cqOk">${rc && rc.su ? 'Scegli la nuova abilità' : 'Continua'}</button></div>`, false);
       o.querySelector('#cqOk').onclick = () => { const fine = () => { chiudiOv(); if (S.fine) finePartita(); else if (S.promDa) dlgPromessa(); }; if (rc && rc.su) dlgLivello(rc.c, fine); else fine(); }; suona(r.vinto ? 'vinto' : 'perso'); }, 450); }}); }
 function soldatini(vivi, tot){ let h = ''; for (let i = 0; i < Math.min(tot, 24); i++) h += `<span class="${i < vivi ? '' : 'caduto'}"></span>`; return h; }
