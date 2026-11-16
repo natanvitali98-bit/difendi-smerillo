@@ -8058,33 +8058,54 @@ function bordoMondo(){ const mw = WW*cam.s, mh = WH*cam.s, d = 26; if (cam.x <= 
 // ===== stagioni e segni della guerra sulla mappa =====
 const STAG = () => S ? (S.turno - 1) % 4 : 0; // 0 primavera, 1 estate, 2 autunno, 3 inverno
 // l'inverno vero: la mappa viene ridipinta pixel per pixel (neve sui campi e sui tetti, alberi spolverati, fiume ghiacciato, strade di fango)
-let cW = null, genW = null, QV = -1, QP = -1, QT = 0;
-function* generaInverno(){ const c = document.createElement('canvas'); c.width = WW; c.height = WH; const x = c.getContext('2d'), src = cB.getContext('2d').getImageData(0, 0, WW, WH).data, im = x.createImageData(WW, WH), D = im.data;
-  const lum = i => (.299*src[i] + .587*src[i + 1] + .114*src[i + 2])/255, mix = (a, b, t) => a + (b - a)*t, cl = v => v < 0 ? 0 : v > 1 ? 1 : v, ss = (a, b, v) => { const t = cl((v - a)/(b - a)); return t*t*(3 - 2*t); };
-  // luminosità sfocata (per le macchie di neve sul bosco) e un rumore morbido
-  const N = WW*WH, LM = new Float32Array(N), T1 = new Float32Array(N), LB = new Float32Array(N), RAD = 3;
-  for (let k = 0; k < N; k++) LM[k] = lum(k*4); yield;
+let QV = -1, QP = -1, QT = 0, PRE = null, genPre = null; const STC = {}, GENS = {};
+// prima, una volta sola: luminosità di ogni pixel, la stessa sfocata, e il colore originale
+function* preparaStagioni(){ const src = cB.getContext('2d').getImageData(0, 0, WW, WH).data, N = WW*WH, LM = new Float32Array(N), T1 = new Float32Array(N), LB = new Float32Array(N), RAD = 3;
+  for (let k = 0; k < N; k++){ const i = k*4; LM[k] = (.299*src[i] + .587*src[i + 1] + .114*src[i + 2])/255; } yield;
   for (let y = 0; y < WH; y++){ let a = 0; const o = y*WW; for (let X = -RAD; X < WW; X++){ if (X + RAD < WW) a += LM[o + X + RAD]; if (X - RAD - 1 >= 0) a -= LM[o + X - RAD - 1]; if (X >= 0) T1[o + X] = a/(2*RAD + 1); } } yield;
   for (let X = 0; X < WW; X++){ let a = 0; for (let y = -RAD; y < WH; y++){ if (y + RAD < WH) a += T1[(y + RAD)*WW + X]; if (y - RAD - 1 >= 0) a -= T1[(y - RAD - 1)*WW + X]; if (y >= 0) LB[y*WW + X] = a/(2*RAD + 1); } } yield;
+  PRE = {src, LM, LB}; genPre = null; }
+// ogni stagione ridipinge la mappa pixel per pixel
+function* generaStagione(q){ const {src, LM, LB} = PRE, c = document.createElement('canvas'); c.width = WW; c.height = WH; const x = c.getContext('2d'), im = x.createImageData(WW, WH), D = im.data;
+  const mix = (a, b, t) => a + (b - a)*t, cl = v => v < 0 ? 0 : v > 1 ? 1 : v, ss = (a, b, v) => { const t = cl((v - a)/(b - a)); return t*t*(3 - 2*t); };
   const vn = (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, sx = fx*fx*(3 - 2*fx), sy = fy*fy*(3 - 2*fy), a = hashP(xi, yi), b = hashP(xi + 1, yi), c = hashP(xi, yi + 1), d = hashP(xi + 1, yi + 1); return mix(mix(a, b, sx), mix(c, d, sx), sy); };
-  for (let y = 0; y < WH; y++){ for (let X = 0; X < WW; X++){ const i = (y*WW + X)*4, r = src[i], g = src[i + 1], b = src[i + 2], L = lum(i), up = y > 1 ? lum(i - WW*8) : L, h = hashP(X, y), h2 = hashP(X >> 1, y >> 1);
+  for (let y = 0; y < WH; y++){ for (let X = 0; X < WW; X++){ const k = y*WW + X, i = k*4, r = src[i], g = src[i + 1], b = src[i + 2], L = LM[k], lb = LB[k], up = y > 1 ? LM[k - WW*2] : L, h = hashP(X, y), h2 = hashP(X >> 1, y >> 1);
       const mx = Math.max(r, g, b), mn = Math.min(r, g, b), sat = mx ? (mx - mn)/mx : 0; let R = r, G = g, B = b;
-      const neve = (t, k = 1) => { const v = mix(.62, 1, t)*k; R = mix(150, 252, t); G = mix(170, 253, t); B = mix(200, 255, t); };
-      if (L < .13){ R = r*.8; G = g*.85; B = b + 12; } // contorni scuri: restano
+      const acqua = b > r + 18 && b >= g - 4, verde = g > r + 6 && g >= b - 6 && sat > .12, rosso = r > g + 14 && sat > .18, bosco = verde && L < .42, prato = verde && !bosco;
+      const tinta = (cr, cg, cb, kk = 1) => { const f = (.55 + L*1.15)*kk; R = cr*f; G = cg*f; B = cb*f; }; // colore nuovo, stessa luce e ombra del disegno
+      if (q === 3){ const neve = t => { R = mix(150, 252, t); G = mix(170, 253, t); B = mix(200, 255, t); };
+            if (L < .13){ R = r*.8; G = g*.85; B = b + 12; } // contorni scuri: restano
       else if (b > r + 18 && b >= g - 4){ const t = cl((L - .25)/.5); R = mix(120, 210, t); G = mix(160, 228, t); B = mix(200, 246, t); if (h < .04 + .06*t){ R = G = B = 250; } } // acqua: ghiaccio
       else if (g > r + 6 && g >= b - 6 && sat > .12){ // verde
-        if (L < .42){ const k = y*WW + X, lb = LB[k], det = (L - lb)*1.6, n = vn(X/7, y/7)*.6 + vn(X/19, y/19)*.4, m = Math.min(.92, ss(.5, .74, ss(.16, .34, lb)*.5 + n*.5) + (up < L - .07 ? .35 : 0));
+        if (L < .42){ const det = (L - lb)*1.6, n = vn(X/7, y/7)*.6 + vn(X/19, y/19)*.4, m = Math.min(.92, ss(.5, .74, ss(.16, .34, lb)*.5 + n*.5) + (up < L - .07 ? .35 : 0));
           const dr = 34 + 40*lb, dg = 58 + 44*lb, db = 72 + 46*lb; R = mix(dr, 236, m) + det*120; G = mix(dg, 243, m) + det*120; B = mix(db, 252, m) + det*110; } // bosco: cime innevate, ombre blu
         else neve(cl((L - .42)/.4 + .25)); } // prato e campi: neve
       else if (r > g + 14 && sat > .18){ if (L > .32){ neve(cl((L - .3)/.5 + .35)); const k = up < L - .08 ? .2 : .32; R = mix(R, r, k); G = mix(G, g, k); B = mix(B, b, k); } else { R = r*.7 + 20; G = g*.72 + 22; B = b*.8 + 36; } } // tetti e terra arata: neve, i bordi restano
       else if (sat < .18){ if (L > .55) neve(cl((L - .5)/.4 + .2)); else { R = mix(r, 128, .45); G = mix(g, 128, .45); B = mix(b, 140, .45); if (h2 < .2){ R += 36; G += 38; B += 42; } } } // pietra e strade: fango e neve sporca
       else neve(cl((L - .3)/.5));
+      }
+      else if (L < .13){} // contorni: restano
+      else if (q === 0){ // primavera: verde tenero, fiori nei prati, alberi in fiore
+        if (bosco){ const n = vn(X/9, y/9), det = (L - lb)*1.4; tinta(70 + det*90, 132 + det*120, 58, .97); if (n > .7 && L > lb - .01 && h < .7){ const p = hashP(X >> 2, y >> 2); R = p < .5 ? 250 : 246; G = p < .5 ? 214 : 240; B = p < .5 ? 226 : 236; } }
+        else if (prato){ tinta(110, 166, 72, .97); if (h < .018){ const p = hashP(X + 7, y); if (p < .4){ R = 255; G = 255; B = 245; } else if (p < .75){ R = 255; G = 222; B = 60; } else { R = 245; G = 150; B = 200; } } }
+        else if (acqua){ R = r*.9; G = g*1.02 + 6; B = Math.min(255, b*1.08 + 10); } }
+      else if (q === 1){ // estate: grano dorato a campi, erba secca, boschi scuri
+        if (bosco){ const det = (L - lb)*1.4; tinta(46 + det*80, 104 + det*110, 42, .98); }
+        else if (prato){ const n = vn(X/46, y/46), gr = n > .52; if (gr){ const st = ((X + y*.3) % 6) < 1 ? .9 : 1; tinta(222, 182, 82, st); } else tinta(168, 170, 84, 1); if (gr && h < .01){ R = 200; G = 60; B = 40; } } // qualche papavero
+        else if (rosso){ R = r*1.03; G = g*1.01; B = b*.95; } }
+      else if (q === 2){ // autunno: boschi a macchie arancioni, rosse e gialle, campi arati, foglie per terra
+        if (bosco){ const n = vn(X/17, y/17)*.75 + vn(X/5 + 50, y/5)*.25, det = (L - lb)*1.5, P = [[70, 98, 50], [120, 112, 46], [196, 116, 46], [168, 76, 42], [206, 160, 64]], f = cl((n - .2)/.65)*4, a = Math.min(3, Math.floor(f)), t = f - a, A = P[a], Bc = P[a + 1]; tinta(mix(A[0], Bc[0], t) + det*90, mix(A[1], Bc[1], t) + det*80, mix(A[2], Bc[2], t) + det*40, .93); }
+        else if (prato){ const n = vn(X/50 + 9, y/50), ar = n > .58; if (ar){ const st = ((y + X*.15) % 5) < 2 ? .82 : 1; tinta(140, 96, 62, st); } else tinta(150, 146, 78, 1); if (!ar && h < .04){ const p = hashP(X, y + 3); R = p < .5 ? 214 : 186; G = p < .5 ? 118 : 70; B = 40; } }
+        else if (acqua){ R = r*.95; G = g*.98; B = b*.95; } }
       D[i] = R; D[i + 1] = G; D[i + 2] = B; D[i + 3] = 255; }
     if (y % 90 === 89) yield; }
-  x.putImageData(im, 0, 0); cW = c; genW = null; }
-function passoInverno(){ if (cW || !cB) return; if (!genW) genW = generaInverno(); const t0 = performance.now(); while (genW && performance.now() - t0 < 12) genW.next(); }
+  x.putImageData(im, 0, 0); STC[q] = c; delete GENS[q]; if (q === QV) QT = performance.now(); }
+// lavora pochi millesimi a ogni fotogramma: la stagione di adesso, poi già la prossima
+function passoStagioni(q){ if (!cB) return; const t0 = performance.now(); if (!PRE){ if (!genPre) genPre = preparaStagioni(); while (genPre && performance.now() - t0 < 12) genPre.next(); return; }
+  const da = STC[q] ? (q + 1) % 4 : q; if (STC[da]) return; for (const k in STC) if (+k !== q && +k !== QP && +k !== da) delete STC[k]; // in memoria al massimo 3 stagioni
+  if (!GENS[da]) GENS[da] = generaStagione(da); while (GENS[da] && performance.now() - t0 < 12) GENS[da].next(); }
 function stagioneMappa(){ const q = STAG(), x = cam.x, y = cam.y, w = WW*cam.s, h = WH*cam.s; ctx.save();
-  const tinte = [['multiply', 'rgba(205,255,185,.22)'], ['multiply', 'rgba(255,228,150,.30)'], ['multiply', 'rgba(255,160,80,.42)'], ['multiply', 'rgba(225,235,255,.18)']];
+  const tinte = [['source-over', 'rgba(0,0,0,0)'], ['multiply', 'rgba(255,240,210,.08)'], ['multiply', 'rgba(255,215,170,.1)'], ['multiply', 'rgba(225,235,255,.12)']];
   ctx.globalCompositeOperation = tinte[q][0]; ctx.fillStyle = tinte[q][1]; ctx.fillRect(x, y, w, h);
   ctx.restore(); }
 let cC = null, cicKey = '';
@@ -8109,7 +8130,9 @@ function disegna(Tm, dt){ const ter = VISTA || (S && S.terre); passoVolo(dt);
   if (CAMT){ const k = Math.min(1, dt*7); if (CAMT.s){ cam.s += (CAMT.s - cam.s)*k; if (CAMT.t){ const T = TERRE[CAMT.t] || CAMT.t; CAMT.x = INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s; CAMT.y = INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s; } } cam.x += (CAMT.x - cam.x)*k; cam.y += (CAMT.y - cam.y)*k; const ox = cam.x, oy = cam.y; limita(); const sOk = !CAMT.s || Math.abs(CAMT.s - cam.s) < .005; if ((Math.hypot(CAMT.x - cam.x, CAMT.y - cam.y) < 2 && sOk) || (ox !== cam.x && oy !== cam.y && sOk)) CAMT = null; }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#1f3a22'; ctx.fillRect(0, 0, W, H); sfondo(); ctx.imageSmoothingEnabled = cam.s < .7;
   ctx.drawImage(cB, cam.x, cam.y, WW*cam.s, WH*cam.s);
-  if (S){ const q = STAG(); if (q !== QV){ QT = QV < 0 ? -9e9 : performance.now(); QP = QV; QV = q; } if (q >= 2) passoInverno(); const k = Math.min(1, (performance.now() - QT)/1400), a = q === 3 ? k : QP === 3 && k < 1 ? 1 - k : 0; if (cW && a > 0){ ctx.globalAlpha = a; ctx.drawImage(cW, cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; } }
+  if (S){ const q = STAG(); if (q !== QV){ QT = QV < 0 ? -9e9 : performance.now(); QP = QV; QV = q; } passoStagioni(q); const k = Math.min(1, (performance.now() - QT)/1400), ora = STC[q], prima = QP >= 0 ? STC[QP] : null;
+    if (ora && k < 1 && prima) ctx.drawImage(prima, cam.x, cam.y, WW*cam.s, WH*cam.s); else if (!ora && prima) ctx.drawImage(prima, cam.x, cam.y, WW*cam.s, WH*cam.s);
+    if (ora){ ctx.globalAlpha = k; ctx.drawImage(ora, cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.globalAlpha = 1; } }
   bordoMondo(); ctx.imageSmoothingEnabled = false;
   if (!ter) return;
   stagioneMappa(); creaCicatrici(ter); ctx.drawImage(cC, cam.x, cam.y, WW*cam.s, WH*cam.s); ctx.imageSmoothingEnabled = false;
