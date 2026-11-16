@@ -7352,8 +7352,8 @@ const FZ = {
     vant:'Il tetto delle Marche: è il borgo più alto. Chi lo attacca deve salire: difesa del borgo +25%.',
     diff:'Strade ripide e poca campagna: produce poco cibo e dovrà commerciare.'},
   sanmartino:{nome:'San Martino al Faggio', corto:'San Martino', col:'#4a8fe0', scuro:'#1f4f8e', chiaro:'#b0d4ff',
-    vant:'Il bosco dei faggi: tanta legna, e costruire costa il 25% in meno.',
-    diff:'Parte senza mura: all’inizio è il borgo più facile da attaccare.'},
+    vant:'Gente dei boschi: parte con 3 soldati in più, le castagne danno +3 cibo ogni stagione e costruire costa il 25% in meno.',
+    diff:'È in mezzo ai faggi, lontano dalle strade: ogni accordo commerciale gli rende 1 moneta in meno.'},
   ceresola:  {nome:'Ceresola', corto:'Ceresola', col:'#a878e0', scuro:'#5a3c96', chiaro:'#dcc8ff',
     vant:'Campi e vigne: tanto cibo e 2 monete in più ogni stagione.',
     diff:'Parte con 2 soldati in meno, e gli altri borghi la vedono come una preda facile.'}};
@@ -7674,7 +7674,7 @@ const neve = () => ANNO() === 'inverno' && (S.turno - 1) % 4 === 3; // le tre fa
 const patto = (a, b) => !!(S.patti && S.patti[pk(a, b)] >= S.turno);
 const rep = f => S.rep ? (S.rep[f] == null ? 50 : S.rep[f]) : 50;
 const livRep = v => v >= 70 ? 'Affidabile' : v >= 45 ? 'Normale' : v >= 25 ? 'Poco affidabile' : 'Traditore';
-function prodCibo(f, t = S.turno){ let c = 0; for (const x of terreDi(f)){ const st = S.terre[x]; c += TERRE[x].c + (st.str === 'fattoria' ? 2*lvS(st) : 0) + (st.str === 'mulino' ? lvS(st) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? prosp(x) - 1 : 0); }
+function prodCibo(f, t = S.turno){ let c = f === 'sanmartino' ? 3 : 0; /* San Martino: le castagne del bosco */ for (const x of terreDi(f)){ const st = S.terre[x]; c += TERRE[x].c + (st.str === 'fattoria' ? 2*lvS(st) : 0) + (st.str === 'mulino' ? lvS(st) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? prosp(x) - 1 : 0); }
   if ((t - 1) % 4 === 2) c += 2; if ((t - 1) % 4 === 3) c -= 2; const ma = ANNO() === 'carestia' ? .6 : ANNO() === 'abbondanza' ? 1.3 : 1; return Math.max(0, Math.round(c*ma*(f === S.io ? 1 : RIV()))); }
 function prodLegna(f){ let l = 0; for (const x of terreDi(f)){ const st = S.terre[x]; l += TERRE[x].l + (st.str === 'segheria' ? 2*lvS(st) : 0); } return Math.round(l*(ANNO() === 'abbondanza' ? 1.3 : 1)*(f === S.io ? 1 : RIV())); }
 const puoPagare = (F, m, l = 0, c = 0) => F.monete >= m && F.legna >= l && F.cibo >= c;
@@ -7706,7 +7706,7 @@ const accordo = (a, b) => !!(S.acc && S.acc[pk(a, b)]);
 const assediato = f => S.terre[f] && S.terre[f].own === f && terreDelBorgo(f).filter(x => { const o = S.terre[x].own; return o !== f && !(o && alleati(f, o)); }).length >= ASSEDIO;
 const capRecl = f => { const c = 4 + 2*S.fz[f].ed.armeria; return assediato(f) ? Math.ceil(c/2) : c; };
 function rendita(f, t = S.turno){ let r = 0, merc = 0; for (const x of terreDi(f)){ const st = S.terre[x]; r += (TERRE[x].rend + (st.str === 'mercato' ? 3*lvS(st) : 0) + (st.str === 'mulino' ? 2*lvS(st) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? 2*(prosp(x) - 1) : 0) + (st.ill && RIBELLI() ? 4 : 0))*(st.prom === 'tasse' && RIBELLI() ? .5 : 1); if (st.str === 'mercato') merc++; }
-  for (const g of vivi()) if (g !== f && accordo(f, g)) r += 3 + merc + (ANNO() === 'mercanti' ? 2 : 0); if (f === 'ceresola') r += 2;
+  for (const g of vivi()) if (g !== f && accordo(f, g)) r += 3 + merc + (ANNO() === 'mercanti' ? 2 : 0) - (f === 'sanmartino' ? 1 : 0); if (f === 'ceresola') r += 2;
   for (const g of vivi()) if (g !== f && alleati(f, g)) r += 2;
   return Math.max(2, Math.round(r*(f === S.io ? 1 : RIV()))); }
 // ===== il mondo: le tre mappe vere dei borghi, unite da campagna, boschi e frazioni (distanze accorciate) =====
@@ -9256,10 +9256,10 @@ function dlgAnno(dopo){ const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f
     <button class="big" id="cqOk">Si comincia ${ico('play', 2)}</button></div>`, false);
   o.querySelector('#cqOk').onclick = () => { chiudiOv(); suona('banner'); if (dopo) dopo(); }; }
 function nuova(io, dif = 'normale', sim = false, veloce = false, mappa = null){ impostaMappa(mappa || (sim ? MAPPA_ATT : mappaScelta())); S = {v:3, io, dif, sim, veloce, mappa: MAPPA_ATT, turno:1, mosse:MOSSE_N(), fz:{}, terre:{}, amic:{}, all:{}, acc:{}, patti:{}, rep:{}, proposte:[], richieste:[], missioni:[], scambi:0, fine:null, cron:[]};
-  for (const f in FZ){ S.fz[f] = {monete: veloce ? 30 : 15, cibo: veloce ? 16 : 10, legna: (f === 'sanmartino' ? 14 : 8) + (veloce ? 12 : 0), opera:0, vivo:true, ed:{mura: f === 'sanmartino' ? 0 : 1, torri:0, armeria:0, meccanico:0}}; S.rep[f] = 50; }
+  for (const f in FZ){ S.fz[f] = {monete: veloce ? 30 : 15, cibo: veloce ? 16 : 10, legna: (f === 'sanmartino' ? 14 : 8) + (veloce ? 12 : 0), opera:0, vivo:true, ed:{mura:1, torri:0, armeria:0, meccanico:0}}; S.rep[f] = 50; }
   const ks = Object.keys(CARATTERI).sort(() => rnd() - .5); S.car = {}; S.noto = {}; Object.keys(FZ).filter(f => f !== io).forEach((f, i) => { S.car[f] = ks[i]; }); capIAinit();
   const an = Object.keys(ANNI); S.anno = rnd() < .2 ? 'calmo' : an[1 + Math.floor(rnd()*(an.length - 1))]; S.eventi = [];
-  for (const t of IDS){ const T = TERRE[t]; S.terre[t] = T.borgo ? {own:t, sold: t === 'ceresola' ? 6 : 9} : T.di ? {own:T.di, sold:2} : {own:null, sold:T.guar*(S.anno === 'briganti' ? 2 : 1)}; }
+  for (const t of IDS){ const T = TERRE[t]; S.terre[t] = T.borgo ? {own:t, sold: t === 'ceresola' ? 6 : t === 'sanmartino' ? 12 : 9} : T.di ? {own:T.di, sold:2} : {own:null, sold:T.guar*(S.anno === 'briganti' ? 2 : 1)}; }
   S.esp = 0; if (!sim){ leggiCas(); if (CAS) S.esp = Math.min(.3, .06*(CAS.vittorie || 0)); } else if (typeof window !== 'undefined' && window.CQ_ESP) S.esp = window.CQ_ESP;
   if (S.esp) for (const f in FZ) if (f !== io && S.terre[f]) S.terre[f].sold += Math.round(S.esp*10);
   S.capNews = null; if (!sim){ leggiCas(); cron(`${NomeCas()}${CAS ? ', alla ' + (CAS.gen + 1) + 'ª generazione,' : ''} prende ${FZ[io].nome}. È ${ANNI[S.anno].nome.charAt(0).toLowerCase() + ANNI[S.anno].nome.slice(1)}.`, 3); S.capNews = capInizio(); }
