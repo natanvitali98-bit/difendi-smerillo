@@ -1808,7 +1808,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-notizie #cqOk{margin-top:12px}
 
 /* schede dentro le pagine del menu */
-.cr-seg{position:sticky;top:0;z-index:5;display:flex;gap:4px;padding:4px;margin:2px 0 12px;background:rgba(20,20,51,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:2px solid #141433;border-radius:16px;box-shadow:0 4px 0 rgba(20,20,51,.35)}
+.cr-seg{position:sticky;top:-10px;z-index:5; /* top negativo: si attacca al bordo vero della pagina, senza fessura dove spunta il contenuto */display:flex;gap:4px;padding:4px;margin:2px 0 12px;background:rgba(20,20,51,.95);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:2px solid #141433;border-radius:16px;box-shadow:0 4px 0 rgba(20,20,51,.35)}
 .cr-seg button{flex:1;position:relative;font:400 17px var(--f-big),"Lilita One",sans-serif;color:#cfd6ff;background:none;border:0;border-radius:12px;padding:9px 4px;cursor:pointer;transition:background .15s,color .15s}
 .cr-seg button.on{background:#ffd03a;color:#141433;box-shadow:inset 0 -3px 0 #e0a500}
 .cr-seg button i{position:absolute;top:-6px;right:4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#e04830;color:#fff;border:2px solid #141433;font:700 11px/16px var(--f-body,system-ui);font-style:normal}
