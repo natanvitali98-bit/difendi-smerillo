@@ -441,7 +441,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .dlgfoot{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:6px;align-self:stretch;width:100%}
 .dlgfoot + .dlgfoot{margin-top:0}
 .dlgfoot.fisso{position:sticky;bottom:-16px;margin-bottom:-16px;padding:12px 0 16px;background:linear-gradient(180deg,rgba(20,27,41,0) 0,#141b29 14px)}
-#tb:has(#tbOv:not([hidden])) #tbInfo,#tb:has(#tbOv:not([hidden])) #tbBar,#tb:has(#tbOv:not([hidden])) #tbStage > *{visibility:hidden}
+#tb:has(#tbOv:not([hidden])) #tbInfo,#tb:has(#tbOv:not([hidden])) #tbBar{visibility:hidden}
+#tb:has(#tbOv:not([hidden])) #tbStage{filter:blur(3px) brightness(.55) saturate(.85)} /* dietro le schermate di inizio si vede la mappa della missione, sfocata */
 
 .tbscb{font-weight:700;font-size:14px;min-height:38px;border-radius:6px;border:2px solid #2c5d8a;background:#16263c;color:#9ad0ff;margin:4px 0 0;width:100%}
 .tbscb[aria-pressed="true"]{background:#7cc4ff;color:#0c1626;border-color:#7cc4ff}
@@ -493,7 +494,7 @@ body,#tb{background:radial-gradient(120% 80% at 50% 0%,#3d86ff 0%,#2457d8 45%,#1
 .big:disabled{background:#9aa3c7;color:#e6e9f5;box-shadow:0 5px 0 var(--linea)!important;text-shadow:none}
 #tbFine.pronto{animation:tbpulse 1s ease-in-out infinite}
 /* finestre: un foglio bianco grande e pulito */
-#tb > #tbOv{inset:0!important;top:0!important;background:rgba(14,22,70,.55)!important;padding:64px 10px calc(12px + env(safe-area-inset-bottom))!important;border-radius:0!important}
+#tb > #tbOv{inset:0!important;top:0!important;background:linear-gradient(rgba(14,22,70,.35),rgba(10,14,44,.6))!important;padding:64px 10px calc(12px + env(safe-area-inset-bottom))!important;border-radius:0!important}
 #tbOv .dlg.box{background:var(--carta);color:var(--testo);border:3px solid var(--linea);border-radius:22px!important;box-shadow:0 6px 0 var(--linea)!important;padding:20px 18px}
 .dlg h2{font-family:var(--f-big)!important;font-weight:400;font-size:28px;color:var(--testo);letter-spacing:.3px}
 .kicker{color:var(--blu);font-weight:700;text-transform:none;letter-spacing:0;font-size:14px;font-family:var(--f-body)!important}
@@ -2024,6 +2025,19 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-opts .cq-dif button{min-height:36px;font-size:15px;border-radius:10px}
 .cq-optd{margin:2px 0 0!important;font-size:12.5px!important;line-height:1.35}
 .cq-optd span{display:none}
+/* scelta del borgo: impostazioni compatte, etichetta sopra e pulsanti tutti su una riga */
+.cq-scbox .cq-opts{gap:10px;padding:10px 12px 12px;background:rgba(10,14,44,.45);border:2px solid #34408f}
+.cq-optt{font:400 15px var(--f-big);color:#cfd8ff;display:flex;align-items:center;gap:6px;opacity:.9}
+.cq-scbox .cq-or{display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.cq-scbox .cq-or>span{font-size:11px;color:#aab4e8}
+.cq-scbox .cq-opts .cq-dif{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;grid-template-columns:none!important;gap:3px;background:#141433;border-radius:12px;padding:3px;box-shadow:inset 0 2px 0 rgba(0,0,0,.35)}
+.cq-scbox .cq-opts .cq-dif button{min-height:34px;font-size:14px;border-radius:9px;border:0!important;box-shadow:none;background:transparent;color:#cfd8ff;padding:0 2px;white-space:nowrap}
+.cq-scbox .cq-opts .cq-dif button[aria-checked="true"]{background:linear-gradient(#ffe066,#f5b800);color:#141433;box-shadow:0 2px 0 #a87a00}
+.cq-scbox .cq-optd{background:rgba(255,255,255,.05);border-radius:10px;padding:8px 10px;font-size:13px!important}
+.cq-chips{display:flex!important;flex-wrap:wrap;gap:5px;margin-top:6px}
+.cq-chips i{font-style:normal;display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;background:rgba(255,90,74,.16);border:1px solid rgba(255,120,100,.45);color:#ffd6cf;border-radius:999px;padding:2px 8px 2px 5px}
+.cq-scbox #cqScDet{margin:2px 0 4px}
+.cq-schip{font-size:13px!important;padding:5px 12px!important;opacity:.92}
 .cq-optd[data-v=dif] #cqDifT,.cq-optd[data-v=map] #cqMapT,.cq-optd[data-v=vel] #cqVelT{display:inline}
 .cq-rpop{animation:cqRpop .5s cubic-bezier(.2,1.4,.4,1);box-shadow:inset 0 0 0 3px #3ed46b!important}
 @keyframes cqRpop{40%{transform:scale(1.03)}}
@@ -9275,6 +9289,8 @@ function volaSu(f){ const L = IDS.filter(t => S.terre[t].own === f); let x0 = 1e
 function passoVolo(dt){ if (!VOLO) return; const V = VOLO, k = Math.min(1, dt*4), cx0 = V.vis.l + (W - V.vis.l - V.vis.r)/2, cy0 = V.vis.t + (H - V.vis.t - V.vis.b)/2;
   const wx = (cx0 - cam.x)/cam.s, wy = (cy0 - cam.y)/cam.s, nx = wx + (V.wx - wx)*k, ny = wy + (V.wy - wy)*k; cam.s += (V.s - cam.s)*k; cam.x = cx0 - nx*cam.s; cam.y = cy0 - ny*cam.s;
   if (Math.abs(V.s - cam.s) < .004 && Math.hypot(V.wx - nx, V.wy - ny) < 2) VOLO = null; }
+const DIF_CHIP = {difficile:[['nebbia', 'Nebbia di guerra'], ['moneta', 'Soldati da pagare'], ['luna', 'Inverno duro'], ['teschio', 'Capitani mortali'], ['bandiera', 'Frazioni ribelli'], ['spade', 'Coalizione'], ['attenzione', 'Niente aiuti']]};
+const difHtml = k => DIF_CHIP[k] ? `<b>Guerra vera:</b> gli altri borghi guadagnano e osano di più. Tregua di ${DIFF[k].tregua} stagione.<span class="cq-chips">${DIF_CHIP[k].map(([i, t]) => `<i>${ico(i, 2)} ${t}</i>`).join('')}</span>` : DIFF[k].desc;
 function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KREC)) || {}; } catch(e){} leggiCas();
   if (!SCELTA || !FZ[SCELTA]) SCELTA = 'smerillo'; nuova(SCELTA, difScelta(), true, false, mappaScelta()); sel = null; root.classList.add('vuoto');
   const vicine = f => { const fr = new Set(); for (const t of IDS) if (S.terre[t].own === f) for (const v of VIC[t]) if (TERRE[v].fraz && S.terre[v].own !== f) fr.add(TERRE[v].nome); return [...fr]; };
@@ -9286,12 +9302,12 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   const o = ov(`<div class="dlg box cq-dlg cq-scbox"><div class="cq-schead"><span class="kicker">${ico(SCELTA_MP ? 'amici' : 'bandiera', 2)} ${SCELTA_MP ? 'Conquista con gli amici' : 'Conquista'}</span>${CAS ? `<span class="cq-casmini cq-castag">${imgStemma(CAS.stemma, 1)} Casata ${CAS.nome}</span>` : ''}</div>
     <h2>Scegli il tuo borgo</h2>
     <div class="cq-sctab" role="tablist">${Object.keys(FZ).map(f => `<button type="button" role="tab" class="cq-sct" data-t="${f}" style="--c:${FZ[f].col}"><canvas data-sp="${f}"></canvas><span>${FZ[f].corto}</span></button>`).join('')}</div>
-    <div class="cq-opts">
+    <div id="cqScDet"></div>
+    <div class="cq-opts"><div class="cq-optt">${ico('altro', 2)} Impostazioni della partita</div>
       <div class="cq-or"><span>Difficoltà</span><div class="cq-dif" role="radiogroup" aria-label="Difficoltà">${Object.keys(DIFF).map(k => `<button type="button" role="radio" data-dif="${k}" aria-checked="${k === difScelta() ? 'true' : 'false'}">${DIFF[k].nome}</button>`).join('')}</div></div>
       <div class="cq-or"><span>Mappa</span><div class="cq-dif cq-map" role="radiogroup" aria-label="Grandezza della mappa">${Object.keys(MAPPE).map(k => `<button type="button" role="radio" data-map="${k}" aria-checked="${k === mappaScelta() ? 'true' : 'false'}">${MAPPE[k].nome}</button>`).join('')}</div></div>
       <div class="cq-or"><span>Durata</span><div class="cq-dif cq-vel" role="radiogroup" aria-label="Durata">${[['lunga', 'Lunga'], ['veloce', 'Veloce']].map(([k, n]) => `<button type="button" role="radio" data-vel="${k}" aria-checked="${(k === 'veloce') === velScelta() ? 'true' : 'false'}">${n}</button>`).join('')}</div></div>
-      <p class="cq-nota cq-optd" data-v="dif"><span id="cqDifT">${DIFF[difScelta()].desc}</span> <span id="cqMapT">Mappa ${MAPPE[mappaScelta()].nome.toLowerCase()}: ${MAPPE[mappaScelta()].desc}</span> <span id="cqVelT">${velTesto()}</span></p></div>
-    <div id="cqScDet"></div>
+      <p class="cq-nota cq-optd" data-v="dif"><span id="cqDifT">${difHtml(difScelta())}</span> <span id="cqMapT">Mappa ${MAPPE[mappaScelta()].nome.toLowerCase()}: ${MAPPE[mappaScelta()].desc}</span> <span id="cqVelT">${velTesto()}</span></p></div>
 
     <button type="button" class="cq-link" id="cqMe">Torna al menu</button><div class="cq-scvai"><button class="big" id="cqVai"></button></div></div><div class="cq-schip">${ico('pin', 2)} Tocca un borgo sulla mappa</div>`, false);
   o.classList.add('scelta');
@@ -9302,7 +9318,7 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
     o.querySelector('#cqVai').innerHTML = SCELTA_MP ? `Crea la stanza: difendo ${FZ[f].corto}` : `Difendi ${FZ[f].corto} ${ico('play', 2)}`; o.querySelector('#cqVai').style.setProperty('--c', FZ[f].col); disegnaSp(); tintKey = ''; if (vola) requestAnimationFrame(() => volaSu(f)); };
   SCELTA_MOSTRA = f => { suona('tocco'); mostra(f); };
   o.querySelectorAll('.cq-sct').forEach(b => b.onclick = () => SCELTA_MOSTRA(b.dataset.t));
-  o.querySelectorAll('[data-dif]').forEach(b => b.onclick = () => { try { localStorage.setItem(KDIF, b.dataset.dif); } catch(e){} DIFSC = b.dataset.dif; o.querySelectorAll('[data-dif]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqDifT').textContent = DIFF[b.dataset.dif].desc; opt(); suona('tocco'); });
+  o.querySelectorAll('[data-dif]').forEach(b => b.onclick = () => { try { localStorage.setItem(KDIF, b.dataset.dif); } catch(e){} DIFSC = b.dataset.dif; o.querySelectorAll('[data-dif]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqDifT').innerHTML = difHtml(b.dataset.dif); opt(); suona('tocco'); });
   o.querySelectorAll('[data-vel]').forEach(b => b.onclick = () => { const v = b.dataset.vel === 'veloce'; try { localStorage.setItem(KVEL, v ? '1' : '0'); } catch(e){} o.querySelectorAll('[data-vel]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqVelT').textContent = velTesto(); opt(); suona('tocco'); });
   o.querySelectorAll('[data-map]').forEach(b => b.onclick = () => { const m = b.dataset.map; try { localStorage.setItem(KMAPPA, m); } catch(e){} o.querySelectorAll('[data-map]').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false')); o.querySelector('#cqMapT').textContent = 'Mappa ' + MAPPE[m].nome.toLowerCase() + ': ' + MAPPE[m].desc; opt(); suona('tocco'); nuova(SCELTA, difScelta(), true, false, m); sel = null; tintKey = ''; });
   o.querySelector('#cqVai').onclick = () => { if (SCELTA_MP){ suona('tocco'); mpCrea(); return; } const f = SCELTA; SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; suona('banner'); o.classList.remove('scelta'); nuova(f, difScelta(), false, velScelta()); try { RITORNO.inizio('conquista'); } catch(e){} chiudiOv(); dlgAnno(() => { let g = false; try { g = localStorage.getItem(KGUIDA + '3') === '1'; } catch(e){} if (!g){ try { localStorage.setItem(KGUIDA + '3', '1'); } catch(e){} } coachCQ(); }); };
