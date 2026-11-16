@@ -10187,7 +10187,15 @@ const RITORNO = window.RITORNO = (() => {
   if (/[?&]tutorial=1/.test(location.search)){ setTimeout(rivediGuide, 300); }
   // all'avvio
   { const s = stato(), g = giorni(); traccia('apri', {da: DA, nuovo: s.nuovo && s.passo === 0 ? 1 : 0, torna: s.torna ? 1 : 0, ass: s.passo, giorni: g.s, acc: acc() ? 1 : 0, w: innerWidth}); invitoSalva(); }
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') traccia('chiudi', {sec: Math.round((Date.now() - T0)/1000)}, true); });
+  // dove si trovava il giocatore quando ha chiuso: serve a capire in che punto la gente se ne va
+  let TAP = 0; document.addEventListener('pointerdown', () => { TAP++; }, {capture: true, passive: true});
+  window.__dove = () => dove();
+  function dove(){ const vis = id => { const e = document.getElementById(id); return !!e && !e.hidden && e.getClientRects().length > 0; }, txt = q => { const e = document.querySelector(q); return e ? e.textContent.replace(/\s+/g, ' ').trim().slice(0, 40) : ''; }, o = {};
+    try { if (vis('cq')){ o.s = 'conquista'; o.st = txt('#cqStag'); if (vis('cqOv')) o.ov = txt('#cqOv h2'); }
+      else if (vis('tb')){ o.s = 'gioco'; o.tit = txt('#tbTit'); o.turno = txt('#tbTurno'); if (vis('tbOv')) o.ov = txt('#tbOv h2') || txt('#tbOv .kicker'); }
+      else if (vis('title')){ o.s = 'menu'; const t = document.querySelector('.cr-tab.on'); o.tab = t ? t.dataset.tab || t.textContent.trim() : ''; const d = [...document.querySelectorAll('.dlg')].find(x => x.getClientRects().length && !x.closest('[hidden]')); if (d){ const h = d.querySelector('h2'); if (h) o.ov = h.textContent.trim().slice(0, 40); } }
+      else o.s = 'altro'; o.ass = stato().passo; const c = document.querySelector('#coach:not([hidden]) .co-t'); if (c) o.guida = c.textContent.trim().slice(0, 40); } catch(e){ o.err = 1; } return o; }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') traccia('chiudi', {sec: Math.round((Date.now() - T0)/1000), tap: TAP, dove: dove()}, true); });
   function subito(){ const s = stato(); if (s.passo !== 0 || s.in) return false; aspettaPasso = true; avviaPasso(PASSI[0]); setTimeout(() => { aspettaPasso = false; }, 4000); return true; }
   return {versione: VERSIONE, rivediGuide, subito, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
 })();
