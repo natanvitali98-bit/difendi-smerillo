@@ -2156,6 +2156,24 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .gf-pop b{position:relative;font-family:var(--f-big,system-ui);font-weight:400;font-size:20px;text-shadow:0 2px 0 rgba(20,20,51,.35);margin-top:6px}
 .gf-pop .gf-st{width:100%;margin-top:6px}
 @media (prefers-reduced-motion:reduce){.gf-d.ora .gf-c,.gf-pop>.gf-c,.gf-pop .gf-raggi{animation:none}}
+.rr-box:has(.gf-pop){background:linear-gradient(180deg,#26307e 0%,#1a1f5c 60%,#141845 100%);color:#fff;box-shadow:0 6px 0 #141433,inset 0 2px 0 rgba(255,255,255,.1);gap:12px}
+.rr-box:has(.gf-pop) .acc-sub{color:#d6ddff;text-align:center;font-size:14px}
+.gf-top{display:flex;align-items:center;gap:12px}.gf-top .fd-k{text-align:left;margin-bottom:2px}.gf-top h2{color:#fff;text-shadow:0 3px 0 #141433}
+.gf-serie{flex:none;width:64px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#141433;background:radial-gradient(circle at 50% 70%,#ffe27a,#ffb020 60%,#ff7a1e);border:3px solid #141433;border-radius:50% 50% 46% 46%/60% 60% 40% 40%;box-shadow:0 4px 0 #141433,0 0 22px rgba(255,170,40,.6);animation:gfFiamma 1.6s ease-in-out infinite}
+.gf-serie b{font:400 30px/1 var(--f-big)}.gf-serie small{font-size:10px;font-weight:900;margin-top:-2px}
+@keyframes gfFiamma{50%{transform:scale(1.06) rotate(-2deg);box-shadow:0 4px 0 #141433,0 0 34px rgba(255,170,40,.85)}}
+.rr-box .gf-pop{position:relative;overflow:hidden;padding:20px 12px 14px;background:radial-gradient(ellipse at 50% 30%,#ffb84a 0%,#ff7a2e 50%,#c9361e 100%);box-shadow:inset 0 3px 0 rgba(255,255,255,.3),0 5px 0 #141433}
+.rr-box .gf-pop>.gf-c{width:104px;height:82px;margin-top:6px;filter:drop-shadow(0 0 18px rgba(255,240,170,.75))}
+.rr-box .gf-pop>.gf-c::after{top:20px;width:18px;height:22px;margin-left:-9px}
+.rr-box .gf-pop b{font-size:24px;text-shadow:0 3px 0 #141433;-webkit-text-stroke:1px #141433}
+.rr-box .gf-pop .gf-raggi{top:66px;width:440px;height:440px;margin:-220px 0 0 -220px;background:repeating-conic-gradient(rgba(255,240,180,.28) 0 9deg,transparent 9deg 18deg)}
+.rr-box .gf-st{background:rgba(20,20,51,.45);border-radius:14px;padding:8px 6px;gap:4px}
+.rr-box .gf-d{background:rgba(255,255,255,.1);border:2px solid rgba(20,20,51,.5)}
+.rr-box .gf-d.ok{background:rgba(63,191,90,.25);border-color:#3fbf5a}
+.rr-box .gf-d.ora{background:#ffd03a;border-color:#141433;transform:translateY(-4px) scale(1.06);box-shadow:0 4px 0 #141433,0 0 16px rgba(255,208,58,.9)}
+.rr-box .gf-d.ora small{color:#141433}
+.rr-box .gf-d.g7:not(.ok):not(.ora){background:rgba(255,208,58,.22);border-color:#ffd03a;box-shadow:0 0 12px rgba(255,208,58,.5)}
+@media (prefers-reduced-motion: reduce){ .gf-serie{animation:none} }
 .pv-box{display:flex;flex-direction:column;gap:4px;width:100%;margin-top:10px;padding:10px 12px;border-radius:14px;border:3px dashed #f8d048;background:rgba(20,27,41,.88);color:#fff;text-align:left;cursor:pointer}
 .pv-k{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#f8d048;font-weight:800}
 .pv-r{display:flex;align-items:center;gap:10px}.pv-r b{display:block;font-size:16px}.pv-r small{color:#c8cfe4;font-size:13px}.pv-r em{margin-left:auto;font-style:normal;font-size:22px;color:#f8d048}
@@ -10238,7 +10256,7 @@ const RITORNO = window.RITORNO = (() => {
     if (!gVisto && g.p !== g.u){ gVisto = true; quandoPronto(() => { if (giorni().p !== giorni().u) finestraGiorno(); }); return; }
     if (!vVisto && votoPronto()){ vVisto = true; quandoPronto(() => { if (votoPronto()) finestraVoto(); }); } }
   function finestraGiorno(){ const g = giorni(); if (g.p === g.u) return; const tipo = premioG(g.s);
-    const b = finestra(`<span class="fd-k">${g.s === 1 ? 'BENTORNATO' : 'SEI TORNATO'}</span><h2>${g.s === 1 ? 'Il premio di oggi' : g.s + ' giorni di fila!'}</h2>
+    const b = finestra(`<div class="gf-top"><span class="gf-serie"><b>${g.s}</b><small>${g.s === 1 ? 'giorno' : 'giorni'}</small></span><span><span class="fd-k">${g.s === 1 ? 'BENTORNATO' : 'SEI TORNATO'}</span><h2>${g.s === 1 ? 'Il premio di oggi' : g.s + ' giorni di fila!'}</h2></span></div>
       <div class="gf-pop"><span class="gf-raggi"></span>${cassa(tipo)}<b>Scrigno di ${NOMEG[tipo]}</b><div class="gf-st">${strisciaG(g)}</div></div>
       <p class="acc-sub">${g.s % 7 === 0 ? 'Hai completato la settimana!' : `Torna ogni giorno: al giorno ${Math.ceil(g.s/7)*7} c’è lo scrigno d’oro. Se salti un giorno si ricomincia.`}</p><button class="big" data-x>Ritira lo scrigno</button>`, true);
     b.querySelector('[data-x]').onclick = () => { ritiraG(); chiudi(); if (nelMenu()) RIENTRA('premi'); }; soloMenu(); }
