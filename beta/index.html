@@ -7840,6 +7840,8 @@ const ZMAX = 5;
 function misura(){ const st = el('cqStage'); if (!st) return; const r = st.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = Math.max(1, r.width); H = Math.max(1, r.height);
   cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); insets();
   const fw = (W - INS.l - INS.r)/WW, fh = (H - INS.t - INS.b)/WH; fitS = Math.max(.1, W > H*1.1 ? Math.min(fw, fh) : Math.min(fw, Math.max(fh, fw*.8))); cam.s = Math.max(fitS, Math.min(ZMAX, cam.s)); limita(); }
+// la mappa riempie tutto lo schermo (niente bande vuote sopra e sotto), per le schermate di attesa
+function riempi(){ const s2 = Math.min(ZMAX, Math.max(cam.s, H/WH, W/WW)); CAMT = null; cam.s = s2; cam.x = (W - WW*s2)/2; cam.y = (H - WH*s2)/2; limita(); }
 function centra(){ CAMT = null; cam.s = fitS; cam.x = INS.l + (W - INS.l - INS.r - WW*cam.s)/2; cam.y = INS.t + (H - INS.t - INS.b - WH*cam.s)/2; }
 function vaiA(t, s){ CAMT = null; const T = TERRE[t]; cam.s = Math.max(fitS, Math.min(ZMAX, s || Math.max(fitS*2.2, Math.min(.9, (W - INS.l - INS.r)/700)))); cam.x = INS.l + (W - INS.l - INS.r)/2 - T.x*cam.s; cam.y = INS.t + (H - INS.t - INS.b)/2 - T.y*cam.s; limita(); }
 function limita(){ const mw = WW*cam.s, mh = WH*cam.s, iw = W - INS.l - INS.r, ih = H - INS.t - INS.b;
@@ -9180,7 +9182,7 @@ function apri(dopo){ APRI_DOPO = dopo || null; if (!root) costruisciDom(); root.
     setTimeout(pezzo, 60); return; }
   avviaCQ(); }
 function avviaCQ(){ SCELTA_MP = false; if (APRI_DOPO === 'crea' || APRI_DOPO === 'amici'){ APRI_DOPO = null; SCELTA_MP = true; S = null; aggiornaUI(); scegli(); misura(); centra(); return; }
-  if (APRI_DOPO && APRI_DOPO.startsWith('entra:')){ const cod = APRI_DOPO.slice(6); APRI_DOPO = null; S = null; SCELTA = null; root.classList.add('vuoto'); misura(); centra(); mpEntra(cod); return; }
+  if (APRI_DOPO && APRI_DOPO.startsWith('entra:')){ const cod = APRI_DOPO.slice(6); APRI_DOPO = null; S = null; SCELTA = null; root.classList.add('vuoto'); misura(); centra(); riempi(); mpEntra(cod); return; }
   if (APRI_DOPO && leggiCas()){ const k = APRI_DOPO; APRI_DOPO = null; S = null; SCELTA = null; root.classList.add('vuoto'); misura(); centra(); const torna = () => esci('dif');
     if (k === 'stemma'){ dlgStemma(torna); const no = el('cqOv').querySelector('#cqNo'); if (no) no.onclick = torna; }
     else { dlgCasata(); const o = el('cqOv'), no = o.querySelector('#cqNo'), st = o.querySelector('#cqStC'); if (no) no.onclick = torna; if (st) st.onclick = () => { dlgStemma(torna); const n2 = el('cqOv').querySelector('#cqNo'); if (n2) n2.onclick = torna; }; }
