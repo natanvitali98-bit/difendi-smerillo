@@ -1188,7 +1188,9 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 #titleVelo{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .35s ease;background:linear-gradient(rgba(14,20,60,.58),rgba(10,14,44,.78));-webkit-backdrop-filter:blur(3px) saturate(.85);backdrop-filter:blur(3px) saturate(.85)}
 #title:not(.cr-on) #titleVelo{display:none}
 .cr-pg > .cr-h{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0;padding:0}
-.cr-pg{padding-top:12px}
+.cr-pg{padding-top:12px;-webkit-mask-image:linear-gradient(transparent 0,#000 12px);mask-image:linear-gradient(transparent 0,#000 12px)}
+.cr-pg[data-tab="gioca"]{-webkit-mask-image:linear-gradient(transparent 0,#000 34px);mask-image:linear-gradient(transparent 0,#000 34px)}
+.cr-pg:has(> .cr-seg){-webkit-mask-image:none;mask-image:none}
 .cr-tab:not(.on) .cr-ti{opacity:.72;filter:saturate(.8)}.cr-tab:not(.on) .cr-tn{opacity:.7}
 .cr-tab.on .cr-tn{opacity:1;font-weight:400}
 .cr-tab[data-tab="gioca"]:not(.on){background:rgba(255,208,58,.14)!important;color:#ffd03a;box-shadow:inset 0 0 0 2px rgba(255,208,58,.55)!important}
@@ -1905,7 +1907,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-notizie #cqOk{margin-top:12px}
 
 /* schede dentro le pagine del menu */
-.cr-seg{position:sticky;top:-10px;z-index:5; /* top negativo: si attacca al bordo vero della pagina, senza fessura dove spunta il contenuto */display:flex;gap:4px;padding:4px;margin:2px 0 12px;background:rgba(20,20,51,.95);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:2px solid #141433;border-radius:16px;box-shadow:0 4px 0 rgba(20,20,51,.35)}
+.cr-seg{position:sticky;top:-12px;z-index:5; /* top negativo: si attacca al bordo vero della pagina, senza fessura dove spunta il contenuto */display:flex;gap:4px;padding:4px;margin:2px 0 12px;background:rgba(20,20,51,.95);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:2px solid #141433;border-radius:16px;box-shadow:0 4px 0 rgba(20,20,51,.35)}
 .cr-seg button{flex:1;position:relative;font:400 17px var(--f-big),"Lilita One",sans-serif;color:#cfd6ff;background:none;border:0;border-radius:12px;padding:9px 4px;cursor:pointer;transition:background .15s,color .15s}
 .cr-seg button.on{background:#ffd03a;color:#141433;box-shadow:inset 0 -3px 0 #e0a500}
 .cr-seg button i{position:absolute;top:-6px;right:4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#e04830;color:#fff;border:2px solid #141433;font:700 11px/16px var(--f-body,system-ui);font-style:normal}
