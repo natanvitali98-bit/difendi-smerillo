@@ -20,6 +20,19 @@
 .mis-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tbruolo{display:block;font-size:14.5px;line-height:1.3;margin:2px 0 4px;color:var(--testo)}
 body.tb-prova #tbFine,body.tb-prova #tbUndo,body.tb-prova #tbShop,body.tb-prova #tbAiuto{visibility:hidden}
+.cq-serie{background:#141433;border-radius:16px;padding:10px 12px;margin:10px 0 4px;color:#fff;display:flex;flex-direction:column;gap:6px}
+.cq-sh{font:700 12px var(--f-body,system-ui);letter-spacing:1px;text-transform:uppercase;color:#aab4e8;text-align:center}
+.cq-srow{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.06)}
+.cq-srow b{flex:1;font-size:15px}.cq-srow b small{color:#aab4e8;font-weight:600}
+.cq-srow.win{background:rgba(255,208,58,.18);box-shadow:inset 0 0 0 2px #ffd03a}
+.cq-srow span{display:flex;gap:4px}.cq-srow em{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.08);filter:grayscale(1) brightness(.6)}
+.cq-srow em.on{background:#ffd03a;filter:none;animation:cqCoppa .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes cqCoppa{from{transform:scale(.3) rotate(-20deg)}to{transform:none}}
+#cqOv .cq-serie p.cq-scamp,.cq-scamp{margin:4px 0 0!important;-webkit-text-fill-color:#ffd03a;text-align:center;font:400 22px "Lilita One",sans-serif!important;color:#ffd03a!important;text-shadow:0 2px 0 #141433;animation:cqCoppa .6s cubic-bezier(.2,1.6,.4,1) both}
+.cq-rivst.on{color:#ffd03a!important;font-weight:700}
+.cq-pulsa{animation:cqPulsa 1s ease-in-out infinite}
+@keyframes cqPulsa{50%{transform:scale(1.05);box-shadow:0 0 0 6px rgba(255,208,58,.35),0 5px 0 #141433}}
+@media (prefers-reduced-motion: reduce){ .cq-srow em.on,.cq-scamp,.cq-pulsa{animation:none!important} }
 .cq-casd{max-height:calc(100dvh - 90px - env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain}
 .cq-casd > *{flex-shrink:0}
 .cq-casd #cqOk{position:sticky;bottom:0;z-index:3;box-shadow:0 5px 0 #141433,inset 0 -6px 0 #e0a500,inset 0 3px 0 rgba(255,255,255,.6),0 -12px 14px 4px #141845,0 26px 0 16px #141845!important}
@@ -8942,7 +8955,7 @@ function finePartita(){ if (S && S.mp){ const am = mpAltriNomi() || 'gli amici',
       if (k >= 1){ o.querySelector('#cqGlb').style.width = G.pDopo + '%'; o.querySelector('#cqGlt').innerHTML = LIVC[G.livDopo][1] + (G.livDopo > G.livPrima ? ' <b class="cq-nuovo">nuovo titolo!</b>' : ''); if (G.livDopo > G.livPrima) suona('leggenda'); else suona('stella1'); return; } requestAnimationFrame(anima); }; setTimeout(anima, 500); }
   fondDopo(o);
   o.querySelector('#cqCr').onclick = () => dlgCasata(true);
-  o.querySelector('#cqAg').onclick = () => { chiudiOv(); S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; }
+  o.querySelector('#cqAg').onclick = () => { chiudiOv(); S = null; aggiornaUI(); scegli(); }; o.querySelector('#cqMe').onclick = esci; if (S.mp && MPN) mpSerieUI(o); }
 function fondDopo(o){ if (typeof ACC === 'undefined' || !ACC.fondatore) return; ACC.fondatore().then(r => { if (!r || !document.body.contains(o)) return;
     if (r.nuovo) setTimeout(() => ACC.festa(r.n), 1500);
     else if (r.noacc && r.liberi > 0 && !o.querySelector('.fd-inv')){ const ag = o.querySelector('#cqAg'); if (ag) ag.insertAdjacentHTML('beforebegin', `<div class="cq-premio fd-inv">${ACC.med(0, 'med')}<span><b>Diventa un Fondatore</b><small>I primi 10 che finiscono una partita a Conquista con un account restano per sempre sulla Targa dei Fondatori. ${r.liberi === 1 ? 'Resta 1 posto' : 'Restano ' + r.liberi + ' posti'}.</small></span><button type="button" class="big mini" data-acc-crea>Crea account</button></div>`); } }); }
@@ -9257,13 +9270,15 @@ function mpRicevi(raw, da){ let m; try { m = typeof raw === 'string' ? JSON.pars
   if (m.t === 'ciao'){ if (centro){ const a = MPN.amici.find(x => x.id === da); if (a){ a.nome = (m.nome || 'Amico').slice(0, 14); a.fond = Math.max(0, Math.min(10, Math.floor(+m.fond || 0))); } mpLobby(); suona('stella1'); } return; }
   if (m.t === 'id'){ MPN.io = m.id; return; }
   if (m.t === 'lobby'){ const st = el('cqMpSt'); if (st) st.innerHTML = `${ico('ok', 2)} Collegato! Nella stanza: <b>${m.nomi.join(', ')}</b>. Aspetto che si cominci…`; return; }
-  if (m.t === 'inizia'){ const via = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; chiudiOv(); mpApplica(m.S); MPN.visto = 0; suona('banner'); aggiornaUI(); vaiA(S.io); pannello(); mpBenvenuto(); }; if (typeof CARICA === 'function') CARICA(via, 'Comincia la partita…'); else via(); return; }
+  if (m.t === 'inizia'){ MPN.rivUlt = null; const via = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; chiudiOv(); mpApplica(m.S); MPN.visto = 0; suona('banner'); aggiornaUI(); vaiA(S.io); pannello(); mpBenvenuto(); }; if (typeof CARICA === 'function') CARICA(via, 'Comincia la partita…'); else via(); return; }
   if (centro && da && (m.t === 'turno' || m.t === 'stato' || m.t === 'live')) mpInvia(m, da);
   if (m.t === 'live'){ if (!S || !S.mp || !mpAttesa() || !m.S.mp || m.S.mp.fase !== S.mp.fase) return; if (GIOCA){ MPN._livePend = m.S; return; } mpVedi(m.S); return; } // il centro gira le mosse agli altri
   if (m.t === 'turno'){ mpTurno(m.S); return; }
   if (m.t === 'fine'){ if (!centro) return; const log = ((m.S.mp && m.S.mp.log) || []).filter(e => e.n > (MPN.visto || 0)); PRIMA_SNAP = JSON.parse(JSON.stringify(S.terre)); mpApplica(m.S); if (log.length) MPN.visto = log[log.length - 1].n; if (log.length) riproduciEv(log, mpStagione); else mpStagione(); return; }
   if (m.t === 'stagione'){ mpApplica(m.S); MPN.visto = 0; PRIMA_SNAP = m.prima; riproduciEv(m.ev, () => { notizie(m.ev); mpDopoNotizie(); }); return; }
   if (m.t === 'stato'){ mpApplica(m.S); aggiornaUI(); pannello(); if (S.fine && !(el('cqOv').querySelector('.cq-esito,#cqAg'))) finePartita(); return; }
+  if (m.t === 'riv'){ if (centro) mpRivPronto(da); return; }
+  if (m.t === 'rivst'){ mpRivAgg(m); return; }
   if (m.t === 'via'){ mpTogli(m.id); return; }
   if (m.t === 'esci'){ mpVia(da); return; } }
 // qualcuno esce: con tre giocatori il suo borgo passa al computer, con due la partita finisce
@@ -9275,7 +9290,7 @@ function mpVia(da){ if (!MPN) return;
   const nome = MPN.io === 'h' ? (mpG().find(x => x.id === da) || {}).nome || 'Un amico' : 'Chi ha creato la stanza'; MPN.conn = null; MPN.conns = {}; mpChiudi(); if (!attivo || !S || !S.mp || S.fine) return;
   const o = ov(`<div class="dlg box cq-dlg"><h2>Partita interrotta</h2><p><b>${nome}</b> è uscito dalla partita o si è scollegato.</p><button class="big" id="cqOk">Torna al menu</button></div>`, false); o.querySelector('#cqOk').onclick = () => esci('gioca'); }
 function mpBenvenuto(){ const altri = mpG().filter(p => p.borgo !== S.io), ia = Object.keys(FZ).filter(f => !umano(f));
-  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} Conquista ${mpG().length === 3 ? 'in tre' : 'in due'}</span><h2>Tu difendi ${FZ[S.io].nome}</h2><p>${altri.map(p => `<b>${p.nome}</b> difende ${FZ[p.borgo].nome}`).join(', ')}.${ia.length ? ` ${FZ[ia[0]].nome} la muove il computer.` : ' Nessun borgo al computer: siete solo voi.'}</p>
+  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('amici', 2)} ${S.mp.serie && S.mp.serie.g ? `Rivincita · partita ${S.mp.serie.g + 1} della serie` : `Conquista ${mpG().length === 3 ? 'in tre' : 'in due'}`}</span><h2>Tu difendi ${FZ[S.io].nome}</h2>${S.mp.serie && S.mp.serie.g ? `<p class="cq-nota">${ico('coppa', 2)} ${mpG().map(p => `<b>${p.id === MPN.io ? 'Tu' : p.nome}</b> ${S.mp.serie.v[p.id] || 0}`).join(' – ')}${S.mp.bonus && S.mp.bonus.includes(S.io) ? ' · Hai perso l’ultima: parti con <b>2 soldati in più</b>.' : ''}</p>` : ''}<p>${altri.map(p => `<b>${p.nome}</b> difende ${FZ[p.borgo].nome}`).join(', ')}.${ia.length ? ` ${FZ[ia[0]].nome} la muove il computer.` : ' Nessun borgo al computer: siete solo voi.'}</p>
     <p>Si gioca a turni: in ogni stagione gioca uno alla volta${ia.length ? ', poi il computer' : ''}. Chi comincia cambia a ogni stagione. Vince chi resta in piedi.</p><p class="cq-nota">Dalla Diplomazia puoi fare <b>proposte su misura</b>: decidi cosa dai e cosa chiedi. Questa partita non si salva.</p>
     <button class="big" id="cqOk">${mpAttesa() ? 'Aspetto il mio turno' : 'Comincio io'} ${ico('play', 2)}</button></div>`, false); o.querySelector('#cqOk').onclick = () => { chiudiOv(); pannello(); }; }
 function dlgMp(){ if (!mpRete()){ toast('Il gioco online non è disponibile'); return; }
@@ -9320,8 +9335,31 @@ function mpInizia(){ if (!MPN || !MPN.amici.length) return; if (typeof CARICA ==
   nuova(h, difScelta(), false, velScelta(), mappaScelta());
   if (S.esp){ for (const f in FZ) if (f !== h && S.terre[f]) S.terre[f].sold = Math.max(1, S.terre[f].sold - Math.round(S.esp*10)); S.esp = 0; } // tra amici niente rivali rinforzati dalla casata
   S.capNews = null; const gioc = [{id:'h', borgo:h, nome: mpNome(), fond: mpFond()}].concat(MPN.amici.map(a => ({id:a.id, borgo:a.borgo, nome:a.nome || 'Amico', fond: a.fond || 0})));
-  S.mp = {gioc, ordine: gioc.map(p => p.id), k:0, fase:'h', log:[], seq:0, mosse: MOSSE_N()}; MPN.visto = 0;
+  S.mp = {gioc, ordine: gioc.map(p => p.id), k:0, fase:'h', log:[], seq:0, mosse: MOSSE_N(), serie: MPN.serie || {v:{}, g:0}}; MPN.visto = 0;
+  if (MPN.bonus){ for (const b of MPN.bonus) if (S.terre[b]) S.terre[b].sold += 2; S.mp.bonus = MPN.bonus; MPN.bonus = null; } // nella rivincita chi ha perso parte con 2 soldati in più
   mpInvia({t:'inizia', S}); suona('banner'); aggiornaUI(); vaiA(S.io); pannello(); mpBenvenuto(); }
+// ===== rivincita e serie al meglio di 3: si riparte subito con gli stessi amici, i borghi si scambiano =====
+function mpVincId(){ const g = mpG(); if (S.vincitore){ const p = g.find(x => x.borgo === S.vincitore); return p ? p.id : null; } const viv = g.filter(p => S.fz[p.borgo] && S.fz[p.borgo].vivo); return viv.length === 1 ? viv[0].id : null; }
+function mpSerieConta(){ const se = JSON.parse(JSON.stringify((S && S.mp && S.mp.serie) || {v:{}, g:0})), w = mpVincId(); if (w) se.v[w] = (se.v[w] || 0) + 1; se.g++; return se; }
+const SERIE_VINCE = 2;
+function mpSerieUI(o){ const se = mpSerieConta(), g = mpG(), w = mpVincId(), camp = g.find(p => (se.v[p.id] || 0) >= SERIE_VINCE), io = MPN.io;
+  const righe = g.map(p => `<div class="cq-srow${p.id === w ? ' win' : ''}"><i class="cq-dot" style="background:${FZ[p.borgo].col}"></i><b>${p.nome}${p.id === io ? ' <small>(tu)</small>' : ''}</b><span>${Array.from({length: SERIE_VINCE}, (_, k) => `<em class="${k < (se.v[p.id] || 0) ? 'on' : ''}">${ico('coppa', 2)}</em>`).join('')}</span></div>`).join('');
+  const box = `<div class="cq-serie"><div class="cq-sh">${ico('coppa', 2)} Serie al meglio di 3 · partita ${se.g}</div>${righe}${camp ? `<p class="cq-scamp">${camp.id === io ? 'Hai vinto la serie!' : camp.nome + ' vince la serie!'}</p>` : !w ? '<p class="cq-nota">Ha vinto il computer: nessun punto in questa partita.</p>' : ''}</div>
+    <button class="big" id="cqRiv">${camp ? 'Nuova serie' : 'Rivincita'} ${ico('play', 2)}</button><p class="cq-nota cq-rivst" id="cqRivSt">${camp ? 'Si ricomincia da zero, con borghi nuovi.' : 'Nella rivincita i borghi si scambiano. Chi ha perso parte con 2 soldati in più.'}</p>`;
+  const ag = o.querySelector('#cqAg'); if (!ag) return; const dove = o.querySelector('.dlg > p') || ag; dove.insertAdjacentHTML(dove === ag ? 'beforebegin' : 'afterend', box); ag.remove();
+  if (camp){ try { SUONI.suona(camp.id === io ? 'leggenda' : 'perso'); if (camp.id === io) EPICO.coriandoli(220); } catch(e){} }
+  const b = o.querySelector('#cqRiv'); b.onclick = () => { b.disabled = true; b.innerHTML = `${ico('clessidra', 2)} Aspetto gli altri…`; suona('tocco'); if (MPN.io === 'h') mpRivPronto('h'); else mpInvia({t:'riv'}); };
+  if (MPN.rivUlt) mpRivAgg(MPN.rivUlt); }
+function mpRivPronto(id){ if (!MPN || MPN.io !== 'h' || !S || !S.mp) return; MPN.riv = MPN.riv || []; if (!MPN.riv.includes(id)) MPN.riv.push(id);
+  const g = mpG().filter(p => p.id === 'h' || MPN.conns[p.id]), m = {t:'rivst', pronti: MPN.riv.slice(), chi: g.filter(p => MPN.riv.includes(p.id)).map(p => ({id: p.id, nome: p.nome})), tot: g.length};
+  mpInvia(m); mpRivAgg(m); if (g.every(p => MPN.riv.includes(p.id))) setTimeout(mpRivincita, 700); }
+function mpRivAgg(m){ if (!MPN) return; MPN.rivUlt = m; const st = el('cqRivSt'); if (!st) return; const io = MPN.io, altri = (m.chi || []).filter(c => c.id !== io).map(c => c.nome);
+  st.innerHTML = `${ico('amici', 2)} Pronti: <b>${m.pronti.length} di ${m.tot}</b>${altri.length ? ' · ' + altri.join(', ') + (altri.length === 1 ? ' vuole' : ' vogliono') + ' la rivincita!' : ''}`; st.classList.add('on');
+  if (!m.pronti.includes(io)){ const b = el('cqRiv'); if (b && !b.disabled) b.classList.add('cq-pulsa'); } }
+function mpRivincita(){ if (!MPN || MPN.io !== 'h' || !S || !S.mp) return; const se = mpSerieConta(), g = mpG(), w = mpVincId(), fin = g.some(p => (se.v[p.id] || 0) >= SERIE_VINCE), ord = Object.keys(FZ);
+  const nuovo = id => { const p = g.find(x => x.id === id); return ord[(ord.indexOf(p.borgo) + 1) % ord.length]; };
+  MPN.serie = fin ? {v:{}, g:0} : se; MPN.bonus = fin || !w ? null : g.filter(p => p.id !== w).map(p => nuovo(p.id));
+  MPN.borgoH = nuovo('h'); MPN.amici.forEach(a => { if (g.some(x => x.id === a.id)) a.borgo = nuovo(a.id); }); MPN.riv = null; MPN.rivUlt = null; mpInizia(); }
 // ===== proposte su misura: scegli tu cosa dai e cosa chiedi (agli amici e ai borghi del computer) =====
 const RISP = {monete:['moneta', 'monete', 1], cibo:['castagna', 'cibo', 1.25], legna:['albero', 'legna', 1.1]};
 function dlgProposta(g, st){ st = st || {dai:{monete:0, cibo:0, legna:0}, chiedi:{monete:0, cibo:0, legna:0}, patto:''}; const F = S.fz[S.io], G = S.fz[g], amico = umano(g);
