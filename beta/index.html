@@ -7434,7 +7434,9 @@ const PAGANO = 4, COSTO_ESP = 2; // 1 moneta di paga ogni 4 soldati · un esplor
 const pagaSold = f => SERIO() && f === S.io ? Math.floor(soldDi(f)/PAGANO) : 0;
 const PER_DOM = 8, costoDom = f => SERIO() && f === S.io ? Math.floor(terreDi(f).length/PER_DOM) : 0; // più è grande il dominio, più costa governarlo
 const invernoDuro = f => SERIO() && f === S.io && (S.turno - 1) % 4 === 3 ? 2 : 1; // d'inverno i soldati mangiano il doppio
-const nebbia = t => SERIO() && !SCELTA && S.terre[t] && S.terre[t].own !== S.io && !(VIC[t] || []).some(v => S.terre[v] && S.terre[v].own === S.io) && !(S.esplo && S.esplo[t] >= S.turno);
+// Difficile: la nebbia è un evento del tempo. Quando c'è vedi solo le tue terre e gli attacchi a sorpresa hanno +15%
+const nebbiaOn = () => !!(S && SERIO() && S.neb && S.neb.fino >= S.turno);
+const nebbia = t => SERIO() && !SCELTA && S.terre[t] && S.terre[t].own !== S.io && (nebbiaOn() || !(VIC[t] || []).some(v => S.terre[v] && S.terre[v].own === S.io)) && !(S.esplo && S.esplo[t] >= S.turno);
 const lvS = st => (st.sl || 1)*(st.dan ? .5 : 1); // struttura danneggiata: produce la metà
 const FEM_STR = ['segheria', 'caserma', 'torre', 'scuderia', 'fornace'];
 const strDet = (k, m, f) => STR[k].nome + ' ' + (FEM_STR.includes(k) ? f : m);
@@ -8282,7 +8284,7 @@ function creaNebbia(){ if (!idx) return; const key = MAPPA_ATT + '|' + STAG() + 
   // i fiocchi di nebbia: nuvolette chiare che poi si muovono
   cNW = document.createElement('canvas'); cNW.width = W2; cNW.height = H2; { const c = cNW.getContext('2d'); for (let i = 0; i < 140; i++){ const x = hashP(i, 3)*W2, y = hashP(i, 11)*H2, r = (.03 + .05*hashP(i, 19))*W2; const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, 'rgba(255,255,255,.55)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(x - r, y - r, r*2, r*2); }
     c.globalCompositeOperation = 'destination-in'; c.drawImage(cN, 0, 0); } }
-function disegnaNebbia(){ if (!S || !SERIO() || SCELTA) return; creaNebbia(); const q = STAG(), base = q === 2 || q === 3 ? .62 : .5, t = performance.now()/1000, X = cam.x, Y = cam.y, Wd = WW*cam.s, Hd = WH*cam.s;
+function disegnaNebbia(){ if (!S || !SERIO() || SCELTA) return; if (!nebbiaOn() && !cNP){ if (cN){ cNP = [cN, cNW]; nebT = performance.now(); cN = cNW = null; nebKey = ''; } else return; } if (nebbiaOn()) creaNebbia(); const q = STAG(), base = q === 2 || q === 3 ? .62 : .5, t = performance.now()/1000, X = cam.x, Y = cam.y, Wd = WW*cam.s, Hd = WH*cam.s;
   const strato = (L, a) => { if (!L) return; const [n, w] = L; ctx.globalAlpha = base*a; ctx.drawImage(n, X, Y, Wd, Hd); if (w && !matchMedia('(prefers-reduced-motion: reduce)').matches){ ctx.globalAlpha = .7*a; ctx.drawImage(w, X + Math.sin(t*.13)*Wd*.012, Y + Math.cos(t*.1)*Hd*.008, Wd, Hd); ctx.globalAlpha = .45*a; ctx.drawImage(w, X - Math.sin(t*.09 + 1)*Wd*.016, Y + Math.sin(t*.07)*Hd*.01, Wd, Hd); } };
   const k = cNP ? Math.min(1, (performance.now() - nebT)/700) : 1; ctx.save(); ctx.imageSmoothingEnabled = true;
   if (cNP && k < 1) strato(cNP, 1 - k); else cNP = null; strato(cN ? [cN, cNW] : null, k); ctx.restore(); }
@@ -8448,6 +8450,7 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
   if (da && MP().marcia){ const lo = lontananza(f, da); if (lo > 4){ const m = Math.max(.76, 1 - .08*(lo - 4)); att *= m; voci.push(`Lontano dalle basi (${lo > 8 ? 'nessuna vicina' : lo + ' terre'}): −${Math.round((1 - m)*100)}%. Una struttura più vicina fa da avamposto`); } }
   if (cap){ let b = 1.05 + .04*(capLiv(cap) - 1); if (haAb(cap, 'fiero')) b *= 1.12; if (!df && haAb(cap, 'volpe')) b *= 1.25; att *= b; voci.push(`${capNome(cap)} guida l’attacco: +${Math.round((b - 1)*100)}%`); if (sp) voci.push(`${cap.nome} conosce le mura: 1 livello in meno, torri a metà`); }
   { const am = vivi().find(h => h !== f && h !== df && alleati(h, f) && VIC[t].some(v => S.terre[v].own === h)); if (am){ att *= 1.15; voci.push(`${FZ[am].corto} è tua alleata e ti aiuta: +15%`); } }
+  if (nebbiaOn()){ att *= 1.15; voci.push('Attacco a sorpresa nella nebbia: +15%'); }
   if (f === S.io && RIBELLI()){ const gt = !df && S.terre[t].aut ? gruppo(S.terre, t) : null; if (gt && (pattoAut(gt) || alleAut(gt) || tribAut(gt))) voci.push(`Attenzione: rompi il patto con ${TERRE[gt].nome} e la tua reputazione cala`); }
   if (f === S.io && RIBELLI()){ const ga = VIC[t].map(v => gruppo(S.terre, v)).find(g => g && alleAut(g) && g !== gruppo(S.terre, t)); if (ga){ att *= 1.1; voci.push(`${TERRE[ga].nome} (autonoma) è tua alleata e ti aiuta: +10%`); } }
   let mult = df ? 1 + .2*Ed.armeria : 1; if (df && Ed.armeria) voci.push(`La loro armeria: +${20*Ed.armeria}%`);
@@ -8896,6 +8899,10 @@ function calcolaStagione(ev, tutti = false){ coalizione(ev);
   S.missioni = (S.missioni || []).filter(mi => { if (S.turno < mi.scade || !S.fz[mi.f].vivo) return S.fz[mi.f].vivo; setAmic(S.io, mi.f, amic(S.io, mi.f) - 10); S.rep[S.io] = Math.max(0, rep(S.io) - 3); ev.push({t:'miss', f:mi.f, snap: sn(), testo:`Non hai aiutato ${FZ[mi.f].corto} contro ${FZ[mi.contro].corto}: è delusa`}); return false; });
   // la stagione nuova: entrate, cibo per i soldati, legna
   S.turno++; S.mosse = MOSSE_N(); S.scambi = 0;
+  if (SERIO()){ // il tempo: ogni tanto arriva la nebbia (più spesso in autunno e inverno), dura 2 o 3 stagioni
+    if (S.neb && S.turno > S.neb.fino){ delete S.neb; S.nebFine = S.turno; ev.push({t:'nebbia', f:S.io, snap: sn(), testo:'La nebbia si alza: torni a vedere le terre vicine.'}); }
+    else if (!S.neb && S.turno >= 4 && S.turno - (S.nebFine || -9) >= 4 && rnd() < [.1, 0, .3, .25][STAG()]){ const dur = rnd() < .4 ? 3 : 2; S.neb = {fino: S.turno + dur - 1}; cron(`Arriva la nebbia per ${dur} stagioni.`, 1);
+      ev.push({t:'nebbia', f:S.io, snap: sn(), testo:`Arriva la <b>nebbia</b>, per ${dur} stagioni: vedi solo le tue terre e chi attacca ha +15% (attacco a sorpresa). Usa Esplora per guardare oltre, e lascia soldati sui confini.`}); } }
   for (const f of vivi()){ const F = S.fz[f]; F.monete += rendita(f); F.legna += prodLegna(f); F.cibo += prodCibo(f) - mangia(f)*invernoDuro(f);
     if (invernoDuro(f) > 1 && !S.cron.some(x => /inverno mangiano/.test(x.txt))) cron('D’inverno i soldati mangiano il doppio.', 0);
     { const pg = pagaSold(f) + costoDom(f); if (pg){ F.monete -= pg; if (F.monete < 0){ let manca = -F.monete, via = 0; F.monete = 0; while (manca > 0){ const t = terreDi(f).filter(x => S.terre[x].sold > 1).sort((a, b) => S.terre[b].sold - S.terre[a].sold)[0]; if (!t) break; S.terre[t].sold--; manca--; via++; }
@@ -8952,7 +8959,7 @@ function volaNumeri(F){ const cur = {monete: F.monete, cibo: F.cibo, legna: F.le
   const sp = el('cqRis').querySelectorAll(':scope > span'), ord = ['monete', 'cibo', 'legna']; ord.forEach((k, i) => { const d = cur[k] - RPREV[k]; if (!d || !sp[i]) return; const r = sp[i].getBoundingClientRect(), f = document.createElement('div'); f.className = 'cq-fl ' + (d > 0 ? 'su' : 'giu'); f.textContent = (d > 0 ? '+' : '−') + Math.abs(d); f.style.cssText = `left:${r.left + r.width/2}px;top:${r.bottom}px`; root.append(f); setTimeout(() => f.remove(), 1300); sp[i].classList.add('cq-bump'); });
   Object.assign(RPREV, cur); }
 function aggiornaUI(){ if (root){ root.classList.toggle('vuoto', !S || !!SCELTA); root.classList.toggle('cq-serio', SERIO()); } if (!S) return; const F = S.fz[S.io];
-  el('cqTit').textContent = FZ[S.io].corto; el('cqStag').textContent = stagione(S.turno) + (S.veloce ? ' · ' + Math.min(S.turno, VEL.stag) + '/' + VEL.stag : '') + (S.dif && S.dif !== 'normale' ? ' · ' + DIFF[S.dif].nome : '') + (S.mp && MPN ? (mpAttesa() ? ' · tocca a ' + mpNomeDi(mpBorgoDi(S.mp.fase)) : ' · tocca a te') : '');
+  el('cqTit').textContent = FZ[S.io].corto; el('cqStag').textContent = stagione(S.turno) + (nebbiaOn() ? ` · nebbia (${S.neb.fino - S.turno + 1})` : '') + (S.veloce ? ' · ' + Math.min(S.turno, VEL.stag) + '/' + VEL.stag : '') + (S.dif && S.dif !== 'normale' ? ' · ' + DIFF[S.dif].nome : '') + (S.mp && MPN ? (mpAttesa() ? ' · tocca a ' + mpNomeDi(mpBorgoDi(S.mp.fase)) : ' · tocca a te') : '');
   { const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); el('cqRis').innerHTML = `<span>${ico('moneta', 2)} ${F.monete}</span><span class="${dc < 0 ? 'meno' : ''}">${ico('castagna', 2)} ${F.cibo}<small>${dc >= 0 ? '+' : ''}${dc}</small></span><span>${ico('albero', 2)} ${F.legna}</span>`; }
   if (!SCELTA){ if (ovAperto() && RPREV && RPREV.s === S){ Object.assign(RPREV, {monete: F.monete, cibo: F.cibo, legna: F.legna}); } else volaNumeri(F); } el('cqMos').innerHTML = '<span class="cq-mt">Mosse</span> ' + Array.from({length:MOSSE_N()}, (_, i) => `<i class="${i < S.mosse ? 'on' : ''}"></i>`).join('');
   el('cqFine').disabled = !!GIOCA || mpAttesa(); el('cqFine').classList.toggle('pronto', S.mosse === 0 && !GIOCA); el('cqDip').disabled = !!GIOCA || mpAttesa();
@@ -9042,7 +9049,7 @@ function dlgStruttura(t){ const F = S.fz[S.io], st = S.terre[t], ks = st.str ? [
 const KDIFV = 'difendi-smerillo-difficile-visto';
 const REGOLE_DIF = () => [
   ['spade', 'Come si vince', 'Prendi gli altri 2 borghi, finisci la Grande Fiera oppure fai la pace con tutti. Le frazioni autonome non servono per vincere.'],
-  ['nebbia', 'Nebbia di guerra', 'Non vedi i soldati delle terre lontane. Usa Esplora (2 monete) prima di attaccare.'],
+  ['nebbia', 'Non vedi lontano', 'Non conosci i soldati delle terre lontane. A volte arriva la nebbia (2 o 3 stagioni): vedi solo le tue terre e gli attacchi a sorpresa hanno +15%. Usa Esplora (2 monete).'],
   ['moneta', 'Soldati da pagare', 'Ogni stagione paghi i soldati e d’inverno mangiano il doppio. Tieni sempre monete e cibo da parte.'],
   ['bandiera', 'Frazioni da tenere', 'Ogni frazione vuole 2 o 3 soldati e la fedeltà scende da sola. Se scende troppo si ribella e diventa autonoma.'],
   ['torre', 'Frazioni autonome', 'Arruolano, alzano le mura, attaccano e fanno razzie. Puoi conquistarle (resteranno ostili) o farci un patto, un’alleanza o commercio.'],
@@ -9210,7 +9217,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
     for (const f in gruppi){ h += `<div class="cq-natt"><div class="cq-nchi">${tag(f)}${gruppi[f].some(e => e.trad) ? '<b class="cq-ntrad">ha rotto il patto</b>' : ''}</div>`;
       h += gruppi[f].map(e => `<div class="cq-nrow ${e.ok ? 'ko' : 'ok'}"><span>${TERRE[e.a] ? TERRE[e.a].nome : ''}</span><b>${e.ok ? 'Persa' : 'Difesa'}</b></div>`).join('') + '</div>'; }
     h += '</div>'; }
-  if (io.length) h += `<div class="cq-nsez"><div class="cq-nh">${ico('bandiera', 2)} Il tuo borgo</div>${io.map(e => `<div class="cq-nmsg ${e.t === 'cresce' || e.t === 'autdif' ? 'ok' : e.t === 'neve' || e.t === 'carattere' || e.t === 'autonoma' || (e.t === 'autatt' && e.vs !== S.io) ? 'info' : 'ko'}">${e.testo}</div>`).join('')}</div>`;
+  if (io.length) h += `<div class="cq-nsez"><div class="cq-nh">${ico('bandiera', 2)} Il tuo borgo</div>${io.map(e => `<div class="cq-nmsg ${e.t === 'cresce' || e.t === 'autdif' ? 'ok' : e.t === 'neve' || e.t === 'nebbia' || e.t === 'carattere' || e.t === 'autonoma' || (e.t === 'autatt' && e.vs !== S.io) ? 'info' : 'ko'}">${e.testo}</div>`).join('')}</div>`;
   if (altri.length) h += `<div class="cq-nsez"><div class="cq-nh">${ico('mappa', 2)} Gli altri borghi</div><div class="cq-nbs">${altriInBreve(altri, tag)}</div></div>`;
   if (!h) h = `<div class="cq-nmsg info">Una stagione tranquilla: nessuno ha attaccato.</div>`;
   ULTIMO_REP = `<span class="kicker">${ico('pergamena', 2)} ${stagione(S.turno)}</span><h2>Cosa è successo</h2><div class="cq-nbody">${h}</div>`;
