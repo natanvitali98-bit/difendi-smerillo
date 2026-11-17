@@ -7414,7 +7414,7 @@ const MOSSE_B = 4, MOSSE_N = () => MOSSE_B + (S && S.mappa === 'grande' ? 1 : S 
 const DIFF = {
   facile:   {nome:'Facile', desc:'Gli altri borghi guadagnano meno e attaccano con prudenza. Tregua di 4 stagioni.', rend:.75, soglia:.08, tregua:4},
   normale:  {nome:'Normale', desc:'Gli altri borghi sono svegli e ambiziosi. Tregua di 2 stagioni.', rend:1.12, soglia:-.03, tregua:2},
-  difficile:{nome:'Difficile', desc:'Guerra vera. Gli altri borghi guadagnano e osano di più. Nebbia di guerra: non vedi i soldati delle terre lontane, devi mandare esploratori. I soldati vogliono la paga ogni stagione e d’inverno mangiano il doppio. I capitani possono morire in battaglia, per sempre. Niente consigli e niente percentuali esatte. Le frazioni conquistate vogliono una promessa. Tregua di 1 stagione.', rend:1.6, soglia:-.1, tregua:1}};
+  difficile:{nome:'Difficile', desc:'Guerra vera. Gli altri borghi guadagnano e osano di più. Nebbia di guerra: non vedi i soldati delle terre lontane, devi mandare esploratori. I soldati vogliono la paga ogni stagione e d’inverno mangiano il doppio. I capitani possono morire in battaglia, per sempre. Niente consigli e niente percentuali esatte. Le frazioni conquistate vogliono una promessa. Tregua di 1 stagione.', rend:1.75, soglia:-.1, tregua:1}};
 const KDIF = 'difendi-smerillo-conquista-dif';
 const DF = () => DIFF[(S && S.dif) || 'normale'] || DIFF.normale;
 // ---- Difficile = guerra seria (solo partita da soli): nebbia, paga dei soldati, inverno duro, capitani mortali, niente aiuti
@@ -7802,7 +7802,7 @@ const capRecl = f => { const c = 4 + 2*S.fz[f].ed.armeria; return assediato(f) ?
 function rendita(f, t = S.turno){ let r = 0, merc = 0; for (const x of terreDi(f)){ const st = S.terre[x]; r += (TERRE[x].rend + (st.str === 'mercato' ? 3*lvS(st) : 0) + (st.str === 'mulino' ? 2*lvS(st) : 0) + ((TERRE[x].fraz || TERRE[x].borgo) ? 2*(prosp(x) - 1) : 0) + (st.ill && RIBELLI() ? 4 : 0))*(st.prom === 'tasse' && RIBELLI() ? .5 : 1); if (st.str === 'mercato') merc++; }
   for (const g of vivi()) if (g !== f && accordo(f, g)) r += 3 + merc + (ANNO() === 'mercanti' ? 2 : 0) - (f === 'sanmartino' ? 1 : 0); if (f === 'ceresola') r += 2;
   for (const g of vivi()) if (g !== f && alleati(f, g)) r += 2;
-  return Math.max(2, Math.round(r*(f === S.io ? 1 : RIV()*(scappa(f) ? .8 : 1)))); }
+  return Math.max(2, Math.round(r*(f === S.io ? 1 : RIV()*(scappa(f) ? .88 : 1)))); }
 // Difficile: il borgo del computer molto più grande degli altri spende di più per tenere l'ordine
 const scappa = f => SERIO() && f !== S.io && S.fz[f] && (() => { const m = terreDi(f).length; return m >= 8 && vivi().every(g => g === f || terreDi(g).length*1.3 <= m); })();
 // ===== il mondo: le tre mappe vere dei borghi, unite da campagna, boschi e frazioni (distanze accorciate) =====
@@ -8541,14 +8541,37 @@ function domino(f, t, ev, sn){ if (!f || !S.fz[f]) return; const altre = IDS.fil
 function cartaFev(t){ const st = S.terre[t]; if (!st.fev || st.own !== S.io) return ''; const E = FEV[st.fev.k], resta = st.fev.scad - S.turno + 1;
   return `<div class="cq-fev"><div class="cq-fevh">${ico(E.ic, 3)}<span><b>${E.tit}</b><small>${resta <= 1 ? 'Ultima stagione per decidere!' : 'Hai ' + resta + ' stagioni per decidere'}</small></span></div><p>${E.testo(t)}</p>
     <div class="cq-fevs">${E.scelte.map(([n, c], i) => `<button type="button" class="big mini${i === E.scelte.length - 1 ? ' alt' : ''}" data-fev="${i}" ${puoCosto(S.io, t, c) ? '' : 'disabled'}>${n}${Object.keys(c).length ? ' · ' + costoTxt(c) : ''}</button>`).join('')}</div></div>`; }
-function aggiornaFedelta(ev, sn){ if (!RIBELLI()) return; aggiornaFedelta0(ev, sn); vitaFrazioni(ev, sn); }
+function aggiornaFedelta(ev, sn){ if (!RIBELLI()) return; aggiornaFedelta0(ev, sn); vitaFrazioni(ev, sn); turnoAutonome(ev, sn); }
+// Difficile: le frazioni autonome giocano anche loro. Arruolano, si vendicano del vecchio padrone, liberano altre frazioni, prendono terre libere
+function turnoAutonome(ev, sn){ if (S.turno < 3) return;
+  const capi = IDS.filter(x => TERRE[x].fraz && !TERRE[x].borgo && !TERRE[x].di && S.terre[x].aut && !S.terre[x].own);
+  for (const g of capi.sort(() => rnd() - .5)){ const C = S.terre[g]; if (!C.aut || C.own) continue;
+    const mem = IDS.filter(x => gruppo(S.terre, x) === g); if (!mem.length) continue;
+    C.sold += 1 + (mem.length >= 4 ? 1 : 0) + (C.libero ? 1 : 0); // arruolano ogni stagione
+    if (C.sold < 6 || rnd() < .35) continue; // a volte aspettano
+    const n = C.sold - 3, nemico = C.ribDa && S.fz[C.ribDa] && S.fz[C.ribDa].vivo ? C.ribDa : null, cand = [];
+    for (const v of new Set(mem.flatMap(x => VIC[x]))){ const sv = S.terre[v], T = TERRE[v]; if (mem.includes(v) || T.borgo || T.di || (sv.aut && !sv.own)) continue;
+      const D = sv.sold, mult = (sv.str === 'torre' ? (sv.dan ? 1.25 : 1.5) : 1)*(sv.ill ? 1.25 : 1), p = D <= 0 ? 1 : n**2.2/(n**2.2 + (D*mult)**2.2);
+      const val = (T.fraz ? 4 : 1) + (sv.own && sv.own === nemico ? 3 : 0) + (sv.own === S.io ? .5 : 0) + T.rend*.3;
+      if (p >= (sv.own === nemico ? .5 : .6)) cand.push({v, p, D, mult, sc: val*p}); }
+    if (!cand.length) continue; cand.sort((a, b) => b.sc - a.sc); const {v, p, D, mult} = cand[0], sv = S.terre[v], vs = sv.own, T = TERRE[v];
+    C.sold -= n; sv.guerra = S.turno; sv.bat = Math.min(3, (sv.bat || 0) + 1); C.guerra = S.turno;
+    const vinto = rnd() < p, rap = D*mult/Math.max(1, n);
+    if (vinto){ const persi = Math.min(n - 1, Math.round(n*Math.min(.8, rap*.6))); sv.own = null; sv.aut = true; sv.prom = null; sv.fed = null; delete sv.fev; delete sv.vuole; sv.sold = n - persi;
+      if (T.fraz){ sv.rib = v; sv.ribDa = vs; sv.ribT = S.turno; (S.leghe = S.leghe || {})[v] = legaDi(g); } else sv.rib = g;
+      if (vs === S.io){ cron(`${TERRE[g].nome} (autonoma) ti strappa ${T.nome}.`, 2); ev.push({t:'autatt', f:null, vs, a:v, snap: sn(), testo: T.fraz ? `La frazione autonoma di ${TERRE[g].nome} attacca ${T.nome} e la <b>libera</b>: ora si unisce alla Lega. L’hai persa!` : `La frazione autonoma di ${TERRE[g].nome} ti attacca e si prende ${T.nome}.`}); }
+      else if (vs){ cron(`${TERRE[g].nome} (autonoma) strappa ${T.nome} a ${FZ[vs].corto}.`, 1); ev.push({t:'autatt', f:null, vs, a:v, snap: sn(), testo: `La frazione autonoma di ${TERRE[g].nome} strappa ${T.nome} a ${FZ[vs].corto}${T.fraz ? ' e la libera' : ''}.`}); }
+      else ev.push({t:'autatt', f:null, vs:null, a:v, snap: sn(), testo: `La frazione autonoma di ${TERRE[g].nome} si allarga: prende ${T.nome}.`});
+      if (vs && T.fraz) domino(vs, v, ev, sn); }
+    else { const persiD = Math.min(D - 1, Math.round(D*Math.min(.7, (1/Math.max(.3, rap))*.35))); sv.sold = Math.max(1, D - persiD);
+      if (vs === S.io){ cron(`${T.nome} respinge l’attacco di ${TERRE[g].nome} (autonoma).`, 1); ev.push({t:'autdif', f:S.io, vs, a:v, snap: sn(), testo: `La frazione autonoma di ${TERRE[g].nome} attacca ${T.nome}, ma i tuoi soldati la respingono${persiD ? ' (ne perdi ' + persiD + ')' : ''}.`}); } } } }
 function aggiornaFedelta0(ev, sn){
   for (const t of IDS){ const sr = S.terre[t]; if (!sr.own && sr.aut && !puoRibellarsi(t) && sr.sold < 5 && rnd() < .35) sr.sold++; }
   for (const t of IDS){ if (!puoRibellarsi(t)) continue; const st = S.terre[t];
     if (!st.own){ if (st.aut && st.sold < 9 && rnd() < .5) st.sold++; if (SERIO() && !st.aut && S.turno > 2){ st.lib = (st.lib || 0) + 1; if (st.lib >= LIB_N && rnd() < .5) autonomia(t, ev, sn); } continue; }
     st.lib = 0;
     const f = st.own, duro = SERIO(), duroIo = duro && f === S.io; let d = st.prom === 'tasse' ? (duroIo ? 2 : 4) : st.prom ? (duroIo ? 1 : 2) : (duroIo ? -1 : 0); const mot = [];
-    if (duro){ const vuole = vuoleSold(t); if (st.sold < vuole){ d -= 2*(vuole - st.sold); mot.push(`vuole almeno ${vuole} soldati a difenderla`); } if (fed(t) >= 70){ d -= 3; mot.push('si è abituata: ora chiede di più'); } }
+    if (duro){ const vuole = vuoleSold(t); if (st.sold < vuole){ d -= 2*(vuole - st.sold); mot.push(`vuole almeno ${vuole} soldati a difenderla`); } if (duroIo && fed(t) >= 70){ d -= 3; mot.push('si è abituata: ora chiede di più'); } }
     if (st.prom === 'protezione' && st.sold < 3){ d -= 22; mot.push('non la stai proteggendo: ci sono meno di 3 soldati'); }
     if (VIC[t].some(v => { const o = S.terre[v].own; return o && o !== f && !alleati(f, o) && !patto(f, o) && S.terre[v].sold > st.sold; })){ d -= 4; mot.push('ha paura dei nemici vicini'); }
     if (st.guerra === S.turno) d -= 6;
@@ -9044,7 +9067,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
   const tag = f => `<span class="cq-ntag" style="--c:${FZ[f].col}">${FZ[f].corto}</span>`;
   const contro = mie.filter(e => e.t === 'att' && e.contro === S.io), gruppi = {};
   contro.forEach(e => { (gruppi[e.f] = gruppi[e.f] || []).push(e); });
-  const io = mie.filter(e => e.t !== 'att' && e.f === S.io || e.t === 'miss' || e.t === 'autonoma' || ((e.t === 'opera') && e.f === S.io));
+  const io = mie.filter(e => e.t !== 'att' && e.f === S.io || e.t === 'miss' || e.t === 'autonoma' || (e.t === 'autatt' && !!e.vs) || ((e.t === 'opera') && e.f === S.io));
   const altri = mie.filter(e => !contro.includes(e) && !io.includes(e));
   const persa = contro.filter(e => e.ok).length, tenute = contro.length - persa;
   const fiere = vivi().filter(g => g !== S.io && (S.fz[g].opera || 0) >= 1);
@@ -9055,7 +9078,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
     for (const f in gruppi){ h += `<div class="cq-natt"><div class="cq-nchi">${tag(f)}${gruppi[f].some(e => e.trad) ? '<b class="cq-ntrad">ha rotto il patto</b>' : ''}</div>`;
       h += gruppi[f].map(e => `<div class="cq-nrow ${e.ok ? 'ko' : 'ok'}"><span>${TERRE[e.a] ? TERRE[e.a].nome : ''}</span><b>${e.ok ? 'Persa' : 'Difesa'}</b></div>`).join('') + '</div>'; }
     h += '</div>'; }
-  if (io.length) h += `<div class="cq-nsez"><div class="cq-nh">${ico('bandiera', 2)} Il tuo borgo</div>${io.map(e => `<div class="cq-nmsg ${e.t === 'cresce' ? 'ok' : e.t === 'neve' || e.t === 'carattere' || e.t === 'autonoma' ? 'info' : 'ko'}">${e.testo}</div>`).join('')}</div>`;
+  if (io.length) h += `<div class="cq-nsez"><div class="cq-nh">${ico('bandiera', 2)} Il tuo borgo</div>${io.map(e => `<div class="cq-nmsg ${e.t === 'cresce' || e.t === 'autdif' ? 'ok' : e.t === 'neve' || e.t === 'carattere' || e.t === 'autonoma' || (e.t === 'autatt' && e.vs !== S.io) ? 'info' : 'ko'}">${e.testo}</div>`).join('')}</div>`;
   if (altri.length) h += `<div class="cq-nsez"><div class="cq-nh">${ico('mappa', 2)} Gli altri borghi</div><div class="cq-nbs">${altriInBreve(altri, tag)}</div></div>`;
   if (!h) h = `<div class="cq-nmsg info">Una stagione tranquilla: nessuno ha attaccato.</div>`;
   ULTIMO_REP = `<span class="kicker">${ico('pergamena', 2)} ${stagione(S.turno)}</span><h2>Cosa è successo</h2><div class="cq-nbody">${h}</div>`;
