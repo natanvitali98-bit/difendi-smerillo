@@ -8550,10 +8550,27 @@ function aggiornaFedelta(ev, sn){ if (!RIBELLI()) return; aggiornaFedelta0(ev, s
 // Difficile: le frazioni autonome giocano anche loro. Arruolano, si vendicano del vecchio padrone, liberano altre frazioni, prendono terre libere
 // difesa totale di una frazione autonoma (rabbia, mura, Lega): serve a lei per capire se è in pericolo
 const autMult = t => 1.6*(1 + .3*(S.terre[t].mura || 0)*(S.terre[t].dan ? .5 : 1));
+const dipF = (g, f) => (g && S.terre[g] && S.terre[g].dipF && S.terre[g].dipF[f]) || {};
+const pattoF = (g, f) => (dipF(g, f).patto || 0) >= S.turno, alleF = (g, f) => (dipF(g, f).alle || 0) >= S.turno;
+// i borghi del computer trattano con le autonome vicine: un patto per stare tranquilli, oppure le pagano per colpire il nemico comune
+function diploAutIA(g, ev, sn){ const C = S.terre[g], mem = membriAut(g); C.dipF = C.dipF || {};
+  for (const f of vivi()){ if (f === S.io || umano(f) || !mem.some(x => VIC[x].some(v => S.terre[v].own === f))) continue; const F = S.fz[f], d = C.dipF[f] = C.dipF[f] || {};
+    if (C.ribDa === f && S.turno - (C.ribT || 0) < 6) continue; if (C.odio && C.odio[f] >= S.turno - 4) continue; if (C.colpi && C.colpi[f] >= S.turno - 3) continue;
+    const nem = daFermare(f), vicinoNem = nem && nem !== f && mem.some(x => VIC[x].some(v => S.terre[v].own === nem));
+    if (vicinoNem && !alleF(g, f) && !(nem === S.io && alleAut(g)) && F.monete >= 18 && rnd() < (S.coal ? .6 : .4)){ F.monete -= 8; C.cassa = (C.cassa || 0) + 8; d.alle = S.turno + 7; d.patto = Math.max(d.patto || 0, S.turno + 7); d.contro = nem;
+      cron(`${FZ[f].corto} paga ${TERRE[g].nome} (autonoma) per allearsi${nem === S.io ? ' contro di te' : ''}.`, nem === S.io ? 2 : 1);
+      if (nem === S.io || VIC[g].some(v => S.terre[v].own === S.io)) ev.push({t:'autatt', f:null, vs: nem === S.io ? S.io : f, a:g, snap: sn(), testo: nem === S.io ? `${FZ[f].corto} ha pagato ${TERRE[g].nome} (autonoma) per allearsi <b>contro di te</b>. Aspettati attacchi da quella parte.` : `${FZ[f].corto} si allea con ${TERRE[g].nome} (autonoma) contro ${FZ[nem].corto}.`}); continue; }
+    if (!pattoF(g, f) && rnd() < .3){ d.patto = S.turno + 5; if (VIC[g].some(v => S.terre[v].own === S.io)) cron(`${FZ[f].corto} fa un patto di pace con ${TERRE[g].nome} (autonoma).`, 1); } } }
+// la Lega delle frazioni: chi è in pericolo riceve soldati, chi è ricca aiuta chi è povera
+function aiutoLega(g){ const L = legaDi(g), C = S.terre[g]; const amici = IDS.filter(h => h !== g && TERRE[h].fraz && S.terre[h].aut && !S.terre[h].own && legaDi(h) === L); if (!amici.length) return 0;
+  let arrivati = 0; for (const h of amici){ const H = S.terre[h]; if (H.sold > 9){ const k = Math.min(3, H.sold - 7); H.sold -= k; C.sold += k; arrivati += k; } } return arrivati; }
 function turnoAutonome(ev, sn){ if (S.turno < 3) return;
+  { // la Lega mette in comune le monete: la più ricca aiuta la più povera
+    const per = {}; for (const x of IDS) if (TERRE[x].fraz && S.terre[x].aut && !S.terre[x].own) (per[legaDi(x)] = per[legaDi(x)] || []).push(x);
+    for (const L in per){ const m = per[L]; if (m.length < 2) continue; m.sort((a, b) => (S.terre[b].cassa || 0) - (S.terre[a].cassa || 0)); const r = S.terre[m[0]], p2 = S.terre[m[m.length - 1]], k = Math.floor(((r.cassa || 0) - (p2.cassa || 0))/3); if (k > 0){ r.cassa -= k; p2.cassa = (p2.cassa || 0) + k; } } }
   const capi = IDS.filter(x => TERRE[x].fraz && !TERRE[x].borgo && !TERRE[x].di && S.terre[x].aut && !S.terre[x].own);
   for (const g of capi.sort(() => rnd() - .5)){ const C = S.terre[g]; if (!C.aut || C.own) continue;
-    const mem = IDS.filter(x => gruppo(S.terre, x) === g); if (!mem.length) continue;
+    const mem = IDS.filter(x => gruppo(S.terre, x) === g); if (!mem.length) continue; diploAutIA(g, ev, sn);
     C.sold += 2 + Math.floor(S.turno/8) + (C.libero ? 1 : 0); // la milizia: qualcuno si arruola sempre
     // l'economia: le terre pagano, la frazione spende per difendersi
     const entrata = 3 + Math.round(mem.reduce((a, x) => a + (TERRE[x].rend || 1), 0)) + 2*prosp(g) + (C.libero ? 4 : 0) + (alleAut(g) ? 2 : 0); C.cassa = (C.cassa || 0) + entrata; if (tribAut(g) && S.fz[S.io] && S.fz[S.io].vivo){ const pg = Math.min(4, C.cassa); C.cassa -= pg; S.fz[S.io].monete += pg; }
@@ -8566,7 +8583,7 @@ function turnoAutonome(ev, sn){ if (S.turno < 3) return;
     if (!pericolo && (C.mura || 0) < 2 && S.turno - (C.ribT || 0) >= 2 && C.cassa >= prezzoMura){ C.cassa -= prezzoMura; C.mura = (C.mura || 0) + 1; C.lvM = S.turno;
       if (VIC[g].some(v => S.terre[v].own === S.io)) cron(`${TERRE[g].nome} (autonoma) alza le mura: livello ${C.mura}.`, 1); }
     { const tieni = pericolo ? 0 : (C.mura || 0) < 2 ? 6 : 0, compra = Math.floor(Math.max(0, C.cassa - tieni)/2); C.sold += compra; C.cassa -= compra*2; } // 2 monete a soldato
-    if (pericolo){ // richiamano i soldati dalle terre tranquille per difendere la frazione
+    if (pericolo){ const al = aiutoLega(g); if (al && VIC[g].some(v => S.terre[v].own === S.io)) cron(`La Lega manda ${al} soldati a difendere ${TERRE[g].nome}.`, 1); // richiamano i soldati dalle terre tranquille per difendere la frazione
       for (const x of mem){ if (x === g) continue; const sx = S.terre[x]; if (sx.sold > 1 && minaccia(x) < sx.sold){ C.sold += sx.sold - 1; sx.sold = 1; } }
       continue; } // in pericolo non si attacca
     { // rinforzano il confine più minacciato, ma la frazione resta ben difesa
@@ -8574,9 +8591,9 @@ function turnoAutonome(ev, sn){ if (S.turno < 3) return;
       if (conf && C.sold > casa + 2){ const serve = Math.min(C.sold - casa, Math.max(2, Math.ceil(minaccia(conf)*.8) - S.terre[conf].sold)); if (serve > 0){ C.sold -= serve; S.terre[conf].sold += serve; } } }
     if (C.sold < 7 || rnd() < .2) continue; // a volte aspettano
     const n = C.sold - Math.max(4, Math.ceil(C.sold*.4), casa); if (n < 3) continue; /* attaccano solo con i soldati che avanzano */ const nemico = C.ribDa && S.fz[C.ribDa] && S.fz[C.ribDa].vivo ? C.ribDa : null, cand = [], razzie = [];
-    for (const v of new Set(mem.flatMap(x => VIC[x]))){ const sv = S.terre[v], T = TERRE[v]; if (mem.includes(v) || T.borgo || T.di || (sv.aut && !sv.own) || (sv.own === S.io && pattoAut(g))) continue;
-      const D = sv.sold, mult = (sv.str === 'torre' ? (sv.dan ? 1.25 : 1.5) : 1)*(sv.ill ? 1.25 : 1), p = D <= 0 ? 1 : n**2.2/(n**2.2 + (D*mult)**2.2);
-      const val = (T.fraz ? 4 : 1) + (sv.own && sv.own === nemico ? 3 : 0) + (sv.own === S.io ? .5 : 0) + (T.rend || 1)*.3 + (sv.own && S.fz[sv.own] && (S.fz[sv.own].guerra || -9) >= S.turno - 1 ? 1.5 : 0) + (alleAut(g) && sv.own && sv.own !== S.io && !alleati(S.io, sv.own) && amic(S.io, sv.own) < 20 ? 2.5 : 0);
+    for (const v of new Set(mem.flatMap(x => VIC[x]))){ const sv = S.terre[v], T = TERRE[v]; if (mem.includes(v) || T.borgo || T.di || (sv.aut && !sv.own) || (sv.own === S.io && pattoAut(g)) || (sv.own && sv.own !== S.io && pattoF(g, sv.own))) continue;
+      const D = sv.sold, mult = (sv.str === 'torre' ? (sv.dan ? 1.25 : 1.5) : 1)*(sv.ill ? 1.25 : 1), nn = n*(VIC[v].some(w => { const h = gruppo(S.terre, w); return h && h !== g && legaDi(h) === legaDi(g); }) ? 1.2 : 1), p = D <= 0 ? 1 : nn**2.2/(nn**2.2 + (D*mult)**2.2);
+      const val = (T.fraz ? 4 : 1) + (sv.own && sv.own === nemico ? 3 : 0) + (sv.own === S.io ? .5 : 0) + (T.rend || 1)*.3 + (sv.own && S.fz[sv.own] && (S.fz[sv.own].guerra || -9) >= S.turno - 1 ? 1.5 : 0) + (alleAut(g) && sv.own && sv.own !== S.io && !alleati(S.io, sv.own) && amic(S.io, sv.own) < 20 ? 2.5 : 0) + (sv.own && vivi().some(h => alleF(g, h) && dipF(g, h).contro === sv.own) ? 3 : 0);
       if (p >= (sv.own === nemico ? .45 : .55)) cand.push({v, p, D, mult, sc: val*p}); else if (sv.own === S.io && !pattoAut(g) && n >= 3) razzie.push(v); }
     if (!cand.length && razzie.length && S.fz[S.io] && rnd() < .6){ // saccheggio: non conquista, ma porta via monete e cibo
       const v = razzie[Math.floor(rnd()*razzie.length)], F = S.fz[S.io], mo = Math.min(F.monete, 3 + Math.floor(n/2)), ci = Math.min(F.cibo, 4 + Math.floor(n/2));
@@ -8634,6 +8651,7 @@ function statoDipAut(t){ const st = S.terre[t], r = relAut(t);
   if (!vicinaIo(t)){ for (const k in out) no(k, 'Serve una tua terra vicina.'); return out; }
   if (odiaIo(t)) for (const k of ['pace', 'alle', 'comm']) no(k, 'L’hai attaccata da poco: non vuole sentirti.');
   if (pattoAut(t)) no('pace', 'Avete già un patto di pace.'); else if (r < 25 && !out.pace) no('pace', 'Non si fida abbastanza: prima commercia con lei.');
+  { const contro = vivi().find(f => f !== S.io && alleF(t, f) && dipF(t, f).contro === S.io); if (contro) no('alle', `È alleata di ${FZ[contro].corto} contro di te.`); }
   if (alleAut(t)) no('alle', 'Siete già alleati.'); else if (!pattoAut(t) && !out.alle) no('alle', 'Prima serve un patto di pace.'); else if (r < 50 && !out.alle) no('alle', 'Il rapporto deve arrivare a 50.'); else if (S.fz[S.io].monete < 8 && !out.alle) no('alle', 'Servono 8 monete.');
   if (st.commT === S.turno && !out.comm) no('comm', 'Avete già commerciato in questa stagione.'); else if (S.fz[S.io].monete < 6 && !out.comm) no('comm', 'Servono 6 monete.');
   if (alleAut(t)) no('trib', 'È tua alleata: non le chiedi soldi.'); else if (tribAut(t)) no('trib', 'Ti sta già pagando.');
@@ -8657,7 +8675,8 @@ function dlgPromessa(){ const t = S.promDa; S.promDa = null; if (!t || !S.terre[
     <div class="cq-proms">${Object.keys(PROMESSE).map(k => `<button type="button" class="cq-prom" data-prom="${k}">${ico(PROMESSE[k].ic, 3)}<span><b>${PROMESSE[k].nome}</b><small>${PROMESSE[k].desc}</small></span></button>`).join('')}</div></div>`, false);
   o.querySelectorAll('[data-prom]').forEach(b => b.onclick = () => { st.prom = b.dataset.prom; suona('stella1'); cron(`${NomeCas()} promette a ${TERRE[t].nome}: «${PROMESSE[st.prom].nome}».`, 1); salva(); chiudiOv(); aggiornaUI(); pannello(); }); }
 function dipAutHtml(t){ const r = relAut(t), stt = statoDipAut(t), st = S.terre[t];
-  const stato = [alleAut(t) ? `alleata ancora ${st.alleIo - S.turno + 1} stagioni` : pattoAut(t) ? `patto di pace ancora ${st.pattoIo - S.turno + 1} stagioni` : '', tribAut(t) ? 'ti paga un tributo' : ''].filter(Boolean).join(' · ');
+  const conF = vivi().filter(f => f !== S.io && (pattoF(t, f) || alleF(t, f))).map(f => (alleF(t, f) ? 'alleata di ' : 'patto con ') + FZ[f].corto);
+  const stato = [...conF, alleAut(t) ? `alleata ancora ${st.alleIo - S.turno + 1} stagioni` : pattoAut(t) ? `patto di pace ancora ${st.pattoIo - S.turno + 1} stagioni` : '', tribAut(t) ? 'ti paga un tributo' : ''].filter(Boolean).join(' · ');
   const B = (k, id, txt) => `<button type="button" class="big mini${k === 'trib' ? ' alt' : ''}" id="${id}" ${stt[k] || S.mosse < 1 ? 'disabled' : ''} title="${stt[k]}">${txt}</button>`;
   const motivi = [...new Set(Object.values(stt).filter(Boolean))].slice(0, 2);
   return `<div class="cq-rel cq-adip">${ico('pergamena', 2)} <b>Diplomazia</b> · rapporto <b>${r}</b>/100${stato ? ' · ' + stato : ''}
@@ -8710,7 +8729,7 @@ function cervello(f, az, news){ const F = S.fz[f], ai = (S.ai = S.ai || {}), me 
   while (az > 0 && giri++ < 10 && !neve()){ let best = null;
     for (const src of terreDi(f)){ const avail = S.terre[src].sold - tieniIn(f, src); if (avail < 2) continue; if (partePace(f, src) && !(CAR(f).tradisce && rnd() < .08)) continue;
       for (const v of VIC[src]){ const o = S.terre[v].own; if (o === f) continue; if (TERRE[v].borgo && eBorgo(v) && (S.turno <= TREGUA() || !puoAssediare(v, f))) continue;
-        if (S.coal && o && o !== S.io && f !== S.io) continue; // nella coalizione i borghi non si attaccano tra loro
+        if (S.coal && o && o !== S.io && f !== S.io) continue; if (!o && S.terre[v].aut && pattoF(gruppo(S.terre, v), f)) continue; // patto con un'autonoma // nella coalizione i borghi non si attaccano tra loro
         const legato = o && (alleati(f, o) || patto(f, o)); if (legato && !(CAR(f).tradisce ? (S.turno > 5 && rnd() < .35) : ((S.fz[o].opera || 0) >= 2 && !alleati(f, o)) || (o === nem && (S.fz[o].opera || 0) >= 1 && amic(f, o) < 50) || (o === S.io && ioInTesta() && amic(f, o) < 45 && rnd() < .3))) continue;
         const assalto = TERRE[v].borgo && eBorgo(v) && o; let n = avail, pr = previsione(f, n, v, null, src); if (pr.p < (assalto ? .36 : soglia - .08)) continue;
         // si manda quasi tutto: l'esercito avanza unito. Si tiene una riserva solo se la terra di partenza è minacciata
@@ -8725,7 +8744,7 @@ function cervello(f, az, news){ const F = S.fz[f], ai = (S.ai = S.ai || {}), me 
       if (r.vinto && best.v === me.obj) me.obj = null; continue; }
     // D. concentrare le forze: se unendo due eserciti un attacco importante diventa sicuro, prima si uniscono
     if (az >= 2){ let pm = null;
-      for (const src of terreDi(f)){ for (const v of VIC[src]){ const o = S.terre[v].own; if (o === f || (o && (patto(f, o) || alleati(f, o)))) continue; if (TERRE[v].borgo && eBorgo(v) && (S.turno <= TREGUA() || !puoAssediare(v, f))) continue;
+      for (const src of terreDi(f)){ for (const v of VIC[src]){ const o = S.terre[v].own; if (o === f || (o && (patto(f, o) || alleati(f, o)))) continue; if (!o && S.terre[v].aut && pattoF(gruppo(S.terre, v), f)) continue; if (TERRE[v].borgo && eBorgo(v) && (S.turno <= TREGUA() || !puoAssediare(v, f))) continue;
           const val = valoreTerra(f, v, nem); if (val < 4) continue; const vis = collegate(f, src); let add = 0, da = null;
           for (const t in vis){ if (t === src) continue; const k = S.terre[t].sold - tieniIn(f, t) - Math.ceil(Math.max(0, rischio(f, t) - S.terre[t].sold)*.5); if (k >= 2 && k > add){ add = k; da = t; } }
           if (!da) continue; const n2 = S.terre[src].sold - tieniIn(f, src) + add; if (n2 < 3) continue; const q = previsione(f, n2, v, null, src);
