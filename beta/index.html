@@ -2568,6 +2568,7 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
 .cq-fedb{display:block;width:100%;height:8px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden}.cq-fedb i{display:block;height:100%}
 .cq-fed .big.mini,.cq-aut .big.mini{align-self:flex-start;margin-top:4px;width:auto}
 .cq-rel.cq-aut{display:block;text-align:left;border-left:3px solid #ffb347;padding-left:8px}
+.cq-adip{display:block;text-align:left;border-left:3px solid #6aa8ff;padding-left:8px;margin-top:6px}.cq-adb{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 4px}.cq-adb .big{width:100%;font-size:14px}.cq-adip small{display:block;opacity:.85}
 .cq-map{flex-wrap:wrap}
 
 .pr-scr{display:flex;align-items:center;gap:12px;width:100%;margin:4px 0 10px;padding:12px 14px;border:3px solid #141433;border-radius:16px;background:linear-gradient(180deg,#ffe27a,#f5b301);color:#141433;font:inherit;box-shadow:0 5px 0 #141433;cursor:pointer;animation:prScr 1.6s ease-in-out infinite}
@@ -8420,7 +8421,10 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
   if (da && MP().marcia){ const lo = lontananza(f, da); if (lo > 4){ const m = Math.max(.76, 1 - .08*(lo - 4)); att *= m; voci.push(`Lontano dalle basi (${lo > 8 ? 'nessuna vicina' : lo + ' terre'}): −${Math.round((1 - m)*100)}%. Una struttura più vicina fa da avamposto`); } }
   if (cap){ let b = 1.05 + .04*(capLiv(cap) - 1); if (haAb(cap, 'fiero')) b *= 1.12; if (!df && haAb(cap, 'volpe')) b *= 1.25; att *= b; voci.push(`${capNome(cap)} guida l’attacco: +${Math.round((b - 1)*100)}%`); if (sp) voci.push(`${cap.nome} conosce le mura: 1 livello in meno, torri a metà`); }
   { const am = vivi().find(h => h !== f && h !== df && alleati(h, f) && VIC[t].some(v => S.terre[v].own === h)); if (am){ att *= 1.15; voci.push(`${FZ[am].corto} è tua alleata e ti aiuta: +15%`); } }
+  if (f === S.io && RIBELLI()){ const gt = !df && S.terre[t].aut ? gruppo(S.terre, t) : null; if (gt && (pattoAut(gt) || alleAut(gt) || tribAut(gt))) voci.push(`Attenzione: rompi il patto con ${TERRE[gt].nome} e la tua reputazione cala`); }
+  if (f === S.io && RIBELLI()){ const ga = VIC[t].map(v => gruppo(S.terre, v)).find(g => g && alleAut(g) && g !== gruppo(S.terre, t)); if (ga){ att *= 1.1; voci.push(`${TERRE[ga].nome} (autonoma) è tua alleata e ti aiuta: +10%`); } }
   let mult = df ? 1 + .2*Ed.armeria : 1; if (df && Ed.armeria) voci.push(`La loro armeria: +${20*Ed.armeria}%`);
+  if (df === S.io && RIBELLI()){ const ga = VIC[t].map(v => gruppo(S.terre, v)).find(g => g && alleAut(g)); if (ga){ mult *= 1.15; voci.push(`${TERRE[ga].nome} (autonoma) è alleata di ${nomeCas()}: +15%`); } }
   if (borgo && df && df !== S.io && !umano(df)){ const cc = capCasa(df); if (cc){ const b2 = 1.06 + .03*capLiv(cc); mult *= b2; voci.push(`${capNome(cc)}, capitano di ${FZ[df].corto}, difende il borgo: +${Math.round((b2 - 1)*100)}%`); } }
   if (borgo){ const mu = Math.max(0, Ed.mura - Ef.meccanico - (sp ? 1 : 0)); if (Ed.mura){ voci.push(`Mura livello ${Ed.mura}` + (Ef.meccanico ? `, i tuoi arieti ne annullano ${Math.min(Ed.mura, Ef.meccanico)}` : '') + (mu ? `: +${30*mu}%` : ': niente bonus')); } mult *= 1 + .3*mu; if (df === 'smerillo'){ mult *= 1.25; voci.push('Smerillo è in alto: +25%'); } if (S.fz[df].assedio){ mult *= .85; voci.push('È sotto assedio da ' + S.fz[df].assedio + (S.fz[df].assedio === 1 ? ' stagione' : ' stagioni') + ': difesa −15%'); } }
   if (S.terre[t].str === 'torre'){ const dz = S.terre[t].dan; mult *= dz ? 1.25 : 1.5; voci.push(dz ? 'Torre di guardia danneggiata: +25%' : 'Torre di guardia: +50%'); }
@@ -8430,7 +8434,7 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
   const dif = D*mult, p = D === 0 ? 1 : Math.max(.02, Math.min(.98, att**2.2/(att**2.2 + dif**2.2)));
   return {p, att, dif, kill, A, D, voci}; }
 const PACE_FIERA = 3, inPace = f => S.turno - (S.fz[f].guerra || -99) >= PACE_FIERA;
-function battaglia(f, da, t, n, cap){ if (cap === undefined && f !== S.io && !umano(f)) cap = capIAscegli(f, n);  if (partePace(f, da)) rompiPromessa(da, 'sei partito all’attacco da lì'); { const g0 = !S.terre[t].own && S.terre[t].aut ? gruppo(S.terre, t) : null; if (g0 && S.terre[g0]) (S.terre[g0].odio = S.terre[g0].odio || {})[f] = S.turno; } const pr = previsione(f, n, t, cap, da), df = S.terre[t].own, guidato = f === S.io && !!CG && CG.k === 3 && t === CG.terra && pr.p >= .3, vinto = guidato || rnd() < pr.p, borgo = eBorgo(t); // il primo attacco della guida riesce: serve a imparare, non a scoraggiare let persiA, persiD; if (df){ S.fz[f].guerra = S.turno; S.fz[df].guerra = S.turno; }
+function battaglia(f, da, t, n, cap){ if (cap === undefined && f !== S.io && !umano(f)) cap = capIAscegli(f, n);  if (partePace(f, da)) rompiPromessa(da, 'sei partito all’attacco da lì'); { const g0 = !S.terre[t].own && S.terre[t].aut ? gruppo(S.terre, t) : null; if (g0 && S.terre[g0]){ (S.terre[g0].odio = S.terre[g0].odio || {})[f] = S.turno; if (f === S.io){ rompiAut(g0); setRel(g0, relAut(g0) - 25); } } } const pr = previsione(f, n, t, cap, da), df = S.terre[t].own, guidato = f === S.io && !!CG && CG.k === 3 && t === CG.terra && pr.p >= .3, vinto = guidato || rnd() < pr.p, borgo = eBorgo(t); // il primo attacco della guida riesce: serve a imparare, non a scoraggiare let persiA, persiD; if (df){ S.fz[f].guerra = S.turno; S.fz[df].guerra = S.turno; }
   S.terre[da].sold -= n; diplomaziaAttacco(f, df); { const st = S.terre[t]; if (st.lv > 1) st.lv--; st.cresc = 0; st.guerra = S.turno; }
   if (vinto){ persiA = pr.kill + Math.min(pr.A - 1, Math.round(pr.A*Math.min(.85, .55*pr.dif/Math.max(.1, pr.att))*(.75 + rnd()*.5))); if (haAb(cap, 'saggio')) persiA = Math.max(pr.kill, Math.round(persiA*.7)); persiD = pr.D; S.terre[t].own = f; S.terre[t].sold = n - persiA; if (!puoRibellarsi(t)){ S.terre[t].aut = false; delete S.terre[t].rib; } dopoPresa(f, t, df);
     if (borgo && df){ eliminato(df, f); if (f === S.io) S.ultB = t; }
@@ -8552,7 +8556,7 @@ function turnoAutonome(ev, sn){ if (S.turno < 3) return;
     const mem = IDS.filter(x => gruppo(S.terre, x) === g); if (!mem.length) continue;
     C.sold += 1 + Math.floor(S.turno/10) + (C.libero ? 1 : 0); // la milizia: qualcuno si arruola sempre
     // l'economia: le terre pagano, la frazione spende per difendersi
-    const entrata = Math.round(mem.reduce((a, x) => a + (TERRE[x].rend || 1), 0)*.7) + 2*prosp(g) + (C.libero ? 3 : 0); C.cassa = (C.cassa || 0) + entrata;
+    const entrata = Math.round(mem.reduce((a, x) => a + (TERRE[x].rend || 1), 0)*.7) + 2*prosp(g) + (C.libero ? 3 : 0); C.cassa = (C.cassa || 0) + entrata; if (tribAut(g) && S.fz[S.io] && S.fz[S.io].vivo){ const pg = Math.min(4, C.cassa); C.cassa -= pg; S.fz[S.io].monete += pg; }
     const minaccia = x => Math.max(0, ...VIC[x].filter(v => S.terre[v].own).map(v => S.terre[v].sold*(S.terre[v].own === C.ribDa ? 1.2 : 1))); // il nemico più forte lì vicino
     // quanti soldati può radunare il borgo nemico più vicino (terre vicine e quelle a due passi)
     const radunabili = (() => { const per = {}; for (const v of new Set([...VIC[g], ...VIC[g].flatMap(x => VIC[x])])){ const o = S.terre[v].own; if (o && o !== S.io || o === S.io) per[o] = (per[o] || 0) + S.terre[v].sold*(VIC[g].includes(v) ? 1 : .6); } return Math.max(0, ...Object.values(per)); })();
@@ -8570,9 +8574,9 @@ function turnoAutonome(ev, sn){ if (S.turno < 3) return;
       if (conf && C.sold > casa + 2){ const serve = Math.min(C.sold - casa, Math.max(2, Math.ceil(minaccia(conf)*.8) - S.terre[conf].sold)); if (serve > 0){ C.sold -= serve; S.terre[conf].sold += serve; } } }
     if (C.sold < 9 || rnd() < .35) continue; // a volte aspettano
     const n = C.sold - Math.max(5, Math.ceil(C.sold/2), casa); if (n < 4) continue; /* attaccano solo con i soldati che avanzano */ const nemico = C.ribDa && S.fz[C.ribDa] && S.fz[C.ribDa].vivo ? C.ribDa : null, cand = [];
-    for (const v of new Set(mem.flatMap(x => VIC[x]))){ const sv = S.terre[v], T = TERRE[v]; if (mem.includes(v) || T.borgo || T.di || (sv.aut && !sv.own)) continue;
+    for (const v of new Set(mem.flatMap(x => VIC[x]))){ const sv = S.terre[v], T = TERRE[v]; if (mem.includes(v) || T.borgo || T.di || (sv.aut && !sv.own) || (sv.own === S.io && pattoAut(g))) continue;
       const D = sv.sold, mult = (sv.str === 'torre' ? (sv.dan ? 1.25 : 1.5) : 1)*(sv.ill ? 1.25 : 1), p = D <= 0 ? 1 : n**2.2/(n**2.2 + (D*mult)**2.2);
-      const val = (T.fraz ? 4 : 1) + (sv.own && sv.own === nemico ? 3 : 0) + (sv.own === S.io ? .5 : 0) + (T.rend || 1)*.3 + (sv.own && S.fz[sv.own] && (S.fz[sv.own].guerra || -9) >= S.turno - 1 ? 1.5 : 0);
+      const val = (T.fraz ? 4 : 1) + (sv.own && sv.own === nemico ? 3 : 0) + (sv.own === S.io ? .5 : 0) + (T.rend || 1)*.3 + (sv.own && S.fz[sv.own] && (S.fz[sv.own].guerra || -9) >= S.turno - 1 ? 1.5 : 0) + (alleAut(g) && sv.own && sv.own !== S.io && !alleati(S.io, sv.own) && amic(S.io, sv.own) < 20 ? 2.5 : 0);
       if (p >= (sv.own === nemico ? .5 : .6)) cand.push({v, p, D, mult, sc: val*p}); }
     if (!cand.length) continue; cand.sort((a, b) => b.sc - a.sc); const {v, p, D, mult} = cand[0], sv = S.terre[v], vs = sv.own, T = TERRE[v];
     C.sold -= n; sv.guerra = S.turno; sv.bat = Math.min(3, (sv.bat || 0) + 1); C.guerra = S.turno; if (vs) (C.colpi = C.colpi || {})[vs] = S.turno; // chi viene attaccato se lo ricorda
@@ -8611,7 +8615,33 @@ function aggiornaFedelta0(ev, sn){
     if (v < 35 && !st.avvisata && (f === S.io || umano(f))){ st.avvisata = true; if (f === S.io) ev.push({t:'malc', f, a:t, snap: sn(), testo:`${TERRE[t].nome} è scontenta${mot.length ? ': ' + mot[0] : ''}. Se non cambia, si ribella.`}); }
     if (v >= 45) st.avvisata = false;
     if (v <= 12 || (v < 28 && rnd() < .2)) ribellione(t, ev, sn); } }
-function puoTrattare(f, t){ const st = S.terre[t]; if (!RIBELLI() || !st.aut || st.own) return 'no'; if (!VIC[t].some(v => S.terre[v].own === f)) return 'lontana';
+// Difficile: diplomazia con le frazioni autonome (pace, alleanza, commercio, tributo)
+const relAut = t => { const st = S.terre[t]; return st.rel != null ? st.rel : (st.ribDa === S.io ? 10 : 35); };
+const setRel = (t, v) => { S.terre[t].rel = Math.max(0, Math.min(100, Math.round(v))); };
+const pattoAut = t => !!t && (S.terre[t].pattoIo || 0) >= S.turno, alleAut = t => !!t && (S.terre[t].alleIo || 0) >= S.turno, tribAut = t => !!t && (S.terre[t].tribIo || 0) >= S.turno;
+const membriAut = t => IDS.filter(x => gruppo(S.terre, x) === t);
+const vicinaIo = t => membriAut(t).some(x => VIC[x].some(v => S.terre[v].own === S.io));
+const forzaIo = t => { const vis = new Set(); let n = 0; for (const x of membriAut(t)) for (const v of VIC[x]) if (S.terre[v].own === S.io && !vis.has(v)){ vis.add(v); n += S.terre[v].sold; } return n; };
+const difAut = t => membriAut(t).reduce((a, x) => a + S.terre[x].sold, 0)*autMult(t);
+const odiaIo = t => !!(S.terre[t].odio && S.terre[t].odio[S.io] >= S.turno - 4);
+function statoDipAut(t){ const st = S.terre[t], r = relAut(t);
+  const out = {pace: '', alle: '', comm: '', trib: ''}; const no = (k, m) => { out[k] = m; };
+  if (!vicinaIo(t)){ for (const k in out) no(k, 'Serve una tua terra vicina.'); return out; }
+  if (odiaIo(t)) for (const k of ['pace', 'alle', 'comm']) no(k, 'L’hai attaccata da poco: non vuole sentirti.');
+  if (pattoAut(t)) no('pace', 'Avete già un patto di pace.'); else if (r < 25 && !out.pace) no('pace', 'Non si fida abbastanza: prima commercia con lei.');
+  if (alleAut(t)) no('alle', 'Siete già alleati.'); else if (!pattoAut(t) && !out.alle) no('alle', 'Prima serve un patto di pace.'); else if (r < 50 && !out.alle) no('alle', 'Il rapporto deve arrivare a 50.'); else if (S.fz[S.io].monete < 8 && !out.alle) no('alle', 'Servono 8 monete.');
+  if (st.commT === S.turno && !out.comm) no('comm', 'Avete già commerciato in questa stagione.'); else if (S.fz[S.io].monete < 6 && !out.comm) no('comm', 'Servono 6 monete.');
+  if (alleAut(t)) no('trib', 'È tua alleata: non le chiedi soldi.'); else if (tribAut(t)) no('trib', 'Ti sta già pagando.');
+  return out; }
+function dipAut(t, k){ const st = S.terre[t], N = TERRE[t].nome, F = S.fz[S.io];
+  if (k === 'pace'){ st.pattoIo = S.turno + 5; setRel(t, relAut(t) + 10); cron(`Patto di pace con ${N} (autonoma) per 6 stagioni.`, 2); return `${N} accetta: per 6 stagioni non vi attaccherete.`; }
+  if (k === 'alle'){ F.monete -= 8; st.alleIo = S.turno + 7; st.pattoIo = Math.max(st.pattoIo || 0, S.turno + 7); setRel(t, relAut(t) + 10); cron(`${N} (autonoma) diventa tua alleata.`, 2); return `${N} è tua alleata per 8 stagioni: difende le tue terre vicine e attacca i tuoi nemici.`; }
+  if (k === 'comm'){ F.monete -= 6; F.cibo += 8; F.legna += 3; st.cassa = (st.cassa || 0) + 6; st.commT = S.turno; setRel(t, relAut(t) + 8); return `Scambio fatto: 6 monete per 8 cibo e 3 legna. ${N} si fida un po’ di più.`; }
+  if (k === 'trib'){ const f2 = forzaIo(t), d2 = difAut(t);
+    if (f2 >= 2*d2){ st.tribIo = S.turno + 3; st.pattoIo = Math.max(st.pattoIo || 0, S.turno + 3); setRel(t, relAut(t) - 20); cron(`${N} (autonoma) accetta di pagarti un tributo.`, 1); return `${N} ha paura dei tuoi ${f2} soldati: ti pagherà fino a 4 monete a stagione per 4 stagioni. Però ti odia di più.`; }
+    setRel(t, relAut(t) - 10); (st.odio = st.odio || {})[S.io] = S.turno; return `${N} rifiuta: i tuoi soldati vicini (${f2}) non le fanno paura. Ora è arrabbiata con te.`; } }
+function rompiAut(g){ const st = S.terre[g]; if (!(pattoAut(g) || alleAut(g) || tribAut(g))) return; delete st.pattoIo; delete st.alleIo; delete st.tribIo; setRel(g, 0); if (S.rep) S.rep[S.io] = Math.max(0, rep(S.io) - 10); cron(`Hai tradito il patto con ${TERRE[g].nome}: la tua reputazione cala.`, 2); }
+function puoTrattare(f, t){ const st = S.terre[t]; if (!RIBELLI() || !st.aut || st.own) return 'no'; if (f !== S.io && alleAut(t)) return 'no'; if (!VIC[t].some(v => S.terre[v].own === f)) return 'lontana';
   if (st.ribDa === f && S.turno - (st.ribT || 0) < (SERIO() ? 8 : 6)) return 'presto'; if (SERIO() && S.turno - (st.ribT || 0) < 4) return 'nuova'; if (SERIO() && st.odio && st.odio[f] >= S.turno - 4) return 'odio';
   if (rep(f) < 40) return 'rep'; if (S.fz[f].monete < prezzoTratta(t)) return 'monete'; return 'ok'; }
 // Difficile: più la frazione autonoma è forte, più costa convincerla a tornare
@@ -8621,10 +8651,17 @@ function dlgPromessa(){ const t = S.promDa; S.promDa = null; if (!t || !S.terre[
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} ${TERRE[t].nome} è tua</span><h2>Che promessa fai a ${TERRE[t].nome}?</h2><p>In difficile le frazioni vogliono una promessa. Se la mantieni restano fedeli. Se non la mantieni si arrabbiano e possono <b>ribellarsi</b> e diventare autonome.</p>
     <div class="cq-proms">${Object.keys(PROMESSE).map(k => `<button type="button" class="cq-prom" data-prom="${k}">${ico(PROMESSE[k].ic, 3)}<span><b>${PROMESSE[k].nome}</b><small>${PROMESSE[k].desc}</small></span></button>`).join('')}</div></div>`, false);
   o.querySelectorAll('[data-prom]').forEach(b => b.onclick = () => { st.prom = b.dataset.prom; suona('stella1'); cron(`${NomeCas()} promette a ${TERRE[t].nome}: «${PROMESSE[st.prom].nome}».`, 1); salva(); chiudiOv(); aggiornaUI(); pannello(); }); }
+function dipAutHtml(t){ const r = relAut(t), stt = statoDipAut(t), st = S.terre[t];
+  const stato = [alleAut(t) ? `alleata ancora ${st.alleIo - S.turno + 1} stagioni` : pattoAut(t) ? `patto di pace ancora ${st.pattoIo - S.turno + 1} stagioni` : '', tribAut(t) ? 'ti paga un tributo' : ''].filter(Boolean).join(' · ');
+  const B = (k, id, txt) => `<button type="button" class="big mini${k === 'trib' ? ' alt' : ''}" id="${id}" ${stt[k] || S.mosse < 1 ? 'disabled' : ''} title="${stt[k]}">${txt}</button>`;
+  const motivi = [...new Set(Object.values(stt).filter(Boolean))].slice(0, 2);
+  return `<div class="cq-rel cq-adip">${ico('pergamena', 2)} <b>Diplomazia</b> · rapporto <b>${r}</b>/100${stato ? ' · ' + stato : ''}
+    <div class="cq-adb">${B('pace', 'cqAdPace', 'Patto di pace')}${B('alle', 'cqAdAlle', 'Alleanza · 8 ' + ico('moneta', 2))}${B('comm', 'cqAdComm', 'Commercia · 6 ' + ico('moneta', 2))}${B('trib', 'cqAdTrib', 'Chiedi tributo')}</div>
+    ${motivi.length ? `<small>${motivi.join(' ')}</small>` : ''}<small>Ogni scelta usa 1 mossa.</small></div>`; }
 function schedaFedelta(t){ if (!RIBELLI() || !puoRibellarsi(t)) return ''; const st = S.terre[t];
   if (st.aut && !st.own){ const q = puoTrattare(S.io, t), perche = {lontana:'Per trattare devi avere una terra vicina.', presto:'Si è appena ribellata a te: non si fida ancora.', rep:'La tua reputazione è troppo bassa: non si fida.', monete:`Servono ${prezzoTratta(t)} monete.`, nuova:'È autonoma da poco: per ora non vuole trattare.', odio:'L’hai attaccata da poco: non vuole sentirti.'}[q];
     return `<div class="cq-rel cq-aut">${ico('bandiera', 2)} <b>Autonoma</b>: si è ribellata${st.ribDa ? ' a ' + (st.ribDa === S.io ? 'te' : FZ[st.ribDa].corto) : ''} e si governa da sola. Si difende con rabbia (+${TERRE[t].fraz ? 40 : 25}%)${st.mura ? `, ha le mura di livello ${st.mura}` : ''}${!nebbia(t) && st.cassa ? ` e ${st.cassa} monete da parte per i soldati` : ''}. Puoi riprenderla con la forza oppure trattare.
-      ${q === 'ok' ? `<button type="button" class="big mini cq-tratta" id="cqTratta" ${S.mosse < 1 ? 'disabled' : ''}>Tratta: ${prezzoTratta(t)} ${ico('moneta', 2)} · 1 mossa</button>` : perche ? `<small>${perche}</small>` : ''}</div>`; }
+      ${q === 'ok' ? `<button type="button" class="big mini cq-tratta" id="cqTratta" ${S.mosse < 1 ? 'disabled' : ''}>Tratta: ${prezzoTratta(t)} ${ico('moneta', 2)} · 1 mossa</button>` : perche ? `<small>${perche}</small>` : ''}</div>${gruppo(S.terre, t) === t ? dipAutHtml(t) : ''}`; }
   if (st.own !== S.io) return st.own ? `<div class="cq-rel">${ico('pergamena', 2)} Promessa di ${FZ[st.own].corto}: ${st.prom ? PROMESSE[st.prom].nome : 'nessuna'}${fed(t) < 35 ? ' · <b style="color:#ff8a6a">è scontenta</b>' : ''}</div>` : '';
   const v = fed(t), col = v >= 60 ? '#5fd36a' : v >= 35 ? '#ffd03a' : '#ff6a5a', P = st.prom && PROMESSE[st.prom];
   const stato = st.prom === 'protezione' ? (st.sold >= 3 ? 'mantenuta: ci sono ' + st.sold + ' soldati' : `<b style="color:#ff8a6a">non mantenuta: servono almeno 3 soldati</b>`) : st.prom === 'pace' ? 'non partire all’attacco da qui' : st.prom === 'tasse' ? 'ti dà metà delle monete' : '';
@@ -8910,6 +8947,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()
   on('cqCos', dlgCostruisci); on('cqRec', () => dlgArruola(S.io)); on('cqRec2', () => dlgArruola(sel)); on('cqStr', () => dlgStruttura(sel)); on('cqRip', () => { const st = S.terre[sel], rc = costoRip(sel); if (!st.dan || !puoPagare(S.fz[S.io], rc[0], rc[1])) return; paga(S.fz[S.io], rc[0], rc[1]); delete st.dan; nasce(sel, st.str); suona('costruisci'); FLASH.push({a:sel, t:0, col:'#f8d048'}); toast(`${STR[st.str].nome} riparat${FEM_STR.includes(st.str) ? 'a' : 'o'}`); usaMossa(); }); on('cqSpo', () => { modo = {tipo:'sposta', da:sel}; suona('tocco'); pannello(); }); on('cqEsp', () => { const F = S.fz[S.io]; if (F.monete < COSTO_ESP) return; F.monete -= COSTO_ESP; S.esplo = S.esplo || {}; S.esplo[sel] = S.turno; tintKey = ''; suona('moneta'); cron(`Un esploratore spia ${TERRE[sel].nome}: ci sono ${sol(S.terre[sel].sold)}.`, 0); salva(); aggiornaUI(); });
   p.querySelectorAll('[data-fev]').forEach(b => b.onclick = () => { const txt = risolviFev(S.io, sel, +b.dataset.fev, []); if (txt){ toast(txt); suona('stella1'); salva(); aggiornaUI(); pannello(); } });
   on('cqAtt', () => dlgAttacco(sel)); on('cqDip1', () => dlgDiplomazia(own)); on('cqMan', () => dlgManda(sel));
+  for (const [id, k] of [['cqAdPace', 'pace'], ['cqAdAlle', 'alle'], ['cqAdComm', 'comm'], ['cqAdTrib', 'trib']]) on(id, () => { const t = sel; if (S.mosse < 1 || statoDipAut(t)[k]) return; const txt = dipAut(t, k); toast(txt); suona(k === 'trib' && !tribAut(t) ? 'tocco' : 'stella1'); usaMossa(); aggiornaUI(); pannello(); });
   on('cqTratta', () => { const t = sel; if (puoTrattare(S.io, t) !== 'ok' || S.mosse < 1) return; tratta(S.io, t); cron(`${TERRE[t].nome} torna con ${nomeCas()} dopo una trattativa.`, 2); suona('stella2'); usaMossa(); aggiornaUI(); if (S.promDa) dlgPromessa(); else pannello(); });
   on('cqNuovaProm', () => { const t = sel; if (S.mosse < 1 || S.fz[S.io].monete < 6) return; S.fz[S.io].monete -= 6; S.promDa = t; usaMossa(); dlgPromessa(); }); }
 function prodTerra(t){ const T = TERRE[t], st = S.terre[t], c = T.c + (st.str === 'fattoria' ? 2*lvS(st) : 0) + (st.str === 'mulino' ? lvS(st) : 0) + ((T.fraz || T.borgo) ? prosp(t) - 1 : 0), l = T.l + (st.str === 'segheria' ? 2*lvS(st) : 0), m = T.rend + (st.str === 'mercato' ? 3*lvS(st) : 0) + (st.str === 'mulino' ? 2*lvS(st) : 0) + ((T.fraz || T.borgo) ? 2*(prosp(t) - 1) : 0);
