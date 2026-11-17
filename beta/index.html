@@ -8451,10 +8451,12 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
   if (cap){ let b = 1.05 + .04*(capLiv(cap) - 1); if (haAb(cap, 'fiero')) b *= 1.12; if (!df && haAb(cap, 'volpe')) b *= 1.25; att *= b; voci.push(`${capNome(cap)} guida l’attacco: +${Math.round((b - 1)*100)}%`); if (sp) voci.push(`${cap.nome} conosce le mura: 1 livello in meno, torri a metà`); }
   { const am = vivi().find(h => h !== f && h !== df && alleati(h, f) && VIC[t].some(v => S.terre[v].own === h)); if (am){ att *= 1.15; voci.push(`${FZ[am].corto} è tua alleata e ti aiuta: +15%`); } }
   if (nebbiaOn()){ att *= 1.15; voci.push('Attacco a sorpresa nella nebbia: +15%'); }
+  const baluardo = SERIO() && df && df !== S.io && t === df && f === S.io && borghiDi(S.io) >= 2;
   if (f === S.io && RIBELLI()){ const gt = !df && S.terre[t].aut ? gruppo(S.terre, t) : null; if (gt && (pattoAut(gt) || alleAut(gt) || tribAut(gt))) voci.push(`Attenzione: rompi il patto con ${TERRE[gt].nome} e la tua reputazione cala`); }
   if (f === S.io && RIBELLI()){ const ga = VIC[t].map(v => gruppo(S.terre, v)).find(g => g && alleAut(g) && g !== gruppo(S.terre, t)); if (ga){ att *= 1.1; voci.push(`${TERRE[ga].nome} (autonoma) è tua alleata e ti aiuta: +10%`); } }
   let mult = df ? 1 + .2*Ed.armeria : 1; if (df && Ed.armeria) voci.push(`La loro armeria: +${20*Ed.armeria}%`);
   if (df === S.io && RIBELLI()){ const ga = VIC[t].map(v => gruppo(S.terre, v)).find(g => g && alleAut(g)); if (ga){ mult *= 1.15; voci.push(`${TERRE[ga].nome} (autonoma) è alleata di ${nomeCas()}: +15%`); } }
+  if (baluardo){ mult *= 1.3; voci.push(`Ultimo baluardo: ${FZ[df].corto} si difende con tutto, +30%`); }
   if (borgo && df && df !== S.io && !umano(df)){ const cc = capCasa(df); if (cc){ const b2 = 1.06 + .03*capLiv(cc); mult *= b2; voci.push(`${capNome(cc)}, capitano di ${FZ[df].corto}, difende il borgo: +${Math.round((b2 - 1)*100)}%`); } }
   if (borgo){ const mu = Math.max(0, Ed.mura - Ef.meccanico - (sp ? 1 : 0)); if (Ed.mura){ voci.push(`Mura livello ${Ed.mura}` + (Ef.meccanico ? `, i tuoi arieti ne annullano ${Math.min(Ed.mura, Ef.meccanico)}` : '') + (mu ? `: +${30*mu}%` : ': niente bonus')); } mult *= 1 + .3*mu; if (df === 'smerillo'){ mult *= 1.25; voci.push('Smerillo è in alto: +25%'); } if (S.fz[df].assedio){ mult *= .85; voci.push('È sotto assedio da ' + S.fz[df].assedio + (S.fz[df].assedio === 1 ? ' stagione' : ' stagioni') + ': difesa −15%'); } }
   if (S.terre[t].str === 'torre'){ const dz = S.terre[t].dan; mult *= dz ? 1.25 : 1.5; voci.push(dz ? 'Torre di guardia danneggiata: +25%' : 'Torre di guardia: +50%'); }
@@ -8806,9 +8808,13 @@ function cammino(p){ return curva(p.map(t => [TERRE[t].x, TERRE[t].y])); }
 const nemico = (f, o) => o !== f && !(o && alleati(f, o));
 const fronte = (f, t) => VIC[t].some(v => nemico(f, S.terre[v].own));
 // pericolo per il borgo: il nemico più forte entro due terre
+const borghiDi = f => Object.keys(FZ).filter(b => S.terre[b] && S.terre[b].own === f).length;
 function minaccia(f){ let m = 0; const vicine = new Set(VIC[f]); for (const v of VIC[f]) for (const w of VIC[v]) vicine.add(w);
+  if (SERIO()){ const per = {}; for (const v of vicine){ const o = S.terre[v].own; if (!o || o === f) continue; const al = alleati(f, o) || patto(f, o); if (al && o !== S.io) continue; // degli alleati del computer ci si fida, del giocatore solo a metà
+      per[o] = (per[o] || 0) + S.terre[v].sold*(1 + .2*S.fz[o].ed.armeria)*(VIC[f].includes(v) ? 1 : .7)*(al ? .6 : 1); }
+    return Math.max(0, ...Object.values(per)); }
   for (const v of vicine){ const o = S.terre[v].own; if (o && o !== f && !alleati(f, o)) m = Math.max(m, S.terre[v].sold*(1 + .2*S.fz[o].ed.armeria)); } return m; }
-const guardiaBorgo = f => S.terre[f].own !== f ? 1 : Math.max(2, Math.ceil(minaccia(f)*.75*(f === S.io && STRAT ? 1 : CAR(f).guardia)/((1 + .3*S.fz[f].ed.mura)*(f === 'smerillo' ? 1.25 : 1))));
+const guardiaBorgo = f => S.terre[f].own !== f ? 1 : Math.max(2, SERIO() && f !== S.io && borghiDi(S.io) >= 2 ? 10 + Math.floor(S.turno/3) : 0, Math.ceil(minaccia(f)*.75*(f === S.io && STRAT ? 1 : CAR(f).guardia)/((1 + .3*S.fz[f].ed.mura)*(f === 'smerillo' ? 1.25 : 1))));
 let STRAT = null; // solo per le prove automatiche: come gioca il 'giocatore'
 function diploIO(){ const io = S.io, F = S.fz[io]; let az = MOSSE_N(), usate = 0; const altri = vivi().filter(g => g !== io); const fid = g => amic(io, g) + (rep(io) - 50)/2;
   for (const g of altri){ if (az <= 1) break; const k = pk(io, g);
@@ -8875,7 +8881,7 @@ function turnoIA(f, ev){ const F = S.fz[f]; let az = f === S.io && AZ_IO != null
 // ===== coalizione (Difficile): se diventi troppo forte, gli altri borghi si alleano contro di te =====
 function coalizione(ev){ if (!SERIO() || !S.fz[S.io] || !S.fz[S.io].vivo) return; const ia = vivi().filter(g => g !== S.io); if (!ia.length) return;
   const mie = terreDi(S.io).length, altri = Math.max(...ia.map(g => terreDi(g).length)), sm = soldDi(S.io), sa = Math.max(...ia.map(g => soldDi(g)));
-  const forte = mie >= IDS.length*.3 || (mie >= 10 && mie > altri*1.5) || (sm >= 20 && sm > sa*1.6), calmo = mie < IDS.length*.22 && mie <= altri*1.15 && sm <= sa*1.3;
+  const forte = borghiDi(S.io) >= 2 || mie >= IDS.length*.3 || (mie >= 10 && mie > altri*1.5) || (sm >= 20 && sm > sa*1.6), calmo = borghiDi(S.io) < 2 && mie < IDS.length*.22 && mie <= altri*1.15 && sm <= sa*1.3;
   if (!S.coal && forte){ S.coal = S.turno; for (const g of ia){ const k = pk(g, S.io); delete S.all[k]; delete S.patti[k]; if (S.acc) delete S.acc[k]; setAmic(g, S.io, Math.min(amic(g, S.io), 20)); for (const h of ia) if (h !== g) S.all[pk(g, h)] = true; }
     cron(`${ia.map(g => FZ[g].corto).join(' e ')} si alleano contro ${nomeCas()}: nasce la coalizione.`, 3);
     ev.push({t:'coal', f: ia[0], a: S.io, snap: JSON.parse(JSON.stringify(S.terre)), testo: `Sei diventato troppo forte: ${ia.map(g => FZ[g].corto).join(' e ')} rompono i patti con te e si alleano per fermarti. Ora attaccheranno insieme le tue terre.`}); }
@@ -8899,6 +8905,7 @@ function calcolaStagione(ev, tutti = false){ coalizione(ev);
   S.missioni = (S.missioni || []).filter(mi => { if (S.turno < mi.scade || !S.fz[mi.f].vivo) return S.fz[mi.f].vivo; setAmic(S.io, mi.f, amic(S.io, mi.f) - 10); S.rep[S.io] = Math.max(0, rep(S.io) - 3); ev.push({t:'miss', f:mi.f, snap: sn(), testo:`Non hai aiutato ${FZ[mi.f].corto} contro ${FZ[mi.contro].corto}: è delusa`}); return false; });
   // la stagione nuova: entrate, cibo per i soldati, legna
   S.turno++; S.mosse = MOSSE_N(); S.scambi = 0;
+  if (SERIO() && borghiDi(S.io) >= 2) for (const f of vivi()) if (f !== S.io && S.terre[f].own === f){ S.terre[f].sold += 3; if (!S.balT){ S.balT = S.turno; cron(`${FZ[f].corto} è l’ultimo borgo libero: tutti prendono le armi.`, 2); } }
   if (SERIO()){ // il tempo: ogni tanto arriva la nebbia (più spesso in autunno e inverno), dura 2 o 3 stagioni
     if (S.neb && S.turno > S.neb.fino){ delete S.neb; S.nebFine = S.turno; ev.push({t:'nebbia', f:S.io, snap: sn(), testo:'La nebbia si alza: torni a vedere le terre vicine.'}); }
     else if (!S.neb && S.turno >= 4 && S.turno - (S.nebFine || -9) >= 4 && rnd() < [.1, 0, .3, .25][STAG()]){ const dur = rnd() < .4 ? 3 : 2; S.neb = {fino: S.turno + dur - 1}; cron(`Arriva la nebbia per ${dur} stagioni.`, 1);
@@ -9054,7 +9061,7 @@ const REGOLE_DIF = () => [
   ['bandiera', 'Frazioni da tenere', 'Ogni frazione vuole 2 o 3 soldati e la fedeltà scende da sola. Se scende troppo si ribella e diventa autonoma.'],
   ['torre', 'Frazioni autonome', 'Arruolano, alzano le mura, attaccano e fanno razzie. Puoi conquistarle (resteranno ostili) o farci un patto, un’alleanza o commercio.'],
   ['coppa', 'Fermare la Fiera', 'Se un borgo costruisce la Grande Fiera, prendigli una frazione: la Fiera torna indietro di una fase.'],
-  ['attenzione', 'Coalizione', 'Se diventi troppo forte, gli altri borghi si alleano contro di te e pagano le autonome per attaccarti.'],
+  ['attenzione', 'Coalizione', 'Se diventi troppo forte o prendi un secondo borgo, gli altri rompono i patti con te e si alleano. L’ultimo borgo libero si difende con tutto (+30% e nuovi soldati ogni stagione).'],
   ['teschio', 'Capitani mortali', 'Un capitano che perde una battaglia può morire, per sempre.']];
 function dlgDifficile(dopo){ const o = ov(`<div class="dlg box cq-dlg cq-difv"><span class="kicker">${ico('teschio', 2)} Modalità Difficile</span><h2>Qui le regole cambiano</h2><div class="cq-bil">${REGOLE_DIF().map(([i, t, d]) => `<span>${ico(i, 3)}</span><span><b>${t}</b><small>${d}</small></span>`).join('')}</div><button class="big" id="cqNo">Ho capito, si comincia!</button></div>`);
   try { localStorage.setItem(KDIFV, '1'); } catch(e){} o.querySelector('#cqNo').onclick = () => { chiudiOv(); if (dopo) dopo(); }; }
