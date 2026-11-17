@@ -7764,7 +7764,7 @@ const ANNO = () => (S && S.anno) || 'calmo';
 // sulle mappe grandi la Fiera serve un territorio largo: per ogni fase servono più terre
 const terreFiera = fase => S && (S.mappa === 'enorme' || S.mappa === 'grande') ? Math.ceil(IDS.length*[.1, .15, .2][fase]) : 0;
 const fieraOk = f => !attesaFiera(f) && terreDi(f).length >= terreFiera(S.fz[f].opera || 0);
-const attesaFiera = f => { const F = S.fz[f], gap = S.mappa === 'enorme' ? 3 : S.mappa === 'grande' ? 2 : 0; return F && F.opera && F.operaT && gap ? Math.max(0, gap - (S.turno - F.operaT)) : 0; };
+const attesaFiera = f => { const F = S.fz[f], gap = (S.mappa === 'enorme' ? 3 : S.mappa === 'grande' ? 2 : 0) + (SERIO() ? 1 : 0); return F && F.opera && F.operaT && gap ? Math.max(0, gap - (S.turno - F.operaT)) : 0; };
 const costoOpera = fase => { const o = OPERA[fase]; if (!o) return null; const m = (ANNO() === 'fiera' ? .6 : 1)*(S && S.veloce ? .6 : 1)*(S && S.mappa === 'enorme' ? 1.7 : S && S.mappa === 'grande' ? 1.3 : 1); return m !== 1 ? o.map(v => Math.round(v*m)) : o; };
 const neve = () => ANNO() === 'inverno' && (S.turno - 1) % 4 === 3; // le tre fasi della Grande Fiera: monete, legna, cibo
 const patto = (a, b) => !!(S.patti && S.patti[pk(a, b)] >= S.turno);
@@ -8436,7 +8436,7 @@ function previsione(f, n, t, cap, da){ const df = S.terre[t].own, D = S.terre[t]
 const PACE_FIERA = 3, inPace = f => S.turno - (S.fz[f].guerra || -99) >= PACE_FIERA;
 function battaglia(f, da, t, n, cap){ if (cap === undefined && f !== S.io && !umano(f)) cap = capIAscegli(f, n);  if (partePace(f, da)) rompiPromessa(da, 'sei partito all’attacco da lì'); { const g0 = !S.terre[t].own && S.terre[t].aut ? gruppo(S.terre, t) : null; if (g0 && S.terre[g0]){ (S.terre[g0].odio = S.terre[g0].odio || {})[f] = S.turno; if (f === S.io){ rompiAut(g0); setRel(g0, relAut(g0) - 25); } } } const pr = previsione(f, n, t, cap, da), df = S.terre[t].own, guidato = f === S.io && !!CG && CG.k === 3 && t === CG.terra && pr.p >= .3, vinto = guidato || rnd() < pr.p, borgo = eBorgo(t); // il primo attacco della guida riesce: serve a imparare, non a scoraggiare let persiA, persiD; if (df){ S.fz[f].guerra = S.turno; S.fz[df].guerra = S.turno; }
   S.terre[da].sold -= n; diplomaziaAttacco(f, df); { const st = S.terre[t]; if (st.lv > 1) st.lv--; st.cresc = 0; st.guerra = S.turno; }
-  if (vinto){ persiA = pr.kill + Math.min(pr.A - 1, Math.round(pr.A*Math.min(.85, .55*pr.dif/Math.max(.1, pr.att))*(.75 + rnd()*.5))); if (haAb(cap, 'saggio')) persiA = Math.max(pr.kill, Math.round(persiA*.7)); persiD = pr.D; S.terre[t].own = f; S.terre[t].sold = n - persiA; if (!puoRibellarsi(t)){ S.terre[t].aut = false; delete S.terre[t].rib; } dopoPresa(f, t, df);
+  if (vinto){ persiA = pr.kill + Math.min(pr.A - 1, Math.round(pr.A*Math.min(.85, .55*pr.dif/Math.max(.1, pr.att))*(.75 + rnd()*.5))); if (haAb(cap, 'saggio')) persiA = Math.max(pr.kill, Math.round(persiA*.7)); persiD = pr.D; S.terre[t].own = f; S.terre[t].sold = n - persiA; if (!puoRibellarsi(t)){ S.terre[t].aut = false; delete S.terre[t].rib; } dopoPresa(f, t, df); colpoFiera(df, t, f);
     if (borgo && df){ eliminato(df, f); if (f === S.io) S.ultB = t; }
     if (f === S.io){ if (borgo && df) cron(`${NomeCas()} conquista ${FZ[df].nome}.`, 3); else if (TERRE[t].fraz) cron(`${NomeCas()} prende la frazione di ${TERRE[t].nome}.`, 2); else if (df && TERRE[t].di === df) cron(`${NomeCas()} strappa a ${FZ[df].corto} ${TERRE[t].nome.charAt(0).toLowerCase() + TERRE[t].nome.slice(1)}.`, 1); }
     else if (df === S.io) cron(`${FZ[f].corto} toglie ${TERRE[t].fraz ? 'la frazione di ' + TERRE[t].nome : TERRE[t].nome.charAt(0).toLowerCase() + TERRE[t].nome.slice(1)} ${aCas()}.`, TERRE[t].fraz ? 2 : 1); }
@@ -8467,7 +8467,11 @@ const fed = t => { const v = S.terre[t].fed; return v == null ? 60 : v; };
 const tieniIn = (f, t) => t === f ? guardiaBorgo(f) : (puoRibellarsi(t) && S.terre[t].own === f && S.terre[t].prom === 'protezione' ? 3 : SERIO() ? vuoleSold(t) : 1);
 const partePace = (f, t) => puoRibellarsi(t) && S.terre[t].own === f && S.terre[t].prom === 'pace';
 function promettiIA(f, t){ if (cervelloOn(f, null) && t){ return S.terre[t].sold >= 4 && !VIC[t].some(v => S.terre[v].own && S.terre[v].own !== f) ? 'protezione' : 'tasse'; } const c = S.car && S.car[f]; if (c === 'mercante' || c === 'timoroso') return 'tasse'; if (c === 'traditore') return rnd() < .5 ? 'pace' : 'tasse'; return rnd() < .6 ? 'protezione' : 'tasse'; }
-function dopoPresa(f, t, df){ if (!puoRibellarsi(t)) return; const st = S.terre[t], eraAut = st.aut; st.aut = false; st.ribDa = null; st.fed = eraAut ? (SERIO() ? 22 : 40) : df ? 45 : 55; if (eraAut && SERIO()){ st.ostile = S.turno + 4; delete st.mura; delete st.cassa; for (const x of IDS){ const sx = S.terre[x]; if (x !== t && TERRE[x].fraz && sx.aut && !sx.own){ (sx.odio = sx.odio || {})[f] = S.turno; if (f === S.io) setRel(x, relAut(x) - 15); } } } st.prom = null; st.avvisata = false;
+// Difficile: chi prepara la Grande Fiera e perde una frazione torna indietro di una fase; se perde una terra, i lavori si fermano
+function colpoFiera(df, t, chi){ if (!SERIO() || !df || !S.fz[df] || !(S.fz[df].opera > 0) || S.fz[df].opera >= 3) return; const F = S.fz[df], da = chi && FZ[chi] ? (chi === S.io ? 'tu' : FZ[chi].corto) : TERRE[chi] ? TERRE[chi].nome : 'qualcuno';
+  if (TERRE[t].fraz && !TERRE[t].borgo && FZ[chi] && S.turno - (F.colpoT || -9) >= 3){ F.colpoT = S.turno; F.opera--; F.operaT = S.turno; cron(`${df === S.io ? 'La tua' : 'La'} Grande Fiera${df === S.io ? '' : ' di ' + FZ[df].corto} torna indietro: persa ${TERRE[t].nome} (fase ${F.opera} di 3).`, 2); }
+  }
+function dopoPresa(f, t, df){ if (!puoRibellarsi(t)) return; const st = S.terre[t], eraAut = st.aut; st.aut = false; st.ribDa = null; st.fed = eraAut ? (SERIO() ? (f === S.io ? 22 : 34) : 40) : df ? 45 : 55; if (eraAut && SERIO()){ st.ostile = S.turno + 4; delete st.mura; delete st.cassa; for (const x of IDS){ const sx = S.terre[x]; if (x !== t && TERRE[x].fraz && sx.aut && !sx.own){ (sx.odio = sx.odio || {})[f] = S.turno; if (f === S.io) setRel(x, relAut(x) - 15); } } } st.prom = null; st.avvisata = false;
   if (f === S.io && !S.sim) S.promDa = t; else st.prom = promettiIA(f, t); }
 function rompiPromessa(t, perche){ const st = S.terre[t]; if (!st.prom) return; const f = st.own; st.prom = null; st.fed = Math.max(0, fed(t) - 40); st.tradita = S.turno;
   if (f === S.io){ cron(`${NomeCas()} rompe la promessa fatta a ${TERRE[t].nome}.`, 2); try { toast(`Hai rotto la promessa a ${TERRE[t].nome}: ${perche}. Ora è molto arrabbiata.`); } catch(e){} } }
@@ -8598,25 +8602,26 @@ function turnoAutonome(ev, sn){ if (S.turno < 3) return;
     if (!cand.length && razzie.length && S.fz[S.io] && rnd() < .6){ // saccheggio: non conquista, ma porta via monete e cibo
       const v = razzie[Math.floor(rnd()*razzie.length)], F = S.fz[S.io], mo = Math.min(F.monete, 3 + Math.floor(n/2)), ci = Math.min(F.cibo, 4 + Math.floor(n/2));
       F.monete -= mo; F.cibo -= ci; C.cassa += mo; S.terre[v].bat = Math.min(3, (S.terre[v].bat || 0) + .5); (C.colpi = C.colpi || {})[S.io] = S.turno;
-      cron(`${TERRE[g].nome} (autonoma) saccheggia ${TERRE[v].nome}.`, 2); ev.push({t:'autatt', f:null, vs:S.io, a:v, snap: sn(), testo:`La frazione autonoma di ${TERRE[g].nome} fa una razzia a ${TERRE[v].nome}: ti porta via ${[mo ? mo + ' monete' : '', ci ? ci + ' cibo' : ''].filter(Boolean).join(' e ') || 'poco o niente, ma ha rovinato i campi'}. Difendi meglio il confine o fai un patto con lei.`}); continue; }
+      cron(`${TERRE[g].nome} (autonoma) saccheggia ${TERRE[v].nome}.`, 2); ev.push({t:'autatt', f:null, vs:S.io, da:g, ok:true, a:v, snap: sn(), testo:`La frazione autonoma di ${TERRE[g].nome} fa una razzia a ${TERRE[v].nome}: ti porta via ${[mo ? mo + ' monete' : '', ci ? ci + ' cibo' : ''].filter(Boolean).join(' e ') || 'poco o niente, ma ha rovinato i campi'}. Difendi meglio il confine o fai un patto con lei.`}); continue; }
     if (!cand.length) continue; cand.sort((a, b) => b.sc - a.sc); const {v, p, D, mult} = cand[0], sv = S.terre[v], vs = sv.own, T = TERRE[v];
     C.sold -= n; sv.guerra = S.turno; sv.bat = Math.min(3, (sv.bat || 0) + 1); C.guerra = S.turno; if (vs) (C.colpi = C.colpi || {})[vs] = S.turno; // chi viene attaccato se lo ricorda
     const vinto = rnd() < p, rap = D*mult/Math.max(1, n);
     if (vinto){ const persi = Math.min(n - 1, Math.round(n*Math.min(.8, rap*.6))); sv.own = null; sv.aut = true; sv.prom = null; sv.fed = null; delete sv.fev; delete sv.vuole; sv.sold = n - persi;
       if (T.fraz){ sv.rib = v; sv.ribDa = vs; sv.ribT = S.turno; (S.leghe = S.leghe || {})[v] = legaDi(g); } else sv.rib = g;
-      if (vs === S.io){ cron(`${TERRE[g].nome} (autonoma) ti strappa ${T.nome}.`, 2); ev.push({t:'autatt', f:null, vs, a:v, snap: sn(), testo: T.fraz ? `La frazione autonoma di ${TERRE[g].nome} attacca ${T.nome} e la <b>libera</b>: ora si unisce alla Lega. L’hai persa!` : `La frazione autonoma di ${TERRE[g].nome} ti attacca e si prende ${T.nome}.`}); }
-      else if (vs){ cron(`${TERRE[g].nome} (autonoma) strappa ${T.nome} a ${FZ[vs].corto}.`, 1); ev.push({t:'autatt', f:null, vs, a:v, snap: sn(), testo: `La frazione autonoma di ${TERRE[g].nome} strappa ${T.nome} a ${FZ[vs].corto}${T.fraz ? ' e la libera' : ''}.`}); }
-      else ev.push({t:'autatt', f:null, vs:null, a:v, snap: sn(), testo: `La frazione autonoma di ${TERRE[g].nome} si allarga: prende ${T.nome}.`});
-      if (vs && T.fraz) domino(vs, v, ev, sn); }
+      if (vs === S.io){ cron(`${TERRE[g].nome} (autonoma) ti strappa ${T.nome}.`, 2); ev.push({t:'autatt', f:null, vs, da:g, ok:true, a:v, snap: sn(), testo: T.fraz ? `La frazione autonoma di ${TERRE[g].nome} attacca ${T.nome} e la <b>libera</b>: ora si unisce alla Lega. L’hai persa!` : `La frazione autonoma di ${TERRE[g].nome} ti attacca e si prende ${T.nome}.`}); }
+      else if (vs){ cron(`${TERRE[g].nome} (autonoma) strappa ${T.nome} a ${FZ[vs].corto}.`, 1); ev.push({t:'autatt', f:null, vs, da:g, ok:true, a:v, snap: sn(), testo: `La frazione autonoma di ${TERRE[g].nome} strappa ${T.nome} a ${FZ[vs].corto}${T.fraz ? ' e la libera' : ''}.`}); }
+      else ev.push({t:'autatt', f:null, vs:null, da:g, ok:true, a:v, snap: sn(), testo: `La frazione autonoma di ${TERRE[g].nome} si allarga: prende ${T.nome}.`});
+      if (vs && T.fraz) domino(vs, v, ev, sn); if (vs) colpoFiera(vs, v, g); }
     else { const persiD = Math.min(D - 1, Math.round(D*Math.min(.7, (1/Math.max(.3, rap))*.35))); sv.sold = Math.max(1, D - persiD);
-      if (vs === S.io){ cron(`${T.nome} respinge l’attacco di ${TERRE[g].nome} (autonoma).`, 1); ev.push({t:'autdif', f:S.io, vs, a:v, snap: sn(), testo: `La frazione autonoma di ${TERRE[g].nome} attacca ${T.nome}, ma i tuoi soldati la respingono${persiD ? ' (ne perdi ' + persiD + ')' : ''}.`}); } } } }
+      if (vs === S.io){ cron(`${T.nome} respinge l’attacco di ${TERRE[g].nome} (autonoma).`, 1); ev.push({t:'autdif', f:S.io, vs, da:g, ok:false, a:v, snap: sn(), testo: `La frazione autonoma di ${TERRE[g].nome} attacca ${T.nome}, ma i tuoi soldati la respingono${persiD ? ' (ne perdi ' + persiD + ')' : ''}.`}); }
+      else if (vs) ev.push({t:'autatt', f:null, vs, da:g, ok:false, a:v, snap: sn(), testo:`La frazione autonoma di ${TERRE[g].nome} attacca ${T.nome} di ${FZ[vs].corto}, ma viene respinta.`}); } } }
 function aggiornaFedelta0(ev, sn){
   for (const t of IDS){ const sr = S.terre[t]; if (!sr.own && sr.aut && !puoRibellarsi(t) && sr.sold < 5 && rnd() < .35) sr.sold++; }
   for (const t of IDS){ if (!puoRibellarsi(t)) continue; const st = S.terre[t];
     if (!st.own){ if (st.aut && st.sold < 9 && rnd() < .5) st.sold++; if (SERIO() && !st.aut && S.turno > 2){ st.lib = (st.lib || 0) + 1; if (st.lib >= LIB_N && rnd() < .5) autonomia(t, ev, sn); } continue; }
     st.lib = 0;
     const f = st.own, duro = SERIO(), duroIo = duro && f === S.io; let d = st.prom === 'tasse' ? (duroIo ? 2 : 4) : st.prom ? (duroIo ? 1 : 2) : (duroIo ? -1 : 0); const mot = [];
-    if (duro && st.ostile >= S.turno){ d -= 4; mot.push('l’hai presa con la forza: la gente non ti accetta'); }
+    if (duroIo && st.ostile >= S.turno){ d -= 4; mot.push('l’hai presa con la forza: la gente non ti accetta'); }
     if (duro){ const vuole = vuoleSold(t); if (st.sold < vuole){ d -= 2*(vuole - st.sold); mot.push(`vuole almeno ${vuole} soldati a difenderla`); } if (duroIo && fed(t) >= 70){ d -= 3; mot.push('si è abituata: ora chiede di più'); } }
     if (st.prom === 'protezione' && st.sold < 3){ d -= 22; mot.push('non la stai proteggendo: ci sono meno di 3 soldati'); }
     if (VIC[t].some(v => { const o = S.terre[v].own; return o && o !== f && !alleati(f, o) && !patto(f, o) && S.terre[v].sold > st.sold; })){ d -= 4; mot.push('ha paura dei nemici vicini'); }
@@ -8900,6 +8905,7 @@ function passo(){ const G = GIOCA; if (!G) return; if (G.i >= G.ev.length){ GIOC
   const e = G.ev[G.i++]; el('cqToast').textContent = e.testo; el('cqToast').className = 'cq-toast on';
   if (e.t === 'att' && !visibile(e.a)) guarda(e.a);
   if (e.t === 'att'){ const col = FZ[e.f].col; ANIM.push({pts: stradaVerso(e.da, e.a), t:0, dur:.75, col, fine: () => { VISTA = e.snap; FLASH.push({a:e.a, t:0, col: e.ok ? col : '#f8f8f0'}); suona(e.ok ? 'boom' : 'tonfo'); setTimeout(passo, 520); }}); }
+  else if ((e.t === 'autatt' || e.t === 'autdif') && e.da && TERRE[e.da]){ if (!visibile(e.a)) guarda(e.a); const col = colAut(S.terre, e.da) || colAut(e.snap || S.terre, e.da) || '#ffb347'; ANIM.push({pts: stradaVerso(e.da, e.a), t:0, dur:.75, col, fine: () => { VISTA = e.snap; FLASH.push({a:e.a, t:0, col: e.ok ? col : '#f8f8f0'}); suona(e.ok ? 'boom' : 'tonfo'); setTimeout(passo, 520); }}); }
   else if (e.t === 'mov'){ if (!visibile(e.a) && !visibile(e.da)){ VISTA = e.snap; setTimeout(passo, 10); return; } ANIM.push({pts: cammino(e.p), t:0, dur:.55, col:FZ[e.f].col, fine: () => { VISTA = e.snap; setTimeout(passo, 120); }}); }
   else if ((e.t === 'str' || e.t === 'costr' || e.t === 'opera') && e.a && visibile(e.a)){ VISTA = e.snap; nasce(e.a, e.k); suona('costruisci'); setTimeout(passo, 750); }
   else { VISTA = e.snap; if (!e.muto) suona(e.t === 'costr' ? 'costruisci' : e.t === 'regalo' ? 'moneta' : 'flip'); setTimeout(passo, e.muto ? 260 : 700); } }
@@ -8977,7 +8983,7 @@ function pannello(){ const p = el('cqPan'); if (!p || !S) return; if (mpAttesa()
 function prodTerra(t){ const T = TERRE[t], st = S.terre[t], c = T.c + (st.str === 'fattoria' ? 2*lvS(st) : 0) + (st.str === 'mulino' ? lvS(st) : 0) + ((T.fraz || T.borgo) ? prosp(t) - 1 : 0), l = T.l + (st.str === 'segheria' ? 2*lvS(st) : 0), m = T.rend + (st.str === 'mercato' ? 3*lvS(st) : 0) + (st.str === 'mulino' ? 2*lvS(st) : 0) + ((T.fraz || T.borgo) ? 2*(prosp(t) - 1) : 0);
   return [m ? m + ' ' + (m === 1 ? 'moneta' : 'monete') : '', c ? c + ' cibo' : '', l ? l + ' legna' : ''].filter(Boolean).join(', ') + ' a stagione'; }
 function consigli(){ const f = S.io, F = S.fz[f], dc = prodCibo(f, S.turno + 1) - mangia(f), L = [];
-  const fo = vivi().find(g => g !== f && (S.fz[g].opera || 0) >= 1); if (fo) L.push(`${ico('attenzione', 2)} ${FZ[fo].corto} costruisce la Grande Fiera (${S.fz[fo].opera}/3): attacca le sue terre per fermarla.`);
+  const fo = vivi().find(g => g !== f && (S.fz[g].opera || 0) >= 1); if (fo) L.push(`${ico('attenzione', 2)} ${FZ[fo].corto} costruisce la Grande Fiera (${S.fz[fo].opera}/3): ${SERIO() ? 'prendigli una frazione e la Fiera torna indietro di una fase' : 'attacca le sue terre per fermarla'}.`);
   if (dc < 0) L.push(`${ico('castagna', 2)} Il cibo cala di ${-dc} a stagione. Pianta un <b>Castagneto</b> su un campo (sulla mappa hanno la castagna) o scambia al mercato.`);
   if (F.legna < 8 && prodLegna(f) < 4) L.push(`${ico('albero', 2)} Ti serve legna: costruisci una <b>Segheria</b> in un bosco (sulla mappa hanno l’albero) o scambia al mercato.`);
   if (F.monete >= 45) L.push(`${ico('moneta', 2)} Hai tante monete: migliora le strutture o costruisci la <b>Grande Fiera</b> nel tuo borgo.`);
@@ -9157,7 +9163,7 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
   const persa = contro.filter(e => e.ok).length, tenute = contro.length - persa;
   const fiere = vivi().filter(g => g !== S.io && (S.fz[g].opera || 0) >= 1);
   let h = '';
-  if (fiere.length) h += fiere.map(g => `<div class="cq-nalarm">${ico('attenzione', 2)} <span><b>${FZ[g].corto} costruisce la Grande Fiera: fase ${S.fz[g].opera} di 3.</b> Se la finisce vince. Attacca una sua terra per fermarla.</span></div>`).join('');
+  if (fiere.length) h += fiere.map(g => `<div class="cq-nalarm">${ico('attenzione', 2)} <span><b>${FZ[g].corto} costruisce la Grande Fiera: fase ${S.fz[g].opera} di 3.</b> Se la finisce vince. ${SERIO() ? 'Prendigli una frazione: la Fiera torna indietro di una fase.' : 'Attacca una sua terra per fermarla.'}</span></div>`).join('');
   if (contro.length){
     h += `<div class="cq-nsez"><div class="cq-nh">${ico('spade', 2)} Ti hanno attaccato <span class="cq-nconto">${tenute ? `<i class="ok">${tenute} ${tenute === 1 ? 'difesa' : 'difese'}</i>` : ''}${persa ? `<i class="ko">${persa} ${persa === 1 ? 'persa' : 'perse'}</i>` : ''}</span></div>`;
     for (const f in gruppi){ h += `<div class="cq-natt"><div class="cq-nchi">${tag(f)}${gruppi[f].some(e => e.trad) ? '<b class="cq-ntrad">ha rotto il patto</b>' : ''}</div>`;
