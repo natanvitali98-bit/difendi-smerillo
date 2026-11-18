@@ -4746,7 +4746,7 @@ $('#mCopy').onclick = () => {
 };
 
 const punti = new Map(); let trascina = null, distPinch = 0, midPinch = null;
-cv.addEventListener('pointerdown', ev => { try { cv.setPointerCapture(ev.pointerId); } catch(e){} punti.set(ev.pointerId, [ev.clientX, ev.clientY]);
+cv.addEventListener('pointerdown', ev => { if (ev.isPrimary) punti.clear(); try { cv.setPointerCapture(ev.pointerId); } catch(e){} punti.set(ev.pointerId, [ev.clientX, ev.clientY]);
   if (punti.size === 1){ trascina = {x:ev.clientX, y:ev.clientY, cx:camX, cy:camY, mosso:false, ogg:false, px:ev.clientX, py:ev.clientY};
     if (MOD && modSel){ const r = cv.getBoundingClientRect(); const o = trovaOggetto((ev.clientX - r.left - ox)/scale, (ev.clientY - r.top - oy)/scale);
       if (o && o.tipo === modSel.tipo && o.i === modSel.i){ trascina.ogg = true; memo(); } } }
@@ -4763,7 +4763,9 @@ cv.addEventListener('pointermove', ev => { if (!punti.has(ev.pointerId)) return;
 cv.addEventListener('pointerup', ev => { if (trascina && trascina.ogg){ if (trascina.mosso) ricostruisci(); else storia.pop(); modUI(); } const tocco = punti.size === 1 && trascina && !trascina.mosso; punti.delete(ev.pointerId); if (!punti.size){ trascina = null; distPinch = 0; midPinch = null; }
   else if (punti.size === 1){ const [q] = [...punti.values()]; trascina = {x:q[0], y:q[1], cx:camX, cy:camY, mosso:true, ogg:false, px:q[0], py:q[1]}; distPinch = 0; midPinch = null; } // resta un dito: continua da qui, senza salti
   if (tocco) tocca(ev); });
-cv.addEventListener('pointercancel', ev => { punti.delete(ev.pointerId); if (!punti.size){ trascina = null; distPinch = 0; midPinch = null; } else if (punti.size === 1){ const [q] = [...punti.values()]; trascina = {x:q[0], y:q[1], cx:camX, cy:camY, mosso:true, ogg:false, px:q[0], py:q[1]}; distPinch = 0; midPinch = null; } });
+const annullaTocco = ev => { punti.delete(ev.pointerId); if (!punti.size){ trascina = null; distPinch = 0; midPinch = null; } else if (punti.size === 1){ const [q] = [...punti.values()]; trascina = {x:q[0], y:q[1], cx:camX, cy:camY, mosso:true, ogg:false, px:q[0], py:q[1]}; distPinch = 0; midPinch = null; } };
+cv.addEventListener('pointercancel', annullaTocco); cv.addEventListener('lostpointercapture', ev => { if (punti.has(ev.pointerId)) annullaTocco(ev); });
+addEventListener('resize', () => { punti.clear(); trascina = null; distPinch = 0; midPinch = null; });
 cv.addEventListener('wheel', ev => { ev.preventDefault(); const r = cv.getBoundingClientRect(); zoom(ev.deltaY < 0 ? 1.15 : 1/1.15, ev.clientX - r.left, ev.clientY - r.top); }, {passive:false});
 function tocca(ev){
   const r = cv.getBoundingClientRect(); const sx = (ev.clientX - r.left - ox)/scale, sy = (ev.clientY - r.top - oy)/scale;
@@ -7134,7 +7136,7 @@ function esci(ev){ if (root.classList.contains('sopra')){ root.classList.remove(
 const punti = new Map(); let tr = null, dP = 0, mP = null;
 const zoomA = (f, x, y) => { const wx = camX + (x - SW/2)/sc, wy = camY + (y - SH/2)/sc; sc *= f; limitaCam(); camX = wx - (x - SW/2)/sc; camY = wy - (y - SH/2)/sc; limitaCam(); }; // zoom tenendo fermo il punto sotto le dita
 const rel = (p) => { const r = cvt.getBoundingClientRect(); return [p[0] - r.left, p[1] - r.top]; };
-cvt.addEventListener('pointerdown', e => { try { cvt.setPointerCapture(e.pointerId); } catch(_){} punti.set(e.pointerId, [e.clientX, e.clientY]);
+cvt.addEventListener('pointerdown', e => { if (e.isPrimary) punti.clear(); try { cvt.setPointerCapture(e.pointerId); } catch(_){} punti.set(e.pointerId, [e.clientX, e.clientY]);
   if (punti.size === 1) tr = {x:e.clientX, y:e.clientY, cx:camX, cy:camY, m:false};
   if (punti.size === 2){ const [a,c] = [...punti.values()]; dP = Math.hypot(a[0]-c[0], a[1]-c[1]); mP = [(a[0]+c[0])/2, (a[1]+c[1])/2]; if (tr) tr.m = true; } });
 cvt.addEventListener('pointermove', e => { if (!punti.has(e.pointerId)) return; punti.set(e.pointerId, [e.clientX, e.clientY]);
@@ -7147,7 +7149,8 @@ const sollevato = e => { punti.delete(e.pointerId); dP = 0; mP = null;
   if (!punti.size) tr = null; };
 cvt.addEventListener('pointerup', e => { const tap = punti.size === 1 && tr && !tr.m; sollevato(e);
   if (tap){ const r = cvt.getBoundingClientRect(); tocca(e.clientX - r.left, e.clientY - r.top); } });
-cvt.addEventListener('pointercancel', sollevato);
+cvt.addEventListener('pointercancel', sollevato); cvt.addEventListener('lostpointercapture', e => { if (punti.has(e.pointerId)) sollevato(e); });
+addEventListener('resize', () => { punti.clear(); tr = null; dP = 0; mP = null; });
 el('tbZp').onclick = () => zoomA(1.4, SW/2, SH/2); el('tbZm').onclick = () => zoomA(1/1.4, SW/2, SH/2);
 let hintT = 0; function suggerisci(t){ const h = el('tbHint'); h.textContent = t; h.classList.add('on'); clearTimeout(hintT); hintT = setTimeout(() => h.classList.remove('on'), Math.max(1600, t.length*60)); }
 cvt.addEventListener('wheel', e => { e.preventDefault(); const [x,y] = rel([e.clientX, e.clientY]); zoomA(e.deltaY < 0 ? 1.12 : 1/1.12, x, y); }, {passive:false});
@@ -8414,7 +8417,7 @@ function spriteBorgo(t){ if (SPRB[t]) return SPRB[t]; const c = document.createE
 
 // ===== tocchi: trascina, pizzica, rotella =====
 const PT = new Map(); let gesto = null;
-function inputMappa(){ tastiMappa(); cv.addEventListener('pointerdown', e => { CAMT = null; cv.setPointerCapture(e.pointerId); PT.set(e.pointerId, [e.clientX, e.clientY]);
+function inputMappa(){ tastiMappa(); cv.addEventListener('pointerdown', e => { CAMT = null; if (e.isPrimary){ PT.clear(); gesto = null; } try { cv.setPointerCapture(e.pointerId); } catch(_){} PT.set(e.pointerId, [e.clientX, e.clientY]);
     if (PT.size === 1) gesto = {x:e.clientX, y:e.clientY, cx:cam.x, cy:cam.y, mosso:false}; else if (PT.size === 2){ const [a, b] = [...PT.values()]; gesto = {pinch:true, d:Math.hypot(a[0] - b[0], a[1] - b[1]), s:cam.s, mx:(a[0] + b[0])/2, my:(a[1] + b[1])/2, cx:cam.x, cy:cam.y, mosso:true}; } });
   cv.addEventListener('pointermove', e => { if (!PT.has(e.pointerId) || !gesto) return; PT.set(e.pointerId, [e.clientX, e.clientY]); const r = cv.getBoundingClientRect();
     if (gesto.pinch && PT.size >= 2){ const [a, b] = [...PT.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), mx = (a[0] + b[0])/2, my = (a[1] + b[1])/2, ns = Math.max(fitS, Math.min(fitS*3.2, gesto.s*d/gesto.d));
@@ -8422,7 +8425,8 @@ function inputMappa(){ tastiMappa(); cv.addEventListener('pointerdown', e => { C
     else if (!gesto.pinch){ const dx = e.clientX - gesto.x, dy = e.clientY - gesto.y; if (Math.hypot(dx, dy) > 8) gesto.mosso = true; if (gesto.mosso){ cam.x = gesto.cx + dx; cam.y = gesto.cy + dy; limita(); } } });
   const su = e => { if (!PT.has(e.pointerId)) return; PT.delete(e.pointerId); if (gesto && !gesto.mosso && PT.size === 0 && e.type === 'pointerup'){ const r = cv.getBoundingClientRect(); tocca(e.clientX - r.left, e.clientY - r.top); }
     if (PT.size === 0) gesto = null; else if (gesto && gesto.pinch){ const [a] = [...PT.values()]; gesto = {x:a[0], y:a[1], cx:cam.x, cy:cam.y, mosso:true}; } };
-  cv.addEventListener('pointerup', su); cv.addEventListener('pointercancel', su);
+  cv.addEventListener('pointerup', su); cv.addEventListener('pointercancel', su); cv.addEventListener('lostpointercapture', e => { if (PT.has(e.pointerId)) su({pointerId: e.pointerId, type:'pointercancel'}); });
+  addEventListener('resize', () => { PT.clear(); gesto = null; });
   cv.addEventListener('wheel', e => { e.preventDefault(); CAMT = null; const r = cv.getBoundingClientRect(), lx = e.clientX - r.left, ly = e.clientY - r.top;
     const k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1, dx = e.deltaX*k, dy = e.deltaY*k, touchpad = !e.ctrlKey && (Math.abs(dx) > 0.5 || (e.deltaMode === 0 && Math.abs(dy) < 50 && dy % 1 !== 0) || (e.deltaMode === 0 && Math.abs(dy) < 16));
     if (touchpad){ cam.x -= dx; cam.y -= dy; limita(); return; }
