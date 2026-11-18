@@ -2568,7 +2568,7 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
 .cq-fedb{display:block;width:100%;height:8px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden}.cq-fedb i{display:block;height:100%}
 .cq-fed .big.mini,.cq-aut .big.mini{align-self:flex-start;margin-top:4px;width:auto}
 .cq-rel.cq-aut{display:block;text-align:left;border-left:3px solid #ffb347;padding-left:8px}
-.cq-merc{display:block;text-align:left;border-left:3px solid #ffd03a;padding:6px 0 6px 8px;margin:4px 0 8px;font-size:14px;color:var(--testo)}.cq-merc small{display:block;opacity:.8}
+.cq-vendi{display:block;text-align:left;border-left:3px solid #ffd03a;padding:6px 0 6px 8px;margin:4px 0 10px;font-size:14px}.cq-vendi small{display:block;opacity:.8}.cq-mbor{display:grid;grid-template-columns:1fr;gap:6px;margin:6px 0}.cq-mbor .big{width:100%}.cq-mbor .big small{display:block;font-size:12px;opacity:.85;font-weight:600}
 .cq-adip{display:block;text-align:left;border-left:3px solid #6aa8ff;padding-left:8px;margin-top:6px}.cq-adb{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0 4px}.cq-adb .big{width:100%;font-size:14px}.cq-adip small{display:block;opacity:.85}
 .cq-map{flex-wrap:wrap}
 
@@ -8963,7 +8963,7 @@ const BLOG = (() => { const on = () => (/\/beta\//.test(location.pathname) || !!
       az.dip = {}; for (const g in s1.dip) if (!s0.dip[g] || s0.dip[g][0] !== s1.dip[g][0]) az.dip[g] = s1.dip[g][0] || 'rotto';
       az.aut = {}; for (const x in s1.aut){ const a = s0.aut[x]; if (a && a[3] !== s1.aut[x][3]) az.aut[x] = s1.aut[x][3] || 'nessuno'; }
       az.quadro = quadro(); az.fraz = IDS.filter(x => TERRE[x].fraz && !TERRE[x].borgo && !TERRE[x].di).map(x => [x, S.terre[x].own || (S.terre[x].aut ? 'autonoma' : ''), tondo(S.terre[x].fed), S.terre[x].sold]);
-      az.nebbia = nebbiaOn() ? 1 : 0; az.coal = S.coal ? 1 : 0; az.mosseAvanzate = S.mosse; az.rep = tondo(rep(S.io)); manda('turno', az); },
+      az.vendite = S.vendite || {}; az.venditeMonete = S.venditeM || 0; az.scambi = S.scambi || 0; az.nebbia = nebbiaOn() ? 1 : 0; az.coal = S.coal ? 1 : 0; az.mosseAvanzate = S.mosse; az.rep = tondo(rep(S.io)); manda('turno', az); },
     dopoStagione(ev){ if (!on() || !pid) return; const c = {}; for (const e of ev) c[e.t] = (c[e.t] || 0) + 1;
       const mie = ev.filter(e => !e.muto && (e.f === S.io || e.vs === S.io || (e.a && S.terre[e.a] && PRIMA_SNAP && PRIMA_SNAP[e.a] && PRIMA_SNAP[e.a].own === S.io))).slice(0, 10).map(e => [e.t, via(e.testo)]);
       manda('stagione', {tipi: c, mie, quadro: quadro()}); s0 = foto(); att = []; },
@@ -9057,7 +9057,7 @@ function prodTerra(t){ const T = TERRE[t], st = S.terre[t], c = T.c + (st.str ==
   return [m ? m + ' ' + (m === 1 ? 'moneta' : 'monete') : '', c ? c + ' cibo' : '', l ? l + ' legna' : ''].filter(Boolean).join(', ') + ' a stagione'; }
 function consigli(){ const f = S.io, F = S.fz[f], dc = prodCibo(f, S.turno + 1) - mangia(f), L = [];
   const fo = vivi().find(g => g !== f && (S.fz[g].opera || 0) >= 1); if (fo) L.push(`${ico('attenzione', 2)} ${FZ[fo].corto} costruisce la Grande Fiera (${S.fz[fo].opera}/3): ${SERIO() ? 'prendigli una frazione e la Fiera torna indietro di una fase' : 'attacca le sue terre per fermarla'}.`);
-  if ((F.cibo >= 80 || F.legna >= 80) && F.monete < 20) L.push(`${ico('moneta', 2)} Hai ${F.cibo >= 80 ? F.cibo + ' cibo' : ''}${F.cibo >= 80 && F.legna >= 80 ? ' e ' : ''}${F.legna >= 80 ? F.legna + ' legna' : ''} fermi e poche monete: vendili al <b>Mercato</b> in Diplomazia.`);
+  if ((F.cibo >= 80 || F.legna >= 80) && F.monete < 20) L.push(`${ico('moneta', 2)} Hai ${F.cibo >= 80 ? F.cibo + ' cibo' : ''}${F.cibo >= 80 && F.legna >= 80 ? ' e ' : ''}${F.legna >= 80 ? F.legna + ' legna' : ''} fermi e poche monete: vendili al <b>Mercato</b>: tocca le tue risorse in alto.`);
   if (dc < 0) L.push(`${ico('castagna', 2)} Il cibo cala di ${-dc} a stagione. Pianta un <b>Castagneto</b> su un campo (sulla mappa hanno la castagna) o scambia al mercato.`);
   if (F.legna < 8 && prodLegna(f) < 4) L.push(`${ico('albero', 2)} Ti serve legna: costruisci una <b>Segheria</b> in un bosco (sulla mappa hanno l’albero) o scambia al mercato.`);
   if (F.monete >= 45) L.push(`${ico('moneta', 2)} Hai tante monete: migliora le strutture o costruisci la <b>Grande Fiera</b> nel tuo borgo.`);
@@ -9160,10 +9160,22 @@ function soldatini(vivi, tot){ let h = ''; for (let i = 0; i < Math.min(tot, 24)
 // il mercato: cibo e legna che avanzano diventano monete. Più vendi nella stessa stagione, meno ti pagano
 const prezzoMerc = () => { const v = S.mercT === S.turno ? (S.mercN || 0) : 0; return Math.max(1, 4 - Math.floor(v/2)); };
 function mercatoHtml(){ const F = S.fz[S.io], p = prezzoMerc();
-  return `<div class="cq-merc">${ico('moneta', 2)} <b>Mercato</b> · 10 ${ico('castagna', 2)} o 10 ${ico('albero', 2)} = <b>${p}</b> ${ico('moneta', 2)}<div class="cq-adb"><button type="button" class="big mini" data-merc="cibo" ${F.cibo < 10 ? 'disabled' : ''}>Vendi 10 cibo</button><button type="button" class="big mini" data-merc="legna" ${F.legna < 10 ? 'disabled' : ''}>Vendi 10 legna</button></div><small>Più vendi nella stessa stagione, più scende il prezzo. Non usa mosse.</small></div>`; }
-function vendi(k){ const F = S.fz[S.io]; if (F[k] < 10) return; const p = prezzoMerc(); F[k] -= 10; F.monete += p; if (S.mercT !== S.turno){ S.mercT = S.turno; S.mercN = 0; } S.mercN++; suona('moneta'); }
+  return `<div class="cq-vendi">${ico('moneta', 2)} <b>Vendi</b> · 10 ${ico('castagna', 2)} o 10 ${ico('albero', 2)} = <b>${p}</b> ${ico('moneta', 2)}<div class="cq-adb"><button type="button" class="big mini" data-merc="cibo" ${F.cibo < 10 ? 'disabled' : ''}>Vendi 10 cibo</button><button type="button" class="big mini" data-merc="legna" ${F.legna < 10 ? 'disabled' : ''}>Vendi 10 legna</button></div><small>Più vendi nella stessa stagione, più scende il prezzo. Non usa mosse.</small></div>`; }
+function vendi(k){ const F = S.fz[S.io]; if (F[k] < 10) return; const p = prezzoMerc(); F[k] -= 10; F.monete += p; if (S.mercT !== S.turno){ S.mercT = S.turno; S.mercN = 0; } S.mercN++; S.vendite = S.vendite || {}; S.vendite[k] = (S.vendite[k] || 0) + 10; S.venditeM = (S.venditeM || 0) + p; suona('moneta'); salva(); }
+// il Mercato: tocchi la barra delle risorse. Qui vendi cibo e legna, e da qui scambi con i borghi (gli stessi scambi della Diplomazia)
+let MERC_DA = '';
+function dlgMercatoTutto(){ if (!S || GIOCA) return; MERC_DA = 'mercato'; const F = S.fz[S.io], rimasti = 4 - (S.scambi || 0);
+  const borghi = vivi().filter(g => g !== S.io).map(g => { const v = amic(S.io, g), no = v < -40; return `<button type="button" class="big mini${no ? ' alt' : ''}" data-mer="${g}" ${no || rimasti <= 0 ? 'disabled' : ''}>Scambia con ${FZ[g].corto}<small>${no ? 'non commercia con un nemico' : accordo(S.io, g) ? 'accordo commerciale: prezzi migliori' : v >= 50 ? 'siete amici: prezzi migliori' : 'prezzi normali'}</small></button>`; }).join('');
+  const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('moneta', 2)} Mercato</span><h2>Vendi e scambia</h2>
+    <p class="cq-rep">Hai ${ico('moneta', 2)} <b>${F.monete}</b> · ${ico('castagna', 2)} <b>${F.cibo}</b> · ${ico('albero', 2)} <b>${F.legna}</b></p>
+    ${mercatoHtml()}
+    <p class="cq-mq">Scambi con i borghi · ne restano <b>${Math.max(0, rimasti)}</b> in questa stagione</p><div class="cq-mbor">${borghi || '<small>Nessun borgo con cui scambiare.</small>'}</div>
+    <div class="cq-adb"><button type="button" class="big mini alt" id="cqBil">Il tuo bilancio</button><button type="button" class="big mini" id="cqNo">Chiudi</button></div></div>`);
+  o.querySelectorAll('[data-merc]').forEach(b => b.onclick = () => { vendi(b.dataset.merc); aggiornaUI(); dlgMercatoTutto(); });
+  o.querySelectorAll('[data-mer]').forEach(b => b.onclick = () => { suona('tocco'); dlgMercato(b.dataset.mer); });
+  o.querySelector('#cqBil').onclick = () => { suona('tocco'); dlgBilancio(); }; o.querySelector('#cqNo').onclick = chiudiOv; }
 function dlgDiplomazia(foc){ const altri = vivi().filter(g => g !== S.io), mr = rep(S.io);
-  const o = ov(`<div class="dlg box cq-dlg"><h2>Diplomazia</h2><p class="cq-rep">La tua reputazione: <b>${livRep(mr)}</b> (${mr})</p>${mercatoHtml()}<details class="cq-gen cq-come"><summary><b>Come funziona</b></summary><ul><li><b>Patto</b>: 8 stagioni senza attaccarvi.</li><li><b>Accordo</b>: 3 monete in più a stagione.</li><li><b>Alleanza</b>: vi aiutate in battaglia e 2 monete in più.</li><li>Con patti e accordi l’amicizia cresce da sola.</li><li>Se tradisci un patto o un’alleanza, la reputazione crolla e nessuno si fida più.</li></ul></details>
+  const o = ov(`<div class="dlg box cq-dlg"><h2>Diplomazia</h2><p class="cq-rep">La tua reputazione: <b>${livRep(mr)}</b> (${mr})</p><button type="button" class="big mini" id="cqVaiMerc" style="width:100%;margin:2px 0 8px">${ico('moneta', 2)} Mercato: vendi cibo e legna, scambia</button><details class="cq-gen cq-come"><summary><b>Come funziona</b></summary><ul><li><b>Patto</b>: 8 stagioni senza attaccarvi.</li><li><b>Accordo</b>: 3 monete in più a stagione.</li><li><b>Alleanza</b>: vi aiutate in battaglia e 2 monete in più.</li><li>Con patti e accordi l’amicizia cresce da sola.</li><li>Se tradisci un patto o un’alleanza, la reputazione crolla e nessuno si fida più.</li></ul></details>
     <div class="cq-list">${altri.map(g => { const v = amic(S.io, g), all = alleati(S.io, g), pat = patto(S.io, g), k = pk(S.io, g), nm = S.mosse < 1;
       return `<div class="cq-dip ${foc === g ? 'foc' : ''}"><div class="cq-dh"><span class="cq-dot" style="background:${FZ[g].col}"></span><b>${FZ[g].nome}</b>${all ? '<b class="cq-all">Alleato</b>' : ''}${pat ? `<b class="cq-all cq-pat">Patto: ${S.patti[k] - S.turno + 1}</b>` : ''}${accordo(S.io, g) ? '<b class="cq-all cq-acc">Accordo</b>' : ''}</div><div>${barraAmic(v)}</div><small>${terreDi(g).length === 1 ? '1 terra' : terreDi(g).length + ' terre'} · ${sol(soldDi(g))} · reputazione ${livRep(rep(g)).toLowerCase()}${capiIA(g).length ? ' · capitani: ' + capiIA(g).map(c => `<b>${capNome(c)}</b> liv. ${capLiv(c)}`).join(', ') : ''} · carattere: ${notoCar(g) ? '<b>' + CARATTERI[S.car[g]].nome + '</b>' : 'ancora non lo conosci'}${S.fz[g].opera ? ` · <b style="color:#d8342a">Grande Fiera ${S.fz[g].opera}/3</b>` : ''}</small>
         <div class="cq-db"><button class="big mini cq-subtn" data-su="${g}">${ico('pergamena', 2)} Proposta su misura</button><button class="big mini" data-mer="${g}">${ico('moneta', 2)} Scambi</button><button class="big alt mini" data-reg="${g}" ${nm || S.fz[S.io].monete < REGALO ? 'disabled' : ''}>Regalo ${ico('moneta', 2)} ${REGALO}</button>
@@ -9178,7 +9190,8 @@ function dlgDiplomazia(foc){ const altri = vivi().filter(g => g !== S.io), mr = 
       const tipo = b.dataset.pat ? 'patto' : b.dataset.acc ? 'acc' : 'all'; if (!S.proposte.some(x => x.f === S.io && x.per === g && x.tipo === tipo)) S.proposte.push({f:S.io, tipo, per:g}); suona('stella1'); toast(`Proposta mandata: ${mpNomeDi(g)} risponde nel suo turno`); b.disabled = true; }, true); }
   const fid = g => amic(S.io, g) + (rep(S.io) - 50)/2;
   o.querySelectorAll('[data-mer]').forEach(b => b.onclick = () => dlgMercato(b.dataset.mer));
-  o.querySelectorAll('[data-merc]').forEach(b => b.onclick = () => { vendi(b.dataset.merc); aggiornaUI(); dlgDiplomazia(foc); });
+  MERC_DA = 'dip';
+  { const bm = o.querySelector('#cqVaiMerc'); if (bm) bm.onclick = () => { suona('tocco'); dlgMercatoTutto(); }; }
   o.querySelectorAll('[data-su]').forEach(b => b.onclick = () => { suona('tocco'); dlgProposta(b.dataset.su); });
   o.querySelectorAll('[data-reg]').forEach(b => b.onclick = () => { const g = b.dataset.reg; S.fz[S.io].monete -= REGALO; S.fz[g].monete += REGALO; const v = amic(S.io, g); setAmic(S.io, g, v + valRegalo(v)); suona('moneta'); usaMossa(); toast(`${FZ[g].corto} gradisce il regalo`); dlgDiplomazia(g); });
   o.querySelectorAll('[data-pat]').forEach(b => b.onclick = () => { const g = b.dataset.pat; usaMossa();
@@ -9213,7 +9226,7 @@ function dlgMercato(g, scelta){ const F = S.fz[S.io], G = S.fz[g], v = amic(S.io
     <p class="cq-nota">Gli scambi non usano mosse e ognuno fa salire un po’ l’amicizia.</p>
     <button class="big alt" id="cqNo">Indietro</button></div>`);
   if (sc.fatto){ o.querySelectorAll('.cq-mr.io [data-r]').forEach(e => { if (e.dataset.r === sc.fatto.a) e.classList.add('su'); if (e.dataset.r === sc.fatto.d) e.classList.add('giu'); }); sc.fatto = null; }
-  o.querySelector('#cqNo').onclick = () => dlgDiplomazia(g);
+  o.querySelector('#cqNo').onclick = () => MERC_DA === 'mercato' ? dlgMercatoTutto() : dlgDiplomazia(g);
   o.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { const a = b.dataset.a; let d = sc.d === a ? RIS.filter(x => x !== a).sort((x, y) => F[y] - F[x])[0] : sc.d; suona('tocco'); dlgMercato(g, {a, d, fatto:null}); });
   o.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { suona('tocco'); dlgMercato(g, {a:sc.a, d:b.dataset.d, fatto:null}); });
   o.querySelector('#cqSc').onclick = () => { if ((S.scambi || 0) >= 4 || F[sc.d] < n || G[sc.a] < r) return; F[sc.d] -= n; G[sc.d] += n; F[sc.a] += r; G[sc.a] -= r; S.scambi = (S.scambi || 0) + 1; setAmic(S.io, g, amic(S.io, g) + 2); suona('moneta'); salva(); aggiornaUI(); stat('scambi'); dlgMercato(g, {a:sc.a, d:sc.d, fatto:{n, r, a:sc.a, d:sc.d}}); }; }
@@ -9596,7 +9609,7 @@ function costruisciDom(){ root = document.createElement('section'); root.id = 'c
   document.body.append(root); cv = el('cqCv'); ctx = cv.getContext('2d'); inputMappa();
   root.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b || b.disabled || !root.contains(b)) return; const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height)*2.2, sp = document.createElement('span'); sp.className = 'cq-rip'; sp.style.cssText = `left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px;width:${d}px;height:${d}px`; b.append(sp); setTimeout(() => sp.remove(), 520);
     const bu = document.createElement('div'); bu.className = 'cq-burst'; bu.style.cssText = `left:${e.clientX}px;top:${e.clientY}px`; for (let i = 0; i < 8; i++){ const q = document.createElement('i'), a = i/8*Math.PI*2 + Math.random()*.4, v = 22 + Math.random()*16; q.style.setProperty('--dx', Math.cos(a)*v + 'px'); q.style.setProperty('--dy', Math.sin(a)*v + 'px'); q.style.background = ['#ffd03a', '#ffffff', '#ffe98a'][i % 3]; bu.append(q); } root.append(bu); setTimeout(() => bu.remove(), 560); }, {passive: true});
-  el('cqZin').onclick = () => zoomIn(1.3); el('cqZout').onclick = () => zoomIn(1/1.3); el('cqPausa').onclick = pausa; el('cqRis').onclick = () => { if (CG && CG.k <= 4) return; dlgBilancio(); }; el('cqDip').onclick = () => { if (CG && CG.k <= 4){ toast('Prima segui il dito: la Diplomazia la vediamo dopo.'); return; } dlgDiplomazia(); }; el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
+  el('cqZin').onclick = () => zoomIn(1.3); el('cqZout').onclick = () => zoomIn(1/1.3); el('cqPausa').onclick = pausa; el('cqRis').onclick = () => { if (CG && CG.k <= 4) return; dlgMercatoTutto(); }; el('cqDip').onclick = () => { if (CG && CG.k <= 4){ toast('Prima segui il dito: la Diplomazia la vediamo dopo.'); return; } dlgDiplomazia(); }; el('cqCentra').onclick = () => { if (cam.s > fitS*1.15 || !S) centra(); else vaiA(sel || S.io); };
   el('cqCosa').onclick = cosaFaccio;
   el('cqFine').onclick = () => { stopCH(); if (GIOCA || !S || mpAttesa()) return; const fs = S.mp ? mpFine : fineStagione; if (S.mosse > 0){ const o = ov(`<div class="dlg box cq-dlg"><h2>Hai ancora ${S.mosse} ${S.mosse === 1 ? 'mossa' : 'mosse'}</h2><p>Se finisci la stagione adesso le perdi. Le risorse invece restano.</p><button class="big" id="cqSi">Finisci la stagione</button><button class="big alt" id="cqNo">Gioca ancora</button></div>`);
       o.querySelector('#cqSi').onclick = () => { chiudiOv(); suona('flip'); fs(); }; o.querySelector('#cqNo').onclick = chiudiOv; return; } suona('flip'); fs(); };
