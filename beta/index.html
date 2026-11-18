@@ -7432,7 +7432,7 @@ const DF = () => DIFF[(S && S.dif) || 'normale'] || DIFF.normale;
 // ---- Difficile = guerra seria (solo partita da soli): nebbia, paga dei soldati, inverno duro, capitani mortali, niente aiuti
 const SERIO = () => !!(S && S.dif === 'difficile' && !S.mp);
 const PAGANO = 4, COSTO_ESP = 2; // 1 moneta di paga ogni 4 soldati · un esploratore costa 2 monete
-const pagaSold = f => SERIO() && f === S.io ? Math.floor(soldDi(f)/PAGANO) : 0;
+const pagaSold = f => !SERIO() ? 0 : f === S.io ? Math.floor(soldDi(f)/PAGANO) : Math.floor(Math.max(0, soldDi(f) - 6*terreDi(f).length)/PAGANO);
 const PER_DOM = 8, costoDom = f => SERIO() && f === S.io ? Math.floor(terreDi(f).length/PER_DOM) : 0; // più è grande il dominio, più costa governarlo
 const invernoDuro = f => SERIO() && f === S.io && (S.turno - 1) % 4 === 3 ? 2 : 1; // d'inverno i soldati mangiano il doppio
 // Difficile: la nebbia è un evento del tempo. Quando c'è vedi solo le tue terre e gli attacchi a sorpresa hanno +15%
@@ -8915,7 +8915,7 @@ function calcolaStagione(ev, tutti = false){ coalizione(ev);
   for (const f of vivi()){ const F = S.fz[f]; F.monete += rendita(f); F.legna += prodLegna(f); F.cibo += prodCibo(f) - mangia(f)*invernoDuro(f);
     if (invernoDuro(f) > 1 && !S.cron.some(x => /inverno mangiano/.test(x.txt))) cron('D’inverno i soldati mangiano il doppio.', 0);
     { const pg = pagaSold(f) + costoDom(f); if (pg){ F.monete -= pg; if (F.monete < 0){ let manca = -F.monete, via = 0; F.monete = 0; while (manca > 0){ const t = terreDi(f).filter(x => S.terre[x].sold > 1).sort((a, b) => S.terre[b].sold - S.terre[a].sold)[0]; if (!t) break; S.terre[t].sold--; manca--; via++; }
-      if (via) ev.push({t:'fame', f, snap: sn(), testo: `Non hai monete per la paga: ${sol(via)} ${via === 1 ? 'diserta' : 'disertano'}`}); } } } // Difficile: i soldati vogliono la paga
+      if (via) ev.push({t:'fame', f, snap: sn(), muto: f !== S.io, testo: f === S.io ? `Non hai monete per la paga: ${sol(via)} ${via === 1 ? 'diserta' : 'disertano'}` : `${FZ[f].corto} non paga l’esercito: ${sol(via)} ${via === 1 ? 'diserta' : 'disertano'}`}); } } } // Difficile: i soldati vogliono la paga
     if (F.cibo < 0){ let manca = -F.cibo, persi = 0; F.cibo = 0; while (manca > 0){ const t = terreDi(f).filter(x => S.terre[x].sold > 1).sort((a, b) => S.terre[b].sold - S.terre[a].sold)[0]; if (!t) break; S.terre[t].sold--; manca--; persi++; }
       if (persi && f === S.io && !S.cron.some(x => /fame/.test(x.txt))) cron(`Arriva la fame: i soldati ${diCas()} se ne vanno.`, 1);
       if (persi) ev.push({t:'fame', f, muto: f !== S.io, snap: sn(), testo: f === S.io ? `Non hai abbastanza cibo: ${sol(persi)} ${persi === 1 ? 'se ne va' : 'se ne vanno'}` : `${FZ[f].corto} ha fame: perde ${sol(persi)}`}); } }
@@ -9053,6 +9053,7 @@ function prodTerra(t){ const T = TERRE[t], st = S.terre[t], c = T.c + (st.str ==
   return [m ? m + ' ' + (m === 1 ? 'moneta' : 'monete') : '', c ? c + ' cibo' : '', l ? l + ' legna' : ''].filter(Boolean).join(', ') + ' a stagione'; }
 function consigli(){ const f = S.io, F = S.fz[f], dc = prodCibo(f, S.turno + 1) - mangia(f), L = [];
   const fo = vivi().find(g => g !== f && (S.fz[g].opera || 0) >= 1); if (fo) L.push(`${ico('attenzione', 2)} ${FZ[fo].corto} costruisce la Grande Fiera (${S.fz[fo].opera}/3): ${SERIO() ? 'prendigli una frazione e la Fiera torna indietro di una fase' : 'attacca le sue terre per fermarla'}.`);
+  if ((F.cibo >= 80 || F.legna >= 80) && F.monete < 20) L.push(`${ico('moneta', 2)} Hai ${F.cibo >= 80 ? F.cibo + ' cibo' : ''}${F.cibo >= 80 && F.legna >= 80 ? ' e ' : ''}${F.legna >= 80 ? F.legna + ' legna' : ''} fermi e poche monete: vendili al <b>Mercato</b> in Diplomazia.`);
   if (dc < 0) L.push(`${ico('castagna', 2)} Il cibo cala di ${-dc} a stagione. Pianta un <b>Castagneto</b> su un campo (sulla mappa hanno la castagna) o scambia al mercato.`);
   if (F.legna < 8 && prodLegna(f) < 4) L.push(`${ico('albero', 2)} Ti serve legna: costruisci una <b>Segheria</b> in un bosco (sulla mappa hanno l’albero) o scambia al mercato.`);
   if (F.monete >= 45) L.push(`${ico('moneta', 2)} Hai tante monete: migliora le strutture o costruisci la <b>Grande Fiera</b> nel tuo borgo.`);
