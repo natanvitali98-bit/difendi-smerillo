@@ -10334,14 +10334,21 @@ const RITORNO = window.RITORNO = (() => {
         if (provata === j.v) return; nuovaV = j.v; avvisaVersione(); } } catch(e){} }
   function aggiorna(){ traccia('aggiorna', {da: VERSIONE, a: nuovaV}, true); try { sessionStorage.setItem('ds-agg', nuovaV || ''); } catch(e){} const u = new window.URL(location.href); u.searchParams.set('v', nuovaV || Date.now()); u.hash = ''; const cop = document.createElement('div'); cop.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#0b1240'; document.body.append(cop); requestAnimationFrame(() => location.replace(u.toString())); } // copro il gioco prima di ricaricare: niente gioco che compare e poi sparisce
   function avvisaVersione(){ if (!nuovaV) return;
-    // nel menu chiedo subito; durante una partita metto solo una striscia in alto, così non si perde niente
-    if (nelMenu() && !aperta()){ const b = finestra(`<span class="fd-k">AGGIORNAMENTO</span><h2>C’è una versione nuova!</h2><p class="acc-sub">Tocca Aggiorna per avere le ultime novità. I tuoi progressi restano.</p><button class="big" data-ok>Aggiorna ora</button><button class="as-salta" data-no>Dopo</button>`);
+    // nel menu (o appena apri il gioco dalla Home) si aggiorna da solo: un attimo di schermata e via. In partita aspetto che torni al menu
+    if (liberoPerAggiornare()){ autoAggiorna(); return; }
+    if (false){ const b = finestra(`<span class="fd-k">AGGIORNAMENTO</span><h2>C’è una versione nuova!</h2><p class="acc-sub">Tocca Aggiorna per avere le ultime novità. I tuoi progressi restano.</p><button class="big" data-ok>Aggiorna ora</button><button class="as-salta" data-no>Dopo</button>`);
       b.querySelector('[data-ok]').onclick = aggiorna; b.querySelector('[data-no]').onclick = () => { chiudi(); strisciaV(); }; }
     else strisciaV(); }
   function strisciaV(){ if (document.getElementById('agBar')) return; const d = document.createElement('button'); d.type = 'button'; d.id = 'agBar'; d.innerHTML = '<b>Versione nuova</b> · tocca per aggiornare'; d.onclick = () => { if (nelMenu() || confirm('Aggiorno adesso? Se sei in una missione la ricominci.')) aggiorna(); }; document.body.append(d); }
-  setTimeout(controllaVersione, 4000);
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') controllaVersione(); });
-  addEventListener('pageshow', e => { if (e.persisted) controllaVersione(); });
+  function autoAggiorna(){ if (document.getElementById('agAuto')) return; const d = document.createElement('div'); d.id = 'agAuto'; d.style.cssText = 'position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;background:rgba(11,18,64,.92);color:#fff;font:400 26px var(--f-big),sans-serif;text-align:center;padding:24px';
+    d.innerHTML = '<div><div style="font-size:44px;margin-bottom:10px">⬇️</div>Aggiorno il gioco…<div style="font:700 15px var(--f-body),sans-serif;opacity:.85;margin-top:8px">Arrivano le novità. I tuoi progressi restano.</div></div>'; document.body.append(d); setTimeout(aggiorna, 900); }
+  // se l'aggiornamento è arrivato durante una partita, appena torni al menu si aggiorna da solo
+  // libero = nel menu, oppure ancora nella schermata di caricamento o d'ingresso (prima di toccare qualcosa)
+  const liberoPerAggiornare = () => nelMenu() || !!document.getElementById('caricamento') || !!document.querySelector('.acc-gate');
+  setInterval(() => { if (nuovaV && liberoPerAggiornare() && !document.getElementById('agAuto')) autoAggiorna(); }, 1500);
+  setTimeout(controllaVersione, 1200);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible'){ ultimoCheck = 0; controllaVersione(); } });
+  addEventListener('pageshow', e => { if (e.persisted){ ultimoCheck = 0; controllaVersione(); } });
 
   // ---------- giorni di fila: torna ogni giorno, lo scrigno cresce
   const GKEY = 'difendi-smerillo-giorni', PREMI_G = ['legno', 'legno', 'argento', 'legno', 'legno', 'argento', 'oro'];
