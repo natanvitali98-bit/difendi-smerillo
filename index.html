@@ -4765,7 +4765,7 @@ cv.addEventListener('pointerup', ev => { if (trascina && trascina.ogg){ if (tras
   if (tocco) tocca(ev); });
 const annullaTocco = ev => { punti.delete(ev.pointerId); if (!punti.size){ trascina = null; distPinch = 0; midPinch = null; } else if (punti.size === 1){ const [q] = [...punti.values()]; trascina = {x:q[0], y:q[1], cx:camX, cy:camY, mosso:true, ogg:false, px:q[0], py:q[1]}; distPinch = 0; midPinch = null; } };
 cv.addEventListener('pointercancel', annullaTocco); cv.addEventListener('lostpointercapture', ev => { if (punti.has(ev.pointerId)) annullaTocco(ev); });
-addEventListener('resize', () => { punti.clear(); trascina = null; distPinch = 0; midPinch = null; });
+addEventListener('resize', () => { punti.clear(); trascina = null; distPinch = 0; midPinch = null; }); addEventListener('ds-azzera-tocchi', () => { punti.clear(); trascina = null; distPinch = 0; midPinch = null; });
 cv.addEventListener('wheel', ev => { ev.preventDefault(); const r = cv.getBoundingClientRect(); zoom(ev.deltaY < 0 ? 1.15 : 1/1.15, ev.clientX - r.left, ev.clientY - r.top); }, {passive:false});
 function tocca(ev){
   const r = cv.getBoundingClientRect(); const sx = (ev.clientX - r.left - ox)/scale, sy = (ev.clientY - r.top - oy)/scale;
@@ -7150,7 +7150,7 @@ const sollevato = e => { punti.delete(e.pointerId); dP = 0; mP = null;
 cvt.addEventListener('pointerup', e => { const tap = punti.size === 1 && tr && !tr.m; sollevato(e);
   if (tap){ const r = cvt.getBoundingClientRect(); tocca(e.clientX - r.left, e.clientY - r.top); } });
 cvt.addEventListener('pointercancel', sollevato); cvt.addEventListener('lostpointercapture', e => { if (punti.has(e.pointerId)) sollevato(e); });
-addEventListener('resize', () => { punti.clear(); tr = null; dP = 0; mP = null; });
+addEventListener('resize', () => { punti.clear(); tr = null; dP = 0; mP = null; }); addEventListener('ds-azzera-tocchi', () => { punti.clear(); tr = null; dP = 0; mP = null; });
 el('tbZp').onclick = () => zoomA(1.4, SW/2, SH/2); el('tbZm').onclick = () => zoomA(1/1.4, SW/2, SH/2);
 let hintT = 0; function suggerisci(t){ const h = el('tbHint'); h.textContent = t; h.classList.add('on'); clearTimeout(hintT); hintT = setTimeout(() => h.classList.remove('on'), Math.max(1600, t.length*60)); }
 cvt.addEventListener('wheel', e => { e.preventDefault(); const [x,y] = rel([e.clientX, e.clientY]); zoomA(e.deltaY < 0 ? 1.12 : 1/1.12, x, y); }, {passive:false});
@@ -8426,7 +8426,7 @@ function inputMappa(){ tastiMappa(); cv.addEventListener('pointerdown', e => { C
   const su = e => { if (!PT.has(e.pointerId)) return; PT.delete(e.pointerId); if (gesto && !gesto.mosso && PT.size === 0 && e.type === 'pointerup'){ const r = cv.getBoundingClientRect(); tocca(e.clientX - r.left, e.clientY - r.top); }
     if (PT.size === 0) gesto = null; else if (gesto && gesto.pinch){ const [a] = [...PT.values()]; gesto = {x:a[0], y:a[1], cx:cam.x, cy:cam.y, mosso:true}; } };
   cv.addEventListener('pointerup', su); cv.addEventListener('pointercancel', su); cv.addEventListener('lostpointercapture', e => { if (PT.has(e.pointerId)) su({pointerId: e.pointerId, type:'pointercancel'}); });
-  addEventListener('resize', () => { PT.clear(); gesto = null; });
+  addEventListener('resize', () => { PT.clear(); gesto = null; }); addEventListener('ds-azzera-tocchi', () => { PT.clear(); gesto = null; });
   cv.addEventListener('wheel', e => { e.preventDefault(); CAMT = null; const r = cv.getBoundingClientRect(), lx = e.clientX - r.left, ly = e.clientY - r.top;
     const k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1, dx = e.deltaX*k, dy = e.deltaY*k, touchpad = !e.ctrlKey && (Math.abs(dx) > 0.5 || (e.deltaMode === 0 && Math.abs(dy) < 50 && dy % 1 !== 0) || (e.deltaMode === 0 && Math.abs(dy) < 16));
     if (touchpad){ cam.x -= dx; cam.y -= dy; limita(); return; }
@@ -10325,7 +10325,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261118233319';
+  const VERSIONE = window.DS_VER = '20261119213508';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){
@@ -10554,6 +10554,11 @@ fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){
 
 // iPhone: il pizzico non deve ingrandire la pagina (solo la mappa), e niente selezione col tocco lungo
 for (const t of ['gesturestart','gesturechange','gestureend']) document.addEventListener(t, e => e.preventDefault(), {passive:false});
+// tocchi rimasti "appesi" (telefono girato a metà tocco, avvisi a tutto schermo): quando non c'è più nessun dito, si azzera tutto
+const azzeraTocchi = () => dispatchEvent(new Event('ds-azzera-tocchi'));
+for (const t of ['touchend','touchcancel']) document.addEventListener(t, e => { if (!e.touches || e.touches.length === 0) azzeraTocchi(); }, {passive:true, capture:true});
+addEventListener('orientationchange', () => { azzeraTocchi(); setTimeout(() => { azzeraTocchi(); window.scrollTo(0, 0); const m = document.querySelector('meta[name=viewport]'); if (m){ const c = m.content; m.content = c + ',x=1'; requestAnimationFrame(() => { m.content = c; }); } }, 350); });
+document.addEventListener('visibilitychange', azzeraTocchi);
 // ===== orientamento: in orizzontale solo la Difesa in tempo reale; altrove chiedo di girare il telefono =====
 (() => { const tel = () => Math.min(innerWidth, innerHeight) < 560 && matchMedia('(pointer:coarse)').matches;
   const inRT = () => { const t = document.getElementById('title'), b = document.getElementById('tb'), ld = document.getElementById('caricamento'); const q = document.getElementById('cq'); return !!(t && t.hidden && b && b.hidden && !ld && (!q || q.hidden)); };
