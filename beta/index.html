@@ -10325,7 +10325,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261119214417';
+  const VERSIONE = window.DS_VER = '20261119221031';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){

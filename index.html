@@ -10325,7 +10325,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261119214417';
+  const VERSIONE = window.DS_VER = '20261119221031';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){
@@ -10335,7 +10335,7 @@ const RITORNO = window.RITORNO = (() => {
   function aggiorna(){ traccia('aggiorna', {da: VERSIONE, a: nuovaV}, true); try { sessionStorage.setItem('ds-agg', nuovaV || ''); } catch(e){} const u = new window.URL(location.href); u.searchParams.set('v', nuovaV || Date.now()); u.hash = ''; const cop = document.createElement('div'); cop.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#0b1240'; document.body.append(cop); requestAnimationFrame(() => location.replace(u.toString())); } // copro il gioco prima di ricaricare: niente gioco che compare e poi sparisce
   function avvisaVersione(){ if (!nuovaV) return;
     // nel menu (o appena apri il gioco dalla Home) si aggiorna da solo: un attimo di schermata e via. In partita aspetto che torni al menu
-    autoAggiorna(); return; // si aggiorna sempre, anche in partita (la Conquista si salva a ogni mossa)
+    if (liberoPerAggiornare()) autoAggiorna(); return; // in partita non disturbo: il setInterval aggiorna appena torni al menu
     if (false){ const b = finestra(`<span class="fd-k">AGGIORNAMENTO</span><h2>C’è una versione nuova!</h2><p class="acc-sub">Tocca Aggiorna per avere le ultime novità. I tuoi progressi restano.</p><button class="big" data-ok>Aggiorna ora</button><button class="as-salta" data-no>Dopo</button>`);
       b.querySelector('[data-ok]').onclick = aggiorna; b.querySelector('[data-no]').onclick = () => { chiudi(); strisciaV(); }; }
     else strisciaV(); }
