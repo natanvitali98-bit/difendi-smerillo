@@ -10335,7 +10335,7 @@ const RITORNO = window.RITORNO = (() => {
   function aggiorna(){ traccia('aggiorna', {da: VERSIONE, a: nuovaV}, true); try { sessionStorage.setItem('ds-agg', nuovaV || ''); } catch(e){} const u = new window.URL(location.href); u.searchParams.set('v', nuovaV || Date.now()); u.hash = ''; const cop = document.createElement('div'); cop.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#0b1240'; document.body.append(cop); requestAnimationFrame(() => location.replace(u.toString())); } // copro il gioco prima di ricaricare: niente gioco che compare e poi sparisce
   function avvisaVersione(){ if (!nuovaV) return;
     // nel menu (o appena apri il gioco dalla Home) si aggiorna da solo: un attimo di schermata e via. In partita aspetto che torni al menu
-    autoAggiorna(); return; // si aggiorna sempre, anche in partita (la Conquista si salva a ogni mossa)
+    if (liberoPerAggiornare()) autoAggiorna(); return; // in partita non disturbo: il setInterval aggiorna appena torni al menu
     if (false){ const b = finestra(`<span class="fd-k">AGGIORNAMENTO</span><h2>C’è una versione nuova!</h2><p class="acc-sub">Tocca Aggiorna per avere le ultime novità. I tuoi progressi restano.</p><button class="big" data-ok>Aggiorna ora</button><button class="as-salta" data-no>Dopo</button>`);
       b.querySelector('[data-ok]').onclick = aggiorna; b.querySelector('[data-no]').onclick = () => { chiudi(); strisciaV(); }; }
     else strisciaV(); }
