@@ -7513,8 +7513,10 @@ function stemma(st, px = 1){ if (!st) return null; const key = JSON.stringify(st
     g.fillStyle = col; g.fillRect(x*px, y*px, px, px); if (d && y === 2){ g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(x*px, y*px, px, px); } }
   if (im.complete && im.width){ const w = Math.min(10, im.width), h = Math.min(10, im.height), ox = Math.round((W0 - w)/2), oy = 5; g.fillStyle = 'rgba(20,20,51,.35)'; g.imageSmoothingEnabled = false;
     g.drawImage(im, 0, 0, im.width, im.height, ox*px, oy*px, w*px, h*px); return STM[key] = c; }
-  im.onload = () => { for (const k in STM) delete STM[k]; if (root && S) aggiornaUI(); }; return c; }
-const imgStemma = (st, px) => { const c = stemma(st, px); return c ? `<img class="cq-stm" src="${c.toDataURL()}" width="${c.width}" height="${c.height}" alt="Stemma">` : ''; };
+  im.addEventListener('load', () => { for (const k in STM) delete STM[k]; if (root && S) aggiornaUI(); rifaiStemmi(); }, {once: true}); return c; }
+// il simbolo arriva dopo (è un'immagine): ridisegno gli stemmi già messi nelle pagine (Collezione, finestre)
+function rifaiStemmi(){ document.querySelectorAll('img.cq-stm[data-st]').forEach(e => { try { const c = stemma(JSON.parse(e.dataset.st), +e.dataset.px || 1); if (c) e.src = c.toDataURL(); } catch(x){} }); }
+const imgStemma = (st, px) => { const c = stemma(st, px); return c ? `<img class="cq-stm" src="${c.toDataURL()}" width="${c.width}" height="${c.height}" alt="Stemma" data-px="${px || 1}" data-st="${JSON.stringify(st).replace(/"/g, '&quot;')}">` : ''; };
 // i capitani della casata: guidano gli attacchi, fanno esperienza e restano partita dopo partita
 const NOMICAP = ['Bernardo', 'Gualtiero', 'Nicolò', 'Ottone', 'Lapo', 'Brunetto', 'Corrado', 'Ugolino', 'Guido', 'Rinaldo', 'Tebaldo', 'Matteo', 'Filippo', 'Giacomo', 'Ranieri', 'Enrico', 'Bonifazio', 'Federico', 'Ruggero', 'Ansaldo'];
 const XPLIV = [0, 4, 10, 18, 28], CAPMAX = 5, CAPGEN = 6;
