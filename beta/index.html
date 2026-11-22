@@ -10677,10 +10677,13 @@ const STORIA = (() => {
   function bottone(){
     const dlg = [...document.querySelectorAll('#end:not([hidden]) .dlg, #cqOv .dlg, .overlay:not([hidden]) .dlg')].filter(d => d.offsetParent !== null).pop();
     if (!dlg || dlg.querySelector('.st-cond')) return !!dlg;
-    const b = document.createElement('button'); b.className = 'big alt st-cond'; b.innerHTML = '📸 Condividi nella storia';
-    b.style.cssText = 'background:linear-gradient(90deg,#f9a03c,#e1306c 55%,#8a3ab9);color:#fff;border-color:#141433';
+    // stesso stile dei pulsanti del gioco; va in fondo, sotto i pulsanti principali (mai dentro i riquadri come "Diventa un Fondatore")
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'big alt st-cond';
+    let ic = ''; try { ic = TB.ico('amici', 2) + ' '; } catch(er){}
+    b.innerHTML = ic + 'Sfida gli amici nella storia';
     b.onclick = e => { e.stopPropagation(); condividi(); };
-    const btns = dlg.querySelectorAll('button.big'); if (btns.length) btns[0].before(b); else dlg.appendChild(b);
+    const dirette = [...dlg.children].filter(x => x.matches && x.matches('button.big'));
+    if (dirette.length) dirette[dirette.length - 1].after(b); else dlg.appendChild(b);
     return true;
   }
   function dopo(modo, vinto, x){ ultima = {modo, vinto, x}; [300, 900, 1800, 3000].forEach(ms => setTimeout(bottone, ms)); }
