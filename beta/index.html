@@ -10278,7 +10278,7 @@ const RITORNO = window.RITORNO = (() => {
     return 0; }
   async function puntiFrazione(n){ const f = frazione(), t = tok(); if (!f || !n) return; if (!t){ return; }
     await inviaFrazione(); try { const r = await rpc('ds_frazione_punti', {p_token: t, p_punti: n}); FST = null; if (r && r.dati > 0) setTimeout(() => { try { PROF.avviso(`+${r.dati} per ${FZ[r.frazione].n}`, 'Sfida delle frazioni'); } catch(e){} }, 1600); } catch(e){} }
-  function partita(modo, vinto, x = {}){ sc('difendi-smerillo-partite', String((+lg('difendi-smerillo-partite') || 0) + 1)); traccia('partita', Object.assign({modo, v: vinto ? 1 : 0, sec: Math.round((Date.now() - T0)/1000)}, x)); puntiFrazione(puntiDi(modo, vinto, x)); invitoSalva(); }
+  function partita(modo, vinto, x = {}){ sc('difendi-smerillo-partite', String((+lg('difendi-smerillo-partite') || 0) + 1)); traccia('partita', Object.assign({modo, v: vinto ? 1 : 0, sec: Math.round((Date.now() - T0)/1000)}, x)); puntiFrazione(puntiDi(modo, vinto, x)); invitoSalva(); try { STORIA.dopo(modo, vinto, x); } catch(e){} }
   // chi gioca da itch: dopo 5 partite deve creare il giocatore (senza account non entra in classifica)
   const MAX_OSPITE = 5;
   function devRegistrarsi(){ try { if (ACC.account) return false; } catch(e){ return false; } return (+lg('difendi-smerillo-partite') || 0) >= MAX_OSPITE; }
@@ -10591,4 +10591,95 @@ document.addEventListener('selectstart', e => { if (!(e.target.closest && e.targ
 document.addEventListener('contextmenu', e => { if (!(e.target.closest && e.target.closest('input,textarea'))) e.preventDefault(); });
 document.addEventListener('dblclick', e => e.preventDefault(), {passive:false});
 document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1 && !(e.target.closest && e.target.closest('canvas'))) e.preventDefault(); }, {passive:false});
+
+/* =====================================================================
+   CONDIVIDI NELLA STORIA: a fine partita il gioco crea un'immagine verticale
+   (1080x1920) con il risultato, pronta per la storia di Instagram.
+   Il link del gioco viene copiato: si incolla nell'adesivo "Link".
+   ===================================================================== */
+const STORIA = (() => {
+  const URL_GIOCO = 'https://natanvitali98-bit.github.io/difendi-smerillo/?da=storia';
+  const FZN = {smerillo:{n:'SMERILLO', c:'#e04830'}, sanmartino:{n:'SAN MARTINO', c:'#3f9a4a'}, ceresola:{n:'CERESOLA', c:'#3a78d0'}};
+  let ultima = null;
+  const tr = (ev, d) => { try { RITORNO.traccia(ev, d); } catch(e){} };
+  function testi(m){
+    const x = m.x || {}, v = m.vinto;
+    if (m.modo === 'tempo') return v ? ['HO RESPINTO', '12 ONDATE!', 'Difesa in tempo reale'] : ['SONO ARRIVATO', 'ALL’ONDATA ' + (x.ondata || 1), 'Difesa in tempo reale'];
+    if (m.modo === 'conquista') return v ? ['HO CONQUISTATO', 'TUTTA LA VALLE!', 'in ' + (x.stag || '?') + ' stagioni'] : ['HO COMBATTUTO', 'PER LA VALLE', 'Conquista · ' + (x.stag || '?') + ' stagioni'];
+    if (m.modo === 'online') return v ? ['HO VINTO', 'ONLINE!', 'Sfida contro un amico'] : ['SFIDA', 'ONLINE', 'Contro un amico'];
+    if (m.modo === 'assedio') return ['ASSEDIO', 'TAPPA ' + (x.tappa || 1), 'Quanto resisti?'];
+    const st = x.stelle || 0;
+    return v ? ['HO DIFESO', 'SMERILLO!', (x.m ? 'Missione ' + x.m + ' · ' : '') + '★'.repeat(st) + '☆'.repeat(3 - st)] : ['SMERILLO', 'HA BISOGNO DI TE', x.m ? 'Missione ' + x.m : 'Missione'];
+  }
+  function sfondoGioco(){
+    let best = null, area = 0;
+    document.querySelectorAll('canvas').forEach(c => { const r = c.getBoundingClientRect(); const a = r.width * r.height; if (a > area && r.width > 100 && getComputedStyle(c).visibility !== 'hidden' && c.offsetParent !== null) { area = a; best = c; } });
+    return best;
+  }
+  function titolo(g, t, y, size, col1, col2){
+    g.font = `${size}px "Lilita One", "Arial Black", sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    let s = size; while (g.measureText(t).width > 980 && s > 40){ s -= 6; g.font = `${s}px "Lilita One", "Arial Black", sans-serif`; }
+    g.lineJoin = 'round'; g.lineWidth = s * .16; g.strokeStyle = '#141433';
+    for (let i = 6; i > 0; i--){ g.fillStyle = '#141433'; g.fillText(t, 540, y + i * s * .02); }
+    g.strokeText(t, 540, y);
+    const gr = g.createLinearGradient(0, y - s / 2, 0, y + s / 2); gr.addColorStop(0, col1); gr.addColorStop(1, col2); g.fillStyle = gr; g.fillText(t, 540, y);
+  }
+  async function immagine(m){
+    try { await document.fonts.load('100px "Lilita One"'); } catch(e){}
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const g = c.getContext('2d');
+    // sfondo: la partita appena giocata, sfocata e scurita
+    g.fillStyle = '#141433'; g.fillRect(0, 0, 1080, 1920);
+    const src = sfondoGioco();
+    if (src){ try { const k = Math.max(1080 / src.width, 1920 / src.height); const w = src.width * k, h = src.height * k; g.filter = 'blur(6px) saturate(1.2)'; g.drawImage(src, (1080 - w) / 2, (1920 - h) / 2, w, h); g.filter = 'none'; } catch(e){} }
+    let gr = g.createLinearGradient(0, 0, 0, 1920); gr.addColorStop(0, 'rgba(20,20,51,.92)'); gr.addColorStop(.42, 'rgba(20,20,51,.55)'); gr.addColorStop(.62, 'rgba(20,20,51,.55)'); gr.addColorStop(1, 'rgba(20,20,51,.95)'); g.fillStyle = gr; g.fillRect(0, 0, 1080, 1920);
+    // cornice d'oro
+    g.strokeStyle = '#ffd03a'; g.lineWidth = 8; const a = 70, L = 90;
+    [[a, a, 1, 1], [1080 - a, a, -1, 1], [a, 1920 - a, 1, -1], [1080 - a, 1920 - a, -1, -1]].forEach(([x, y, dx, dy]) => { g.beginPath(); g.moveTo(x + dx * L, y); g.lineTo(x, y); g.lineTo(x, y + dy * L); g.stroke(); });
+    const [t1, t2, sub] = testi(m);
+    titolo(g, 'DIFENDI SMERILLO', 300, 92, '#ffe27a', '#ffb81c');
+    titolo(g, t1, 640, 120, '#ffffff', '#dfe6f5');
+    titolo(g, t2, 790, 150, m.vinto ? '#ffe27a' : '#ffd0c4', m.vinto ? '#ffb81c' : '#ff6a4a');
+    g.font = '52px "Lilita One", sans-serif'; g.fillStyle = '#fff'; g.textAlign = 'center'; g.fillText(sub, 540, 920);
+    // chi ha giocato e per quale frazione
+    let nome = ''; try { nome = (ACC.account && ACC.account.nome) || localStorage.getItem('difendi-smerillo-nome') || ''; } catch(e){}
+    let fz = null; try { fz = FZN[localStorage.getItem('difendi-smerillo-frazione')]; } catch(e){}
+    if (nome || fz){
+      const riga = (nome ? nome : 'Gioco') + (fz ? '  ·  per ' + fz.n : '');
+      g.font = '46px "Lilita One", sans-serif'; const w = g.measureText(riga).width + 70;
+      g.fillStyle = fz ? fz.c : '#3a3a7a'; g.beginPath(); g.roundRect(540 - w / 2, 990, w, 84, 42); g.fill(); g.lineWidth = 6; g.strokeStyle = '#141433'; g.stroke();
+      g.fillStyle = '#fff'; g.fillText(riga, 540, 1034);
+    }
+    // invito e spazio libero per l'adesivo Link (fra 1180 e 1450 non c'è niente)
+    titolo(g, 'BATTI IL MIO RECORD', 1150, 76, '#ffffff', '#dfe6f5');
+    g.font = '40px "Lilita One", sans-serif'; g.fillStyle = 'rgba(255,255,255,.75)'; g.fillText('↓  tocca il link  ↓', 540, 1215);
+    g.font = '36px "Lilita One", sans-serif'; g.fillStyle = '#ffd03a'; g.fillText('Gioco gratis · dal telefono · Smerillo Portal', 540, 1720);
+    return new Promise(r => c.toBlob(b => r(b), 'image/png'));
+  }
+  function anteprima(url){
+    const o = document.createElement('div'); o.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(10,10,30,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px';
+    o.innerHTML = `<img src="${url}" style="max-height:68vh;max-width:90vw;border-radius:14px;border:3px solid #ffd03a"><p style="color:#fff;font:400 18px/1.35 var(--f-big);text-align:center;max-width:330px">Tieni premuto sull'immagine e salvala. Poi aprila nella storia di Instagram e aggiungi l'adesivo <b>Link</b>: il link del gioco è già copiato.</p><button class="big" style="min-width:200px">Chiudi</button>`;
+    o.querySelector('button').onclick = () => o.remove(); document.body.appendChild(o);
+  }
+  async function condividi(){
+    if (!ultima) return; tr('storia', {modo: ultima.modo, fase: 'tocco'});
+    try { await navigator.clipboard.writeText(URL_GIOCO); } catch(e){}
+    const blob = await immagine(ultima); if (!blob) return;
+    const file = new File([blob], 'difendi-smerillo.png', {type: 'image/png'});
+    try {
+      if (navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file]}); tr('storia', {modo: ultima.modo, fase: 'condivisa'}); return; }
+    } catch(e){ if (e && e.name === 'AbortError') return; }
+    anteprima(URL.createObjectURL(blob)); tr('storia', {modo: ultima.modo, fase: 'anteprima'});
+  }
+  function bottone(){
+    const dlg = [...document.querySelectorAll('#end:not([hidden]) .dlg, #cqOv .dlg, .overlay:not([hidden]) .dlg')].filter(d => d.offsetParent !== null).pop();
+    if (!dlg || dlg.querySelector('.st-cond')) return !!dlg;
+    const b = document.createElement('button'); b.className = 'big alt st-cond'; b.innerHTML = '📸 Condividi nella storia';
+    b.style.cssText = 'background:linear-gradient(90deg,#f9a03c,#e1306c 55%,#8a3ab9);color:#fff;border-color:#141433';
+    b.onclick = e => { e.stopPropagation(); condividi(); };
+    const btns = dlg.querySelectorAll('button.big'); if (btns.length) btns[0].before(b); else dlg.appendChild(b);
+    return true;
+  }
+  function dopo(modo, vinto, x){ ultima = {modo, vinto, x}; [300, 900, 1800, 3000].forEach(ms => setTimeout(bottone, ms)); }
+  return {dopo, condividi, immagine, _bottone: bottone};
+})();
 </script>
