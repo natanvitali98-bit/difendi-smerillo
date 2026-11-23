@@ -37,6 +37,7 @@ FISSI = [
     ("replace(/^(Simbolo|Colore|Forma) /, '')", "replace(/ (symbol|colour|shape)$/, '')", 2),
     ("replace(/^(Stemma|Scudo) «(.*)»$/, '$2')", "replace(/^(Crest|Shield) «(.*)»$/, '$2')"),
     ("'DIFENDI'", "'DEFEND'", 3),
+    ('<div class="ld-logo"><span>Difendi</span>', '<div class="ld-logo"><span>Difendi\u200b</span>'),   # il titolo del gioco resta "Difendi Smerillo"
     ("strDet(st.str, 'danneggiato', 'danneggiata')", "strDet(st.str, 'damaged', 'damaged')"),
     ("strDet(dn.k, 'distrutto', 'distrutta')", "strDet(dn.k, 'destroyed', 'destroyed')"),
     ("strDet(dn.k, 'danneggiato', 'danneggiata')", "strDet(dn.k, 'damaged', 'damaged')"),
