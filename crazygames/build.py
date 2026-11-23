@@ -1,6 +1,6 @@
 # Crea crazygames/index.html partendo dalla beta.
 # Versione per CrazyGames (Basic Launch): niente account, niente server, niente link esterni,
-# niente multiplayer online, niente richiesta "aggiungi alla Home". Salvataggio solo sul dispositivo.
+# multiplayer solo con codice stanza, testi in inglese, niente richiesta "aggiungi alla Home". Salvataggio solo sul dispositivo.
 import re, os, sys
 QUI = os.path.dirname(os.path.abspath(__file__))
 s = open(os.path.join(QUI, '..', 'beta', 'index.html'), encoding='utf-8').read()
@@ -47,6 +47,11 @@ sost("pgs = [...c.querySelectorAll('.cr-pg')];", "pgs = [...c.querySelectorAll('
 # 4) conteggio delle visite da CrazyGames (anonimo: un numero a caso per dispositivo, nessun dato personale)
 sost("const DA = (() => { const m = /[?&]da=", "const DA = (() => { if (window.CG_BUILD) return 'crazygames'; const m = /[?&]da=")
 sost("vero = /github\\.io$/.test(location.hostname) && !/\\/beta\\//.test(location.pathname);", "vero = !!window.CG_BUILD || (/github\\.io$/.test(location.hostname) && !/\\/beta\\//.test(location.pathname));")
+
+# 5) testi in inglese (CrazyGames chiede l'inglese come lingua principale)
+from traduci import traduci_html
+s, n = traduci_html(s)
+print('testi tradotti:', n)
 
 out = os.path.join(QUI, 'index.html')
 open(out, 'w', encoding='utf-8').write(s)
