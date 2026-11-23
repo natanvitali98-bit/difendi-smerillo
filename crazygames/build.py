@@ -83,6 +83,7 @@ sost("function mostraMenu(", "function mostraMenu(){ try { window.CG_GP && CG_GP
 sost("function nuovaPartita(", "function nuovaPartita(){ try { window.CG_GP && CG_GP(true); } catch(e){} return nuovaPartita0.apply(this, arguments); }\nfunction nuovaPartita0(")
 sost("function apri(modo){ provenienza = 'menu';", "function apri(modo){ try { window.CG_GP && CG_GP(true); } catch(e){} provenienza = 'menu';")
 sost("function apri(dopo){ APRI_DOPO = dopo || null;", "function apri(dopo){ try { window.CG_GP && CG_GP(true); } catch(e){} APRI_DOPO = dopo || null;")
+sost("if (navigator.webdriver && !forzaGate) setTimeout(esci, 1200);", "if ((navigator.webdriver || window.CG_SDK_OK) && !forzaGate) setTimeout(esci, window.CG_SDK_OK ? 300 : 1200);")   # su CrazyGames si entra da soli: il loro tempo di caricamento non conta l'attesa del tocco
 sost("set muto(v){ muto = v;", "set muto(v){ if (!v && window.CG_MUTO) return; muto = v;")
 
 # 6) testi in inglese (CrazyGames chiede l'inglese come lingua principale)
