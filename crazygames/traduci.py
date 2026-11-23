@@ -36,6 +36,7 @@ FISSI = [
     ("replace(/La tua casata/g, 'La casata ' + nm).replace(/la tua casata/g, 'la casata ' + nm)", "replace(/Your house/g, 'The house ' + nm).replace(/your house/g, 'the house ' + nm)"),
     ("replace(/^(Simbolo|Colore|Forma) /, '')", "replace(/ (symbol|colour|shape)$/, '')", 2),
     ("replace(/^(Stemma|Scudo) «(.*)»$/, '$2')", "replace(/^(Crest|Shield) «(.*)»$/, '$2')"),
+    ("'DIFENDI'", "'DEFEND'", 3),
     ("strDet(st.str, 'danneggiato', 'danneggiata')", "strDet(st.str, 'damaged', 'damaged')"),
     ("strDet(dn.k, 'distrutto', 'distrutta')", "strDet(dn.k, 'destroyed', 'destroyed')"),
     ("strDet(dn.k, 'danneggiato', 'danneggiata')", "strDet(dn.k, 'damaged', 'damaged')"),

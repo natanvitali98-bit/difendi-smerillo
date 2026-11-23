@@ -78,7 +78,7 @@ window.cambiaLingua = () => { try { localStorage.setItem('difendi-smerillo-lingu
 sost("localStorage.setItem('difendi-smerillo-audio', v ? 'no' : 'si'); } catch(e){} } };\n})();", "localStorage.setItem('difendi-smerillo-audio', v ? 'no' : 'si'); } catch(e){} } };\n})();\nwindow.SUONI_CG = SUONI;")
 
 # 5c) avvisi a CrazyGames: fine caricamento, inizio e fine partita; il loro "muto" vince sul nostro
-sost("const esci = () => { if (uscito) return; uscito = true;", "const esci = () => { if (uscito) return; uscito = true; try { window.CG_CARICATO && CG_CARICATO(); } catch(e){}")
+sost("const esci = () => { if (uscito) return; uscito = true;", "const esci = () => { if (uscito) return; uscito = true; try { window.CG_CARICATO && CG_CARICATO(); window.CG_GP && CG_GP(true); } catch(e){}")
 sost("function mostraMenu(", "function mostraMenu(){ try { window.CG_GP && CG_GP(false); } catch(e){} return mostraMenu0.apply(this, arguments); }\nfunction mostraMenu0(")
 sost("function nuovaPartita(", "function nuovaPartita(){ try { window.CG_GP && CG_GP(true); } catch(e){} return nuovaPartita0.apply(this, arguments); }\nfunction nuovaPartita0(")
 sost("function apri(modo){ provenienza = 'menu';", "function apri(modo){ try { window.CG_GP && CG_GP(true); } catch(e){} provenienza = 'menu';")
