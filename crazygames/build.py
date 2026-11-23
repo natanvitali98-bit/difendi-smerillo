@@ -48,11 +48,44 @@ sost("pgs = [...c.querySelectorAll('.cr-pg')];", "pgs = [...c.querySelectorAll('
 sost("const DA = (() => { const m = /[?&]da=", "const DA = (() => { if (window.CG_BUILD) return 'crazygames'; const m = /[?&]da=")
 sost("vero = /github\\.io$/.test(location.hostname) && !/\\/beta\\//.test(location.pathname);", "vero = !!window.CG_BUILD || (/github\\.io$/.test(location.hostname) && !/\\/beta\\//.test(location.pathname));")
 
-# 5) testi in inglese (CrazyGames chiede l'inglese come lingua principale)
-from traduci import traduci_html
-s, n = traduci_html(s)
-print('testi tradotti:', n)
+# 5) pulsante lingua nel pannello "Altro"
+sost('''<button class="big alt" data-p="home">Indietro</button></div>`;
+  } else if (pannello === 'profilo')''', '''${window.CG_LINGUA === 'it' ? '<button class="big alt" onclick="cambiaLingua()">🌐 English</button>' : '<button class="big alt" onclick="cambiaLingua()">🌐 Italiano</button>'}
+      <button class="big alt" data-p="home">Indietro</button></div>`;
+  } else if (pannello === 'profilo')''')
+sost('window.CG_BUILD = true;', '''window.CG_BUILD = true; window.CG_LINGUA = '@@LINGUA@@';
+window.cambiaLingua = () => { try { localStorage.setItem('difendi-smerillo-lingua', window.CG_LINGUA === 'it' ? 'en' : 'it'); } catch(e){} location.reload(); };''')
 
+# 6) testi in inglese (CrazyGames chiede l'inglese come lingua principale)
+from traduci import traduci_html
+s_en, n = traduci_html(s)
+print('testi tradotti:', n)
+s_it = s.replace('@@LINGUA@@', 'it'); s_en = s_en.replace('@@LINGUA@@', 'en')
+
+# 7) un solo file con le due lingue: sceglie la lingua salvata, altrimenti quella del telefono (italiano se è in italiano, se no inglese)
+import base64
+b64 = lambda x: base64.b64encode(x.encode('utf-8')).decode('ascii')
+VIEW = re.search(r'<meta name="viewport"[^>]*>', s).group()
+s = f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8">{VIEW}<title>Difendi Smerillo</title></head>
+<body style="margin:0;background:#0b0f2e">
+<script type="text/plain" id="v-it">{b64(s_it)}</script>
+<script type="text/plain" id="v-en">{b64(s_en)}</script>
+<script>
+(function(){{
+  var L = null; try {{ L = localStorage.getItem('difendi-smerillo-lingua'); }} catch(e){{}}
+  if (L !== 'it' && L !== 'en'){{ var n = (navigator.languages && navigator.languages[0]) || navigator.language || ''; L = /^it/i.test(n) ? 'it' : 'en'; }}
+  var b = atob(document.getElementById('v-' + L).textContent), u = new Uint8Array(b.length);
+  for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+  var html = new TextDecoder('utf-8').decode(u);
+  setTimeout(function(){{ document.open(); document.write(html); document.close(); }}, 0);
+}})();
+</script>
+</body></html>'''
+
+os.makedirs(os.path.join(QUI, 'prove'), exist_ok=True)   # copie separate per i test (non si caricano)
+open(os.path.join(QUI, 'prove', 'it.html'), 'w', encoding='utf-8').write(s_it)
+open(os.path.join(QUI, 'prove', 'en.html'), 'w', encoding='utf-8').write(s_en)
 out = os.path.join(QUI, 'index.html')
 open(out, 'w', encoding='utf-8').write(s)
 print('ok', out, round(len(s.encode()) / 1e6, 2), 'MB')
