@@ -7513,8 +7513,10 @@ function stemma(st, px = 1){ if (!st) return null; const key = JSON.stringify(st
     g.fillStyle = col; g.fillRect(x*px, y*px, px, px); if (d && y === 2){ g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(x*px, y*px, px, px); } }
   if (im.complete && im.width){ const w = Math.min(10, im.width), h = Math.min(10, im.height), ox = Math.round((W0 - w)/2), oy = 5; g.fillStyle = 'rgba(20,20,51,.35)'; g.imageSmoothingEnabled = false;
     g.drawImage(im, 0, 0, im.width, im.height, ox*px, oy*px, w*px, h*px); return STM[key] = c; }
-  im.onload = () => { for (const k in STM) delete STM[k]; if (root && S) aggiornaUI(); }; return c; }
-const imgStemma = (st, px) => { const c = stemma(st, px); return c ? `<img class="cq-stm" src="${c.toDataURL()}" width="${c.width}" height="${c.height}" alt="Stemma">` : ''; };
+  im.addEventListener('load', () => { for (const k in STM) delete STM[k]; if (root && S) aggiornaUI(); rifaiStemmi(); }, {once: true}); return c; }
+// il simbolo arriva dopo (è un'immagine): ridisegno gli stemmi già messi nelle pagine (Collezione, finestre)
+function rifaiStemmi(){ document.querySelectorAll('img.cq-stm[data-st]').forEach(e => { try { const c = stemma(JSON.parse(e.dataset.st), +e.dataset.px || 1); if (c) e.src = c.toDataURL(); } catch(x){} }); }
+const imgStemma = (st, px) => { const c = stemma(st, px); return c ? `<img class="cq-stm" src="${c.toDataURL()}" width="${c.width}" height="${c.height}" alt="Stemma" data-px="${px || 1}" data-st="${JSON.stringify(st).replace(/"/g, '&quot;')}">` : ''; };
 // i capitani della casata: guidano gli attacchi, fanno esperienza e restano partita dopo partita
 const NOMICAP = ['Bernardo', 'Gualtiero', 'Nicolò', 'Ottone', 'Lapo', 'Brunetto', 'Corrado', 'Ugolino', 'Guido', 'Rinaldo', 'Tebaldo', 'Matteo', 'Filippo', 'Giacomo', 'Ranieri', 'Enrico', 'Bonifazio', 'Federico', 'Ruggero', 'Ansaldo'];
 const XPLIV = [0, 4, 10, 18, 28], CAPMAX = 5, CAPGEN = 6;
@@ -10047,7 +10049,7 @@ const ACC = window.ACC = (() => {
   const livDa = xp => { let L = 1; while (L < 30 && xp >= 60 + 40*(L - 1)){ xp -= 60 + 40*(L - 1); L++; } return L; };
   const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
   const valore = (tipo, v) => tipo === 'livello' ? `<b>Liv. ${livDa(v)}</b><small>${v} esp.</small>` : tipo === 'assedio' ? `<b>Tappa ${v}</b>` : tipo === 'stelle' ? `<b>${v}</b><small>stelle</small>` : `<b>${v}</b><small>gloria</small>`;
-  function classifica(box){ if (!box) return;
+  function classifica(box){ if (!box) return; CL.cache = {};   // ogni volta che apri la classifica, dati freschi (dopo una partita si vede subito)
     box.innerHTML = `<div class="cr-seg cl-seg">${Object.keys(CLT).map(k => `<button type="button" data-cl="${k}" class="${CL.tipo === k ? 'on' : ''}">${CLT[k][0]}</button>`).join('')}</div><div class="cl-io" id="clIo"></div><div class="cl-lista" id="clL"></div>`;
     box.querySelectorAll('[data-cl]').forEach(b => b.onclick = () => { CL.tipo = b.dataset.cl; try { SUONI.suona('tocco'); } catch(e){} box.querySelectorAll('[data-cl]').forEach(x => x.classList.toggle('on', x === b)); carica(box); });
     carica(box); }
@@ -10058,7 +10060,7 @@ const ACC = window.ACC = (() => {
       else io.innerHTML = `<div class="cl-card"><span><b>${esc(A.nome)}</b><small>${tipo === 'gloria' ? 'Gioca a Conquista per entrare in questa classifica.' : tipo === 'assedio' ? 'Gioca ad Assedio per entrare in questa classifica.' : 'Gioca una missione per entrare in classifica.'}</small></span></div>`;
       if (tipo === 'gloria') io.insertAdjacentHTML('beforeend', `<button type="button" class="fd-cl" data-targa>${med(0, 'mini')}<span><b>Targa dei Fondatori</b><small>I primi 10 a giocare a Conquista</small></span><i>Leggi</i></button>`);
       const b = io.querySelector('#clAcc'); if (b) b.onclick = () => apri('crea');
-      r.righe = r.righe || []; const pod = r.righe.filter(x => x.pos <= 3); L.innerHTML = r.righe.length ? (pod.length >= 2 ? `<div class="cl-podio">${[2, 1, 3].map(n => { const x = pod.find(y => y.pos === n); return x ? `<div class="cl-pd p${n}${x.io ? ' io' : ''}"><span class="cl-av" data-av="${esc(x.av)}"></span><b>${esc(x.nome)}</b><span class="cl-pv">${valore(tipo, x.v)}</span><div class="cl-blocco"><i>${n}</i></div></div>` : '<div class="cl-pd vuoto"></div>'; }).join('')}</div>` : '') + r.righe.filter(x => pod.length < 2 || x.pos > 3).map(x => `<div class="cl-r ${x.io ? 'io' : ''} ${x.pos <= 3 ? 'p' + x.pos : ''}"><span class="cl-pos">${x.pos}</span><span class="cl-av" data-av="${esc(x.av)}"></span><b class="cl-n">${esc(x.nome)}${x.fond ? med(x.fond, 'mini') : ''}</b><span class="cl-v">${valore(tipo, x.v)}</span></div>`).join('')
+      r.righe = r.righe || []; const pod = r.righe.slice(0, 3); L.innerHTML = r.righe.length ? (pod.length >= 2 ? `<div class="cl-podio">${[2, 1, 3].map(n => { const x = pod[n - 1]; return x ? `<div class="cl-pd p${n}${x.io ? ' io' : ''}"><span class="cl-av" data-av="${esc(x.av)}"></span><b>${esc(x.nome)}</b><span class="cl-pv">${valore(tipo, x.v)}</span><div class="cl-blocco"><i>${x.pos}</i></div></div>` : '<div class="cl-pd vuoto"></div>'; }).join('')}</div>` : '') + r.righe.filter((x, i) => pod.length < 2 || i >= 3).map(x => `<div class="cl-r ${x.io ? 'io' : ''} ${x.pos <= 3 ? 'p' + x.pos : ''}"><span class="cl-pos">${x.pos}</span><span class="cl-av" data-av="${esc(x.av)}"></span><b class="cl-n">${esc(x.nome)}${x.fond ? med(x.fond, 'mini') : ''}</b><span class="cl-v">${valore(tipo, x.v)}</span></div>`).join('')
         : `<div class="cl-vuota"><span>${TB.ico('coppa', 5)}</span><b>Il podio è libero!</b><small>Nessuno è ancora in questa classifica: gioca e diventa il primo di Smerillo.</small><button type="button" class="big mini" data-vaigioca>${TB.ico('play', 2)} Gioca adesso</button></div>`;
       { const vg = L.querySelector('[data-vaigioca]'); if (vg) vg.onclick = () => { const tg = document.querySelector('.cr-tab[data-tab="gioca"]'); if (tg) tg.click(); }; }
       L.querySelectorAll('[data-av]').forEach(e => { try { e.append(TB.icona(e.dataset.av, 2)); } catch(er){ try { e.append(TB.icona('lanciere', 2)); } catch(e2){} } }); };
@@ -10212,7 +10214,8 @@ const COACH = window.COACH = (() => {
   function bersaglio(){ if (!cfg || !cfg.dove) return null; let t = null; try { t = cfg.dove(); } catch(e){ return null; } if (!t) return null;
     if (t instanceof Element){ const r = t.getBoundingClientRect(); if (!r.width || !r.height || t.closest('[hidden]') || getComputedStyle(t).visibility === 'hidden') return null; return {x: r.left + r.width/2, y: r.top + r.height/2, w: r.width + 14, h: r.height + 14, el: true}; }
     return {x: t.x, y: t.y, w: (t.r || 34)*2, h: (t.r || 34)*2, el: false}; }
-  function giro(){ raf = requestAnimationFrame(giro); if (!cfg) return;
+  function giro(){ raf = requestAnimationFrame(giro); posiziona(); }
+  function posiziona(){ if (!cfg) return;
     const nascosto = cfg.pausa && cfg.pausa(); box.hidden = !!nascosto;
     const b = nascosto ? null : bersaglio();
     ring.hidden = dito.hidden = !b;
@@ -10221,16 +10224,19 @@ const COACH = window.COACH = (() => {
     // la nuvoletta sta dalla parte opposta al bersaglio
     if (!nascosto){ const basso = innerHeight < 560 && innerWidth > innerHeight;
       if (basso){ const dx = !b || b.x < innerWidth/2; box.classList.add('lato'); box.classList.remove('sopra', 'sotto'); box.classList.toggle('dx', dx); box.classList.toggle('sx', !dx); }
-      else { box.classList.remove('lato', 'dx', 'sx'); const alto = !!(!b || b.y > innerHeight*.45 || (cfg.su && b.y > 150)); box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
-        // se la nuvoletta copre comunque il punto da toccare, la accorcio
-        if (b){ const r = box.getBoundingClientRect(); box.classList.toggle('stretto', b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8); } } } }
+      else { box.classList.remove('lato', 'dx', 'sx');
+        // lato della nuvoletta con un margine: se il punto da toccare si muove (la mappa scorre) non salta su e giù di continuo
+        const era = box.classList.contains('sopra') ? true : box.classList.contains('sotto') ? false : null, lim = era === true ? .37 : era === false ? .53 : .45;
+        const alto = !!(!b || b.y > innerHeight*lim || (cfg.su && b.y > (era === false ? 190 : 150))); box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
+        // se la nuvoletta copre il punto da toccare la accorcio, e resta accorciata finché non cambia passo (prima si allungava e accorciava a ogni fotogramma)
+        if (b && !box.classList.contains('stretto')){ const r = box.getBoundingClientRect(); if (b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8) box.classList.add('stretto'); } } } }
   function armaMini(){ clearTimeout(tMini); if (cfg && !cfg.bottone) tMini = setTimeout(() => { if (cfg && !cfg.bottone && box && !box.hidden) box.classList.add('mini'); }, MINI_DOPO + (cfg.sotto ? 1200 : 0)); }
-  function mostra(c){ crea(); cfg = c; box.classList.remove('mini'); box.classList.toggle('giu', !!c.giu);
+  function mostra(c){ crea(); cfg = c; box.classList.remove('mini', 'stretto'); box.classList.toggle('giu', !!c.giu);
     box.innerHTML = `<div class="co-h"><span class="co-n">${c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : (c.tag || 'GUIDA')}</span>${c.salta ? '<button type="button" class="co-salta">' + (c.saltaT || 'Salta la guida') + '</button>' : ''}</div>
       <p class="co-t">${c.testo}</p>${c.sotto ? `<p class="co-s">${c.sotto}</p>` : ''}${c.bottone ? `<button type="button" class="co-ok">${c.bottone}</button>` : ''}`;
     const s = box.querySelector('.co-salta'); if (s) s.onclick = e => { e.stopPropagation(); if (!s.dataset.sicuro && !c.tag){ s.dataset.sicuro = '1'; const t0 = s.textContent; s.textContent = 'Sicuro? Tocca ancora'; s.classList.add('co-sic'); setTimeout(() => { if (s.isConnected){ delete s.dataset.sicuro; s.textContent = t0; s.classList.remove('co-sic'); } }, 2500); return; } const f = c.salta; nascondi(); f(); }; // un tocco per sbaglio non salta la guida: chiede conferma
     const o = box.querySelector('.co-ok'); if (o) o.onclick = e => { e.stopPropagation(); const f = c.ok; if (f) f(); };
-    box.hidden = false; box.classList.remove('entra'); void box.offsetWidth; box.classList.add('entra'); armaMini();
+    box.hidden = false; box.classList.remove('sopra', 'sotto'); posiziona(); box.classList.remove('entra'); void box.offsetWidth; box.classList.add('entra'); armaMini();   // posizione decisa subito: niente salto al primo fotogramma
     if (!raf) giro(); }
   function nascondi(){ cfg = null; clearTimeout(tMini); if (box){ box.hidden = true; ring.hidden = true; dito.hidden = true; } if (raf){ cancelAnimationFrame(raf); raf = 0; } }
   return {mostra, nascondi, get attivo(){ return !!cfg; }};
@@ -10276,7 +10282,7 @@ const RITORNO = window.RITORNO = (() => {
     return 0; }
   async function puntiFrazione(n){ const f = frazione(), t = tok(); if (!f || !n) return; if (!t){ return; }
     await inviaFrazione(); try { const r = await rpc('ds_frazione_punti', {p_token: t, p_punti: n}); FST = null; if (r && r.dati > 0) setTimeout(() => { try { PROF.avviso(`+${r.dati} per ${FZ[r.frazione].n}`, 'Sfida delle frazioni'); } catch(e){} }, 1600); } catch(e){} }
-  function partita(modo, vinto, x = {}){ sc('difendi-smerillo-partite', String((+lg('difendi-smerillo-partite') || 0) + 1)); traccia('partita', Object.assign({modo, v: vinto ? 1 : 0, sec: Math.round((Date.now() - T0)/1000)}, x)); puntiFrazione(puntiDi(modo, vinto, x)); invitoSalva(); }
+  function partita(modo, vinto, x = {}){ sc('difendi-smerillo-partite', String((+lg('difendi-smerillo-partite') || 0) + 1)); traccia('partita', Object.assign({modo, v: vinto ? 1 : 0, sec: Math.round((Date.now() - T0)/1000)}, x)); puntiFrazione(puntiDi(modo, vinto, x)); invitoSalva(); try { STORIA.dopo(modo, vinto, x); } catch(e){} }
   // chi gioca da itch: dopo 5 partite deve creare il giocatore (senza account non entra in classifica)
   const MAX_OSPITE = 5;
   function devRegistrarsi(){ try { if (ACC.account) return false; } catch(e){ return false; } return (+lg('difendi-smerillo-partite') || 0) >= MAX_OSPITE; }
@@ -10327,7 +10333,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261121175325';
+  const VERSIONE = window.DS_VER = '20261123091945';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){
@@ -10589,4 +10595,98 @@ document.addEventListener('selectstart', e => { if (!(e.target.closest && e.targ
 document.addEventListener('contextmenu', e => { if (!(e.target.closest && e.target.closest('input,textarea'))) e.preventDefault(); });
 document.addEventListener('dblclick', e => e.preventDefault(), {passive:false});
 document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1 && !(e.target.closest && e.target.closest('canvas'))) e.preventDefault(); }, {passive:false});
+
+/* =====================================================================
+   CONDIVIDI NELLA STORIA: a fine partita il gioco crea un'immagine verticale
+   (1080x1920) con il risultato, pronta per la storia di Instagram.
+   Il link del gioco viene copiato: si incolla nell'adesivo "Link".
+   ===================================================================== */
+const STORIA = (() => {
+  const URL_GIOCO = 'https://natanvitali98-bit.github.io/difendi-smerillo/?da=storia';
+  const FZN = {smerillo:{n:'SMERILLO', c:'#e04830'}, sanmartino:{n:'SAN MARTINO', c:'#3f9a4a'}, ceresola:{n:'CERESOLA', c:'#3a78d0'}};
+  let ultima = null;
+  const tr = (ev, d) => { try { RITORNO.traccia(ev, d); } catch(e){} };
+  function testi(m){
+    const x = m.x || {}, v = m.vinto;
+    if (m.modo === 'tempo') return v ? ['HO RESPINTO', '12 ONDATE!', 'Difesa in tempo reale'] : ['SONO ARRIVATO', 'ALL’ONDATA ' + (x.ondata || 1), 'Difesa in tempo reale'];
+    if (m.modo === 'conquista') return v ? ['HO CONQUISTATO', 'TUTTA LA VALLE!', 'in ' + (x.stag || '?') + ' stagioni'] : ['HO COMBATTUTO', 'PER LA VALLE', 'Conquista · ' + (x.stag || '?') + ' stagioni'];
+    if (m.modo === 'online') return v ? ['HO VINTO', 'ONLINE!', 'Sfida contro un amico'] : ['SFIDA', 'ONLINE', 'Contro un amico'];
+    if (m.modo === 'assedio') return ['ASSEDIO', 'TAPPA ' + (x.tappa || 1), 'Quanto resisti?'];
+    const st = x.stelle || 0;
+    return v ? ['HO DIFESO', 'SMERILLO!', (x.m ? 'Missione ' + x.m + ' · ' : '') + '★'.repeat(st) + '☆'.repeat(3 - st)] : ['SMERILLO', 'HA BISOGNO DI TE', x.m ? 'Missione ' + x.m : 'Missione'];
+  }
+  function sfondoGioco(){
+    let best = null, area = 0;
+    document.querySelectorAll('canvas').forEach(c => { const r = c.getBoundingClientRect(); const a = r.width * r.height; if (a > area && r.width > 100 && getComputedStyle(c).visibility !== 'hidden' && c.offsetParent !== null) { area = a; best = c; } });
+    return best;
+  }
+  function titolo(g, t, y, size, col1, col2){
+    g.font = `${size}px "Lilita One", "Arial Black", sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    let s = size; while (g.measureText(t).width > 980 && s > 40){ s -= 6; g.font = `${s}px "Lilita One", "Arial Black", sans-serif`; }
+    g.lineJoin = 'round'; g.lineWidth = s * .16; g.strokeStyle = '#141433';
+    for (let i = 6; i > 0; i--){ g.fillStyle = '#141433'; g.fillText(t, 540, y + i * s * .02); }
+    g.strokeText(t, 540, y);
+    const gr = g.createLinearGradient(0, y - s / 2, 0, y + s / 2); gr.addColorStop(0, col1); gr.addColorStop(1, col2); g.fillStyle = gr; g.fillText(t, 540, y);
+  }
+  async function immagine(m){
+    try { await document.fonts.load('100px "Lilita One"'); } catch(e){}
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1920; const g = c.getContext('2d');
+    // sfondo: la partita appena giocata, sfocata e scurita
+    g.fillStyle = '#141433'; g.fillRect(0, 0, 1080, 1920);
+    const src = sfondoGioco();
+    if (src){ try { const k = Math.max(1080 / src.width, 1920 / src.height); const w = src.width * k, h = src.height * k; g.filter = 'blur(6px) saturate(1.2)'; g.drawImage(src, (1080 - w) / 2, (1920 - h) / 2, w, h); g.filter = 'none'; } catch(e){} }
+    let gr = g.createLinearGradient(0, 0, 0, 1920); gr.addColorStop(0, 'rgba(20,20,51,.92)'); gr.addColorStop(.42, 'rgba(20,20,51,.55)'); gr.addColorStop(.62, 'rgba(20,20,51,.55)'); gr.addColorStop(1, 'rgba(20,20,51,.95)'); g.fillStyle = gr; g.fillRect(0, 0, 1080, 1920);
+    // cornice d'oro
+    g.strokeStyle = '#ffd03a'; g.lineWidth = 8; const a = 70, L = 90;
+    [[a, a, 1, 1], [1080 - a, a, -1, 1], [a, 1920 - a, 1, -1], [1080 - a, 1920 - a, -1, -1]].forEach(([x, y, dx, dy]) => { g.beginPath(); g.moveTo(x + dx * L, y); g.lineTo(x, y); g.lineTo(x, y + dy * L); g.stroke(); });
+    const [t1, t2, sub] = testi(m);
+    titolo(g, 'DIFENDI SMERILLO', 300, 92, '#ffe27a', '#ffb81c');
+    titolo(g, t1, 640, 120, '#ffffff', '#dfe6f5');
+    titolo(g, t2, 790, 150, m.vinto ? '#ffe27a' : '#ffd0c4', m.vinto ? '#ffb81c' : '#ff6a4a');
+    g.font = '52px "Lilita One", sans-serif'; g.fillStyle = '#fff'; g.textAlign = 'center'; g.fillText(sub, 540, 920);
+    // chi ha giocato e per quale frazione
+    let nome = ''; try { nome = (ACC.account && ACC.account.nome) || localStorage.getItem('difendi-smerillo-nome') || ''; } catch(e){}
+    let fz = null; try { fz = FZN[localStorage.getItem('difendi-smerillo-frazione')]; } catch(e){}
+    if (nome || fz){
+      const riga = (nome ? nome : 'Gioco') + (fz ? '  ·  per ' + fz.n : '');
+      g.font = '46px "Lilita One", sans-serif'; const w = g.measureText(riga).width + 70;
+      g.fillStyle = fz ? fz.c : '#3a3a7a'; g.beginPath(); g.roundRect(540 - w / 2, 990, w, 84, 42); g.fill(); g.lineWidth = 6; g.strokeStyle = '#141433'; g.stroke();
+      g.fillStyle = '#fff'; g.fillText(riga, 540, 1034);
+    }
+    // invito e spazio libero per l'adesivo Link (fra 1180 e 1450 non c'è niente)
+    titolo(g, 'BATTI IL MIO RECORD', 1150, 76, '#ffffff', '#dfe6f5');
+    g.font = '40px "Lilita One", sans-serif'; g.fillStyle = 'rgba(255,255,255,.75)'; g.fillText('↓  tocca il link  ↓', 540, 1215);
+    g.font = '36px "Lilita One", sans-serif'; g.fillStyle = '#ffd03a'; g.fillText('Gioco gratis · dal telefono · Smerillo Portal', 540, 1720);
+    return new Promise(r => c.toBlob(b => r(b), 'image/png'));
+  }
+  function anteprima(url){
+    const o = document.createElement('div'); o.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(10,10,30,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px';
+    o.innerHTML = `<img src="${url}" style="max-height:68vh;max-width:90vw;border-radius:14px;border:3px solid #ffd03a"><p style="color:#fff;font:400 18px/1.35 var(--f-big);text-align:center;max-width:330px">Tieni premuto sull'immagine e salvala. Poi aprila nella storia di Instagram e aggiungi l'adesivo <b>Link</b>: il link del gioco è già copiato.</p><button class="big" style="min-width:200px">Chiudi</button>`;
+    o.querySelector('button').onclick = () => o.remove(); document.body.appendChild(o);
+  }
+  async function condividi(){
+    if (!ultima) return; tr('storia', {modo: ultima.modo, fase: 'tocco'});
+    try { await navigator.clipboard.writeText(URL_GIOCO); } catch(e){}
+    const blob = await immagine(ultima); if (!blob) return;
+    const file = new File([blob], 'difendi-smerillo.png', {type: 'image/png'});
+    try {
+      if (navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file]}); tr('storia', {modo: ultima.modo, fase: 'condivisa'}); return; }
+    } catch(e){ if (e && e.name === 'AbortError') return; }
+    anteprima(URL.createObjectURL(blob)); tr('storia', {modo: ultima.modo, fase: 'anteprima'});
+  }
+  function bottone(){
+    const dlg = [...document.querySelectorAll('#end:not([hidden]) .dlg, #cqOv .dlg, .overlay:not([hidden]) .dlg')].filter(d => d.offsetParent !== null).pop();
+    if (!dlg || dlg.querySelector('.st-cond')) return !!dlg;
+    // stesso stile dei pulsanti del gioco; va in fondo, sotto i pulsanti principali (mai dentro i riquadri come "Diventa un Fondatore")
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'big alt st-cond';
+    let ic = ''; try { ic = TB.ico('amici', 2) + ' '; } catch(er){}
+    b.innerHTML = ic + 'Sfida gli amici nella storia';
+    b.onclick = e => { e.stopPropagation(); condividi(); };
+    const dirette = [...dlg.children].filter(x => x.matches && x.matches('button.big'));
+    if (dirette.length) dirette[dirette.length - 1].after(b); else dlg.appendChild(b);
+    return true;
+  }
+  function dopo(modo, vinto, x){ ultima = {modo, vinto, x}; [300, 900, 1800, 3000].forEach(ms => setTimeout(bottone, ms)); }
+  return {dopo, condividi, immagine, _bottone: bottone};
+})();
 </script>
