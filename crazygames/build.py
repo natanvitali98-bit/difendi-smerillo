@@ -54,7 +54,25 @@ sost('''<button class="big alt" data-p="home">Indietro</button></div>`;
       <button class="big alt" data-p="home">Indietro</button></div>`;
   } else if (pannello === 'profilo')''')
 sost('window.CG_BUILD = true;', '''window.CG_BUILD = true; window.CG_LINGUA = '@@LINGUA@@';
+/* salvataggio sul cloud di CrazyGames (SDK, Data module) e tasto muto di CrazyGames */
+(() => {
+  const SDK = () => window.CG_SDK_OK && window.CrazyGames && window.CrazyGames.SDK;
+  const tutto = () => { const o = {}; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (/^difendi-smerillo/.test(k)) o[k] = localStorage.getItem(k); } return o; };
+  let t = null; const scrivi = () => { const S = SDK(); if (!S) return; try { S.data.setItem('ds-salvataggio', JSON.stringify(tutto())); } catch(e){} };
+  const salva = () => { clearTimeout(t); t = setTimeout(scrivi, 1500); };
+  const sI = Storage.prototype.setItem, rI = Storage.prototype.removeItem;
+  Storage.prototype.setItem = function(k, v){ sI.call(this, k, v); if (this === window.localStorage && /^difendi-smerillo/.test(k)) salva(); };
+  Storage.prototype.removeItem = function(k){ rI.call(this, k); if (this === window.localStorage && /^difendi-smerillo/.test(k)) salva(); };
+  window.addEventListener('pagehide', () => { if (t){ clearTimeout(t); scrivi(); } });
+  const S = SDK(); if (!S) return;
+  let mutoCG = false;
+  const applica = st => { try { const m = !!(st && st.muteAudio); const A = window.SUONI_CG; if (!A) return; if (m) A.muto = true; else if (mutoCG) A.muto = false; mutoCG = m; } catch(e){} };
+  try { S.game.addSettingsChangeListener(applica); } catch(e){}
+  window.addEventListener('load', () => { try { applica(S.game.settings); } catch(e){} });
+})();
 window.cambiaLingua = () => { try { localStorage.setItem('difendi-smerillo-lingua', window.CG_LINGUA === 'it' ? 'en' : 'it'); } catch(e){} location.reload(); };''')
+
+sost("localStorage.setItem('difendi-smerillo-audio', v ? 'no' : 'si'); } catch(e){} } };\n})();", "localStorage.setItem('difendi-smerillo-audio', v ? 'no' : 'si'); } catch(e){} } };\n})();\nwindow.SUONI_CG = SUONI;")
 
 # 6) testi in inglese (CrazyGames chiede l'inglese come lingua principale)
 from traduci import traduci_html
@@ -73,12 +91,26 @@ s = f'''<!doctype html>
 <script type="text/plain" id="v-en">{b64(s_en)}</script>
 <script>
 (function(){{
+  // 1) SDK di CrazyGames: se c'è, riporta i progressi salvati sul cloud prima di aprire il gioco
+  var fatto = false;
+  function via(ok){{ if (fatto) return; fatto = true; window.CG_SDK_OK = false;
+    try {{ var S = ok && window.CrazyGames && window.CrazyGames.SDK;
+      if (S && S.environment !== 'disabled'){{ window.CG_SDK_OK = true; var b = S.data.getItem('ds-salvataggio');
+        if (b){{ var o = JSON.parse(b); for (var k in o) if (/^difendi-smerillo/.test(k)) localStorage.setItem(k, o[k]); }} }}
+    }} catch(e){{}}
+    apri(); }}
+  try {{ var sc = document.createElement('script'); sc.src = 'https://sdk.crazygames.com/crazygames-sdk-v3.js';
+    sc.onload = function(){{ try {{ window.CrazyGames.SDK.init().then(function(){{ via(true); }}, function(){{ via(false); }}); }} catch(e){{ via(false); }} }};
+    sc.onerror = function(){{ via(false); }}; document.head.appendChild(sc); }} catch(e){{ via(false); }}
+  setTimeout(function(){{ via(false); }}, 5000);
+  function apri(){{
   var L = null; try {{ L = localStorage.getItem('difendi-smerillo-lingua'); }} catch(e){{}}
   if (L !== 'it' && L !== 'en'){{ var n = (navigator.languages && navigator.languages[0]) || navigator.language || ''; L = /^it/i.test(n) ? 'it' : 'en'; }}
   var b = atob(document.getElementById('v-' + L).textContent), u = new Uint8Array(b.length);
   for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
   var html = new TextDecoder('utf-8').decode(u);
   setTimeout(function(){{ document.open(); document.write(html); document.close(); }}, 0);
+  }}
 }})();
 </script>
 </body></html>'''
