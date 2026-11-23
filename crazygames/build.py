@@ -64,15 +64,26 @@ sost('window.CG_BUILD = true;', '''window.CG_BUILD = true; window.CG_LINGUA = '@
   Storage.prototype.setItem = function(k, v){ sI.call(this, k, v); if (this === window.localStorage && /^difendi-smerillo/.test(k)) salva(); };
   Storage.prototype.removeItem = function(k){ rI.call(this, k); if (this === window.localStorage && /^difendi-smerillo/.test(k)) salva(); };
   window.addEventListener('pagehide', () => { if (t){ clearTimeout(t); scrivi(); } });
+  let gioca = false;
+  window.CG_GP = on => { const S = SDK(); if (!S || on === gioca) return; gioca = on; try { on ? S.game.gameplayStart() : S.game.gameplayStop(); } catch(e){} };
+  window.CG_CARICATO = () => { const S = SDK(); if (S) try { S.game.loadingStop(); } catch(e){} };
   const S = SDK(); if (!S) return;
   let mutoCG = false;
-  const applica = st => { try { const m = !!(st && st.muteAudio); const A = window.SUONI_CG; if (!A) return; if (m) A.muto = true; else if (mutoCG) A.muto = false; mutoCG = m; } catch(e){} };
+  const applica = st => { try { const m = !!(st && st.muteAudio); window.CG_MUTO = m; const A = window.SUONI_CG; if (!A) return; if (m) A.muto = true; else if (mutoCG) A.muto = false; mutoCG = m; } catch(e){} };
   try { S.game.addSettingsChangeListener(applica); } catch(e){}
   window.addEventListener('load', () => { try { applica(S.game.settings); } catch(e){} });
 })();
 window.cambiaLingua = () => { try { localStorage.setItem('difendi-smerillo-lingua', window.CG_LINGUA === 'it' ? 'en' : 'it'); } catch(e){} location.reload(); };''')
 
 sost("localStorage.setItem('difendi-smerillo-audio', v ? 'no' : 'si'); } catch(e){} } };\n})();", "localStorage.setItem('difendi-smerillo-audio', v ? 'no' : 'si'); } catch(e){} } };\n})();\nwindow.SUONI_CG = SUONI;")
+
+# 5c) avvisi a CrazyGames: fine caricamento, inizio e fine partita; il loro "muto" vince sul nostro
+sost("const esci = () => { if (uscito) return; uscito = true;", "const esci = () => { if (uscito) return; uscito = true; try { window.CG_CARICATO && CG_CARICATO(); } catch(e){}")
+sost("function mostraMenu(", "function mostraMenu(){ try { window.CG_GP && CG_GP(false); } catch(e){} return mostraMenu0.apply(this, arguments); }\nfunction mostraMenu0(")
+sost("function nuovaPartita(", "function nuovaPartita(){ try { window.CG_GP && CG_GP(true); } catch(e){} return nuovaPartita0.apply(this, arguments); }\nfunction nuovaPartita0(")
+sost("function apri(modo){ provenienza = 'menu';", "function apri(modo){ try { window.CG_GP && CG_GP(true); } catch(e){} provenienza = 'menu';")
+sost("function apri(dopo){ APRI_DOPO = dopo || null;", "function apri(dopo){ try { window.CG_GP && CG_GP(true); } catch(e){} APRI_DOPO = dopo || null;")
+sost("set muto(v){ muto = v;", "set muto(v){ if (!v && window.CG_MUTO) return; muto = v;")
 
 # 6) testi in inglese (CrazyGames chiede l'inglese come lingua principale)
 from traduci import traduci_html
@@ -95,7 +106,7 @@ s = f'''<!doctype html>
   var fatto = false;
   function via(ok){{ if (fatto) return; fatto = true; window.CG_SDK_OK = false;
     try {{ var S = ok && window.CrazyGames && window.CrazyGames.SDK;
-      if (S && S.environment !== 'disabled'){{ window.CG_SDK_OK = true; var b = S.data.getItem('ds-salvataggio');
+      if (S && S.environment !== 'disabled'){{ window.CG_SDK_OK = true; try {{ S.game.loadingStart(); }} catch(e){{}} var b = S.data.getItem('ds-salvataggio');
         if (b){{ var o = JSON.parse(b); for (var k in o) if (/^difendi-smerillo/.test(k)) localStorage.setItem(k, o[k]); }} }}
     }} catch(e){{}}
     apri(); }}
