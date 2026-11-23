@@ -50,7 +50,8 @@ sost("vero = /github\\.io$/.test(location.hostname) && !/\\/beta\\//.test(locati
 
 # 5) pulsante lingua nel pannello "Altro"
 sost('''<button class="big alt" data-p="home">Indietro</button></div>`;
-  } else if (pannello === 'profilo')''', '''${window.CG_LINGUA === 'it' ? '<button class="big alt" onclick="cambiaLingua()">🌐 English</button>' : '<button class="big alt" onclick="cambiaLingua()">🌐 Italiano</button>'}
+  } else if (pannello === 'profilo')''', '''<button class="big alt" onclick="cgPrivacy()">Privacy</button>
+      ${window.CG_LINGUA === 'it' ? '<button class="big alt" onclick="cambiaLingua()">🌐 English</button>' : '<button class="big alt" onclick="cambiaLingua()">🌐 Italiano</button>'}
       <button class="big alt" data-p="home">Indietro</button></div>`;
   } else if (pannello === 'profilo')''')
 sost('window.CG_BUILD = true;', '''window.CG_BUILD = true; window.CG_LINGUA = '@@LINGUA@@';
@@ -73,6 +74,36 @@ sost('window.CG_BUILD = true;', '''window.CG_BUILD = true; window.CG_LINGUA = '@
   try { S.game.addSettingsChangeListener(applica); } catch(e){}
   window.addEventListener('load', () => { try { applica(S.game.settings); } catch(e){} });
 })();
+
+/* privacy dentro il gioco (CrazyGames non permette link esterni) */
+window.cgPrivacy = () => {
+  const it = window.CG_LINGUA === 'it';
+  const T = it ? {
+    t: 'Privacy', agg: 'Ultimo aggiornamento: 23 novembre 2026',
+    p: [['Chi è il responsabile', 'Natan Vitali, che ha creato il gioco. Per domande o richieste: Instagram <b>@smerillo_portal</b>.'],
+        ['Progressi', 'I progressi e le impostazioni si salvano sul tuo dispositivo e, tramite CrazyGames, nel tuo account CrazyGames.'],
+        ['Statistiche anonime', 'Contiamo le visite in modo anonimo: un codice casuale creato dal dispositivo, quando apri il gioco, le partite giocate, i passi della guida, la larghezza dello schermo e che arrivi da CrazyGames. Niente nome, niente pubblicità, niente profilazione. Le teniamo sul nostro server (Supabase, Francoforte, UE) al massimo 24 mesi, per capire cosa migliorare.'],
+        ['Partite con gli amici', 'Solo quando giochi online con il codice stanza, le mosse passano dal nostro server, legate solo al codice della stanza. Si cancellano da sole dopo alcune ore.'],
+        ['Cosa non facciamo', 'Non chiediamo email, telefono, età o posizione. Non usiamo cookie di pubblicità e non vendiamo né regaliamo dati a nessuno.'],
+        ['I tuoi diritti', 'Puoi chiederci di vedere, correggere o cancellare i dati, o di non usare le statistiche: scrivici su Instagram <b>@smerillo_portal</b>. Puoi anche fare reclamo al Garante per la protezione dei dati personali. Per i dati del tuo account CrazyGames vale anche la privacy di CrazyGames.']],
+    ok: 'Chiudi' } : {
+    t: 'Privacy', agg: 'Last updated: 23 November 2026',
+    p: [['Who is responsible', 'Natan Vitali, who made the game. For questions or requests: Instagram <b>@smerillo_portal</b>.'],
+        ['Progress', 'Your progress and settings are saved on your device and, through CrazyGames, in your CrazyGames account.'],
+        ['Anonymous statistics', 'We count visits anonymously: a random code created by your device, when you open the game, matches played, guide steps, screen width and that you came from CrazyGames. No name, no ads, no profiling. We keep them on our server (Supabase, Frankfurt, EU) for at most 24 months, to understand what to improve.'],
+        ['Playing with friends', 'Only when you play online with a room code, the moves pass through our server, linked only to the room code. They are deleted automatically after a few hours.'],
+        ['What we don\\'t do', 'We don\\'t ask for email, phone, age or location. We don\\'t use advertising cookies and we don\\'t sell or give data to anyone.'],
+        ['Your rights', 'You can ask us to see, correct or delete data, or to stop using statistics: message us on Instagram <b>@smerillo_portal</b>. You can also complain to your data protection authority. For your CrazyGames account data, the CrazyGames privacy policy also applies.']],
+    ok: 'Close' };
+  const o = document.createElement('div');
+  o.setAttribute('style', 'position:fixed;inset:0;z-index:2147483647;background:rgba(8,10,30,.82);display:flex;align-items:center;justify-content:center;padding:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif');
+  o.innerHTML = `<div style="background:#1b1f4b;color:#fff;border:3px solid #141433;border-radius:18px;max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:20px 20px 16px;box-shadow:0 8px 0 #141433;line-height:1.45;font-size:15px">
+    <h2 style="margin:0 0 2px;font-size:24px">${T.t}</h2><div style="opacity:.65;font-size:12px;margin-bottom:10px">Difendi Smerillo · ${T.agg}</div>
+    ${T.p.map(([h, x]) => `<h3 style="margin:12px 0 3px;font-size:15px;color:#ffd03a">${h}</h3><p style="margin:0">${x}</p>`).join('')}
+    <button type="button" style="margin-top:16px;width:100%;font:700 17px system-ui,sans-serif;color:#141433;background:#ffd03a;border:3px solid #141433;border-radius:14px;padding:10px;cursor:pointer">${T.ok}</button></div>`;
+  o.querySelector('button').onclick = () => o.remove(); o.onclick = e => { if (e.target === o) o.remove(); };
+  document.body.appendChild(o);
+};
 window.cambiaLingua = () => { try { localStorage.setItem('difendi-smerillo-lingua', window.CG_LINGUA === 'it' ? 'en' : 'it'); } catch(e){} location.reload(); };''')
 
 sost("localStorage.setItem('difendi-smerillo-audio', v ? 'no' : 'si'); } catch(e){} } };\n})();", "localStorage.setItem('difendi-smerillo-audio', v ? 'no' : 'si'); } catch(e){} } };\n})();\nwindow.SUONI_CG = SUONI;")
