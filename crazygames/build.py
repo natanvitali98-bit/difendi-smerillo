@@ -15,8 +15,9 @@ TESTA = r'''<script>
 /* ===== versione CrazyGames ===== */
 window.CG_BUILD = true;
 (() => {
-  // nessuna chiamata a server esterni: classifiche, account, diario e aggiornamenti restano spenti
-  const blocca = u => /supabase\.co|version\.json|unpkg\.com|jsdelivr\.net|github\.io/.test(String(u));
+  // al server vanno solo il multiplayer (stanze) e il conteggio anonimo delle visite; account, classifiche, diario e aggiornamenti restano spenti
+  const permesso = u => /supabase\.co\/rest\/v1\/rpc\/(ds_stanza_[a-z_]+|ds_traccia)$/.test(u);
+  const blocca = u => { u = String(u); return permesso(u) ? false : /supabase\.co|version\.json|unpkg\.com|jsdelivr\.net|github\.io/.test(u); };
   const f0 = window.fetch.bind(window);
   window.fetch = (u, o) => blocca(u && u.url || u) ? Promise.resolve(new Response('null', {status: 503, headers: {'Content-Type': 'application/json'}})) : f0(u, o);
   window.open = () => null;
@@ -25,7 +26,7 @@ window.CG_BUILD = true;
 </script>
 <style id="cgNascondi">
 /* parti che non servono su CrazyGames */
-#tAmi, .cr-tab[data-tab="amici"], .cr-tab[data-tab="classifica"], #pfAcc, .fd-inv, .st-cond, .cl-card, #hmProf .pf-acc, [onclick*="privacy"], .acc-priv, #amInv { display: none !important; }
+.cr-tab[data-tab="classifica"], #pfAcc, .fd-inv, .st-cond, .cl-card, #hmProf .pf-acc, [onclick*="privacy"], .acc-priv, #amInv { display: none !important; }
 </style>
 '''
 sost('<meta charset="utf-8">', '<meta charset="utf-8">\n' + TESTA)
@@ -39,9 +40,13 @@ sost("else { try { ACC.cancello(ld, () => { if (uscito) return; uscito = true; c
 sost("function devRegistrarsi(){ try { if (ACC.account) return false; }", "function devRegistrarsi(){ if (window.CG_BUILD) return false; try { if (ACC.account) return false; }")
 sost("  function apri(tab, op = {}){ if (provaAttiva()){", "  function apri(tab, op = {}){ if (window.CG_BUILD) return; if (provaAttiva()){")
 # 3) menu: niente schede Amici e Classifica
-sost("['amici', 'amici', 'Amici', false], ['classifica', 'coppa', 'Classifica', false]];", "['amici', 'amici', 'Amici', false], ['classifica', 'coppa', 'Classifica', false]].filter(x => !window.CG_BUILD || (x[0] !== 'amici' && x[0] !== 'classifica'));")
+sost("['amici', 'amici', 'Amici', false], ['classifica', 'coppa', 'Classifica', false]];", "['amici', 'amici', 'Amici', false], ['classifica', 'coppa', 'Classifica', false]].filter(x => !window.CG_BUILD || x[0] !== 'classifica');")
 
-sost("pgs = [...c.querySelectorAll('.cr-pg')];", "pgs = [...c.querySelectorAll('.cr-pg')].filter(p => !window.CG_BUILD || (p.dataset.tab !== 'amici' && p.dataset.tab !== 'classifica') || (p.remove(), false));")
+sost("pgs = [...c.querySelectorAll('.cr-pg')];", "pgs = [...c.querySelectorAll('.cr-pg')].filter(p => !window.CG_BUILD || p.dataset.tab !== 'classifica' || (p.remove(), false));")
+
+# 4) conteggio delle visite da CrazyGames (anonimo: un numero a caso per dispositivo, nessun dato personale)
+sost("const DA = (() => { const m = /[?&]da=", "const DA = (() => { if (window.CG_BUILD) return 'crazygames'; const m = /[?&]da=")
+sost("vero = /github\\.io$/.test(location.hostname) && !/\\/beta\\//.test(location.pathname);", "vero = !!window.CG_BUILD || (/github\\.io$/.test(location.hostname) && !/\\/beta\\//.test(location.pathname));")
 
 out = os.path.join(QUI, 'index.html')
 open(out, 'w', encoding='utf-8').write(s)

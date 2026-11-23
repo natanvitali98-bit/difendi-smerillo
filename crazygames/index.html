@@ -3,8 +3,9 @@
 /* ===== versione CrazyGames ===== */
 window.CG_BUILD = true;
 (() => {
-  // nessuna chiamata a server esterni: classifiche, account, diario e aggiornamenti restano spenti
-  const blocca = u => /supabase\.co|version\.json|unpkg\.com|jsdelivr\.net|github\.io/.test(String(u));
+  // al server vanno solo il multiplayer (stanze) e il conteggio anonimo delle visite; account, classifiche, diario e aggiornamenti restano spenti
+  const permesso = u => /supabase\.co\/rest\/v1\/rpc\/(ds_stanza_[a-z_]+|ds_traccia)$/.test(u);
+  const blocca = u => { u = String(u); return permesso(u) ? false : /supabase\.co|version\.json|unpkg\.com|jsdelivr\.net|github\.io/.test(u); };
   const f0 = window.fetch.bind(window);
   window.fetch = (u, o) => blocca(u && u.url || u) ? Promise.resolve(new Response('null', {status: 503, headers: {'Content-Type': 'application/json'}})) : f0(u, o);
   window.open = () => null;
@@ -13,7 +14,7 @@ window.CG_BUILD = true;
 </script>
 <style id="cgNascondi">
 /* parti che non servono su CrazyGames */
-#tAmi, .cr-tab[data-tab="amici"], .cr-tab[data-tab="classifica"], #pfAcc, .fd-inv, .st-cond, .cl-card, #hmProf .pf-acc, [onclick*="privacy"], .acc-priv, #amInv { display: none !important; }
+.cr-tab[data-tab="classifica"], #pfAcc, .fd-inv, .st-cond, .cl-card, #hmProf .pf-acc, [onclick*="privacy"], .acc-priv, #amInv { display: none !important; }
 </style>
 
 <title>Difendi Smerillo</title>
@@ -4992,7 +4993,7 @@ function mostraMenu(pannello){
       const tit = r => { const t = r.v + r.p; return t >= 8 ? 'Nemici giurati' : t >= 3 ? 'Rivali' : 'Sfidanti'; }, esc2 = x => String(x || '').replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
       return `<div class="am-riv"><div class="am-rh">${TB.ico('coppa', 2)} Le tue rivalità</div>${L.length ? L.map(r => `<div class="am-rr${r.v > r.p ? ' su' : r.p > r.v ? ' giu' : ''}"><b>${esc2(r.nome)}</b><small>${tit(r)}</small><span>Tu <em>${r.v}</em> – <em>${r.p}</em></span></div>`).join('') : '<p class="am-rv">Ancora nessuna: gioca una Conquista con un amico e qui vedrai chi vince di più.</p>'}</div>`; };
     const difs = TB.listaDif().map(d => `<button class="cr-dif ${d.liv ? '' : 'no'}" data-dif="${d.t}" style="--rc:${d.rar.col}"><span class="cr-di"></span><b>${d.liv ? d.nome : '???'}</b><small>${d.liv ? 'liv. ' + d.liv : d.rar.nome}</small></button>`).join('');
-    const TABS = [['premi', 'trifoglio', 'Premi', rp || INCn || CQ.missPronte() || scrigniAttesa().length > 0], ['dif', 'scudo', 'Collezione', false], ['gioca', 'spade', 'Gioca', false], ['amici', 'amici', 'Amici', false], ['classifica', 'coppa', 'Classifica', false]].filter(x => !window.CG_BUILD || (x[0] !== 'amici' && x[0] !== 'classifica'));
+    const TABS = [['premi', 'trifoglio', 'Premi', rp || INCn || CQ.missPronte() || scrigniAttesa().length > 0], ['dif', 'scudo', 'Collezione', false], ['gioca', 'spade', 'Gioca', false], ['amici', 'amici', 'Amici', false], ['classifica', 'coppa', 'Classifica', false]].filter(x => !window.CG_BUILD || x[0] !== 'classifica');
     c.innerHTML = `<div class="cr">
       <header class="cr-top"><div id="hmProf"></div><button type="button" class="cr-res" id="crStel" aria-label="Stelle delle missioni: ${tot}">${TB.ico('stella', 2)} <b>${tot}</b></button><button type="button" class="cr-res" id="crTal" aria-label="Talismani: ${nTal}">${TB.ico('trifoglio', 2)} <b>${nTal}</b></button><button class="cr-ing" id="crSnd" aria-label="Musica e suoni">${TB.ico(SUONI.muto ? 'muto' : 'suono', 2)}</button><button class="cr-ing" data-p="altro" aria-label="Altro: salvataggio e impostazioni">${TB.ico('altro', 2)}</button></header>
       ${tester() ? `<button type="button" class="hm-tester" id="tTest">🧪 Pass di prova attivo · tocca per tornare ai tuoi progressi</button>` : ''}
@@ -5041,7 +5042,7 @@ function mostraMenu(pannello){
       <nav class="cr-nav">${TABS.map(([k, ic, n, nov]) => `<button class="cr-tab ${nov ? 'nov' : ''}" data-tab="${k}" aria-label="${n}"><span class="cr-ti">${TB.ico(ic, 3)}</span><span class="cr-tn">${n}</span></button>`).join('')}</nav>
     </div>`;
     // le pagine si scorrono col dito come in un gioco da telefono; la barra in basso dice dove sei
-    { const pag = c.querySelector('#crPag'), tabs = [...c.querySelectorAll('.cr-tab')], pgs = [...c.querySelectorAll('.cr-pg')].filter(p => !window.CG_BUILD || (p.dataset.tab !== 'amici' && p.dataset.tab !== 'classifica') || (p.remove(), false));
+    { const pag = c.querySelector('#crPag'), tabs = [...c.querySelectorAll('.cr-tab')], pgs = [...c.querySelectorAll('.cr-pg')].filter(p => !window.CG_BUILD || p.dataset.tab !== 'classifica' || (p.remove(), false));
       let auto = false, tgt = -1, tgtT = 0; const vai = (k, liscio) => { const i = pgs.findIndex(s => s.dataset.tab === k); if (i < 0){ if (k !== 'gioca') vai('gioca', liscio); return; } try { pag.getAnimations().forEach(a => a.cancel()); } catch(e){} pag.style.opacity = ''; auto = !!liscio; tgt = liscio ? i : -1; tgtT = performance.now(); const mio = tgtT; const cur = Math.round(pag.scrollLeft / Math.max(1, pag.clientWidth)); if (cur === i){ auto = false; tgt = -1; } if (liscio && Math.abs(i - cur) > 1 && pag.animate){ const dir = i > cur ? 1 : -1; pag.animate([{opacity:1}, {opacity:0, transform:`translateX(${-dir*18}px)`}], {duration:110, easing:'ease-in'}).onfinish = () => { if (tgtT !== mio) return; pag.scrollTo({left: i*pag.clientWidth, behavior:'auto'}); pag.animate([{opacity:0, transform:`translateX(${dir*24}px)`}, {opacity:1, transform:'none'}], {duration:200, easing:'ease-out'}); }; } else pag.scrollTo({left: i*pag.clientWidth, behavior: liscio ? 'smooth' : 'auto'}); segna(k); try { sessionStorage.setItem('ds-tab', k); } catch(e){} };
       const nav = c.querySelector('.cr-nav'), ind = document.createElement('span'); ind.className = 'cr-ind'; nav.prepend(ind); let ultima = null;
       const segna = (k, anima = true) => { tabs.forEach(b => b.classList.toggle('on', b.dataset.tab === k)); const b = tabs.find(x => x.dataset.tab === k); if (!b) return;
@@ -10273,8 +10274,8 @@ const RITORNO = window.RITORNO = (() => {
   async function rpc(fn, body, keep){ const r = await fetch(URL + fn, {method:'POST', keepalive: !!keep, headers:{apikey:KEY, Authorization:'Bearer ' + KEY, 'Content-Type':'application/json'}, body: JSON.stringify(body)}); if (!r.ok) throw new Error('http ' + r.status); const t = await r.text(); return t ? JSON.parse(t) : null; }
 
   // ---------- conteggio anonimo: fin dove arriva ognuno (nessun dato personale, solo un numero a caso per telefono)
-  const DA = (() => { const m = /[?&]da=([a-z0-9_-]{1,20})/i.exec(location.search); if (m) return m[1].toLowerCase(); try { return window.top !== window ? 'iframe' : null; } catch(e){ return 'iframe'; } })(), INFRAME = (() => { try { return window.top !== window; } catch(e){ return true; } })();
-  const AKEY = 'difendi-smerillo-anon', T0 = Date.now(), vero = /github\.io$/.test(location.hostname) && !/\/beta\//.test(location.pathname);
+  const DA = (() => { if (window.CG_BUILD) return 'crazygames'; const m = /[?&]da=([a-z0-9_-]{1,20})/i.exec(location.search); if (m) return m[1].toLowerCase(); try { return window.top !== window ? 'iframe' : null; } catch(e){ return 'iframe'; } })(), INFRAME = (() => { try { return window.top !== window; } catch(e){ return true; } })();
+  const AKEY = 'difendi-smerillo-anon', T0 = Date.now(), vero = !!window.CG_BUILD || (/github\.io$/.test(location.hostname) && !/\/beta\//.test(location.pathname));
   let anon = lg(AKEY); if (!anon){ anon = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); sc(AKEY, anon); }
   function traccia(ev, dati, keep){ if (!vero || prova()) return; rpc('ds_traccia', {p_anon: anon, p_ev: ev, p_dati: dati || null, p_token: tok()}, keep).catch(() => {}); }
 
