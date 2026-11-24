@@ -4288,7 +4288,7 @@ function frana(e, n){ S.aiuti = true; try { SUONI.suona('rupe'); } catch(e){}
   S.fx.push({k:'frana', e, n, z:alt(e,n), t:0, r}); setTimeout(() => { if (S){ S.shake = Math.max(S.shake, 6); scoppio(e, n, alt(e,n)+1, 30, ['#c8b48a','#a87c46','#d6aa6a','#8a7650'], 26, .9, 25); } }, 240); S.franaCd = Math.max(6, S.bonus.franaCd); S.frana = false; ui(); aggiornaHud();
 }
 function ondataFinita(){
-  S.inCorso = false; PROF.daiXP(3); let premio = 12 * S.ondata + (S.ondata % 5 === 0 ? 40 : 0);
+  S.inCorso = false; S.frana = false; PROF.daiXP(3); let premio = 12 * S.ondata + (S.ondata % 5 === 0 ? 40 : 0);
   for (const L of S.luoghi) if (L.lvl){ if (L.tipo === 'logge') premio += Math.round(STAT.logge.bonus[L.lvl-1] * (specDi(L).bonus || 1) * TM('logge')); if (specDi(L).oro) premio += specDi(L).oro; }
   // interesse: chi risparmia guadagna (1 castagna ogni 10 tenute da parte)
   const interesse = Math.min(S.bonus.interesse, Math.floor(S.castagne / 10));
@@ -4314,7 +4314,11 @@ let b = buf.getContext('2d'); b.imageSmoothingEnabled = false; let CACHE_COSTR =
 let scale = 1, ox = 0, oy = 0, dpr = 1;
 const riduci = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const px = (x,y,col) => { b.fillStyle = col; b.fillRect(Math.round(x),Math.round(y),1,1); };
-let SW = 1, SH = 1, camX = 0, camY = 0, primo = true;
+let SW = 1, SH = 1, camX = 0, camY = 0, primo = true, ULT_TRASC = 0;
+// prima partita: se il nemico più avanti esce dallo schermo, la telecamera lo inquadra insieme alla tua torre
+function seguiBattaglia(){ const x = S.nemici.filter(m => !m.morto).sort((a, b) => (b.seg + (b.prog || 0)) - (a.seg + (a.prog || 0)))[0]; if (!x) return;
+  const [a, b] = P(x.e, x.n, x.z || 0), sx = ox + a*scale, sy = oy + b*scale; if (sx > 50 && sx < SW - 50 && sy > 70 && sy < SH - 130) return;
+  const L = S.luoghi.find(q => q.lvl); let tx = a, ty = b; if (L){ const [c, d] = P(L.e, L.n, L.z); tx = (a + c)/2; ty = (b + d)/2; } S.camT = {x: tx, y: ty + 30/scale}; }
 // ===== la Difesa in tempo reale nelle frazioni: stessa mappa e stesse strade vere della modalità a turni =====
 let RTMAP = null; const RT0 = {W, H, vie: VIE.map(v => v.map(p => p.slice())), viez: VIEZ.map(v => v.map(p => p.slice()))};
 function pianoVie(n){ const k = VIE.length, base = [[0],[1],[0,1],[2],[1,2],[0,2],[3],[0,3],[1,2,3],[2,4],[0,1,3],[0,1,2,3,4]]; return [...new Set(base[n-1].map(i => i % k))]; }
@@ -4629,7 +4633,7 @@ function aggiornaHud(){
   $('#hWave').textContent = MOD ? 'Modifica la mappa' : S ? `Ondata ${S.ondata}/${totOndate()}` : 'Smerillo';
   document.querySelectorAll('.stat').forEach(el => { el.hidden = MOD; });
   const go = $('#bGo'); go.disabled = !S || S.inCorso || S.fine || S.attesaCarta;
-  go.textContent = !S ? 'Avvia ondata' : S.inCorso ? `In arrivo: ${S.coda.length + S.nemici.length}` : S.ondata >= ONDATE ? 'Finito' : 'Avvia ondata';
+  go.textContent = !S ? 'Avvia ondata' : S.inCorso ? `Rimasti: ${S.coda.length + S.nemici.filter(m => !m.morto).length}` : S.ondata >= ONDATE ? 'Finito' : 'Avvia ondata';
   const bk = $('#bFalco'); bk.disabled = !S || !S.inCorso || S.falcoCd > 0; $('#falcoTxt').textContent = !S ? 'Pronto' : S.falcoCd > 0 ? `Tra ${Math.ceil(S.falcoCd)} s` : S.inCorso ? 'Pronto' : 'In ondata';
   const bf = $('#bFrana'); bf.disabled = !S || S.fine || S.franaCd > 0;
   $('#franaTxt').textContent = !S ? 'Pronta' : S.franaCd > 0 ? `Tra ${Math.ceil(S.franaCd)} s` : S.frana ? 'Scegli dove' : 'Pronta';
@@ -4665,7 +4669,9 @@ function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; 
     // prima scelta: un pallino accanto alla strada da cui arriva la prossima ondata (così la prima torre colpisce davvero)
     const vie = (S.prossima && S.prossima.vie) || [], dSeg = (q, v) => { let m = 1e9; for (let i = 0; i < v.length - 1; i++){ const [a0, b0] = v[i], [a1, b1] = v[i+1], dx = a1 - a0, dy = b1 - b0, l2 = dx*dx + dy*dy || 1, t = Math.max(0, Math.min(1, ((q[0]-a0)*dx + (q[1]-b0)*dy)/l2)); m = Math.min(m, Math.hypot(q[0] - a0 - t*dx, q[1] - b0 - t*dy)); } return m; };
     for (const passo of [0, 1]) { for (const q of P_){ const [x, y] = P(q[0], q[1], altB(q[0], q[1])), sx = r.left + x*scale + ox, sy = r.top + y*scale + oy; if (sx < 40 || sx > innerWidth - 40 || sy < (passo ? 140 : 80) || sy > innerHeight - (passo ? 200 : 120)) continue; if (S.luoghi.some(L => Math.hypot(L.e - q[0], L.n - q[1]) < 8)) continue;
-      if (passo === 0 && !(vie.length && vie.some(v => VIE[v] && dSeg(q, VIE[v]) < 13))) continue; const d = passo ? Math.hypot(sx - innerWidth/2, sy - innerHeight*.45) : Math.min(...vie.map(v => { const f = VIE[v][VIE[v].length - 1]; return Math.abs(Math.hypot(q[0] - f[0], q[1] - f[1]) - 22); })); if (d < bd){ bd = d; best = {x: sx, y: sy, r: 26}; } } if (best) break; } return best; };
+      if (passo === 0 && !(vie.length && vie.some(v => VIE[v] && dSeg(q, VIE[v]) < 13))) continue; const d = passo ? Math.hypot(sx - innerWidth/2, sy - innerHeight*.45) : Math.min(...vie.map(v => { const f = VIE[v][VIE[v].length - 1]; return Math.abs(Math.hypot(q[0] - f[0], q[1] - f[1]) - 22); })); if (d < bd){ bd = d; best = {x: sx, y: sy, r: 26}; } } if (best) break;
+      if (passo === 0 && vie.length && (pallino.n = (pallino.n || 0) + 1) < 150){ let q0 = null, b0 = 1e9; for (const q of P_){ if (S.luoghi.some(L => Math.hypot(L.e - q[0], L.n - q[1]) < 8) || !vie.some(v => VIE[v] && dSeg(q, VIE[v]) < 13)) continue; const d = Math.min(...vie.map(v => { const f = VIE[v][VIE[v].length - 1]; return Math.abs(Math.hypot(q[0] - f[0], q[1] - f[1]) - 22); })); if (d < b0){ b0 = d; q0 = q; } }
+        if (q0){ const [x, y] = P(q0[0], q0[1], altB(q0[0], q0[1])); S.camT = {x, y}; return null; } } } return best; };
   const PC = matchMedia('(pointer:fine)').matches && !ORIZ;
   // guida corta in 3 passi: metti una torre (un tocco), VIA!, colpisci
   if (!costruite){ k = 'pallino'; n = 1; t = '<b>Metti una torre</b>'; sub = 'Tocca un pallino bianco.'; mappa = pallino;
@@ -4680,7 +4686,7 @@ function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; 
   const bastaG = () => { if (S && S.modo && S.modo.guida){ S.modo = null; costruisciTorri(); } basta(); ui(); };
   COACH.mostra({passo: n || null, tot: 3, tag: n ? null : 'GUIDA', testo: t, sotto: sub, giu: true, bottone: null, ok: basta, salta: k === 'fine' ? null : bastaG,
     // se stai guardando una difesa o costruendo fuori dalla guida, il fumetto si fa da parte: niente finestre una sopra l'altra
-    pausa: () => !S || S.fine || S.attesaCarta || !$('#title').hidden || (k !== 'pallino' && (S.sel !== null || !!S.modo || !!ANELLO)), dove: mappa || punta }); }
+    pausa: () => !S || S.fine || S.attesaCarta || S.pausa || !$('#title').hidden || !!document.querySelector('#pausa:not([hidden]), #cards:not([hidden]), #end:not([hidden]), #rtOv:not([hidden]), #rtFesta.on') || (k !== 'pallino' && (S.sel !== null || !!S.modo || !!ANELLO)), dove: mappa || punta }); }
 let COACH_RT = '';
 // negozio a tendina: chiuso di solito, così la mappa si vede tutta
 let NEG = false;
@@ -4830,7 +4836,7 @@ $('#mCopy').onclick = () => {
 
 const punti = new Map(); let trascina = null, distPinch = 0, midPinch = null;
 cv.addEventListener('pointerdown', ev => { if (ev.isPrimary) punti.clear(); try { cv.setPointerCapture(ev.pointerId); } catch(e){} punti.set(ev.pointerId, [ev.clientX, ev.clientY]);
-  if (punti.size === 1){ trascina = {x:ev.clientX, y:ev.clientY, cx:camX, cy:camY, mosso:false, ogg:false, px:ev.clientX, py:ev.clientY};
+  ULT_TRASC = performance.now(); if (punti.size === 1){ trascina = {x:ev.clientX, y:ev.clientY, cx:camX, cy:camY, mosso:false, ogg:false, px:ev.clientX, py:ev.clientY};
     if (MOD && modSel){ const r = cv.getBoundingClientRect(); const o = trovaOggetto((ev.clientX - r.left - ox)/scale, (ev.clientY - r.top - oy)/scale);
       if (o && o.tipo === modSel.tipo && o.i === modSel.i){ trascina.ogg = true; memo(); } } }
   if (punti.size === 2){ const [p1,p2] = [...punti.values()]; distPinch = Math.hypot(p1[0]-p2[0], p1[1]-p2[1]); midPinch = [(p1[0]+p2[0])/2, (p1[1]+p2[1])/2]; if (trascina) trascina.mosso = true; if (S) S.camT = null; } });
@@ -4909,7 +4915,7 @@ $('#bFalco').onclick = () => { if (!S || !S.inCorso || S.falcoCd > 0) return; co
 function lanciaFalco(tgt){ S.aiuti = true; try { SUONI.suona('tiro'); } catch(e){}  S.proj.push({tipo:'falco', e:tgt.e-25, n:tgt.n-25, z:tgt.z+45, t:tgt, v:150, danno: 28 * (1 + .1*S.ondata)}); S.falcoCd = 3.5 * (S.ev.falco || 1) * S.bonus.falcoCd; aggiornaHud(); }
 function pausa(on){ if (!S) return; S.pausa = on; const p = $('#pausa');
   if (!on){ p.hidden = true; return; }
-  p.innerHTML = `<div class="dlg box"><span class="kicker">Ondata ${S.ondata} di ${ONDATE} · ${DIFF[S.diff].nome}</span><h2>Pausa</h2><button class="big" id="pRip">Riprendi</button><button class="big alt" id="pNew">Ricomincia</button><button class="big alt" id="pMenu">Torna al menu</button></div>`;
+  p.innerHTML = `<div class="dlg box"><span class="kicker">Ondata ${S.ondata} di ${totOndate()} · ${DIFF[S.diff].nome}</span><h2>Pausa</h2><button class="big" id="pRip">Riprendi</button><button class="big alt" id="pNew">Ricomincia</button><button class="big alt" id="pMenu">Torna al menu</button></div>`;
   p.hidden = false; p.querySelector('#pRip').onclick = () => pausa(false); p.querySelector('#pNew').onclick = () => { pausa(false); nuovaPartita(); }; p.querySelector('#pMenu').onclick = () => { pausa(false); mostraMenu(); }; }
 // barra delle difese: tutte a portata di dito, senza cercare i quadratini sulla mappa
 const ICONA = {milizia:'ic_milizia', vedetta:'ic_vedetta', campanile:'ic_campanile', piazza:'ic_piazza', comune:'ic_comune', porta:'ic_porta', logge:'ic_logge', nido:'falco'};
@@ -4970,7 +4976,7 @@ function centraAnello(){ if (!ANELLO) return; const st = $('#stage'), W = st.cli
   layoutAnello(dir, {x:qx, y:qy, W, H, basso: oriz ? 12 : 150}); posAnello(); }
 const vocePiccola = (ic, nome, costo) => { const out = []; if (ic) out.push(ic); const n = document.createElement('span'); n.className = 'an-n'; n.textContent = nome; out.push(n);
   if (costo != null){ const cl = document.createElement('span'); cl.className = 'an-k'; cl.append(nutIcon(), document.createTextNode(costo)); out.push(cl); } return out; };
-function anelloCostruisci(e, n, sx, sy){ const voci = NEGOZIO.map(off => ({html: vocePiccola(sprIcon(ICONA[off.tipo]), off.nome, off.costo), off: S.castagne < off.costo, perche:'Servono più castagne',
+function anelloCostruisci(e, n, sx, sy){ if (S) S.frana = false; const voci = NEGOZIO.map(off => ({html: vocePiccola(sprIcon(ICONA[off.tipo]), off.nome, off.costo), off: S.castagne < off.costo, perche:'Servono più castagne',
     f: () => { chiudiAnello(); if (piazzaDifesa(off.tipo, e, n)){ S.sel = null; POSTI = calcolaPosti(); } ui(); aggiornaHud(); }}));
   apriAnello(sx, sy, voci, '&nbsp;'); ANELLO = {e, n, z:altB(e, n), posto:true}; document.getElementById('anello').classList.add('costr'); centraAnello(); }
 function pallinoVicino(sx, sy){ POSTI = POSTI || calcolaPosti(); let best = null, bd = 1e9; for (const q of POSTI){ const [x, y] = P(q[0], q[1], altB(q[0], q[1])), d = Math.hypot(x - sx, y - sy); if (d < bd){ bd = d; best = q; } } return {q:best, d:bd}; } // distanza in pixel della mappa
@@ -10263,6 +10269,7 @@ window.toastMenu = toastMenu;
 let last = performance.now(), T = 0;
 function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); last = now; T += dt;
   if (S && !S.fine && !S.attesaCarta && !S.pausa) update(dt * S.vel);
+  if (S && S.inizioFacile && S.inCorso && S.ondata <= 3 && !trascina && performance.now() - ULT_TRASC > 3500 && Math.floor(T*2) !== Math.floor((T - dt)*2)) seguiBattaglia();
   if (S && S.camT){ camX += (S.camT.x - camX)*Math.min(1, dt*6); camY += (S.camT.y - camY)*Math.min(1, dt*6); limita(); if (Math.hypot(S.camT.x - camX, S.camT.y - camY) < 1) S.camT = null; }
   if (S && Math.floor(T*4) !== Math.floor((T-dt)*4)) aggiornaTorri();
   if (TB.attivo) TB.frame(T, dt); else if (CQ.attivo) CQ.frame(T, dt); else if (!$('#title').hidden) disegnaTitolo(T); else { draw(T); if (ANELLO) posAnello(); }
@@ -10533,7 +10540,7 @@ const RITORNO = window.RITORNO = (() => {
     if (!chip){ chip = document.createElement('button'); chip.type = 'button'; chip.id = 'asChip'; document.body.append(chip); chip.onclick = () => chiediSalta(); }
     chip.innerHTML = `<small>PROVA</small><span>${i + 1}/3</span><b>▸</b>`; chip.title = `Assaggio ${i + 1} di 3: ${i < 2 ? 'vai al prossimo' : 'finisci'}`; chip.setAttribute('aria-label', chip.title); chip.hidden = false;
     // sparisce quando c'è altro sopra (scrigni, finestre, fine partita)
-    if (!chip._t) chip._t = setInterval(() => { if (!chip || chip.hidden) return; chip.classList.toggle('via', !!document.querySelector('.scr-stage, #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), #rtOv:not([hidden]), #accOv:not([hidden]), #coach:not([hidden]), body.tb-prova')); }, 400); }
+    if (!chip._t) chip._t = setInterval(() => { if (!chip || chip.hidden) return; chip.classList.toggle('via', !!document.querySelector('.scr-stage, #pausa:not([hidden]), #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), #rtOv:not([hidden]), #accOv:not([hidden]), #coach:not([hidden]), body.tb-prova')); }, 400); }
   function togliChip(){ if (chip) chip.hidden = true; }
   // il passo è finito (o saltato): si torna al menu e si vede il prossimo
   function fatto(k, come){ const s = stato(); if (s.passo >= 3 || PASSI[s.passo] !== k) return false; s.passo++; if (s.torna && PASSI[s.passo] === 'turni') s.passo++; s.in = null; s.ultimo = {k, come}; salvaS(s); togliChip(); traccia('assaggio', {passo: k, ev: come}); return true; }
