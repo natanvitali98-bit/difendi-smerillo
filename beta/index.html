@@ -2659,6 +2659,12 @@ body:has(#tbOv:not([hidden])) #pcTasti,body:has(#cqOv:not([hidden])) #pcTasti{di
 
 #tbNem .tbn-l{font-size:13px;opacity:.85;margin-left:2px}
 @media (max-width:480px){ #tbNem .tbn-l{display:none} }
+
+#cqOv:not(.scelta) .dlg.box{max-height:100%;overflow-y:auto;overscroll-behavior:contain}
+#cqOv .dlg .dlgfoot.fisso{background:linear-gradient(180deg,rgba(20,24,69,0) 0,#141845 14px)!important;z-index:2;flex-direction:column}
+@media (max-height:620px){ #cqOv:not(.scelta){padding-top:8px;padding-bottom:8px} }
+@media (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ body:has(#cq:not([hidden])) #coach.sopra{top:112px} }
+#asChip small{font-size:9px;letter-spacing:.5px;display:block;line-height:1;opacity:.85}
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -9065,7 +9071,9 @@ function stradaVerso(a, b){ const p = strada(a < b ? a : b, a < b ? b : a); retu
 
 // ===== interfaccia =====
 const ovAperto = () => !el('cqOv').hidden;
-function ov(html, chiudibile = true){ const o = el('cqOv'), t0 = performance.now(); o.classList.remove('scelta'); o.innerHTML = html; o.hidden = false; o.scrollTop = 0; if (chiudibile) o.onclick = e => { if (e.target === o && performance.now() - t0 > 450) chiudiOv(); }; else o.onclick = null; return o; } // il tocco che apre la finestra non deve anche chiuderla
+function ov(html, chiudibile = true){ const o = el('cqOv'), t0 = performance.now(); o.classList.remove('scelta'); o.innerHTML = html; o.hidden = false; o.scrollTop = 0;
+  { const d = o.querySelector('.dlg.box'); if (d && !d.querySelector('.dlgfoot')){ const fin = []; let c = d.lastElementChild; while (c && c.matches('button.big')){ fin.unshift(c); c = c.previousElementSibling; } if (fin.length){ const f = document.createElement('div'); f.className = 'dlgfoot fisso cq-foot'; fin.forEach(b => f.append(b)); d.append(f); } } } // i pulsanti restano sempre visibili, anche su schermi bassi
+  if (chiudibile) o.onclick = e => { if (e.target === o && performance.now() - t0 > 450) chiudiOv(); }; else o.onclick = null; return o; } // il tocco che apre la finestra non deve anche chiuderla
 function chiudiOv(){ const o = el('cqOv'); o.hidden = true; o.innerHTML = ''; o.classList.remove('scelta'); }
 let RPREV = null;
 function volaNumeri(F){ const cur = {monete: F.monete, cibo: F.cibo, legna: F.legna}; if (!RPREV || RPREV.s !== S || RPREV.io !== S.io){ RPREV = {...cur, s: S, io: S.io}; return; }
@@ -9370,6 +9378,9 @@ function notizie(ev){ el('cqToast').className = 'cq-toast'; if (S.fine){ finePar
   o.querySelectorAll('[data-dc]').forEach(b => b.onclick = () => { const [i, j] = b.dataset.dc.split('|').map(Number), c = D[i]; if (!c || c.fatto || !c.scelte[j][1]()) return; const r = c.scelte[j][2](); c.fatto = true; suona(j ? 'tocco' : 'stella1');
     const box = o.querySelector(`.cq-dec[data-i="${i}"]`); box.classList.add('fatto'); box.querySelector('.cq-decb').outerHTML = `<p class="cq-decr">${ico('ok', 2)} ${r}</p>`; salva(); aggiornaUI(); aggiorna(); });
   aggiorna();
+  // le scelte da fare si vedono subito: la finestra scorre fin lì, e il pulsante grigio ci riporta
+  const vaiScelta = () => { const c = o.querySelector('.cq-dec:not(.fatto)'); if (c) c.scrollIntoView({behavior:'smooth', block:'center'}); };
+  if (resta()) setTimeout(vaiScelta, 700); const ft = ok.parentElement; if (ft) ft.addEventListener('click', () => { if (ok.disabled) vaiScelta(); });
   ok.onclick = () => { if (resta()) return; chiudiOv(); if (S.mp && !mpAttesa()) proposte(); const dc = prodCibo(S.io, S.turno + 1) - mangia(S.io); if (dc < 0 && !ovAperto()) toast(`Attenzione: il cibo cala di ${-dc} a stagione`); pannello(); if (!S.mp && !CG) try { RITORNO.dopoStagione(); } catch(e){} }; aggiornaUI(); } // con la guida ancora aperta non ti chiedo di uscire
 function rivediStagione(){ if (!ULTIMO_REP) return; const o = ov(`<div class="dlg box cq-dlg cq-notizie">${ULTIMO_REP}<button class="big" id="cqOk">Chiudi</button></div>`); o.querySelector('#cqOk').onclick = chiudiOv; }
 function proposte(){ let p; if (S.mp){ const i = S.proposte.findIndex(x => !x.per || x.per === S.io); p = i >= 0 ? S.proposte.splice(i, 1)[0] : null; } else p = S.proposte.shift(); salva(); if (typeof p === 'string') p = {f:p, tipo:'all'}; const f = p && p.f;
@@ -9589,7 +9600,7 @@ function passoCG(){ if (!CG || !S) return; if (!attivo){ COACH.nascondi(); CG.vi
     {t:'Tocca <b>Arruola</b>, poi conferma.', s:'Nuovi soldati. Ogni azione usa 1 mossa.', dove: () => { const b = el('cqRec'); return b && b.offsetWidth && sel === S.io ? b : puntoTerra(S.io); }},
     {t:'Ora tocca questa <b>terra vicina</b>.', s:'Puoi conquistarla.', dove: () => puntoTerra(CG && CG.terra)},
     {t:'Tocca <b>Attacca</b>.', s:'Più soldati mandi, più è facile.', dove: () => { const b = el('cqAtt'); return b && b.offsetWidth ? b : puntoTerra(CG && CG.terra); }},
-    {t:'Finite le mosse: <b>Fine stagione</b>.', s:'Poi muovono gli altri borghi.', dove: () => el('cqFine')},
+    {get t(){ return S && S.mosse > 0 ? `Usa le <b>${S.mosse} mosse</b> rimaste, poi <b>Fine stagione</b>.` : 'Ora tocca <b>Fine stagione</b>.'; }, s:'Poi muovono gli altri borghi.', dove: () => el('cqFine')},
     {t:'In alto: <b>monete, cibo e legna</b>.', s:'Monete = soldati. Cibo = li sfama. Legna = costruire.', dove: () => el('cqRis'), btn:'Ok', next: () => { if (CG){ CG.k = 6; CG.vista = -1; passoCG(); } }},
     {t:'Bloccato? Tocca <b>💡</b>.', s:'Ti indico una mossa buona.', dove: () => el('cqCosa'), btn:'Ho capito', next: fineCG}];
   const x = P[CG.k]; if (!x){ fineCG(); return; }
@@ -10506,14 +10517,14 @@ const RITORNO = window.RITORNO = (() => {
     setTimeout(mostraChip, 1200); }
   function mostraChip(){ const s = stato(); if (!s.in || s.passo >= 3){ togliChip(); return; } const i = PASSI.indexOf(s.in);
     if (!chip){ chip = document.createElement('button'); chip.type = 'button'; chip.id = 'asChip'; document.body.append(chip); chip.onclick = () => chiediSalta(); }
-    chip.innerHTML = `<span>${i + 1}/3</span><b>▸</b>`; chip.title = `Assaggio ${i + 1} di 3: ${i < 2 ? 'vai al prossimo' : 'finisci'}`; chip.setAttribute('aria-label', chip.title); chip.hidden = false;
+    chip.innerHTML = `<small>PROVA</small><span>${i + 1}/3</span><b>▸</b>`; chip.title = `Assaggio ${i + 1} di 3: ${i < 2 ? 'vai al prossimo' : 'finisci'}`; chip.setAttribute('aria-label', chip.title); chip.hidden = false;
     // sparisce quando c'è altro sopra (scrigni, finestre, fine partita)
     if (!chip._t) chip._t = setInterval(() => { if (!chip || chip.hidden) return; chip.classList.toggle('via', !!document.querySelector('.scr-stage, #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), #rtOv:not([hidden]), #accOv:not([hidden]), #coach:not([hidden]), body.tb-prova')); }, 400); }
   function togliChip(){ if (chip) chip.hidden = true; }
   // il passo è finito (o saltato): si torna al menu e si vede il prossimo
   function fatto(k, come){ const s = stato(); if (s.passo >= 3 || PASSI[s.passo] !== k) return false; s.passo++; if (s.torna && PASSI[s.passo] === 'turni') s.passo++; s.in = null; s.ultimo = {k, come}; salvaS(s); togliChip(); traccia('assaggio', {passo: k, ev: come}); return true; }
   // toccata per sbaglio non ti butta fuori: prima chiede
-  function chiediSalta(){ const s = stato(); if (!s.in) return; const b = finestra(`<span class="fd-k">PROVA ${PASSI.indexOf(s.in) + 1} DI 3</span><h2>Vuoi passare alla prossima prova?</h2><p class="acc-sub">Questa partita finisce qui.</p><button class="big" data-no>No, continuo a giocare</button><button class="as-salta" data-si>Sì, vai avanti</button>`);
+  function chiediSalta(){ const s = stato(); if (!s.in) return; const b = finestra(`<span class="fd-k">PROVA ${PASSI.indexOf(s.in) + 1} DI 3</span><h2>Passi alla prossima prova?</h2><p class="acc-sub">Questa partita finisce qui.</p><button class="big" data-si>Sì, prossima prova ▸</button><button class="big alt" data-no>No, continuo</button>`);
     b.querySelector('[data-no]').onclick = chiudi; b.querySelector('[data-si]').onclick = () => { chiudi(); salta(); }; }
   function salta(){ const s = stato(); if (!s.in) return; const k = s.in; fatto(k, 'avanti'); chiudi();
     if (k === 'turni') TB.esci(); else if (k === 'tempo') mostraMenu(); else if (k === 'conquista') CQ.esci(); }
