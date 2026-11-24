@@ -22,6 +22,13 @@ def esc_tpl(v):
 
 # parole singole usate come valori (non si possono tradurre in automatico senza rischiare le chiavi)
 FISSI = [
+    ("Queste due strade sono corte: tieni qualcuno vicino alla <b>chiesetta</b>.'", "These two roads are short: keep someone near the <b>little church</b>.'"),
+    ("'<b>Giallo</b> = costruisci (legno: '", "'<b>Yellow</b> = build (wood: '"),
+    ("'<b>Mirino</b> = puoi fermare'", "'<b>Sight</b> = you can block'"),
+    ("'<b>Mirino rosso</b> = tocca il nemico per colpirlo'", "'<b>Red sight</b> = tap the enemy to hit it'"),
+    ("'Inizia dai <b>Lancieri</b>. Toccali.'", "'Start with the <b>Spearmen</b>. Tap them.'"),
+    ("'Ora gli <b>Arcieri</b>. Toccali.'", "'Now the <b>Archers</b>. Tap them.'"),
+    ("'Ora i <b>Carpentieri</b>. Toccali.'", "'Now the <b>Carpenters</b>. Tap them.'"),
     ("NOMEG = {legno:'legno', argento:'argento', oro:'oro'}", "NOMEG = {legno:'wood', argento:'silver', oro:'gold'}"),
     ("`Sconfiggi ${n} ${n === 1 ? 'volta' : 'volte'} il Cavaliere Nero`", "`Defeat the Black Knight ${n} ${n === 1 ? 'time' : 'times'}`"),
     ("'liv. ' + d.liv", "'lv. ' + d.liv"),

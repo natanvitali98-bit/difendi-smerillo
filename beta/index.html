@@ -2174,7 +2174,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .rr-box:has(.gf-pop) .acc-sub{color:#d6ddff;text-align:center;font-size:14px}
 .gf-top{display:flex;align-items:center;gap:12px}.gf-top .fd-k{text-align:left;margin-bottom:2px}.gf-top h2{color:#fff;text-shadow:0 3px 0 #141433}
 .gf-serie{flex:none;width:64px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#141433;background:radial-gradient(circle at 50% 70%,#ffe27a,#ffb020 60%,#ff7a1e);border:3px solid #141433;border-radius:50% 50% 46% 46%/60% 60% 40% 40%;box-shadow:0 4px 0 #141433,0 0 22px rgba(255,170,40,.6);animation:gfFiamma 1.6s ease-in-out infinite}
-.gf-serie b{font:400 30px/1 var(--f-big)}.gf-serie small{font-size:10px;font-weight:900;margin-top:-2px}
+.gf-serie b{font:400 30px/1 var(--f-big)}.gf-serie small{font-size:11px;font-weight:900;margin-top:-2px}
 @keyframes gfFiamma{50%{transform:scale(1.06) rotate(-2deg);box-shadow:0 4px 0 #141433,0 0 34px rgba(255,170,40,.85)}}
 .rr-box .gf-pop{position:relative;overflow:hidden;padding:20px 12px 14px;background:radial-gradient(ellipse at 50% 30%,#ffb84a 0%,#ff7a2e 50%,#c9361e 100%);box-shadow:inset 0 3px 0 rgba(255,255,255,.3),0 5px 0 #141433}
 .rr-box .gf-pop>.gf-c{width:104px;height:82px;margin-top:6px;filter:drop-shadow(0 0 18px rgba(255,240,170,.75))}
@@ -2246,7 +2246,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .sc-fronte b{flex:none;margin:3px 0 6px;font-size:26px!important;line-height:1!important;max-width:100%;overflow-wrap:anywhere}
 .sc-fronte .sc-es{flex:none;align-self:center;text-align:center;font-size:13px;line-height:1.15;background:#fff;border:2px solid #141433;border-radius:999px;padding:4px 10px;color:#141433}
 .scr-carta.nuovo .sc-fronte .sc-es{background:#ffd03a;font-size:20px}
-.rivela .sc-tipo{font-size:9px}
+.rivela .sc-tipo{font-size:11px}
 .rivela .rv-i img.sc-stm{max-height:76px;width:auto;height:auto}
 
 
@@ -2428,7 +2428,7 @@ button.cr-res{border:0;cursor:pointer;color:#fff}
 .fd-festa{display:flex;justify-content:center;margin:4px 0 6px;animation:fdIn .7s cubic-bezier(.2,1.6,.4,1) both}
 .fd-festa .fd-med{filter:drop-shadow(0 0 22px rgba(255,208,58,.55))}
 @keyframes fdIn{0%{transform:scale(.2) rotate(-25deg);opacity:0}100%{transform:none;opacity:1}}
-.fd-k{display:block;text-align:center;font-family:var(--f-pixel);font-size:10px;letter-spacing:1px;color:#ffd03a;margin-bottom:6px}
+.fd-k{display:block;text-align:center;font-family:var(--f-pixel);font-size:12px;letter-spacing:1px;color:#ffd03a;margin-bottom:6px}
 .fd-cosa{list-style:none;padding:0;margin:12px 0;display:flex;flex-direction:column;gap:8px;text-align:left}
 .fd-cosa li{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.07);border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.3}
 .fd-cosa li > .fd-med,.fd-cosa li > img,.fd-cosa li > i{flex:none;width:34px;display:flex;justify-content:center;margin:0}
@@ -2679,7 +2679,7 @@ body:has(#tbOv:not([hidden])) #pcTasti,body:has(#cqOv:not([hidden])) #pcTasti{di
 #cqOv .dlg .dlgfoot.fisso{background:linear-gradient(180deg,rgba(20,24,69,0) 0,#141845 14px)!important;z-index:2;flex-direction:column}
 @media (max-height:620px){ #cqOv:not(.scelta){padding-top:8px;padding-bottom:8px} }
 @media (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ body:has(#cq:not([hidden])) #coach.sopra{top:112px} }
-#asChip small{font-size:9px;letter-spacing:.5px;display:block;line-height:1;opacity:.85}
+#asChip small{font-size:10.5px;letter-spacing:.5px;display:block;line-height:1;opacity:.85}
 
 /* menu su schermi bassi (es. 960x540 di CrazyGames): niente contenuto tagliato in alto */
 .cr-pg.cr-arena{justify-content:safe flex-end}
@@ -4907,7 +4907,7 @@ function tocca(ev){
     const r = Math.random(); let t;
     if (r < .45){ S.castagne += 20; t = 'Ammonite! +20 castagne'; } else if (r < .7){ S.franaCd = 0; t = 'Conchiglia! Frana pronta'; } else if (r < .9){ S.vite = Math.min(S.viteMax, S.vite+2); t = 'Riccio di mare fossile! +2'; } else { S.falcoCd = 0; S.bonus.nido *= 1.05; t = 'Dente di squalo! Falchi più forti'; }
     S.fx.push({k:'txt', e:f.e, n:f.n, z:f.z+10, t:0, s:t, col:'#f8f0d0'}); aggiornaHud(); return; } }
-  // 2) un nemico? attacco del tuo smeriglio
+  // 2) un nemico? attacco del tuo Falco
   if (S.inCorso){ let tgt = null, bd = ORIZ ? Math.max(22, 46/scale) : Math.max(14, 34/scale); for (const x of S.nemici){ const [X,Y] = P(x.e, x.n, x.z); const d = Math.hypot(X-sx, Y-(x.d.vola ? 16 : 6)-sy); if (d < bd){ bd = d; tgt = x; } }
     let spot = false; if (tgt && ORIZ){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); } POSTI = POSTI || calcolaPosti();
       const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]), [qx, qy] = P(q[0], q[1], altB(q[0], q[1])), [tx, ty] = P(tgt.e, tgt.n, tgt.z);
@@ -5046,7 +5046,7 @@ function transizione(ev, fn, testo){ CARICA(fn, testo || (attivoGioco() ? 'Caric
 const attivoGioco = () => { const t = document.getElementById('title'); return !!(t && !t.hidden); };
 // ===== SCHERMATA DI CARICAMENTO =====
 // Copre lo schermo mentre una modalità si prepara e lo scopre solo quando l'animazione è fluida (niente scatti o grafica a metà).
-const CONSIGLI_CARICA = ['Il Lanciere può buttare giù dalla rupe i nemici sul bordo.', 'Le mura rallentano chi attacca: costruiscile presto.', 'In Conquista le frazioni producono ogni stagione: tienile.', 'Un patto con un borgo vicino ti lascia libero di attaccare l’altro.', 'Le castagne servono per costruire e potenziare le difese.', 'Con un account i progressi si salvano online da soli.', 'Il Falco smeriglio colpisce dall’alto i nemici più veloci.', 'In Conquista un borgo sotto assedio perde soldati ogni stagione.', 'La Sfida del giorno cambia ogni giorno: è uguale per tutti.', 'Nell’Assedio le tappe diventano sempre più difficili.'];
+const CONSIGLI_CARICA = ['Il Lanciere può buttare giù dalla rupe i nemici sul bordo.', 'Le mura rallentano chi attacca: costruiscile presto.', 'In Conquista le frazioni producono ogni stagione: tienile.', 'Un patto con un borgo vicino ti lascia libero di attaccare l’altro.', 'Le castagne servono per costruire e potenziare le difese.', ...(window.CG_BUILD ? [] : ['Con un account i progressi si salvano online da soli.']), 'Il Falco smeriglio colpisce dall’alto i nemici più veloci.', 'In Conquista un borgo sotto assedio perde soldati ogni stagione.', 'La Sfida del giorno cambia ogni giorno: è uguale per tutti.', 'Nell’Assedio le tappe diventano sempre più difficili.'];
 let CARICA_ON = null;
 function CARICA(fn, testo, ev){
   if (CARICA_ON){ try { fn(); } catch(e){ console.error(e); } CARICA_ON.estendi(); return; }
@@ -5256,7 +5256,7 @@ function mostraMenu(pannello){
     c.innerHTML = `<div class="pan"><h2>Come si gioca</h2><div class="how">
       <span>1</span><span>In basso ci sono le tue difese. Toccane una e attivala con le castagne.</span>
       <span>2</span><span>Prima di ogni ondata vedi chi arriva e da quale strada. Le frecce colorate sulla mappa ti mostrano il percorso.</span>
-      <span>3</span><span>Durante l’ondata premi <b>Falco</b>: il tuo smeriglio colpisce il nemico più vicino al paese. Puoi anche toccare un nemico.</span>
+      <span>3</span><span>Durante l’ondata premi <b>Falco</b>: il tuo Falco colpisce il nemico più vicino al paese. Puoi anche toccare un nemico.</span>
       <span>4</span><span>Prima dell’ondata hai 2 <b>ordini</b>: un’<b>imboscata</b> (un barile di pece nascosto sulla strada) oppure un <b>assalto</b> all’accampamento nemico, che toglie i nemici più forti di quella strada.</span>
       <span>5</span><span>La <b>milizia</b> manda soldati sulla strada: fermano i nemici e li combattono. Toccala e premi <b>Sposta i soldati</b> per scegliere dove metterli.</span>
       <span>6</span><span>Premi <b>Frana</b> e tocca la strada dove ci sono tanti nemici.</span>
@@ -6633,15 +6633,15 @@ let COACH_TB = -1;
 let PROVA = null;
 const PROVE = [
   {tipo:'lanciere', da:'piazzale', nem:'fessa', hp:2,
-   sel:['Prova 1 di 3: i <b>Lancieri</b>. Toccali.', 'Forti, da vicino.'],
+   sel:['Inizia dai <b>Lancieri</b>. Toccali.', 'Forti, da vicino.'],
    az:['Ora tocca il <b>nemico</b> con il mirino rosso.', ''],
    ok:['💥 Abbattuto!', '']},
   {tipo:'arciere', da:'porta', nem:'fessa', hp:1,
-   sel:['Prova 2 di 3: gli <b>Arcieri</b>. Toccali.', 'Tirano da lontano.'],
+   sel:['Ora gli <b>Arcieri</b>. Toccali.', 'Tirano da lontano.'],
    az:['Tocca il <b>nemico</b> lontano, con il mirino rosso.', ''],
    ok:['🏹 Colpito da lontano!', 'Sono fragili: tienili dietro.']},
   {tipo:'carpentiere', da:'porta', nem:'fessa', hp:2,
-   sel:['Prova 3 di 3: i <b>Carpentieri</b>. Toccali.', 'Non combattono: costruiscono.'],
+   sel:['Ora i <b>Carpentieri</b>. Toccali.', 'Non combattono: costruiscono.'],
    az:['Tocca il <b>cerchio giallo</b> sulla strada del nemico.', ''],
    ok:['🔨 Il nemico si è fermato!', 'La barricata chiude la strada.']},
 ];
@@ -10196,7 +10196,7 @@ const ACC = window.ACC = (() => {
       { const vg = L.querySelector('[data-vaigioca]'); if (vg) vg.onclick = () => { const tg = document.querySelector('.cr-tab[data-tab="gioca"]'); if (tg) tg.click(); }; }
       L.querySelectorAll('[data-av]').forEach(e => { try { e.append(TB.icona(e.dataset.av, 2)); } catch(er){ try { e.append(TB.icona('lanciere', 2)); } catch(e2){} } }); };
     const c = CL.cache[tipo]; if (c && Date.now() - c.t < 60000){ disegna(c.r); return; }
-    L.innerHTML = '<p class="cl-vuoto">Carico la classifica...</p>'; io.innerHTML = '';
+    L.innerHTML = '<p class="cl-vuoto">Carico la classifica…</p>'; io.innerHTML = '';
     try { if (A) await invia(false); } catch(e){}
     try { const r = await rpc('ds_classifica', {p_tipo: tipo, p_token: A ? A.token : null}); if (r.errore) throw 0; CL.cache[tipo] = {t: Date.now(), r}; disegna(r); }
     catch(e){ if (CL.tipo === tipo) L.innerHTML = `<p class="cl-vuoto">${rete().replace('Controlla internet e riprova.', 'Controlla internet.')}</p><button type="button" class="big alt cl-rip">Riprova</button>`; const rb = L.querySelector('.cl-rip'); if (rb) rb.onclick = () => carica(box); } }
@@ -10699,7 +10699,12 @@ fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){
     await passo(100, 'Pronto!'); } catch(e){}
   try { const h = location.hash.match(/sfida=([^&]+)/); if (h){ const d = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(h[1]))))); history.replaceState(null, '', location.pathname + location.search); setTimeout(() => { const tt = document.getElementById('title'); if (tt) tt.hidden = true; TB.apri({amico:d}); }, 400); } } catch(e){}
   const via = document.getElementById('ldVia'); let uscito = false;
-  const esci = () => { if (uscito) return; uscito = true; clearInterval(tiT); try { SUONI.suona('banner'); } catch(e){} ld.classList.add('via'); setTimeout(() => ld.remove(), 480); };
+  const esci = () => { if (uscito) return; uscito = true; clearInterval(tiT); try { SUONI.suona('banner'); } catch(e){}
+    // giocatore nuovo: la prima prova parte sotto la schermata di caricamento, così non si vede il menu in mezzo
+    let nuovo = false; try { nuovo = RITORNO.subito(); } catch(e){}
+    const vai = () => { ld.classList.add('via'); setTimeout(() => ld.remove(), 480); };
+    if (!nuovo){ vai(); return; }
+    const t0 = Date.now(), tit = document.getElementById('title'), giro = () => { if (Date.now() - t0 > 6000 || (tit && tit.hidden && !document.querySelector('.tr-velo'))){ vai(); return; } setTimeout(giro, 100); }; giro(); };
   // il telefono fa partire la musica solo dopo un tocco: il tocco per entrare serve anche ad accenderla
   tx.textContent = 'Pronto!'; bar.parentElement.style.display = 'none'; const forzaGate = /[?&]gate=1/.test(location.search);
   if (navigator.webdriver && !forzaGate) setTimeout(esci, 1200);
