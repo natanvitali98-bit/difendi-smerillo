@@ -37,6 +37,7 @@ FISSI = [
     ("replace(/^(Simbolo|Colore|Forma) /, '')", "replace(/ (symbol|colour|shape)$/, '')", 2),
     ("replace(/^(Stemma|Scudo) «(.*)»$/, '$2')", "replace(/^(Crest|Shield) «(.*)»$/, '$2')"),
     ("'DIFENDI'", "'DEFEND'", 3),
+    ("t = '<b>▶ VIA!</b>'", "t = '<b>▶ GO!</b>'"),
     ('<div class="ld-logo"><span>Difendi</span>', '<div class="ld-logo"><span>Difendi\u200b</span>'),   # il titolo del gioco resta "Difendi Smerillo"
     ("strDet(st.str, 'danneggiato', 'danneggiata')", "strDet(st.str, 'damaged', 'damaged')"),
     ("strDet(dn.k, 'distrutto', 'distrutta')", "strDet(dn.k, 'destroyed', 'destroyed')"),
@@ -48,7 +49,7 @@ FISSI = [
 PLURALI = {('stagione','stagioni'):('season','seasons'), ('soldato','soldati'):('soldier','soldiers'), ('mossa','mosse'):('move','moves'),
     ('diserta','disertano'):('deserts','desert'), ('volta','volte'):('time','times'), ('turno','turni'):('turn','turns'), ('tappa','tappe'):('stage','stages'),
     ('piano','piani'):('floor','floors'), ('persa','perse'):('lost','lost'), ('pensa','pensano'):('thinks','think'), ('moneta','monete'):('coin','coins'),
-    ('difesa','difese'):('held','held'), ('brigante','briganti'):('bandit','bandits')}
+    ('difesa','difese'):('held','held'), ('brigante','briganti'):('bandit','bandits'), ('nemico','nemici'):('enemy','enemies')}
 
 def traduci_html(s):
     for x in FISSI:
