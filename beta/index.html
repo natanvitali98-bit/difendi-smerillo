@@ -2627,6 +2627,13 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
   #coach.sopra,#coach.sotto{left:12px;right:auto;width:min(calc(100vw - 340px),440px);margin:0}
   #coach.sopra{top:70px} #coach.sotto{bottom:16px}
 }
+
+/* PC: etichetta del tasto sui pulsanti */
+@media (pointer:fine) and (hover:hover){
+  [data-tasto]::after{content:attr(data-tasto);position:absolute;top:-7px;right:-5px;z-index:3;background:#fff;color:#141433;border:2px solid #141433;border-radius:6px;padding:0 5px;font:700 11px/16px var(--f-body);letter-spacing:0;box-shadow:0 2px 0 #141433;pointer-events:none;white-space:nowrap;text-transform:none}
+  #bGo,#bFalco,#bFrana,#bPausa,#bVel,#tbMenu,#cqPausa,#tbFine,#tbUndo,#tbShop,#cqFine,#cqDip,#cqCos,#cqAtt,#cqRec,.chip.shop{position:relative}
+  [data-tasto]{overflow:visible!important}
+}
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -9664,7 +9671,7 @@ function esci(tab){ mpChiudi(); if (CG){ clearInterval(CG.iv); CG = null; COACH.
 function tasto(e, k){ const o = el('cqOv');
   if (o && !o.hidden){ if (k === 'Escape'){ e.preventDefault(); const b = o.querySelector('#cqNo, #cqRi'); if (b) b.click(); } else if (k === 'Enter'){ const b = o.querySelector('.big:not(.alt):not(:disabled)'); if (b){ e.preventDefault(); b.click(); } } return; }
   if (k === ' ' || k === 'Enter'){ e.preventDefault(); el('cqFine').click(); } else if (k === 'Escape'){ e.preventDefault(); if (modo){ modo = null; pannello(); } else if (sel){ sel = null; pannello(); } else pausa(); }
-  else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
+  else if (k === 'p'){ e.preventDefault(); pausa(); } else if (k === 'd') el('cqDip').click(); else if (k === 'c' && sel === S.io) { const b = el('cqCos'); if (b) b.click(); } else if (k === 'a'){ const b = el('cqAtt') || el('cqRec'); if (b) b.click(); } }
 // riproduzione: la mappa mostra la stagione degli altri passo per passo
 function riproduciEv(ev, dopo){ if (!ev.length){ dopo(); return; } GIOCA = {ev, i:0, dopo}; VISTA = PRIMA_SNAP; aggiornaUI(); passo(); }
 
@@ -10195,8 +10202,12 @@ function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); la
   requestAnimationFrame(loop); }
 new ResizeObserver(fit).observe($('#stage'));
 // ===== tastiera (versione PC) =====
-const PC_TASTI_CL = '<kbd>Spazio</kbd>ondata · <kbd>N</kbd>negozio · <kbd>1</kbd>–<kbd>6</kbd>difese<br><kbd>F</kbd>falco · <kbd>R</kbd>frana · <kbd>P</kbd>pausa · rotella zoom';
-const PC_TASTI_TB = '<kbd>Spazio</kbd>fine turno · <kbd>Z</kbd>annulla<br><kbd>B</kbd>bottega · <kbd>M</kbd>menu · rotella zoom';
+const PC_TASTI_CL = '<kbd>Spazio</kbd>ondata · <kbd>N</kbd>negozio · <kbd>1</kbd>–<kbd>6</kbd>difese<br><kbd>F</kbd>falco · <kbd>R</kbd>frana · <kbd>V</kbd>velocità · <kbd>P</kbd>pausa';
+const PC_TASTI_TB = '<kbd>Spazio</kbd>fine turno · <kbd>Z</kbd>annulla<br><kbd>B</kbd>bottega · <kbd>P</kbd>pausa · rotella zoom';
+// PC: una piccola etichetta col tasto sopra ogni pulsante
+const KB_ETI = {bGo:'Spazio', bFalco:'F', bFrana:'R', bPausa:'P', bVel:'V', bShop:'N', tbFine:'Spazio', tbUndo:'Z', tbShop:'B', tbMenu:'P', cqFine:'Spazio', cqDip:'D', cqPausa:'P', cqCos:'C', cqAtt:'A', cqRec:'A'};
+setInterval(() => { if (!matchMedia('(pointer:fine)').matches) return; for (const id in KB_ETI){ const b = document.getElementById(id); if (!b) continue; const v = b.getClientRects().length && b.offsetWidth ? KB_ETI[id] : ''; if (v && b.dataset.tasto !== v) b.dataset.tasto = v; else if (!v && b.dataset.tasto) delete b.dataset.tasto; }
+  document.querySelectorAll('[data-shop]').forEach(b => { const i = NEGOZIO.findIndex(o => o.tipo === b.dataset.shop); if (i >= 0 && i < 6 && b.dataset.tasto !== String(i + 1)) b.dataset.tasto = String(i + 1); }); }, 400);
 setInterval(() => { const h = $('#pcTasti'); if (!h) return; const v = TB.attivo ? PC_TASTI_TB : (S && $('#title').hidden && !MOD ? PC_TASTI_CL : ''); if (h.dataset.v !== v){ h.dataset.v = v; h.innerHTML = v; h.className = TB.attivo ? 'tb' : 'cl'; } }, 500);
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.altKey || (e.target && e.target.closest && e.target.closest('input,textarea,select'))) return;
@@ -10210,7 +10221,7 @@ document.addEventListener('keydown', e => {
     const stg = document.querySelector('.scr-stage'); if (stg){ e.preventDefault(); if (k === 'Escape') stg.querySelector('.scr-salta').click(); else if (k === ' ' || k === 'Enter'){ const c = stg.querySelector('.scr-carta'); (c || stg.querySelector('.scr-cassa')).click(); } return; } // apertura dello scrigno
     const ov = document.getElementById('tbOv');
     if (ov && !ov.hidden){ if (k === 'Enter' || k === ' ') clic('#tbOv .dlgfoot .big:not(.alt)') || clic('#tbOv .big:not(.alt)'); else if (k === 'Escape'){ if (!clic('#tbRip')) clic('#tbOv .indietro'); } return; }
-    if (k === ' ' || k === 'Enter') clic('#tbFine'); else if (k === 'z' || k === 'Backspace') clic('#tbUndo'); else if (k === 'b') clic('#tbShop'); else if (k === 'Escape' || k === 'm') clic('#tbMenu');
+    if (k === ' ' || k === 'Enter') clic('#tbFine'); else if (k === 'z' || k === 'Backspace') clic('#tbUndo'); else if (k === 'b') clic('#tbShop'); else if (k === 'Escape' || k === 'm' || k === 'p') clic('#tbMenu');
     return; }
   if (!$('#title').hidden || !S || MOD) return;
   for (const id of ['#cards', '#end', '#pausa']){ const o = $(id); if (o && !o.hidden){ if (k === 'Enter' || k === ' ') clic(id + ' .big:not(.alt)'); else if ((k === 'Escape' || k === 'p') && id === '#pausa') clic('#pausa .big'); return; } }
@@ -10218,6 +10229,7 @@ document.addEventListener('keydown', e => {
   else if (k === 'f') clic('#bFalco');
   else if (k === 'r') clic('#bFrana');
   else if (k === 'p') clic('#bPausa');
+  else if (k === 'v') clic('#bVel');
   else if (k === 'n'){ if (NEG) clic('#ngX'); else clic('#bShop'); }
   else if (k >= '1' && k <= '6'){ const off = NEGOZIO[+k - 1]; if (!off) return; e.preventDefault(); if (!NEG && !(S.modo && S.modo.tipo === 'costruisci')) $('#bShop').click(); const b = document.querySelector(`[data-shop="${off.tipo}"]`); if (b) b.click(); }
   else if (k === 'Escape'){ e.preventDefault(); if (S.modo){ S.modo = null; costruisciTorri(); ui(); } else if (NEG){ NEG = false; ui(); } else if (S.sel !== null){ S.sel = null; ui(); } else clic('#bPausa'); }
