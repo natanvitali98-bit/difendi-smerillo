@@ -2656,6 +2656,9 @@ body:has(#tbOv:not([hidden])) #pcTasti,body:has(#cqOv:not([hidden])) #pcTasti{di
 #rtFesta.on{animation:rtFesta 1.45s cubic-bezier(.2,.9,.3,1.2) both}
 @keyframes rtFesta{0%{opacity:0;transform:translate(-50%,-50%) scale(.5) rotate(-4deg)}14%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(1deg)}24%{transform:translate(-50%,-50%) scale(1) rotate(0)}82%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-62%) scale(.96)}}
 @media (prefers-reduced-motion: reduce){ #rtFesta.on{animation:none;opacity:1;transform:translate(-50%,-50%)} }
+
+#tbNem .tbn-l{font-size:13px;opacity:.85;margin-left:2px}
+@media (max-width:480px){ #tbNem .tbn-l{display:none} }
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -5576,7 +5579,7 @@ const MAPPA_NORD ={num:1, titolo:'La Porta Nord', livello:'Facile: impari a gioc
    ['lupia1','lupia2',[[63,69],[69.6,55],[76,41.5],[81.5,30]]], ['bivio','tornante',[[51,100],[56,98],[61,93],[65,86],[69.5,81],[74,79]]],
    ['tornante','monte1',[[74,79],[75,83],[73.5,87],[71,96],[67.5,108]]], ['monte1','monte2',[[67.5,108],[64.5,120],[62,131],[60,140]]]],
   // tutorial: pochi nemici, uno alla volta, il cavaliere solo alla fine
-  arrivi:{0:[['fante','fessa']], 1:[['fante','monte2']], 3:[['fante','lupia2']], 4:[['fante','fessa']]}};
+  arrivi:{0:[['fante','fessa']], 1:[['fante','monte2']], 2:[['fante','lupia2']], 3:[['fante','fessa']]}};
 const MAPPA_CENTRO ={num:2, titolo:'Il cuore del paese', livello:'Media', meta:'comune', corto:'Comune', caduta:'Il Municipio è caduto', metaNome:'il Municipio', metaLabel:'MUNICIPIO', dentro:[],
   intro:'La Porta Nord ha resistito, ma i nemici entrano in paese da <b>Via Cortellucci</b>, da <b>Via dei Caduti</b> e dal sud. Difendi il <b>Municipio</b>, in piazza. Arriva il <b>Balestriere</b>: tira da lontano. Hai due Lancieri.',
   consiglio:'Tieni un difensore in piazza: tutti i nemici devono passare da lì. Colpisci prima i balestrieri.',
@@ -6567,9 +6570,9 @@ const GUIDAKEY = 'difendi-smerillo-guida';
 let guida = (() => { try { return localStorage.getItem(GUIDAKEY) ? -1 : 0; } catch(e){ return 0; } })();
 const dif = t => S && S.dif.find(d => d.tipo === t);
 const GUIDA = [
-  {t:'Ora difendi la <b>Chiesa</b>!', sub:'Tocca un tuo soldato, poi il nemico da colpire o dove andare. Quando hai finito, tocca <b>Fine turno</b>: si muovono i nemici.', punta:null, ok:() => false, bottone:'Vai!'},
-  {quando:() => S.turno >= 2, t:'Le <b>linee rosse</b> mostrano cosa faranno i nemici al prossimo turno.', sub:'Dove vanno e chi colpiscono. Mettiti sulla loro strada e colpiscili prima che arrivino alla Chiesa.', punta:null, ok:() => false, bottone:'Ok'},
-  {t:'Non sai cosa fare? Tocca <b>💡 Aiuto</b>.', sub:'Ti mostro col dito una mossa buona. Lo trovi sempre qui nelle prime missioni. Adesso giochi tu!', punta:'aiuto', ok:() => false, bottone:'Ho capito, gioco!'},
+  {get t(){ return `Abbatti i <b>${nemiciTot()} nemici</b> prima che arrivino alla <b>Chiesa</b>!`; }, sub:'Muovi i soldati verso di loro, poi <b>Fine turno</b>.', punta:null, ok:() => false, bottone:'Vai!'},
+  {quando:() => S.turno >= 2, t:'<b>Linee rosse</b> = dove vanno i nemici.', sub:'Vai loro incontro.', punta:null, ok:() => false, bottone:'Ok'},
+  {t:'Bloccato? Tocca <b>💡 Aiuto</b>.', sub:'Se resti fermo, ti aiuto io.', punta:'aiuto', ok:() => false, bottone:'Gioco!'},
 ];
 function passoGuida(){ if (!S || guida < 0 || MI !== 0 || NET) return null; while (guida < GUIDA.length && GUIDA[guida].ok()) guida++; if (guida >= GUIDA.length){ fineGuida(); return null; } if (PROVA) return null; if (GUIDA[guida].quando && !GUIDA[guida].quando()) return null; return GUIDA[guida]; }
 let COACH_TB = -1;
@@ -6629,6 +6632,12 @@ function mossaBuona(){
   if (best) return best;
   return {k:'fine'};
 }
+const nemiciTot = () => Object.values(M.arrivi || {}).flat().length + (RUN ? 0 : (M.extra || []).length);
+// se resti fermo nel tuo turno (prime missioni), la mossa buona te la indico io
+let ULT_INPUT = Date.now();
+for (const t of ['pointerdown','keydown']) addEventListener(t, () => { ULT_INPUT = Date.now(); }, true);
+setInterval(() => { try { if (!S || !el('tb') || el('tb').hidden || ev || coda.length || ovAperto || AIUTO || !aiutoOk() || COACH.attivo) return;
+  if (Date.now() - ULT_INPUT > (MI === 0 ? 7000 : 10000)){ ULT_INPUT = Date.now(); aiuto(); } } catch(e){} }, 1000);
 function aiutoStop(){ if (!AIUTO) return; clearInterval(AIUTO.t); AIUTO = null; try { COACH.nascondi(); } catch(e){} }
 function aiuto(){ if (!aiutoOk()) return; if (guida >= 0){ fineGuida(); COACH_TB = -1; } aiutoStop(); const m = mossaBuona(), turno = S.turno; SUONI.suona('tocco'); try { RITORNO.traccia && RITORNO.traccia('aiuto', {mi: MI}); } catch(e){}
   const punto = id => () => { if (!S || !NODI[id]) return null; const [x, y] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + x, y: r.top + y - 8, r: 30}; };
@@ -6678,7 +6687,7 @@ function info(){
       const t = el('tbTit'); if (t._h !== h){ t._h = h; t.innerHTML = h; } }
     if (st && !ovAperto && !S.esito && st.k !== ultimoAnn){ ultimoAnn = st.k; if (S.prova == null && (online() || guida < 0 || S.turno > 1)) annuncia(st.t, st.c); } } // il cartello "Tocca a te" ora c'è anche quando giochi da solo
   metti(el('tbPorta'), ico(R.porta > 0 ? 'cuore' : 'cuoreV') + `<b>${R.porta}<small>/${S.portaMax}</small></b>`);
-  const rimasti = R.nem.length + S.coda.length; metti(el('tbNem'), ico('teschio') + ' ' + rimasti);
+  const rimasti = R.nem.length + S.coda.length; metti(el('tbNem'), ico('teschio') + ' ' + rimasti + (S.vs ? '' : ' <small class="tbn-l">' + (rimasti === 1 ? 'nemico' : 'nemici') + '</small>'));
   el('tbUndo').disabled = !storia.length || !!V || !!S.esito; aggiornaAiuto();
   { const b = el('tbShop'), m = (R.monete ?? S.monete) || 0; if (b.dataset.m !== String(m)){ const su = b.dataset.m !== undefined && m > +b.dataset.m; b.dataset.m = m; b.innerHTML = ico('moneta', 3) + ' ' + m; if (su){ b.classList.remove('anim-su'); void b.offsetWidth; b.classList.add('anim-su'); } } b.disabled = !!V || !!S.esito; b.classList.toggle('pronto', !V && OFFERTE.some(f => m >= f.costo && f.ok(S))); }
   { const m = S.monete || 0; if (moneteViste === null || V) moneteViste = moneteViste === null ? m : moneteViste; if (!V && m > moneteViste){ if (!S.moneteSpiegate && S.prova == null){ S.moneteSpiegate = true; suggerisci('🪙 Moneta! Spendila nella Bottega, in basso'); } moneteViste = m; } else if (m < moneteViste) moneteViste = m; }
