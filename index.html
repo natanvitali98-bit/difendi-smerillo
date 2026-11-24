@@ -740,6 +740,18 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
   #bShop{left:14px;bottom:14px}
   canvas{cursor:pointer}
 }
+/* PC: colonna dei comandi più stretta (più mappa); dono e fine partita al centro dello schermo */
+@media (min-width:1100px) and (min-aspect-ratio:1/1), (min-width:1100px) and (pointer:fine){
+  #app{grid-template-columns:1fr clamp(300px, 25vw, 360px)!important}
+  #pcTasti.cl{width:clamp(300px, 25vw, 360px)!important}
+}
+@media (min-width:900px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
+  #stage > #cards.overlay,#stage > #end.overlay{position:fixed;inset:0;z-index:40;justify-content:center;align-items:center;padding:16px;background:rgba(10,16,52,.55)}
+  #stage > #cards.overlay > .dlg,#stage > #end.overlay > .dlg{margin:auto;width:min(600px,100%);max-height:calc(100vh - 32px);overflow-y:auto}
+  #app #bar > *{min-width:0}
+}
+@media (max-width:999px) and (pointer:fine){ #app #bar .go{white-space:normal!important;line-height:1.05} }
+@media (max-width:879px) and (pointer:fine){ #app #bar #icFalco,#app #bar #icFrana{display:none!important} #app #bar [data-tasto]::after{left:auto;right:-6px} } /* riquadro piccolo: il nome del pulsante si legge intero */
 
 .hm-row{grid-template-columns:repeat(4,1fr)!important}
 .olnome{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:14px;margin:8px 0}
@@ -2681,9 +2693,9 @@ body:has(#tbOv:not([hidden])) #pcTasti,body:has(#cqOv:not([hidden])) #pcTasti{di
 .wave{font-size:15px}
 @media (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ #app .wave{font-size:17px;color:#fff} #app .stat{font-size:20px} }
 [data-tasto]::after{font-size:12px!important;line-height:17px!important;padding:0 6px!important}
-.cr-tab[data-tab="gioca"]:not(.on){box-shadow:none!important;background:rgba(255,208,58,.10)!important}
+.cr-tab[data-tab="gioca"]:not(.on){box-shadow:none!important;background:none!important} /* una sola scheda accesa: Gioca resta solo con la scritta gialla */
 body:has(#title:not([hidden])) #profToast{top:auto!important;bottom:calc(96px + env(safe-area-inset-bottom))!important}
-@media (max-height:620px){ .cr-pg[data-tab="premi"] .pr-rbox{zoom:.62;margin:2px auto!important} }
+@media (max-height:620px){ .cr-pg[data-tab="premi"] .pr-rbox{zoom:.62;margin:34px auto 2px!important} } /* la punta della ruota non copre la scritta sopra */
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -2691,7 +2703,7 @@ body:has(#title:not([hidden])) #profToast{top:auto!important;bottom:calc(96px + 
 <section id="tb" hidden>
   <header class="tbhud box"><div class="tbl"><span id="tbTurno">Turno 1</span><b id="tbTit">Missione 1 · La Porta Nord</b></div>
     <div class="tbr"><span id="tbPorta" title="Vite della Porta Nord" aria-label="Vite della Porta Nord"></span><span id="tbNem"></span><button id="tbMenu" class="hbtn" aria-label="Pausa">II</button></div></header><section id="tbOv" class="overlay" hidden></section>
-  <div id="tbStage"><canvas id="tbCv" aria-label="Mappa della missione"></canvas><div id="tbBanner" aria-live="polite"></div><div id="olBar" hidden></div><button id="tbCentra" class="box" aria-label="Rivedi tutta la mappa">⤢</button><button id="tbZp" class="box tbzoom" aria-label="Ingrandisci">+</button><button id="tbZm" class="box tbzoom" aria-label="Rimpicciolisci">−</button><div id="tbHint" class="tbhint" aria-live="polite"></div><button type="button" id="tbAiuto" class="tb-aiuto" hidden>💡 Aiuto</button></div>
+  <div id="tbStage"><canvas id="tbCv" aria-label="Mappa della missione"></canvas><div id="tbBanner" aria-live="polite"></div><div id="olBar" hidden></div><button id="tbCentra" class="box" aria-label="Rivedi tutta la mappa"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></button><button id="tbZp" class="box tbzoom" aria-label="Ingrandisci">+</button><button id="tbZm" class="box tbzoom" aria-label="Rimpicciolisci">−</button><div id="tbHint" class="tbhint" aria-live="polite"></div><button type="button" id="tbAiuto" class="tb-aiuto" hidden>💡 Aiuto</button></div>
   <div id="tbInfo" class="box"></div>
   <nav id="tbBar"><button id="tbUndo" class="big alt">↶ Annulla</button><button id="tbShop" class="big alt" aria-label="Bottega: spendi le monete" title="Bottega: spendi le monete">0</button><button id="tbFine" class="big">Fine turno ▶</button></nav>
 </section>
@@ -2729,7 +2741,7 @@ body:has(#title:not([hidden])) #profToast{top:auto!important;bottom:calc(96px + 
 
   <div id="stage">
     <canvas id="cv" aria-label="Mappa di Smerillo"></canvas>
-    <div class="zoom"><button id="zIn" class="box" aria-label="Avvicina">+</button><button id="zOut" class="box" aria-label="Allontana">−</button><button id="zAll" class="box" aria-label="Tutto il paese">⤢</button></div>
+    <div class="zoom"><button id="zIn" class="box" aria-label="Avvicina">+</button><button id="zOut" class="box" aria-label="Allontana">−</button><button id="zAll" class="box" aria-label="Tutto il paese"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></button></div>
     <div id="modTxt" hidden></div>
     <div id="guidaCl" hidden></div>
     <button id="bShop" type="button" aria-label="Apri il negozio">🛒<span>Negozio</span></button>
@@ -3099,7 +3111,7 @@ const CARTE = [
   {t:'Raccolta d’autunno', d:'Ricevi subito 60 castagne.', f:(b,S)=>S.castagne+=60},
   {t:'Muri riparati', d:'Il borgo recupera 4 punti di resistenza.', f:(b,S)=>S.vite=Math.min(S.viteMax,S.vite+4)},
   {t:'Risparmio', d:'Da ora l’interesse sulle castagne risparmiate arriva fino a 40.', f:b=>b.interesse=40},
-  {t:'Occhio di falco', d:'Il tuo smeriglio si ricarica il 30% più in fretta.', f:b=>b.falcoCd*=.7},
+  {t:'Occhio di falco', d:'Il tuo Falco si ricarica il 30% più in fretta.', f:b=>b.falcoCd*=.7},
   {t:'Arenaria fragile', d:'La frana è più larga e torna pronta 3 secondi prima.', f:b=>{b.frana*=1.3; b.franaCd-=3;}},
 ];
 
@@ -4095,7 +4107,7 @@ function avviaOndata(){
   const pr = S.prossima; S.prossima = null;
   S.ondata = pr.n; S.inCorso = true; S.ev = pr.ev; S.ultimoEv = pr.ev; S.vieAttive = pr.vie;
   for (const L of S.luoghi) if (L.tipo === 'logge' && L.lvl && specDi(L).frana) S.franaCd = 0;
-  try { SUONI.suona('arriva'); } catch(e){} if (S.inizioFacile && S.ondata <= 3){ const L = S.luoghi.find(q => q.lvl); if (L){ const [x, y] = P(L.e, L.n + 3, L.z); S.camT = {x, y}; } } // prima partita: la telecamera va dove si combatte, così vedi i nemici cadere
+  try { SUONI.suona('arriva'); } catch(e){} if (S.inizioFacile && S.ondata <= 3 && !PCK){ const L = S.luoghi.find(q => q.lvl); if (L){ const [x, y] = P(L.e, L.n + 3, L.z); S.camT = {x, y}; } } // prima partita: la telecamera va dove si combatte, così vedi i nemici cadere
   S.banner = {t:0, onda:true, titolo: S.ondata === ONDATE ? 'Ultima ondata: ' + CMISSIONI[S.miss || 1].capo : S.ev.nome ? 'Ondata ' + S.ondata + ': ' + S.ev.nome : 'Ondata ' + S.ondata, testo: S.ev.desc};
   S.coda = pr.coda;
   S.intervallo = Math.max(.35, 1.4 / (1 + .06*S.ondata)); S.multVita = (1 + .11*(S.ondata-1)) * S.hpDiff * (S.miss === 2 ? .82 : S.miss === 3 ? .95 : 1); if (S.inizioFacile && S.ondata <= 2) S.multVita *= .4; // i cavalieri hanno l'armatura: un po' meno vita S.multVel = (1 + .02*S.ondata) * (S.ev.vel || 1); S.timer = .4;
@@ -4590,7 +4602,7 @@ function draw(T){
   }
   ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle = '#1a2433'; ctx.fillRect(0,0,cv.width,cv.height);
   ctx.imageSmoothingEnabled = false;
-  const tre = S && S.shake > 0 && !riduci ? S.shake : 0, dx = (Math.random()-.5)*tre*2, dy = (Math.random()-.5)*tre*2;
+  const tre = S && S.shake > 0 && !riduci && !S.attesaCarta && !S.pausa && !S.fine ? S.shake : 0, /* a gioco fermo (scelta del dono, pausa, fine) lo schermo non trema */ dx = (Math.random()-.5)*tre*2, dy = (Math.random()-.5)*tre*2;
   ctx.drawImage(buf, Math.round((ox+dx)*dpr), Math.round((oy+dy)*dpr), Math.round(W*scale*dpr), Math.round(H*scale*dpr));
   ctx.setTransform(dpr,0,0,dpr,0,0);
   if (S && S.miss === 2 && !MOD){ ctx.fillStyle = 'rgba(14,22,70,.32)'; ctx.fillRect(0, 0, SW, SH); } // di notte
@@ -10287,7 +10299,7 @@ window.toastMenu = toastMenu;
 let last = performance.now(), T = 0;
 function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); last = now; T += dt;
   if (S && !S.fine && !S.attesaCarta && !S.pausa) update(dt * S.vel);
-  if (S && S.inizioFacile && S.inCorso && S.ondata <= 3 && !trascina && performance.now() - ULT_TRASC > 3500 && Math.floor(T*2) !== Math.floor((T - dt)*2)) seguiBattaglia();
+  if (S && !PCK && S.inizioFacile && S.inCorso && S.ondata <= 3 && !trascina && performance.now() - ULT_TRASC > 3500 && Math.floor(T*2) !== Math.floor((T - dt)*2)) seguiBattaglia();
   if (S && S.camT){ camX += (S.camT.x - camX)*Math.min(1, dt*6); camY += (S.camT.y - camY)*Math.min(1, dt*6); limita(); if (Math.hypot(S.camT.x - camX, S.camT.y - camY) < 1) S.camT = null; }
   if (S && Math.floor(T*4) !== Math.floor((T-dt)*4)) aggiornaTorri();
   if (TB.attivo) TB.frame(T, dt); else if (CQ.attivo) CQ.frame(T, dt); else if (!$('#title').hidden) disegnaTitolo(T); else { draw(T); if (ANELLO) posAnello(); }
@@ -10459,7 +10471,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261124173404';
+  const VERSIONE = window.DS_VER = '20261124183814';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){
