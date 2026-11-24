@@ -2634,6 +2634,19 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
   #bGo,#bFalco,#bFrana,#bPausa,#bVel,#tbMenu,#cqPausa,#tbFine,#tbUndo,#tbShop,#cqFine,#cqDip,#cqCos,#cqAtt,#cqRec,.chip.shop{position:relative}
   [data-tasto]{overflow:visible!important}
 }
+
+/* Passo 4: finestre corte, il pulsante resta sempre visibile anche su schermi bassi */
+.mis-prima .mp-tre{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 4px}
+.mis-prima .mp-tre > span{display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(255,255,255,.08);border-radius:14px;padding:10px 4px;font-size:13px;text-align:center;opacity:.95}
+.mis-prima .mp-tre i{font-style:normal;font-size:30px;line-height:1.1}.mis-prima .mp-tre b{font-size:15px}
+.mis-prima .mp-g{text-align:center}
+.cq-capd summary{font-weight:800;cursor:pointer}
+.cq-dlg .dlgfoot.fisso.cq-foot{background:linear-gradient(180deg,rgba(20,24,69,0) 0,#141845 14px)!important}
+body:has(#tbOv:not([hidden])) #pcTasti,body:has(#cqOv:not([hidden])) #pcTasti{display:none!important}
+@media (max-height:640px){
+  #tbOv .dlg .dlgfoot.fisso.mis-foot{position:sticky!important;bottom:-22px!important;margin:6px 0 -22px!important;padding:10px 0 14px!important;background:linear-gradient(180deg,rgba(26,35,90,0) 0,#1f2a6b 12px)!important;z-index:2}
+  .mis-prima .mis-t{font-size:30px!important;margin:2px 0!important}
+}
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -6542,17 +6555,17 @@ let COACH_TB = -1;
 let PROVA = null;
 const PROVE = [
   {tipo:'lanciere', da:'piazzale', nem:'fessa', hp:2,
-   sel:['Prova 1 di 3: i <b>Lancieri</b>. Toccali.', 'Sono i soldati da battaglia: colpiscono forte, da vicino.'],
-   az:['Ora tocca il <b>nemico</b> con il mirino rosso.', 'I Lancieri colpiscono solo i nemici accanto a loro.'],
-   ok:['💥 Abbattuto!', 'I <b>Lancieri</b> colpiscono forte, ma solo da vicino.']},
+   sel:['Prova 1 di 3: i <b>Lancieri</b>. Toccali.', 'Forti, da vicino.'],
+   az:['Ora tocca il <b>nemico</b> con il mirino rosso.', ''],
+   ok:['💥 Abbattuto!', '']},
   {tipo:'arciere', da:'porta', nem:'fessa', hp:1,
-   sel:['Prova 2 di 3: gli <b>Arcieri</b>. Toccali.', 'Tirano le frecce da lontano.'],
-   az:['Tocca il <b>nemico</b> lontano, con il mirino rosso.', 'Gli Arcieri lo colpiscono anche da due strade di distanza.'],
-   ok:['🏹 Colpito da lontano!', 'Gli <b>Arcieri</b> tirano da lontano, ma sono fragili: tienili dietro.']},
+   sel:['Prova 2 di 3: gli <b>Arcieri</b>. Toccali.', 'Tirano da lontano.'],
+   az:['Tocca il <b>nemico</b> lontano, con il mirino rosso.', ''],
+   ok:['🏹 Colpito da lontano!', 'Sono fragili: tienili dietro.']},
   {tipo:'carpentiere', da:'porta', nem:'fessa', hp:2,
    sel:['Prova 3 di 3: i <b>Carpentieri</b>. Toccali.', 'Non combattono: costruiscono.'],
-   az:['Tocca il <b>cerchio giallo</b> sulla strada del nemico.', 'Lì costruiscono una barricata con le punte.'],
-   ok:['🔨 Il nemico si è fermato!', 'La <b>barricata</b> chiude la strada, e chi la colpisce perde 1 vita.']},
+   az:['Tocca il <b>cerchio giallo</b> sulla strada del nemico.', ''],
+   ok:['🔨 Il nemico si è fermato!', 'La barricata chiude la strada.']},
 ];
 function provaVia(k){ const P = PROVE[k]; PROVA = {k, vis:'', turno:false}; document.body.classList.add('tb-prova');
   S = nuovo(); S.prova = k; S.coda = []; S.bar = []; S.nem = []; const mx = vitaDi(P.tipo);
@@ -6572,7 +6585,7 @@ function provaCoach(){ if (!PROVA || !S) return; const P = PROVE[PROVA.k], u = S
   if (PROVA.vis === f) return; PROVA.vis = f;
   if (f === 'att'){ COACH.nascondi(); return; }
   const ultima = PROVA.k === PROVE.length - 1, tx = P[f], colpita = !!(x && x.hp < x.max) || !x;
-  const testo = f === 'ok' && PROVA.k === 2 && !colpita ? '🔨 Barricata costruita!' : tx[0], sotto = f === 'ok' && PROVA.k === 2 && !colpita ? 'La <b>barricata</b> chiude la strada: i nemici devono fermarsi a romperla, e chi la colpisce perde 1 vita.' : tx[1];
+  const testo = f === 'ok' && PROVA.k === 2 && !colpita ? '🔨 Barricata costruita!' : tx[0], sotto = f === 'ok' && PROVA.k === 2 && !colpita ? 'La barricata chiude la strada.' : tx[1];
   COACH.mostra({passo: PROVA.k + 1, tot: PROVE.length, testo, sotto,
     salta: f === 'ok' ? null : () => provaFine(true), bottone: f === 'ok' ? (ultima ? 'Inizia la missione!' : 'Avanti') : null,
     ok: () => { if (!PROVA) return; if (ultima) provaFine(false); else provaVia(PROVA.k + 1); },
@@ -6993,11 +7006,9 @@ function intro(){
     <button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>
     <div class="mis-top"><span class="mis-n">Missione 1 · Si impara</span></div>
     <h2 class="mis-t">Prova i tuoi soldati</h2>
-    <div class="mp-r"><span class="mp-i">⚔️</span><span><b>Lancieri</b>Colpiscono forte, da vicino.</span></div>
-    <div class="mp-r"><span class="mp-i">🏹</span><span><b>Arcieri</b>Tirano da lontano.</span></div>
-    <div class="mp-r"><span class="mp-i">🔨</span><span><b>Carpentieri</b>Costruiscono barricate.</span></div>
-    <p class="mp-g">👆 Li provi uno alla volta: bastano 30 secondi. Poi difendi la Chiesa.</p>
-    <button class="big" id="tbVia">Prova ${ico('play')}</button></div>`) : overlay(`<div class="dlg box mis">
+    <div class="mp-tre"><span><i>⚔️</i><b>Lancieri</b>da vicino</span><span><i>🏹</i><b>Arcieri</b>da lontano</span><span><i>🔨</i><b>Carpentieri</b>barricate</span></div>
+    <p class="mp-g">30 secondi, poi difendi la Chiesa.</p>
+    <div class="dlgfoot fisso mis-foot"><button class="big" id="tbVia">Prova ${ico('play')}</button></div></div>`) : overlay(`<div class="dlg box mis">
     ${RUN ? '' : `<button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>`}
     <div class="mis-top"><span class="mis-n">${SFIDA ? ico('calendario') + ' Sfida del giorno' : M.evento ? '🌰 Evento a tempo' : SFIDA_AMICO ? '⚔️ Sfida di ' + escH(SFIDA_AMICO.n || 'un amico') + ': ' + (+SFIDA_AMICO.p || 0) + ' punti' : 'Missione ' + M.num + ' di ' + MISSIONI.length}</span><span class="mis-d" aria-label="Difficoltà: ${M.livello}">${pallini}<em>${M.livello.split(':')[0]}</em></span></div>
     <h2 class="mis-t">${M.titolo}</h2>
@@ -9543,13 +9554,13 @@ function passoCG(){ if (!CG || !S) return; if (!attivo){ COACH.nascondi(); CG.vi
   if (CG.vista === CG.k) return; CG.vista = CG.k;
   const pausa = () => !attivo || ovAperto() || !!GIOCA || !!SCELTA || !!modo;
   const P = [
-    {t:'Questo è il tuo borgo. <b>Toccalo.</b>', s:'Le terre del tuo colore sono tue. Le altre sono dei borghi rivali o libere.', dove: () => puntoTerra(S.io)},
-    {t:'Tocca <b>Arruola</b>, poi conferma.', s:'Prendi nuovi soldati: servono per conquistare e per difenderti. Ogni azione usa una mossa.', dove: () => { const b = el('cqRec'); return b && b.offsetWidth && sel === S.io ? b : puntoTerra(S.io); }},
-    {t:'Ora tocca questa <b>terra vicina</b>.', s:'Non è tua: puoi conquistarla con i tuoi soldati.', dove: () => puntoTerra(CG && CG.terra)},
-    {t:'Tocca <b>Attacca</b>.', s:'Poi scegli quanti soldati mandare e conferma. Più soldati mandi, più è facile vincere.', dove: () => { const b = el('cqAtt'); return b && b.offsetWidth ? b : puntoTerra(CG && CG.terra); }},
-    {t:'Quando hai finito le mosse tocca <b>Fine stagione</b>.', s:'Poi muovono gli altri borghi e leggi cosa è successo.', dove: () => el('cqFine')},
-    {t:'Nuova stagione! Guarda in alto: <b>monete, cibo e legna</b>.', s:'Le monete servono per i soldati. Il cibo li sfama: se finisce, se ne vanno. La legna serve per costruire. Le tue terre te ne danno a ogni stagione.', dove: () => el('cqRis'), btn:'Ok', next: () => { if (CG){ CG.k = 6; CG.vista = -1; passoCG(); } }},
-    {t:'Non sai cosa fare? Tocca <b>💡 Cosa faccio?</b>', s:'Ti indico col dito una mossa buona, ogni volta che vuoi. Ogni stagione: arruola, conquista, costruisci.', dove: () => el('cqCosa'), btn:'Ho capito', next: fineCG}];
+    {t:'Questo è il tuo borgo. <b>Toccalo.</b>', s:'Il tuo colore = le tue terre.', dove: () => puntoTerra(S.io)},
+    {t:'Tocca <b>Arruola</b>, poi conferma.', s:'Nuovi soldati. Ogni azione usa 1 mossa.', dove: () => { const b = el('cqRec'); return b && b.offsetWidth && sel === S.io ? b : puntoTerra(S.io); }},
+    {t:'Ora tocca questa <b>terra vicina</b>.', s:'Puoi conquistarla.', dove: () => puntoTerra(CG && CG.terra)},
+    {t:'Tocca <b>Attacca</b>.', s:'Più soldati mandi, più è facile.', dove: () => { const b = el('cqAtt'); return b && b.offsetWidth ? b : puntoTerra(CG && CG.terra); }},
+    {t:'Finite le mosse: <b>Fine stagione</b>.', s:'Poi muovono gli altri borghi.', dove: () => el('cqFine')},
+    {t:'In alto: <b>monete, cibo e legna</b>.', s:'Monete = soldati. Cibo = li sfama. Legna = costruire.', dove: () => el('cqRis'), btn:'Ok', next: () => { if (CG){ CG.k = 6; CG.vista = -1; passoCG(); } }},
+    {t:'Bloccato? Tocca <b>💡</b>.', s:'Ti indico una mossa buona.', dove: () => el('cqCosa'), btn:'Ho capito', next: fineCG}];
   const x = P[CG.k]; if (!x){ fineCG(); return; }
   if (CG.k === 0) vaiA(S.io);
   COACH.mostra({passo: CG.k + 1, tot: P.length, testo: x.t, sotto: x.s, dove: x.dove, pausa, su: true, bottone: x.btn || null, ok: x.next || fineCG, salta: x.btn ? null : fineCG}); }
@@ -9613,9 +9624,9 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
 let SCELTA_MOSTRA = null, SCELTA_MP = false;
 function dlgAnno(dopo){ const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f => f !== S.io);
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} Comincia una nuova generazione</span><h2>${A.nome}</h2><div class="cq-anno">${ico(A.ic, 4)}<p>${A.desc}</p></div>${ESP_IA() ? `<p class="cq-esp">${ico('spade', 2)} <b>I rivali ti conoscono.</b> Dopo ${CAS && CAS.vittorie} vittorie della tua casata gli altri borghi sono più forti: +${Math.round(ESP_IA()*100)}% di rendita e ${Math.round(ESP_IA()*10)} soldati in più nel borgo.</p>` : ''}
-    ${S.veloce ? `<p class="cq-ok">${ico('clessidra', 2)} Partita veloce: ${VEL.stag} stagioni. Alla fine vince chi ha più punti: terre, borghi, Grande Fiera, alleati e strutture.</p>` : ''}<p>I tuoi vicini sono ${altri.map(f => '<b>' + FZ[f].nome + '</b>').join(' e ')}. Ognuno ha un <b>carattere</b> (guerriero, mercante, traditore o timoroso), ma ancora non sai quale: lo scoprirai giocando.</p>
-    ${CAS && CAS.cap && CAS.cap.length ? `<h3 class="cq-h3">${ico('spade', 2)} I tuoi capitani</h3>${S.capNews && S.capNews.ritirati.length ? `<p class="cq-nota">${S.capNews.ritirati.map(capNome).join(' e ')} ${S.capNews.ritirati.length > 1 ? 'si sono ritirati' : 'si è ritirato'}: ora ${S.capNews.ritirati.length > 1 ? 'sono leggende' : 'è una leggenda'} della casata.</p>` : ''}${CAS.cap.map(c => capCard(c, S.capNews && S.capNews.nuovi.includes(c) ? '<span class="cq-capr"><b class="cq-nuovo">nuovo capitano!</b></span>' : '')).join('')}<p class="cq-nota">Quando attacchi scegli chi guida: ogni capitano può guidare un attacco a stagione, fa esperienza e sale di livello. Resta con la casata anche nelle prossime partite.</p>` : ''}
-    <button class="big" id="cqOk">Si comincia ${ico('play', 2)}</button></div>`, false);
+    ${S.veloce ? `<p class="cq-ok">${ico('clessidra', 2)} Partita veloce: ${VEL.stag} stagioni. Alla fine vince chi ha più punti: terre, borghi, Grande Fiera, alleati e strutture.</p>` : ''}<p>Vicini: ${altri.map(f => '<b>' + FZ[f].nome + '</b>').join(' e ')}. Il loro carattere lo scopri giocando.</p>
+    ${CAS && CAS.cap && CAS.cap.length ? `<details class="regole cq-capd"><summary>${ico('spade', 2)} I tuoi capitani</summary>${S.capNews && S.capNews.ritirati.length ? `<p class="cq-nota">${S.capNews.ritirati.map(capNome).join(' e ')} ${S.capNews.ritirati.length > 1 ? 'si sono ritirati' : 'si è ritirato'}: ora ${S.capNews.ritirati.length > 1 ? 'sono leggende' : 'è una leggenda'} della casata.</p>` : ''}${CAS.cap.map(c => capCard(c, S.capNews && S.capNews.nuovi.includes(c) ? '<span class="cq-capr"><b class="cq-nuovo">nuovo capitano!</b></span>' : '')).join('')}<p class="cq-nota">Quando attacchi scegli chi guida: ogni capitano può guidare un attacco a stagione, fa esperienza e sale di livello. Resta con la casata anche nelle prossime partite.</p></details>` : ''}
+    <div class="dlgfoot fisso cq-foot"><button class="big" id="cqOk">Si comincia ${ico('play', 2)}</button></div></div>`, false);
   o.querySelector('#cqOk').onclick = () => { chiudiOv(); suona('banner'); if (dopo) dopo(); }; }
 function nuova(io, dif = 'normale', sim = false, veloce = false, mappa = null){ impostaMappa(mappa || (sim ? MAPPA_ATT : mappaScelta())); S = {v:3, io, dif, sim, veloce, mappa: MAPPA_ATT, turno:1, mosse:MOSSE_N(), fz:{}, terre:{}, amic:{}, all:{}, acc:{}, patti:{}, rep:{}, proposte:[], richieste:[], missioni:[], scambi:0, fine:null, cron:[]};
   for (const f in FZ){ S.fz[f] = {monete: veloce ? 30 : 15, cibo: veloce ? 16 : 10, legna: (f === 'sanmartino' ? 14 : 8) + (veloce ? 12 : 0), opera:0, vivo:true, ed:{mura:1, torri:0, armeria:0, meccanico:0}}; S.rep[f] = 50; }
