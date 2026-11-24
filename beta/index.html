@@ -2693,9 +2693,9 @@ body:has(#tbOv:not([hidden])) #pcTasti,body:has(#cqOv:not([hidden])) #pcTasti{di
 .wave{font-size:15px}
 @media (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ #app .wave{font-size:17px;color:#fff} #app .stat{font-size:20px} }
 [data-tasto]::after{font-size:12px!important;line-height:17px!important;padding:0 6px!important}
-.cr-tab[data-tab="gioca"]:not(.on){box-shadow:none!important;background:rgba(255,208,58,.10)!important}
+.cr-tab[data-tab="gioca"]:not(.on){box-shadow:none!important;background:none!important} /* una sola scheda accesa: Gioca resta solo con la scritta gialla */
 body:has(#title:not([hidden])) #profToast{top:auto!important;bottom:calc(96px + env(safe-area-inset-bottom))!important}
-@media (max-height:620px){ .cr-pg[data-tab="premi"] .pr-rbox{zoom:.62;margin:2px auto!important} }
+@media (max-height:620px){ .cr-pg[data-tab="premi"] .pr-rbox{zoom:.62;margin:34px auto 2px!important} } /* la punta della ruota non copre la scritta sopra */
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
