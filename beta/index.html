@@ -4516,8 +4516,8 @@ function draw(T){
         b.fillStyle = '#fff'; b.fillRect(Math.round(sx-1), Math.round(sy-12+bob), 3, 3); b.fillRect(Math.round(sx), Math.round(sy-9+bob), 1, 1); } }
     if (S.sel !== null && S.luoghi[S.sel]){ const L = S.luoghi[S.sel], st = STAT[L.tipo]; if (st.range) cerchioRaggio(L.e, L.n, L.z, st.range[Math.max(0,L.lvl-1)], '#ffd03a'); }
     // modalità costruzione: una fascia verde morbida lungo le strade (dove puoi costruire), la strada in rosso (no)
-    const vediCostr = (S.modo && S.modo.tipo === 'costruisci') || (ORIZ && !S.modo); // sul telefono si costruisce anche durante l'ondata
-    if (vediCostr && ORIZ && !(S.modo)){ if (!POSTI) POSTI = calcolaPosti(); // sul telefono strada e pallini sono disegnati una volta sola (più fluido)
+    const vediCostr = (S.modo && S.modo.tipo === 'costruisci') || ((ORIZ || PCK) && !S.modo); // sul telefono si costruisce anche durante l'ondata
+    if (vediCostr && (ORIZ || PCK) && !(S.modo)){ if (!POSTI) POSTI = calcolaPosti(); // sul telefono strada e pallini sono disegnati una volta sola (più fluido)
       if (!CACHE_COSTR || CACHE_COSTR._p !== POSTI){ CACHE_COSTR = document.createElement('canvas'); CACHE_COSTR.width = W; CACHE_COSTR.height = H; CACHE_COSTR._p = POSTI; const b0 = b; b = CACHE_COSTR.getContext('2d'); b.imageSmoothingEnabled = false; const T0 = T, rid = riduci; T = 0;
         b.save(); b.lineCap = b.lineJoin = 'round';
       // la strada dei nemici, tratteggiata e leggera: si costruisce accanto
@@ -4867,7 +4867,7 @@ function tocca(ev){
     if (m.tipo === 'trappola'){ if (S.ordini > 0 && S.castagne >= COSTO_TRAPPOLA) piazzaTrappola(e, n); }
     else if (m.tipo === 'costruisci' && m.guida && (() => { const pv = pallinoVicino(sx, sy); return pv.q && pv.d*scale < 26; })()){ S.modo = m; const q = pallinoVicino(sx, sy).q; if (piazzaDifesa('vedetta', q[0], q[1])){ S.modo = null; S.sel = null; costruisciTorri(); } ui(); aggiornaHud(); return; }
     else if (m.tipo === 'costruisci'){ S.modo = m; const P_ = POSTI || [], q = P_.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]);
-      if (Math.hypot(q[0]-e, q[1]-n) < 14){ if (m.guida){ if (piazzaDifesa('vedetta', q[0], q[1])){ S.modo = null; S.sel = null; costruisciTorri(); } ui(); aggiornaHud(); return; } m.ghost = {e:q[0], n:q[1], z:alt(q[0], q[1]), err:null}; } else S.fx.push({k:'txt', e, n, z:alt(e, n)+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'}); ui(); }
+      if (Math.hypot(q[0]-e, q[1]-n) < 14){ if (m.guida || PCK){ if (piazzaDifesa(m.guida ? 'vedetta' : m.t, q[0], q[1])){ S.modo = null; S.sel = null; costruisciTorri(); } ui(); aggiornaHud(); return; } m.ghost = {e:q[0], n:q[1], z:alt(q[0], q[1]), err:null}; } else S.fx.push({k:'txt', e, n, z:alt(e, n)+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'}); ui(); }
     else if (m.tipo === 'raduno'){ const L = m.L, r = STAT.milizia.range[L.lvl-1];
       if (Math.hypot(e - L.e, n - L.n) <= r){ L.raduno = puntoStrada(e, n, 8) || [e, n]; for (const q of S.soldati) if (q.L === L){ if (q.tgt) q.tgt.bloccatoDa = null; q.tgt = null; } }
       else S.fx.push({k:'txt', e, n, z:z+6, t:0, s:'Troppo lontano', col:'#f8f8f0'}); }
@@ -4900,6 +4900,8 @@ function tocca(ev){
     else if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 12 : 16)){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
     else if (!S.inCorso) S.fx.push({k:'txt', e, n, z:z+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'});
     aggiornaHud(); return; }
+  if (idx === null && PCK){ const pv = pallinoVicino(sx, sy); if (pv.q && pv.d*scale < 18 && !S.luoghi.some(L => Math.hypot(L.e - pv.q[0], L.n - pv.q[1]) < 6)){ S.sel = null; NEG = false; ui(); const [x2, y2] = P(pv.q[0], pv.q[1], altB(pv.q[0], pv.q[1])); anelloCostruisci(pv.q[0], pv.q[1], ox + x2*scale, oy + y2*scale); aggiornaHud(); return; } }
+  if (ANELLO) chiudiAnello();
   S.sel = idx; ui(); aggiornaHud();
 }
 $('#zIn').onclick = () => zoom(1.3, SW/2, SH/2); $('#zOut').onclick = () => zoom(1/1.3, SW/2, SH/2);
@@ -4940,7 +4942,8 @@ function puntoLibero(e, n){ let dv = 1e9, re = e, rn = n; for (const v of VIE) f
   for (const pol of [...CV().map(c => c.pts), CHIESA, COMUNE, LOGGE, portaPoly()]){ if (dentro(pol, e, n)) return 'Sopra una casa non si può'; for (let k = 0; k < pol.length; k++){ const q = pol[k], r = pol[(k+1) % pol.length]; if (distSeg(e, n, q[0], q[1], r[0], r[1]) < 2) return 'Troppo attaccato a una casa'; } }
   return null; }
 // i posti dove puoi costruire: pallini lungo la strada, a 7 e 12 metri dal bordo
-let POSTI = null, ORIZ = false, ANELLO = null; // ORIZ: telefono in orizzontale nella Difesa in tempo reale (si costruisce col cerchio, come Kingdom Rush)
+let POSTI = null, ORIZ = false, ANELLO = null; const PCK = matchMedia('(pointer:fine) and (hover:hover)').matches; // PCK: col mouse si costruisce con un clic sul pallino
+ // ORIZ: telefono in orizzontale nella Difesa in tempo reale (si costruisce col cerchio, come Kingdom Rush)
 window.impostaOriz = (o2, land) => { const prima = ORIZ; document.body.classList.toggle('rt-oriz', !!(o2 && land)); if (o2 === ORIZ) return; ORIZ = o2; document.body.classList.toggle('rt-kr', o2); chiudiAnello(); if (S){ S.modo = null; NEG = false; POSTI = o2 ? calcolaPosti() : null; ui(); } if (prima !== o2) fit(); };
 function chiudiAnello(){ const a = document.getElementById('anello'); if (a) a.remove(); ANELLO = null; document.body.classList.remove('anello-on'); }
 function apriAnello(sx, sy, voci, centro){ chiudiAnello(); const st = $('#stage'), a = document.createElement('div'); a.id = 'anello';
@@ -6598,7 +6601,6 @@ const dif = t => S && S.dif.find(d => d.tipo === t);
 const GUIDA = [
   {get t(){ return `Abbatti i <b>${nemiciTot()} nemici</b> prima che arrivino alla <b>Chiesa</b>!`; }, sub:'Muovi i soldati verso di loro, poi <b>Fine turno</b>.', punta:null, ok:() => false, bottone:'Vai!'},
   {quando:() => S.turno >= 2, t:'<b>Linee rosse</b> = dove vanno i nemici.', sub:'Vai loro incontro.', punta:null, ok:() => false, bottone:'Ok'},
-  {t:'Bloccato? Tocca <b>💡 Aiuto</b>.', sub:'Se resti fermo, ti aiuto io.', punta:'aiuto', ok:() => false, bottone:'Gioco!'},
 ];
 function passoGuida(){ if (!S || guida < 0 || MI !== 0 || NET) return null; while (guida < GUIDA.length && GUIDA[guida].ok()) guida++; if (guida >= GUIDA.length){ fineGuida(); return null; } if (PROVA) return null; if (GUIDA[guida].quando && !GUIDA[guida].quando()) return null; return GUIDA[guida]; }
 let COACH_TB = -1;
@@ -6828,7 +6830,7 @@ function mostraScrigno(tipo, poi){
     <div class="scr-tit"><small>Hai guadagnato</small><b>${sc.nome}</b></div>
     <div class="scr-zona"><div class="scr-ombra"></div><div class="scr-cassa"><div class="scr-luce"></div><div class="scr-corpo"><i class="b1"></i><i class="b2"></i></div><div class="scr-cop"><i class="b1"></i><i class="b2"></i><span class="scr-lucch"></span></div></div></div>
     <div class="scr-carta-zona"></div>
-    <p class="scr-hint">Tocca lo scrigno!</p><button type="button" class="scr-salta">Salta ›</button>`;
+    <p class="scr-hint">Tocca lo scrigno!</p><button type="button" class="scr-salta">Apri tutto ›</button>`;
   host.append(st); ovAperto = true; document.body.classList.add('scr-on');
   const $ = q => st.querySelector(q), cassa = $('.scr-cassa'), cop = $('.scr-cop'), hint = $('.scr-hint'), zonaC = $('.scr-carta-zona');
   // --- particelle ---
@@ -6862,7 +6864,7 @@ function mostraScrigno(tipo, poi){
     cop.animate([{transform:'translateY(0)'}, {transform:`translateY(${-6 - k*5}px) rotate(${k % 2 ? -5 : 5}deg)`}, {transform:'translateY(0)'}], {duration:300});
     const [cx, cy] = centro(); scoppio(cx, cy - 10, 10 + k*8, [COLORI[Math.min(k, 3) - 1], '#ffffff'], 4 + k, .15, 40, 4);
     hint.textContent = k === 1 ? 'Ancora!' : k === 2 ? 'Ancora una volta!' : '';
-    if (k >= 3){ aperto = true; hint.classList.remove('su'); await apri(); } };
+    if (k >= 1){ aperto = true; hint.classList.remove('su'); await apri(); } }; // un tocco basta
   // --- 3. il coperchio salta via: lampo, raggi del colore della rarità, esplosione ---
   async function apri(){
     await att(160); SUONI.suona(top >= 3 ? 'leggenda' : top >= 2 ? 'epico' : 'apri'); flash('#fff'); trema(14, 500);
@@ -6887,6 +6889,7 @@ function mostraScrigno(tipo, poi){
         const b = k.getBoundingClientRect(), s = st.getBoundingClientRect(), x = b.left - s.left + b.width/2, y = b.top - s.top + b.height/2;
         setTimeout(() => { scoppio(x, y, 20 + rar*35, [r.col, '#ffffff', rar >= 2 ? '#ffd03a' : r.col], 6 + rar*2.5, .2, 60, 5); if (rar >= 2){ flash(r.col, 500); trema(10, 400); } if (c.esito === 'nuovo') k.classList.add('nuovo'); }, calma ? 0 : 230);
         setTimeout(() => { if (!k.isConnected) return; hint.textContent = i + 1 < carte.length ? 'Tocca per la prossima' : 'Tocca per continuare'; hint.classList.add('su'); }, 700);
+        setTimeout(() => { if (k.isConnected && !via && !finito) k.onclick(); }, calma ? 600 : (rar >= 2 ? 2600 : 1600)); // va avanti da sola
         return; }
       via = true;
       k.animate([{transform:'none', opacity:1}, {transform:'translateX(-120%) rotate(-20deg) scale(.6)', opacity:0}], {duration:calma ? 1 : 300, easing:'ease-in', fill:'forwards'}); await att(260); prossima(i + 1); };
@@ -9555,7 +9558,7 @@ let CG = null;
 function coachCQ(){ if (CG) return; let fatto = false; try { fatto = localStorage.getItem(KGUIDA + '4') === '1'; } catch(e){} if (fatto || !S || S.mp || SERIO()) return; // in Difficile niente guida
   const via = () => { if (CG || !S) return; CG = {k: 0, mosse: S.mosse, turno: S.turno, terra: null, iv: setInterval(passoCG, 250)}; passoCG(); };
   let visto = false; try { visto = localStorage.getItem(KGUIDA + '5') === '1'; } catch(e){}
-  if (visto || ovAperto()){ via(); return; } try { localStorage.setItem(KGUIDA + '5', '1'); } catch(e){}
+  if (true || visto || ovAperto()){ try { localStorage.setItem(KGUIDA + '5', '1'); } catch(e){} via(); return; } // l'obiettivo lo dice il primo passo della guida: una finestra in meno
   // prima di tutto: cosa devi fare, in tre righe
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('spade', 2)} Conquista</span><h2>Cosa devi fare</h2><div class="how">
     <span>1</span><span>Hai <b>un borgo</b>. Sulla mappa ci sono altri <b>2 borghi rivali</b>.</span>
@@ -9616,7 +9619,7 @@ function passoCG(){ if (!CG || !S) return; if (!attivo){ COACH.nascondi(); CG.vi
   if (CG.vista === CG.k) return; CG.vista = CG.k;
   const pausa = () => !attivo || ovAperto() || !!GIOCA || !!SCELTA || !!modo;
   const P = [
-    {t:'Questo è il tuo borgo. <b>Toccalo.</b>', s:'Il tuo colore = le tue terre.', dove: () => puntoTerra(S.io)},
+    {t:'Questo è il tuo borgo. <b>Toccalo.</b>', s:'Vinci se conquisti i 2 borghi rivali, una terra alla volta.', dove: () => puntoTerra(S.io)},
     {t:'Tocca <b>Arruola</b>, poi conferma.', s:'Nuovi soldati. Ogni azione usa 1 mossa.', dove: () => { const b = el('cqRec'); return b && b.offsetWidth && sel === S.io ? b : puntoTerra(S.io); }},
     {t:'Ora tocca questa <b>terra vicina</b>.', s:'Puoi conquistarla.', dove: () => puntoTerra(CG && CG.terra)},
     {t:'Tocca <b>Attacca</b>.', s:'Più soldati mandi, più è facile.', dove: () => { const b = el('cqAtt'); return b && b.offsetWidth ? b : puntoTerra(CG && CG.terra); }},
@@ -9684,7 +9687,8 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   o.querySelector('#cqMe').onclick = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; S = null; o.classList.remove('scelta'); esci(); };
   opt(); misura(); centra(); mostra(SCELTA, false); setTimeout(() => volaSu(SCELTA), 350); }
 let SCELTA_MOSTRA = null, SCELTA_MP = false;
-function dlgAnno(dopo){ const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f => f !== S.io);
+function dlgAnno(dopo){ try { if (RITORNO.stato().in === 'conquista' && !S.mp){ if (dopo) dopo(); return; } } catch(e){} // nell'assaggio si parte subito
+  const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f => f !== S.io);
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} Comincia una nuova generazione</span><h2>${A.nome}</h2><div class="cq-anno">${ico(A.ic, 4)}<p>${A.desc}</p></div>${ESP_IA() ? `<p class="cq-esp">${ico('spade', 2)} <b>I rivali ti conoscono.</b> Dopo ${CAS && CAS.vittorie} vittorie della tua casata gli altri borghi sono più forti: +${Math.round(ESP_IA()*100)}% di rendita e ${Math.round(ESP_IA()*10)} soldati in più nel borgo.</p>` : ''}
     ${S.veloce ? `<p class="cq-ok">${ico('clessidra', 2)} Partita veloce: ${VEL.stag} stagioni. Alla fine vince chi ha più punti: terre, borghi, Grande Fiera, alleati e strutture.</p>` : ''}<p>Vicini: ${altri.map(f => '<b>' + FZ[f].nome + '</b>').join(' e ')}. Il loro carattere lo scopri giocando.</p>
     ${CAS && CAS.cap && CAS.cap.length ? `<details class="regole cq-capd"><summary>${ico('spade', 2)} I tuoi capitani</summary>${S.capNews && S.capNews.ritirati.length ? `<p class="cq-nota">${S.capNews.ritirati.map(capNome).join(' e ')} ${S.capNews.ritirati.length > 1 ? 'si sono ritirati' : 'si è ritirato'}: ora ${S.capNews.ritirati.length > 1 ? 'sono leggende' : 'è una leggenda'} della casata.</p>` : ''}${CAS.cap.map(c => capCard(c, S.capNews && S.capNews.nuovi.includes(c) ? '<span class="cq-capr"><b class="cq-nuovo">nuovo capitano!</b></span>' : '')).join('')}<p class="cq-nota">Quando attacchi scegli chi guida: ogni capitano può guidare un attacco a stagione, fa esperienza e sale di livello. Resta con la casata anche nelle prossime partite.</p></details>` : ''}
