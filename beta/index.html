@@ -2665,6 +2665,14 @@ body:has(#tbOv:not([hidden])) #pcTasti,body:has(#cqOv:not([hidden])) #pcTasti{di
 @media (max-height:620px){ #cqOv:not(.scelta){padding-top:8px;padding-bottom:8px} }
 @media (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ body:has(#cq:not([hidden])) #coach.sopra{top:112px} }
 #asChip small{font-size:9px;letter-spacing:.5px;display:block;line-height:1;opacity:.85}
+
+/* menu su schermi bassi (es. 960x540 di CrazyGames): niente contenuto tagliato in alto */
+.cr-pg.cr-arena{justify-content:safe flex-end}
+@media (max-height:620px) and (min-aspect-ratio:1/1){
+  .cr-arena .logo,.cr-arena .cr-luogo{display:none!important}
+  .cr-arena .gp-card{padding-top:10px!important;padding-bottom:12px!important;gap:8px!important}
+  .cr-arena .gp-card .mis-t,.cr-arena .gp-card h2{font-size:26px!important}
+}
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
