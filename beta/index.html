@@ -722,7 +722,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 
 /* ===== VERSIONE PC: schermo largo, mappa grande a sinistra, comandi a destra, tasti ===== */
 #pcTasti{display:none}
-@media (min-width:900px) and (min-aspect-ratio:1/1){
+@media (min-width:900px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
   #app{max-width:none!important;display:grid!important;grid-template-columns:1fr 400px;grid-template-rows:auto 1fr auto;grid-template-areas:"hud hud" "stage info" "stage bar";gap:12px!important;padding:12px!important}
   #app > .hud{grid-area:hud} #app > #stage{grid-area:stage} #app > #info{grid-area:info;align-self:start;max-height:none!important;min-height:120px} #app > #bar{grid-area:bar} #app > #modBar{grid-area:bar}
   #app #info .acts{flex-direction:column}
@@ -740,6 +740,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
   #bShop{left:14px;bottom:14px}
   canvas{cursor:pointer}
 }
+
 .hm-row{grid-template-columns:repeat(4,1fr)!important}
 .olnome{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:14px;margin:8px 0}
 .olnome input,.olnome select,.olcodin{font:700 18px var(--f-body);padding:10px 12px;border:3px solid #141433;border-radius:12px;background:#fff;color:#141433;-webkit-user-select:text;user-select:text}
@@ -768,7 +769,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 #olBar .olp b{font-weight:400}#olBar .olp small{font-size:13px}
 #olBar .olp.att{background:var(--giallo);color:var(--linea);box-shadow:0 3px 0 var(--giallo2)}
 #olBar .olvs{font:400 14px var(--f-big);color:#fff;text-shadow:0 2px 0 var(--linea)}
-@media (min-width:900px) and (min-aspect-ratio:1/1){ #olBar{top:70px} }
+@media (min-width:900px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ #olBar{top:70px} }
 .olavv{background:#fff4cc;border:2px solid var(--giallo2);border-radius:12px;padding:8px 10px;font-size:14px}
 #tbTit .olt{display:inline-block;padding:0 6px;border-radius:8px;opacity:.55;font-family:var(--f-big);font-weight:400}
 #tbTit .olt.att{opacity:1;background:var(--giallo);color:var(--linea)}
@@ -1630,7 +1631,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-come ul{margin:8px 0 2px;padding:0 0 0 18px;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:1.35}
 .cq-come summary b{color:var(--blu)}
 #cq.vuoto .cq-hud,#cq.vuoto .cq-side,#cq.vuoto .cq-centra{visibility:hidden}
-@media (min-width:860px) and (min-aspect-ratio:1/1){
+@media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
   .cq-hl{flex:0 1 auto;min-width:240px;max-width:460px;margin-right:auto}
   .cq-side{left:auto;width:370px;top:calc(max(8px,env(safe-area-inset-top)) + 110px);justify-content:flex-end}
   #cqPan{max-height:none}
@@ -1761,7 +1762,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-scopt .cq-dif{margin-top:4px}
 #cqVai{background:var(--giallo)}
 .cq-link{background:none;border:0;color:var(--blu);font-weight:700;text-decoration:underline;padding:4px;align-self:center;min-height:36px}
-@media (min-width:860px) and (min-aspect-ratio:1/1){
+@media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
   #cqOv.scelta{background:linear-gradient(90deg,rgba(14,22,70,.35),rgba(14,22,70,0) 45%);padding:16px}
   #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px);width:420px;margin:auto auto auto 0}
 }
@@ -1773,8 +1774,8 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-schip{position:absolute;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:7px 14px;border-radius:14px;background:rgba(20,20,51,.85);color:#fff;font-weight:700;font-size:14px;white-space:nowrap;pointer-events:none;animation:cqChip 2.4s ease-in-out infinite}
 .cq-schip img{vertical-align:-3px}
 @keyframes cqChip{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,4px)}}
-@media (max-width:859px), (max-aspect-ratio:1/1){ .cq-sct{min-height:72px;padding:6px 4px 5px} .cq-scdet{padding:8px 10px;gap:5px} .cq-scdet p{font-size:13px} .cq-scnome b{font-size:20px} }
-@media (min-width:860px) and (min-aspect-ratio:1/1){ .cq-schip{left:calc(50% + 220px)} }
+@media (max-width:639px), (max-aspect-ratio:1/1), (max-width:859px) and (pointer:coarse){ .cq-sct{min-height:72px;padding:6px 4px 5px} .cq-scdet{padding:8px 10px;gap:5px} .cq-scdet p{font-size:13px} .cq-scnome b{font-size:20px} }
+@media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ .cq-schip{left:calc(50% + 220px)} }
 /* ===== effetti: tocchi, scintille, numeri che volano ===== */
 :where(#cq) button{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
 :where(#cq) button:not(:disabled):active{transform:translateY(2px) scale(.97)}
@@ -1796,7 +1797,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 @keyframes cqPanIn{from{opacity:.3;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){ .cq-rip,.cq-burst,.cq-fl{display:none} #cqOv .dlg.box,.cq-panin,.cq-bump,.cq-entra,.cq-schip{animation:none!important} }
 #cqOv.scelta .cq-scbox{scroll-padding-bottom:90px}
-@media (min-width:860px) and (min-aspect-ratio:1/1){ #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px)} }
+@media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px)} }
 /* ===== missioni e premi ===== */
 .cq-nb{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#e04830;color:#fff;font-style:normal;font-size:12px;font-family:var(--f-body);font-weight:700;border:2px solid #141433;vertical-align:1px}
 .cq-schb{display:flex;gap:6px}
@@ -2085,7 +2086,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-feed span.nuovo{opacity:1;border-left:3px solid #ffd03a;animation:cqFeed .4s ease-out}
 @keyframes cqFeed{from{transform:translateX(-10px);opacity:0}to{transform:none}}
 .cq-zoom{display:none}
-@media (min-width:860px) and (min-aspect-ratio:1/1){
+@media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
   .cq-centra{right:auto;left:14px;top:auto;bottom:14px}
   .cq-zoom{display:flex;flex-direction:column;gap:6px;position:absolute;left:14px;bottom:66px;z-index:4}
   .cq-zoom button{width:44px;height:44px;border-radius:14px;background:rgba(20,20,51,.82);color:#fff;font:900 24px/1 var(--f-big);border:0;cursor:pointer}
@@ -2606,6 +2607,26 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
 .cq-notizie .cq-nbody{max-height:54vh}
 .cq-ocons{display:block}.cq-ocons .ico,.cq-ocons img,.cq-ocons canvas{vertical-align:middle}
 .fd-po{display:grid;place-items:center;width:130px;height:130px;border-radius:50%;background:radial-gradient(#ffb070,#ff8a3a);border:6px solid #141433;box-shadow:0 0 30px rgba(255,138,58,.6);font-family:var(--f-pixel);font-size:30px;font-weight:800;color:#141433}
+/* PC con finestra piccola (es. riquadro di CrazyGames): pannello più stretto, mappa più grande */
+@media (min-width:640px) and (max-width:1099px) and (min-aspect-ratio:1/1) and (pointer:fine){
+  #app{grid-template-columns:1fr 290px;gap:8px!important;padding:8px!important}
+  #app #info{font-size:14px;min-height:0!important;padding:10px 12px!important}
+  #app #info .nm{font-size:19px}
+  #pcTasti.cl{right:8px;bottom:78px;width:290px;font-size:12px;padding:6px 10px}
+  #app #bar{grid-template-columns:1fr 1fr 1.3fr!important;gap:5px!important}
+  #app #bar .skill{padding:6px 6px!important;font-size:13px} #app #bar .skill small,#app #bar .skill .sub{font-size:11px}
+  #app #bar .go{font-size:16px!important;padding:6px!important;white-space:nowrap;letter-spacing:-.3px}
+  #tbInfo{width:330px!important;right:8px!important;bottom:84px!important}
+  #tbBar{width:330px!important;right:8px!important;bottom:8px!important}
+}
+@media (min-width:640px) and (max-height:560px) and (min-aspect-ratio:1/1) and (pointer:fine){
+  #pcTasti.cl{display:none}
+}
+/* PC: la nuvoletta della guida sta in basso sulla mappa, non sopra il pannello */
+@media (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
+  #coach.sopra,#coach.sotto{left:12px;right:auto;width:min(calc(100vw - 340px),440px);margin:0}
+  #coach.sopra{top:70px} #coach.sotto{bottom:16px}
+}
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -4582,22 +4603,21 @@ function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; 
   // un pallino libero vicino al centro dello schermo, per indicarlo col dito
   const pallino = () => { const P_ = POSTI || (POSTI = calcolaPosti()); const r = cv.getBoundingClientRect(); let best = null, bd = 1e9;
     for (const q of P_){ const [x, y] = P(q[0], q[1], altB(q[0], q[1])), sx = r.left + x*scale + ox, sy = r.top + y*scale + oy; if (sx < 40 || sx > innerWidth - 40 || sy < 140 || sy > innerHeight - 200) continue; if (S.luoghi.some(L => Math.hypot(L.e - q[0], L.n - q[1]) < 8)) continue; const d = Math.hypot(sx - innerWidth/2, sy - innerHeight*.45); if (d < bd){ bd = d; best = {x: sx, y: sy, r: 26}; } } return best; };
-  if (ORIZ && !costruite){ if (ANELLO){ k = 'anello'; n = 2; t = 'Tocca la <b>Balestra</b>.'; sub = 'È una difesa che tira lontano. Costa 70 castagne: le castagne sono i tuoi soldi.'; punta = () => [...document.querySelectorAll('.an-v')].find(b => /Balestra/.test(b.textContent)); }
-    else { k = 'pallino'; n = 1; t = 'Tocca un <b>pallino bianco</b> vicino alla strada.'; sub = 'Lì puoi costruire una difesa. La strada gialla è dove passano i nemici.'; mappa = pallino; } }
-  else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci') && !NEG){ k = 'neg'; n = 1; t = 'Tocca <b>Negozio</b>.'; sub = 'Lì compri le difese. Le castagne sono i tuoi soldi.'; punta = () => document.querySelector('#bShop'); }
-  else if (!costruite && !(S.modo && S.modo.tipo === 'costruisci')){ k = 'bal'; n = 2; t = 'Tocca la <b>Balestra</b>.'; sub = 'Costa 70 castagne. Tira lontano.'; punta = () => document.querySelector('[data-shop="vedetta"]'); }
-  else if (!costruite && !S.modo.ghost){ k = 'pal2'; n = 3; t = 'Tocca un <b>pallino bianco</b> vicino alla strada.'; sub = 'È il posto dove metti la Balestra.'; mappa = pallino; }
-  else if (!costruite){ k = 'costr'; n = 3; t = 'Tocca <b>Costruisci</b>.'; sub = 'Il cerchio mostra fin dove arriva: colpisce i nemici che ci entrano.'; punta = () => document.querySelector('#infoActs .act'); }
-  else if (S.ondata === 0 && !S.inCorso){ k = 'go'; n = ORIZ ? 3 : 4; t = 'Tocca <b>Avvia ondata</b>.'; sub = 'Partono i nemici. Se hai ancora castagne puoi prima costruire altre difese.'; punta = () => document.querySelector('#bGo'); }
-  else if (S.inCorso && S.ondata === 1 && !S.toccoNem){ k = 'nem'; n = ORIZ ? 4 : 5; t = 'Arrivano! <b>Tocca un nemico</b>.'; sub = 'Il tuo Falco lo colpisce. Ogni nemico abbattuto ti dà castagne.';
+  const PC = matchMedia('(pointer:fine)').matches && !ORIZ;
+  // guida corta in 3 passi: metti una torre (un tocco), VIA!, colpisci
+  if (!costruite){ k = 'pallino'; n = 1; t = '<b>Metti una torre</b>'; sub = 'Tocca un pallino bianco.'; mappa = pallino;
+    if (!ORIZ && !(S.modo && S.modo.tipo === 'costruisci')){ NEG = false; S.sel = null; S.modo = {tipo:'costruisci', t:'vedetta', guida:true}; POSTI = calcolaPosti(); costruisciTorri(); setTimeout(ui, 0); } }
+  else if (S.ondata === 0 && !S.inCorso){ k = 'go'; n = 2; t = '<b>▶ VIA!</b>'; sub = PC ? '<kbd>Spazio</kbd> via · <kbd>P</kbd> pausa · <kbd>1</kbd>–<kbd>6</kbd> torri' : ''; punta = () => document.querySelector('#bGo'); }
+  else if (S.inCorso && S.ondata === 1 && !S.toccoNem){ k = 'nem'; n = 3; t = '<b>Colpisci!</b>'; sub = 'Tocca un nemico.';
     mappa = () => { const r = cv.getBoundingClientRect(), x = S.nemici.find(m => !m.morto); if (!x) return null; const [a, b] = P(x.e, x.n, x.z || 0), sx = r.left + a*scale + ox, sy = r.top + b*scale + oy; if (sx < 0 || sx > innerWidth || sy < 60 || sy > innerHeight - 120) return null; return {x: sx, y: sy - 10, r: 28}; }; }
-  else { k = 'fine'; n = ORIZ ? 5 : 6; t = 'Bravo! Ora <b>giochi tu</b>.'; sub = 'Costruisci altre difese tra un’ondata e l’altra. Tocca una tua difesa per renderla più forte.'; ok = true; }
+  else { k = 'fine'; n = 0; t = '<b>Bravo!</b> Ora giochi tu.'; sub = ''; ok = false; }
   if (COACH_RT === k) return; COACH_RT = k;
-  if (k === 'fine') setTimeout(() => { if (COACH_RT === 'fine'){ try { localStorage.setItem(GKEY_CL, '1'); } catch(e){} COACH_RT = ''; COACH.nascondi(); } }, 5000);
+  if (k === 'fine') setTimeout(() => { if (COACH_RT === 'fine'){ try { localStorage.setItem(GKEY_CL, '1'); } catch(e){} COACH_RT = ''; COACH.nascondi(); } }, 2500);
   const basta = () => { try { localStorage.setItem(GKEY_CL, '1'); } catch(e){} COACH_RT = ''; COACH.nascondi(); };
-  COACH.mostra({passo: n, tot: ORIZ ? 5 : 6, testo: t, sotto: sub, giu: true, bottone: ok ? 'Ho capito' : null, ok: basta, salta: ok ? null : basta,
+  const bastaG = () => { if (S && S.modo && S.modo.guida){ S.modo = null; costruisciTorri(); } basta(); ui(); };
+  COACH.mostra({passo: n || null, tot: 3, tag: n ? null : 'GUIDA', testo: t, sotto: sub, giu: true, bottone: null, ok: basta, salta: k === 'fine' ? null : bastaG,
     // se stai guardando una difesa o costruendo fuori dalla guida, il fumetto si fa da parte: niente finestre una sopra l'altra
-    pausa: () => !S || S.fine || S.attesaCarta || !$('#title').hidden || (!['anello','costr','bal','pal2'].includes(k) && (S.sel !== null || !!S.modo || !!ANELLO)), dove: mappa || punta }); }
+    pausa: () => !S || S.fine || S.attesaCarta || !$('#title').hidden || (k !== 'pallino' && (S.sel !== null || !!S.modo || !!ANELLO)), dove: mappa || punta }); }
 let COACH_RT = '';
 // negozio a tendina: chiuso di solito, così la mappa si vede tutta
 let NEG = false;
@@ -4771,13 +4791,13 @@ function tocca(ev){
   const r = cv.getBoundingClientRect(); const sx = (ev.clientX - r.left - ox)/scale, sy = (ev.clientY - r.top - oy)/scale;
   if (MOD){ modSel = trovaOggetto(sx, sy); modUI(); return; }
   if (!S || S.fine) return;
-  { const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top, f = FRECCE_ING.find(q => Math.hypot(q.x - px, q.y - py) < 30); if (f && !(ORIZ && pallinoVicino((ev.clientX - rs.left - ox)/scale, (ev.clientY - rs.top - oy)/scale).d*scale < 16)){ const VV = VIEZ[f.meta ? 0 : f.v], p0 = f.meta ? VV[VV.length - 1] : VV[0], [x, y] = P(p0[0], p0[1], p0[2]); S.camT = {x, y}; return; } }
+  { const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top, f = COACH_RT === 'nem' ? null : FRECCE_ING.find(q => Math.hypot(q.x - px, q.y - py) < 30); if (f && !(ORIZ && pallinoVicino((ev.clientX - rs.left - ox)/scale, (ev.clientY - rs.top - oy)/scale).d*scale < 16)){ const VV = VIEZ[f.meta ? 0 : f.v], p0 = f.meta ? VV[VV.length - 1] : VV[0], [x, y] = P(p0[0], p0[1], p0[2]); S.camT = {x, y}; return; } }
   if (ORIZ && ANELLO){ chiudiAnello(); S.sel = null; ui(); } // tocco fuori dal cerchio: si chiude e il tocco vale lo stesso (es. su un nemico)
   if (S.modo){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     const m = S.modo; S.modo = null;
     if (m.tipo === 'trappola'){ if (S.ordini > 0 && S.castagne >= COSTO_TRAPPOLA) piazzaTrappola(e, n); }
     else if (m.tipo === 'costruisci'){ S.modo = m; const P_ = POSTI || [], q = P_.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]);
-      if (Math.hypot(q[0]-e, q[1]-n) < 14){ m.ghost = {e:q[0], n:q[1], z:alt(q[0], q[1]), err:null}; } else S.fx.push({k:'txt', e, n, z:alt(e, n)+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'}); ui(); }
+      if (Math.hypot(q[0]-e, q[1]-n) < 14){ if (m.guida){ if (piazzaDifesa('vedetta', q[0], q[1])){ S.modo = null; S.sel = null; costruisciTorri(); } ui(); aggiornaHud(); return; } m.ghost = {e:q[0], n:q[1], z:alt(q[0], q[1]), err:null}; } else S.fx.push({k:'txt', e, n, z:alt(e, n)+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'}); ui(); }
     else if (m.tipo === 'raduno'){ const L = m.L, r = STAT.milizia.range[L.lvl-1];
       if (Math.hypot(e - L.e, n - L.n) <= r){ L.raduno = puntoStrada(e, n, 8) || [e, n]; for (const q of S.soldati) if (q.L === L){ if (q.tgt) q.tgt.bloccatoDa = null; q.tgt = null; } }
       else S.fx.push({k:'txt', e, n, z:z+6, t:0, s:'Troppo lontano', col:'#f8f8f0'}); }
@@ -4797,7 +4817,7 @@ function tocca(ev){
     let spot = false; if (tgt && ORIZ){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); } POSTI = POSTI || calcolaPosti();
       const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]), [qx, qy] = P(q[0], q[1], altB(q[0], q[1])), [tx, ty] = P(tgt.e, tgt.n, tgt.z);
       spot = Math.hypot(qx - sx, qy - sy) < Math.hypot(tx - sx, ty - (tgt.d.vola ? 16 : 6) - sy) && Math.hypot(qx - sx, qy - sy)*scale < 22; } // il tocco è più vicino a un pallino che al nemico: si costruisce
-    if (tgt && !spot){ if (S.falcoCd <= 0){ lanciaFalco(tgt); S.toccoNem = true; } return; } }
+    if (tgt && !spot){ if (S.falcoCd <= 0){ lanciaFalco(tgt); S.toccoNem = true; setTimeout(guidaCl, 0); } return; } }
   let idx = null, best = Math.max(16, 30/scale);
   S.luoghi.forEach((L,i) => { const [x,y] = P(L.e, L.n, L.z); const top = y - (STAT[L.tipo].h||0)*K - 6; const d = Math.min(Math.hypot(x-sx, y-sy), Math.hypot(x-sx, top-sy)); if (d < best){ best = d; idx = i; } });
   if (ORIZ){ const rs = $('#stage').getBoundingClientRect(), px = ev.clientX - rs.left, py = ev.clientY - rs.top;
@@ -4805,7 +4825,8 @@ function tocca(ev){
     let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     POSTI = POSTI || calcolaPosti(); const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]);
     S.sel = null; ui();
-    if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 12 : 16)){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
+    if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 12 : 16) && COACH_RT === 'pallino' && !S.luoghi.some(L => L.lvl)){ piazzaDifesa('vedetta', q[0], q[1]); S.sel = null; chiudiAnello(); costruisciTorri(); ui(); }
+    else if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 12 : 16)){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
     else if (!S.inCorso) S.fx.push({k:'txt', e, n, z:z+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'});
     aggiornaHud(); return; }
   S.sel = idx; ui(); aggiornaHud();
@@ -10174,8 +10195,8 @@ function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); la
   requestAnimationFrame(loop); }
 new ResizeObserver(fit).observe($('#stage'));
 // ===== tastiera (versione PC) =====
-const PC_TASTI_CL = '<kbd>Spazio</kbd>ondata · <kbd>N</kbd>negozio · <kbd>1</kbd>–<kbd>6</kbd>difese<br><kbd>F</kbd>falco · <kbd>R</kbd>frana · <kbd>Esc</kbd>annulla/pausa · rotella zoom';
-const PC_TASTI_TB = '<kbd>Spazio</kbd>fine turno · <kbd>Z</kbd>annulla<br><kbd>B</kbd>bottega · <kbd>Esc</kbd>menu · rotella zoom';
+const PC_TASTI_CL = '<kbd>Spazio</kbd>ondata · <kbd>N</kbd>negozio · <kbd>1</kbd>–<kbd>6</kbd>difese<br><kbd>F</kbd>falco · <kbd>R</kbd>frana · <kbd>P</kbd>pausa · rotella zoom';
+const PC_TASTI_TB = '<kbd>Spazio</kbd>fine turno · <kbd>Z</kbd>annulla<br><kbd>B</kbd>bottega · <kbd>M</kbd>menu · rotella zoom';
 setInterval(() => { const h = $('#pcTasti'); if (!h) return; const v = TB.attivo ? PC_TASTI_TB : (S && $('#title').hidden && !MOD ? PC_TASTI_CL : ''); if (h.dataset.v !== v){ h.dataset.v = v; h.innerHTML = v; h.className = TB.attivo ? 'tb' : 'cl'; } }, 500);
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.altKey || (e.target && e.target.closest && e.target.closest('input,textarea,select'))) return;
@@ -10189,13 +10210,14 @@ document.addEventListener('keydown', e => {
     const stg = document.querySelector('.scr-stage'); if (stg){ e.preventDefault(); if (k === 'Escape') stg.querySelector('.scr-salta').click(); else if (k === ' ' || k === 'Enter'){ const c = stg.querySelector('.scr-carta'); (c || stg.querySelector('.scr-cassa')).click(); } return; } // apertura dello scrigno
     const ov = document.getElementById('tbOv');
     if (ov && !ov.hidden){ if (k === 'Enter' || k === ' ') clic('#tbOv .dlgfoot .big:not(.alt)') || clic('#tbOv .big:not(.alt)'); else if (k === 'Escape'){ if (!clic('#tbRip')) clic('#tbOv .indietro'); } return; }
-    if (k === ' ' || k === 'Enter') clic('#tbFine'); else if (k === 'z' || k === 'Backspace') clic('#tbUndo'); else if (k === 'b') clic('#tbShop'); else if (k === 'Escape') clic('#tbMenu');
+    if (k === ' ' || k === 'Enter') clic('#tbFine'); else if (k === 'z' || k === 'Backspace') clic('#tbUndo'); else if (k === 'b') clic('#tbShop'); else if (k === 'Escape' || k === 'm') clic('#tbMenu');
     return; }
   if (!$('#title').hidden || !S || MOD) return;
-  for (const id of ['#cards', '#end', '#pausa']){ const o = $(id); if (o && !o.hidden){ if (k === 'Enter' || k === ' ') clic(id + ' .big:not(.alt)'); else if (k === 'Escape' && id === '#pausa') clic('#pausa .big'); return; } }
+  for (const id of ['#cards', '#end', '#pausa']){ const o = $(id); if (o && !o.hidden){ if (k === 'Enter' || k === ' ') clic(id + ' .big:not(.alt)'); else if ((k === 'Escape' || k === 'p') && id === '#pausa') clic('#pausa .big'); return; } }
   if (k === ' ' || k === 'Enter') clic('#bGo');
   else if (k === 'f') clic('#bFalco');
   else if (k === 'r') clic('#bFrana');
+  else if (k === 'p') clic('#bPausa');
   else if (k === 'n'){ if (NEG) clic('#ngX'); else clic('#bShop'); }
   else if (k >= '1' && k <= '6'){ const off = NEGOZIO[+k - 1]; if (!off) return; e.preventDefault(); if (!NEG && !(S.modo && S.modo.tipo === 'costruisci')) $('#bShop').click(); const b = document.querySelector(`[data-shop="${off.tipo}"]`); if (b) b.click(); }
   else if (k === 'Escape'){ e.preventDefault(); if (S.modo){ S.modo = null; costruisciTorri(); ui(); } else if (NEG){ NEG = false; ui(); } else if (S.sel !== null){ S.sel = null; ui(); } else clic('#bPausa'); }
@@ -10222,7 +10244,7 @@ const COACH = window.COACH = (() => {
     if (b){ ring.style.left = (b.x - b.w/2) + 'px'; ring.style.top = (b.y - b.h/2) + 'px'; ring.style.width = b.w + 'px'; ring.style.height = b.h + 'px'; ring.style.borderRadius = b.el ? '16px' : '50%';
       const t = performance.now()/1000, k = Math.abs(Math.sin(t*3.2))*10; dito.style.left = (b.x + b.w*.18 + k*.6) + 'px'; dito.style.top = (b.y + b.h*.18 + k) + 'px'; }
     // la nuvoletta sta dalla parte opposta al bersaglio
-    if (!nascosto){ const basso = innerHeight < 560 && innerWidth > innerHeight;
+    if (!nascosto){ const basso = innerHeight < 560 && innerWidth > innerHeight && !matchMedia('(pointer:fine)').matches;
       if (basso){ const dx = !b || b.x < innerWidth/2; box.classList.add('lato'); box.classList.remove('sopra', 'sotto'); box.classList.toggle('dx', dx); box.classList.toggle('sx', !dx); }
       else { box.classList.remove('lato', 'dx', 'sx');
         // lato della nuvoletta con un margine: se il punto da toccare si muove (la mappa scorre) non salta su e giù di continuo
@@ -10380,7 +10402,7 @@ const RITORNO = window.RITORNO = (() => {
   function quandoPronto(f, prove = 0){ if (prove > 150) return; if (!nelMenu() || aperta()){ setTimeout(() => quandoPronto(f, prove + 1), 400); return; } setTimeout(() => { if (nelMenu() && !aperta()) f(); else quandoPronto(f, prove + 1); }, 700); }
 
   // ---------- ASSAGGIO: al primo accesso provi le modalità, poi entri nel menu
-  const SKEY = 'difendi-smerillo-assaggio', PASSI = ['turni', 'tempo', 'conquista'];
+  const SKEY = 'difendi-smerillo-assaggio', PASSI = ['tempo', 'turni', 'conquista'];
   const INFO = {
     turni:{ic:'scudo', t:'Le missioni a turni', d:'Muovi i difensori uno alla volta, come a scacchi, e difendi la Porta Nord. Ti guido io, passo passo.', go:'Gioca la missione'},
     tempo:{ic:'torre', t:'La difesa in tempo reale', d:'Costruisci le difese vicino alla strada e ferma <b>2 ondate</b> di nemici. Qui si gioca veloce.', go:'Difendi il paese'},
@@ -10389,7 +10411,7 @@ const RITORNO = window.RITORNO = (() => {
     // chi aveva già giocato non lo rivede; chi ha fatto solo la prima missione prova le altre modalità
     const mis = lgJ('difendi-smerillo-missioni') || {}, rec = lgJ('difendi-smerillo-record') || {}, cas = lgJ('difendi-smerillo-casata'), nMis = Object.keys(mis).length;
     const tanto = nMis > 2 || Object.keys(rec).length || (cas && cas.gen) || +lg('difendi-smerillo-assedio') > 0 || lg('difendi-smerillo-conquista');
-    s = tanto ? {passo:9} : (nMis || lg('difendi-smerillo-guida')) ? {passo:1, torna:1} : {passo:0, nuovo:1};
+    s = tanto ? {passo:9} : (nMis || lg('difendi-smerillo-guida')) ? {passo:0, torna:1} : {passo:0, nuovo:1};
     scJ(SKEY, s); return s; }
   const salvaS = s => scJ(SKEY, s);
   const pallini = i => `<div class="as-passi">${PASSI.map((k, j) => `<span class="${j < i ? 'ok' : j === i ? 'ora' : ''}">${j < i ? '✓' : ico(INFO[k].ic, 2)}</span>`).join('<i></i>')}</div>`;
@@ -10419,7 +10441,7 @@ const RITORNO = window.RITORNO = (() => {
       const bi = b.querySelector('[data-in]'); if (bi) bi.onclick = () => { i--; disegna(); };
       const bs = b.querySelector('[data-sk]'); if (bs) bs.onclick = () => { chiudi(); poi(); }; };
     disegna(); }
-  function avviaPasso(k){ if (TUT[k] && !avviaPasso.visto){ avviaPasso.visto = {}; } if (TUT[k] && k !== 'conquista' && !avviaPasso.visto[k]){ avviaPasso.visto[k] = true; tutorial(k, () => avviaPasso(k)); return; }
+  function avviaPasso(k){ if (TUT[k] && !avviaPasso.visto){ avviaPasso.visto = {}; } if (TUT[k] && k !== 'conquista' && k !== 'tempo' && !avviaPasso.visto[k]){ avviaPasso.visto[k] = true; tutorial(k, () => avviaPasso(k)); return; }
     if (k === 'conquista') sc('difendi-smerillo-conquista-guida3', '1'); // il tutorial ha già spiegato: niente muro di testo all'inizio
     const t = titolo(), s = stato(); s.in = k; salvaS(s); chiudi(); traccia('assaggio', {passo: k, ev:'via'});
     if (k === 'tempo'){ CARICA(() => { if (t) t.hidden = true; try { avviaRT(); } catch(e){ console.error(e); } try { window.aggOriz && window.aggOriz(); } catch(e){} }, 'Carico la difesa…'); setTimeout(mostraChip, 1800); return; } // dietro la schermata di caricamento: niente menu sotto, niente mappa a metà
@@ -10435,7 +10457,7 @@ const RITORNO = window.RITORNO = (() => {
     if (!chip._t) chip._t = setInterval(() => { if (!chip || chip.hidden) return; chip.classList.toggle('via', !!document.querySelector('.scr-stage, #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), #rtOv:not([hidden]), #accOv:not([hidden]), #coach:not([hidden]), body.tb-prova')); }, 400); }
   function togliChip(){ if (chip) chip.hidden = true; }
   // il passo è finito (o saltato): si torna al menu e si vede il prossimo
-  function fatto(k, come){ const s = stato(); if (s.passo >= 3 || PASSI[s.passo] !== k) return false; s.passo++; s.in = null; s.ultimo = {k, come}; salvaS(s); togliChip(); traccia('assaggio', {passo: k, ev: come}); return true; }
+  function fatto(k, come){ const s = stato(); if (s.passo >= 3 || PASSI[s.passo] !== k) return false; s.passo++; if (s.torna && PASSI[s.passo] === 'turni') s.passo++; s.in = null; s.ultimo = {k, come}; salvaS(s); togliChip(); traccia('assaggio', {passo: k, ev: come}); return true; }
   // toccata per sbaglio non ti butta fuori: prima chiede
   function chiediSalta(){ const s = stato(); if (!s.in) return; const b = finestra(`<span class="fd-k">PROVA ${PASSI.indexOf(s.in) + 1} DI 3</span><h2>Vuoi passare alla prossima prova?</h2><p class="acc-sub">Questa partita finisce qui.</p><button class="big" data-no>No, continuo a giocare</button><button class="as-salta" data-si>Sì, vai avanti</button>`);
     b.querySelector('[data-no]').onclick = chiudi; b.querySelector('[data-si]').onclick = () => { chiudi(); salta(); }; }
@@ -10448,9 +10470,9 @@ const RITORNO = window.RITORNO = (() => {
       return false; }
     if (s.passo >= 3){ finestraFine(); return true; }
     const k = PASSI[s.passo], I = INFO[k], u = s.ultimo; let su = '';
-    if (s.passo === 0 && !u){ avviaPasso(k); return true; }
+    if (s.passo === 0 && !u && !s.torna){ avviaPasso(k); return true; }
     if (s.passo === 0 && !u) su = `<span class="fd-k">BENVENUTO A SMERILLO</span><h2>Ti faccio provare il gioco</h2><p class="acc-sub">Tre assaggi brevi delle modalità. Poi entri nel menu e scegli tu come continuare.</p>`;
-    else if (s.torna && s.passo === 1 && !u) su = `<span class="fd-k">BENTORNATO</span><h2>Hai provato solo le missioni</h2><p class="acc-sub">Difendi Smerillo ha anche altre modalità. Ti faccio fare due assaggi veloci, poi scegli tu.</p>`;
+    else if (s.torna && s.passo === 0 && !u) su = `<span class="fd-k">BENTORNATO</span><h2>Hai provato solo le missioni</h2><p class="acc-sub">Difendi Smerillo ha anche altre modalità. Ti faccio fare due assaggi veloci, poi scegli tu.</p>`;
     else su = `<span class="fd-k">ASSAGGIO ${s.passo} DI 3 FATTO</span><h2>${u && u.come === 'perso' ? 'Ci hai provato!' : 'Bravo!'}</h2>${u && u.come === 'perso' ? '<p class="acc-sub">Non è andata, ma ora sai come funziona: la riprovi quando vuoi dal menu.</p>' : ''}`;
     const b = finestra(`${su}${pallini(s.passo)}<div class="as-card"><span class="as-ic">${ico(I.ic, 4)}</span><span><b>${s.passo + 1}. ${I.t}</b><small>${I.d}</small></span></div>
       <button class="big" data-go>${I.go} ▸</button><button class="as-salta" data-no>Salta gli assaggi e vai al menu</button>`);
@@ -10473,8 +10495,8 @@ const RITORNO = window.RITORNO = (() => {
   // dopo ogni partita: se è un passo dell'assaggio, lo chiude
   function fineTurni(vinto){ const s = stato(); if (s.in !== 'turni') return false; fatto('turni', vinto ? 'vinto' : 'perso'); try { TB.esci(); } catch(e){ mostraMenu(); } return true; }
   function ondataRT(n, continua){ const s = stato(); if (s.in !== 'tempo' || n < 2) return false; fatto('tempo', 'vinto');
-    const b = finestra(`<span class="fd-k">ASSAGGIO 2 DI 3 FATTO</span><h2>Hai fermato 2 ondate!</h2><p class="acc-sub">La partita intera ne ha 12. Puoi finirla adesso oppure passare all’ultimo assaggio.</p>${pallini(2)}
-      <button class="big" data-go>Avanti: la Conquista ▸</button><button class="big alt" data-st>Continuo questa partita</button>`);
+    const b = finestra(`<span class="fd-k">ASSAGGIO 1 DI 3 FATTO</span><h2>Hai fermato 2 ondate!</h2><p class="acc-sub">La partita intera ne ha 12. Finiscila ora o prova il prossimo assaggio.</p>${pallini(stato().passo)}
+      <button class="big" data-go>${stato().passo >= 2 ? 'Avanti: la Conquista ▸' : 'Avanti: le missioni ▸'}</button><button class="big alt" data-st>Continuo questa partita</button>`);
     b.querySelector('[data-go]').onclick = () => { chiudi(); mostraMenu(); };
     b.querySelector('[data-st]').onclick = () => { chiudi(); continua(); }; return true; }
   function persoRT(){ const s = stato(); if (s.in !== 'tempo') return false; fatto('tempo', 'perso'); mostraMenu(); return true; }
