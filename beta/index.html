@@ -2630,7 +2630,7 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
 
 /* PC: etichetta del tasto sui pulsanti */
 @media (pointer:fine) and (hover:hover){
-  [data-tasto]::after{content:attr(data-tasto);position:absolute;top:-7px;right:-5px;z-index:3;background:#fff;color:#141433;border:2px solid #141433;border-radius:6px;padding:0 5px;font:700 11px/16px var(--f-body);letter-spacing:0;box-shadow:0 2px 0 #141433;pointer-events:none;white-space:nowrap;text-transform:none}
+  [data-tasto]::after{content:attr(data-tasto);position:absolute;top:-9px;left:-7px;z-index:3;background:#fff;color:#141433;border:2px solid #141433;border-radius:6px;padding:0 5px;font:700 11px/16px var(--f-body);letter-spacing:0;box-shadow:0 2px 0 #141433;pointer-events:none;white-space:nowrap;text-transform:none}
   #bGo,#bFalco,#bFrana,#bPausa,#bVel,#tbMenu,#cqPausa,#tbFine,#tbUndo,#tbShop,#cqFine,#cqDip,#cqCos,#cqAtt,#cqRec,.chip.shop{position:relative}
   [data-tasto]{overflow:visible!important}
 }
@@ -4060,7 +4060,7 @@ function avviaOndata(){
   for (const L of S.luoghi) if (L.tipo === 'logge' && L.lvl && specDi(L).frana) S.franaCd = 0;
   S.banner = {t:0, titolo: S.ondata === ONDATE ? 'Ultima ondata: ' + CMISSIONI[S.miss || 1].capo : S.ev.nome ? 'Ondata ' + S.ondata + ': ' + S.ev.nome : 'Ondata ' + S.ondata, testo: S.ev.desc};
   S.coda = pr.coda;
-  S.intervallo = Math.max(.35, 1.4 / (1 + .06*S.ondata)); S.multVita = (1 + .11*(S.ondata-1)) * S.hpDiff * (S.miss === 2 ? .82 : S.miss === 3 ? .95 : 1); // i cavalieri hanno l'armatura: un po' meno vita S.multVel = (1 + .02*S.ondata) * (S.ev.vel || 1); S.timer = .4;
+  S.intervallo = Math.max(.35, 1.4 / (1 + .06*S.ondata)); S.multVita = (1 + .11*(S.ondata-1)) * S.hpDiff * (S.miss === 2 ? .82 : S.miss === 3 ? .95 : 1); if (S.inizioFacile && S.ondata <= 2) S.multVita *= .4; // i cavalieri hanno l'armatura: un po' meno vita S.multVel = (1 + .02*S.ondata) * (S.ev.vel || 1); S.timer = .4;
   aggiornaHud(); ui();
 }
 function genera(id, from, via){
@@ -4616,13 +4616,16 @@ const GKEY_CL = 'difendi-smerillo-guida-classica';
 function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; try { fatto = localStorage.getItem(GKEY_CL) === '1'; } catch(e){}
   document.querySelectorAll('.punta').forEach(x => x.classList.remove('punta')); g.hidden = true;
   const via = () => { if (COACH_RT){ COACH_RT = ''; COACH.nascondi(); } };
-  if (!S || fatto || MOD || S.fine){ via(); return; }
+  if (!S || fatto || MOD || S.fine){ via(); return; } if (S.ondata === 0 && !S.inCorso) S.inizioFacile = true; // prima partita con la guida: le prime 2 ondate sono più leggere
   const costruite = S.luoghi.some(L => L.lvl); let k = '', n = 0, t = '', sub = '', ok = false, punta = null, mappa = null;
   let inAss = false; try { inAss = RITORNO.stato().in === 'tempo'; } catch(e){}
   if (ORIZ && costruite && !inAss && !(S.ondata === 0 || (S.inCorso && S.ondata === 1))){ via(); return; }
   // un pallino libero vicino al centro dello schermo, per indicarlo col dito
   const pallino = () => { const P_ = POSTI || (POSTI = calcolaPosti()); const r = cv.getBoundingClientRect(); let best = null, bd = 1e9;
-    for (const q of P_){ const [x, y] = P(q[0], q[1], altB(q[0], q[1])), sx = r.left + x*scale + ox, sy = r.top + y*scale + oy; if (sx < 40 || sx > innerWidth - 40 || sy < 140 || sy > innerHeight - 200) continue; if (S.luoghi.some(L => Math.hypot(L.e - q[0], L.n - q[1]) < 8)) continue; const d = Math.hypot(sx - innerWidth/2, sy - innerHeight*.45); if (d < bd){ bd = d; best = {x: sx, y: sy, r: 26}; } } return best; };
+    // prima scelta: un pallino accanto alla strada da cui arriva la prossima ondata (così la prima torre colpisce davvero)
+    const vie = (S.prossima && S.prossima.vie) || [], dSeg = (q, v) => { let m = 1e9; for (let i = 0; i < v.length - 1; i++){ const [a0, b0] = v[i], [a1, b1] = v[i+1], dx = a1 - a0, dy = b1 - b0, l2 = dx*dx + dy*dy || 1, t = Math.max(0, Math.min(1, ((q[0]-a0)*dx + (q[1]-b0)*dy)/l2)); m = Math.min(m, Math.hypot(q[0] - a0 - t*dx, q[1] - b0 - t*dy)); } return m; };
+    for (const passo of [0, 1]) { for (const q of P_){ const [x, y] = P(q[0], q[1], altB(q[0], q[1])), sx = r.left + x*scale + ox, sy = r.top + y*scale + oy; if (sx < 40 || sx > innerWidth - 40 || sy < (passo ? 140 : 80) || sy > innerHeight - (passo ? 200 : 120)) continue; if (S.luoghi.some(L => Math.hypot(L.e - q[0], L.n - q[1]) < 8)) continue;
+      if (passo === 0 && !(vie.length && vie.some(v => VIE[v] && dSeg(q, VIE[v]) < 13))) continue; const d = passo ? Math.hypot(sx - innerWidth/2, sy - innerHeight*.45) : Math.min(...vie.map(v => { const f = VIE[v][VIE[v].length - 1]; return Math.abs(Math.hypot(q[0] - f[0], q[1] - f[1]) - 22); })); if (d < bd){ bd = d; best = {x: sx, y: sy, r: 26}; } } if (best) break; } return best; };
   const PC = matchMedia('(pointer:fine)').matches && !ORIZ;
   // guida corta in 3 passi: metti una torre (un tocco), VIA!, colpisci
   if (!costruite){ k = 'pallino'; n = 1; t = '<b>Metti una torre</b>'; sub = 'Tocca un pallino bianco.'; mappa = pallino;
