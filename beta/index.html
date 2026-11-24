@@ -4076,7 +4076,8 @@ function avviaOndata(){
   const pr = S.prossima; S.prossima = null;
   S.ondata = pr.n; S.inCorso = true; S.ev = pr.ev; S.ultimoEv = pr.ev; S.vieAttive = pr.vie;
   for (const L of S.luoghi) if (L.tipo === 'logge' && L.lvl && specDi(L).frana) S.franaCd = 0;
-  S.banner = {t:0, titolo: S.ondata === ONDATE ? 'Ultima ondata: ' + CMISSIONI[S.miss || 1].capo : S.ev.nome ? 'Ondata ' + S.ondata + ': ' + S.ev.nome : 'Ondata ' + S.ondata, testo: S.ev.desc};
+  try { SUONI.suona('arriva'); } catch(e){} if (S.inizioFacile && S.ondata <= 3){ const L = S.luoghi.find(q => q.lvl); if (L){ const [x, y] = P(L.e, L.n + 3, L.z); S.camT = {x, y}; } } // prima partita: la telecamera va dove si combatte, così vedi i nemici cadere
+  S.banner = {t:0, onda:true, titolo: S.ondata === ONDATE ? 'Ultima ondata: ' + CMISSIONI[S.miss || 1].capo : S.ev.nome ? 'Ondata ' + S.ondata + ': ' + S.ev.nome : 'Ondata ' + S.ondata, testo: S.ev.desc};
   S.coda = pr.coda;
   S.intervallo = Math.max(.35, 1.4 / (1 + .06*S.ondata)); S.multVita = (1 + .11*(S.ondata-1)) * S.hpDiff * (S.miss === 2 ? .82 : S.miss === 3 ? .95 : 1); if (S.inizioFacile && S.ondata <= 2) S.multVita *= .4; // i cavalieri hanno l'armatura: un po' meno vita S.multVel = (1 + .02*S.ondata) * (S.ev.vel || 1); S.timer = .4;
   aggiornaHud(); ui();
@@ -4088,7 +4089,7 @@ function genera(id, from, via){
   if (from) Object.assign(x, {via:from.via, e:from.e, n:from.n, z:from.z, seg:from.seg, prog:from.prog});
   else { const v = via !== undefined ? via : (S.vieAttive.length ? S.vieAttive[Math.floor(Math.random()*S.vieAttive.length)] : 1), p0 = VIEZ[v][0]; Object.assign(x, {via:v, e:p0[0], n:p0[1], z:p0[2], seg:1, prog:0}); }
   S.nemici.push(x);
-  if (d.boss && !from){ S.shake = Math.max(S.shake, 5); S.banner = {t:0, titolo:'Arriva: ' + (BESTIARIO.find(q => q[0] === id) || [0,id])[1] + '!', testo:(BESTIARIO.find(q => q[0] === id) || [0,0,''])[2]}; }
+  if (d.boss && !from){ S.shake = Math.max(S.shake, 5); try { SUONI.suona('boss'); } catch(e){}  S.banner = {t:0, titolo:'Arriva: ' + (BESTIARIO.find(q => q[0] === id) || [0,id])[1] + '!', testo:(BESTIARIO.find(q => q[0] === id) || [0,0,''])[2]}; }
 }
 // particelle: scintille, fumo, polvere, piume
 function scoppio(e, n, z, quante, colori, vel, vita, grav){
@@ -4102,7 +4103,7 @@ const COLORI_NEM = {mazzamurello:['#e04830','#98d860','#f8f8f0'], corvo_nebbia:[
 function colpisci(x, danno, perfora){
   if (x.morto) return;
   x.hp -= Math.max(1, danno - (perfora ? 0 : (x.d.arm||0) + (x.aura ? 2 : 0)));
-  x.flash = .1; if (Math.random() < .6) scoppio(x.e, x.n, x.z + (x.d.vola ? 14 : 5), 2, ['#fff8d0','#f8d048'], 14, .25, 20);
+  x.flash = .14; if (danno >= 25 && x.hp > 0) S.fx.push({k:'txt', e:x.e, n:x.n, z:x.z + 12, t:0, s:'-' + Math.round(danno), col:'#ffd03a'}); if (Math.random() < .6) scoppio(x.e, x.n, x.z + (x.d.vola ? 14 : 5), 2, ['#fff8d0','#f8d048'], 14, .25, 20);
   if (x.d.carica && !x.caricato && x.hp > 0 && x.hp < x.max*.6){ x.caricato = true; x.veloce = 2.5; scoppio(x.e, x.n, x.z, 8, ['#c8b48a','#a89670'], 16, .5, 10); S.fx.push({k:'txt', e:x.e, n:x.n, z:x.z+14, t:0, s:'Carica!', col:'#f8f8f0'}); }
   if (x.id === 'cavaliere_nero' && !x.evocato && x.hp > 0 && x.hp < x.max/2){ x.evocato = true; for (let k = 0; k < 3; k++) genera('fante_fantasma', x); S.shake = Math.max(S.shake, 4); S.fx.push({k:'ring', e:x.e, n:x.n, z:x.z, t:0, r:20, col:'#a02c20'}); S.fx.push({k:'txt', e:x.e, n:x.n, z:x.z+16, t:0, s:'A me, fanti!', col:'#f8f8f0'}); }
   // il Lupo della Rocca, ferito a metà, ulula: i nemici vicini corrono di più per qualche secondo
@@ -4112,7 +4113,8 @@ function colpisci(x, danno, perfora){
     scoppio(x.e, x.n, zc, x.d.boss ? 40 : 12, COLORI_NEM[x.id] || ['#f8f8f0'], x.d.boss ? 30 : 20, x.d.boss ? 1 : .6);
     if (x.d.fantasma) for (let k = 0; k < 3; k++) S.part.push({e:x.e + (Math.random()-.5)*2, n:x.n, z:zc, ve:0, vn:0, vz:10 + Math.random()*6, t:0, vita:1.1, col:'#d8f0ff', g:-2, s:2});
     S.morti.push({x, t:0}); S.monete.push({e:x.e, n:x.n, z:zc, t:0, v:pr});
-    if (x.d.boss) S.shake = Math.max(S.shake, 8);
+    if (x.d.boss) S.shake = Math.max(S.shake, 8); else if (x.max >= 60) S.shake = Math.max(S.shake, 2);
+    S.fx.push({k:'ring', e:x.e, n:x.n, z:x.z, t:0, r:x.d.boss ? 30 : 9, col:'#fff4c0'}); try { SUONI.suona(x.d.boss ? 'boom' : 'colpo'); } catch(e){} 
     S.fx.push({k:'txt', e:x.e, n:x.n, z:x.z+8, t:0, s:'+'+pr}); }
 }
 const dist3 = (a,b) => Math.hypot(a.e-b.e, a.n-b.n);
@@ -4160,7 +4162,7 @@ function update(dt){
       if (dd <= passo){ x.e = te; x.n = tn; x.z = tz; passo -= dd; x.prog += dd; x.seg++; }
       else { x.e += de/dd*passo; x.n += dn/dd*passo; const L = Math.hypot(te-pe, tn-pn) || 1; x.z = pz + (tz-pz) * (1 - Math.hypot(te-x.e, tn-x.n)/L); x.prog += passo; passo = 0; }
     }
-    if (x.seg >= V.length){ x.morto = true; S.vite -= x.d.boss ? 5 : 1; S.fx.push({k:'hit', t:0}); S.shake = Math.max(S.shake, 3); }
+    if (x.seg >= V.length){ x.morto = true; S.vite -= x.d.boss ? 5 : 1; S.fx.push({k:'hit', t:0}); S.shake = Math.max(S.shake, 3); try { SUONI.suona('tonfo'); } catch(e){} }
   }
 
   const vivi = () => S.nemici.filter(x => !x.morto);
@@ -4272,7 +4274,7 @@ function aggiornaTrappole(){
       scoppio(t.e, t.n, t.z + 1, 30, ['#202028','#f08838','#f8d048','#5a5258'], 26, .8); S.shake = Math.max(S.shake, 4); S.fx.push({k:'boom', e:t.e, n:t.n, z:t.z, t:0, r:10}); } }
   S.trappole = S.trappole.filter(t => !t.via);
 }
-function frana(e, n){ S.aiuti = true;
+function frana(e, n){ S.aiuti = true; try { SUONI.suona('rupe'); } catch(e){} 
   const r = 17 * S.bonus.frana;
   for (const x of S.nemici) if (!x.morto && Math.hypot(x.e-e, x.n-n) < r){ x.stun = Math.max(x.stun, .6); colpisci(x, 60 * (1 + .08*S.ondata)); }
   S.fx.push({k:'frana', e, n, z:alt(e,n), t:0, r}); setTimeout(() => { if (S){ S.shake = Math.max(S.shake, 6); scoppio(e, n, alt(e,n)+1, 30, ['#c8b48a','#a87c46','#d6aa6a','#8a7650'], 26, .9, 25); } }, 240); S.franaCd = Math.max(6, S.bonus.franaCd); S.frana = false; ui(); aggiornaHud();
@@ -4591,13 +4593,17 @@ function draw(T){
     ctx.fillStyle = S.falcoCd > 0 ? '#c8ccd8' : '#f8d048'; ctx.fillText(ft, 10, SH - 31);
     }
     if (S.trovati){ const t2 = `Fossili trovati: ${S.trovati}`; const w2 = ctx.measureText(t2).width + 12; ctx.fillStyle = 'rgba(32,32,40,.78)'; ctx.fillRect(4, SH - 68, w2, 20); ctx.fillStyle = '#f0e2bc'; ctx.fillText(t2, 10, SH - 53); }
-    if (S.banner){ const a = Math.min(1, S.banner.t*4, (3.5 - S.banner.t)*2); ctx.globalAlpha = Math.max(0, a); ctx.textAlign = 'center';
-      ctx.font = '700 17px "Pixelify Sans", "Lilita One", monospace'; const w3 = Math.min(SW - 16, Math.max(ctx.measureText(S.banner.titolo).width, 200) + 24);
-      ctx.font = '400 13px "Atkinson Hyperlegible", sans-serif'; const righe = []; let riga = ''; for (const p of (S.banner.testo||'').split(' ')){ if (ctx.measureText(riga + ' ' + p).width > w3 - 24 && riga){ righe.push(riga); riga = p; } else riga = riga ? riga + ' ' + p : p; } if (riga) righe.push(riga);
-      const hB = 34 + righe.length*17, X0 = SW/2 - w3/2, Y0 = SH*.3;
-      ctx.fillStyle = '#fbf7ec'; ctx.fillRect(X0, Y0, w3, hB); ctx.strokeStyle = '#33415e'; ctx.lineWidth = 3; ctx.strokeRect(X0, Y0, w3, hB);
-      ctx.fillStyle = '#e04830'; ctx.font = '700 17px "Pixelify Sans", "Lilita One", monospace'; ctx.fillText(S.banner.titolo, X0 + w3/2, Y0 + 23);
-      ctx.fillStyle = '#202838'; ctx.font = '400 13px "Atkinson Hyperlegible", sans-serif'; righe.forEach((r, k) => ctx.fillText(r, X0 + w3/2, Y0 + 42 + k*17)); ctx.globalAlpha = 1; }
+    if (S.banner){ const bt = S.banner.t, a = Math.min(1, bt*5, (3.5 - bt)*2), pop = bt < .25 ? .7 + (bt/.25)*.38 : bt < .38 ? 1.08 - ((bt - .25)/.13)*.08 : 1; ctx.globalAlpha = Math.max(0, a); ctx.textAlign = 'center';
+      const fT = Math.min(26, Math.max(18, SW/26)); ctx.font = `400 ${fT}px "Lilita One", sans-serif`; const w3 = Math.min(SW - 16, Math.max(ctx.measureText(S.banner.titolo).width + 40, 220));
+      ctx.font = '700 13px "Atkinson Hyperlegible", sans-serif'; const righe = []; let riga = ''; for (const p of (S.banner.testo||'').split(' ')){ if (ctx.measureText(riga + ' ' + p).width > w3 - 28 && riga){ righe.push(riga); riga = p; } else riga = riga ? riga + ' ' + p : p; } if (riga) righe.push(riga);
+      const hB = fT + 22 + righe.length*17, cx = SW/2, cy = SH*.3 + hB/2;
+      ctx.save(); ctx.translate(cx, cy); ctx.scale(pop, pop); const X0 = -w3/2, Y0 = -hB/2;
+      const rr = (x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
+      ctx.fillStyle = '#141433'; rr(X0, Y0 + 5, w3, hB, 16); ctx.fill();
+      ctx.fillStyle = S.banner.onda ? '#e04830' : '#ffd03a'; rr(X0, Y0, w3, hB, 16); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#141433'; ctx.stroke();
+      ctx.font = `400 ${fT}px "Lilita One", sans-serif`; ctx.lineJoin = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = '#141433'; ctx.fillStyle = S.banner.onda ? '#ffffff' : '#141433';
+      if (S.banner.onda) ctx.strokeText(S.banner.titolo, 0, Y0 + fT + 6); ctx.fillText(S.banner.titolo, 0, Y0 + fT + 6);
+      ctx.fillStyle = S.banner.onda ? '#fff4e0' : '#141433'; ctx.font = '700 13px "Atkinson Hyperlegible", sans-serif'; righe.forEach((r2, k) => ctx.fillText(r2, 0, Y0 + fT + 26 + k*17)); ctx.restore(); ctx.globalAlpha = 1; }
     if (S.frana || S.modo){ ctx.font = '700 14px "Pixelify Sans", "Lilita One", monospace'; const t = S.modo ? (S.modo.tipo === 'trappola' ? 'Tocca una strada per il barile di pece' : S.modo.tipo === 'costruisci' ? 'Tocca un pallino bianco' : 'Tocca dove mandare i soldati') : 'Tocca una strada per far cadere il masso'; const w = ctx.measureText(t).width + 16;
       ctx.fillStyle = 'rgba(32,32,40,.85)'; ctx.fillRect(SW/2 - w/2, 6, w, 24); ctx.fillStyle = '#f8f8f0'; ctx.fillText(t, SW/2, 23); }
   }
@@ -4636,7 +4642,7 @@ function bottone(testo, fn, dis, alt){ const bt = document.createElement('button
 function compra(L){ const c = costoLivello(L); if (L.lvl >= 3 || S.castagne < c) return;
   if (L.lvl === 2){ scegliSpec(L); return; }
   S.castagne -= c; L.speso += c; L.lvl++; if (L.lvl >= 2) S.potenziato = true; S.maxDif = Math.max(S.maxDif || 0, S.luoghi.filter(q => q.lvl).length); L.cd = 0; L.anim = 1; costruisci(L); ui(); aggiornaHud(); }
-function costruisci(L){ if (L.tipo === 'milizia') aggiornaMilizia(L); L.costr = 1; scoppio(L.e, L.n, L.z + 1, 16, ['#c8b48a','#a89670','#e8dcc0'], 14, .8, 8); }
+function costruisci(L){ if (L.tipo === 'milizia') aggiornaMilizia(L); L.costr = 1; try { SUONI.suona('costruisci'); } catch(e){}  scoppio(L.e, L.n, L.z + 1, 16, ['#c8b48a','#a89670','#e8dcc0'], 14, .8, 8); }
 // guida della prima partita: passo passo, poi sparisce
 const GKEY_CL = 'difendi-smerillo-guida-classica';
 function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; try { fatto = localStorage.getItem(GKEY_CL) === '1'; } catch(e){}
@@ -4892,7 +4898,7 @@ $('#bPausa').onclick = () => { if (!S || S.fine) return; pausa(true); };
 $('#zAll').onclick = () => { scale = 0; limita(); };
 $('#bFalco').onclick = () => { if (!S || !S.inCorso || S.falcoCd > 0) return; const vivi = S.nemici.filter(x => !x.morto); if (!vivi.length) return;
   const capo = vivi.find(x => x.d.boss), tgt = capo || vivi.reduce((a,c) => c.prog > a.prog ? c : a); lanciaFalco(tgt); };
-function lanciaFalco(tgt){ S.aiuti = true; S.proj.push({tipo:'falco', e:tgt.e-25, n:tgt.n-25, z:tgt.z+45, t:tgt, v:150, danno: 28 * (1 + .1*S.ondata)}); S.falcoCd = 3.5 * (S.ev.falco || 1) * S.bonus.falcoCd; aggiornaHud(); }
+function lanciaFalco(tgt){ S.aiuti = true; try { SUONI.suona('tiro'); } catch(e){}  S.proj.push({tipo:'falco', e:tgt.e-25, n:tgt.n-25, z:tgt.z+45, t:tgt, v:150, danno: 28 * (1 + .1*S.ondata)}); S.falcoCd = 3.5 * (S.ev.falco || 1) * S.bonus.falcoCd; aggiornaHud(); }
 function pausa(on){ if (!S) return; S.pausa = on; const p = $('#pausa');
   if (!on){ p.hidden = true; return; }
   p.innerHTML = `<div class="dlg box"><span class="kicker">Ondata ${S.ondata} di ${ONDATE} · ${DIFF[S.diff].nome}</span><h2>Pausa</h2><button class="big" id="pRip">Riprendi</button><button class="big alt" id="pNew">Ricomincia</button><button class="big alt" id="pMenu">Torna al menu</button></div>`;
