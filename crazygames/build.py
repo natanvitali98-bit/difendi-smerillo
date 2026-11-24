@@ -138,7 +138,7 @@ s = f'''<!doctype html>
   var fatto = false;
   function via(ok){{ if (fatto) return; fatto = true; window.CG_SDK_OK = false;
     try {{ var S = ok && window.CrazyGames && window.CrazyGames.SDK;
-      if (S && S.environment !== 'disabled'){{ window.CG_SDK_OK = true; try {{ S.game.loadingStart(); }} catch(e){{}} var b = S.data.getItem('ds-salvataggio');
+      if (S && S.environment !== 'disabled'){{ window.CG_SDK_OK = true; try {{ S.game.loadingStart(); }} catch(e){{}} try {{ var si = S.user && S.user.systemInfo; window.CG_LOCALE = (si && si.locale) || ''; }} catch(e){{}} var b = S.data.getItem('ds-salvataggio');
         if (b){{ var o = JSON.parse(b); for (var k in o) if (/^difendi-smerillo/.test(k)) localStorage.setItem(k, o[k]); }} }}
     }} catch(e){{}}
     apri(); }}
@@ -148,7 +148,8 @@ s = f'''<!doctype html>
   setTimeout(function(){{ via(false); }}, 5000);
   function apri(){{
   var L = null; try {{ L = localStorage.getItem('difendi-smerillo-lingua'); }} catch(e){{}}
-  if (L !== 'it' && L !== 'en'){{ var n = (navigator.languages && navigator.languages[0]) || navigator.language || ''; L = /^it/i.test(n) ? 'it' : 'en'; }}
+  // lingua: quella che il giocatore ha scelto, se no quella data da CrazyGames (systemInfo.locale), se no inglese
+  if (L !== 'it' && L !== 'en'){{ var n = window.CG_SDK_OK ? (window.CG_LOCALE || '') : ((navigator.languages && navigator.languages[0]) || navigator.language || ''); L = /^it/i.test(n) ? 'it' : 'en'; }}
   var b = atob(document.getElementById('v-' + L).textContent), u = new Uint8Array(b.length);
   for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
   var html = new TextDecoder('utf-8').decode(u);
