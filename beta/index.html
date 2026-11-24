@@ -2673,6 +2673,14 @@ body:has(#tbOv:not([hidden])) #pcTasti,body:has(#cqOv:not([hidden])) #pcTasti{di
   .cr-arena .gp-card{padding-top:10px!important;padding-bottom:12px!important;gap:8px!important}
   .cr-arena .gp-card .mis-t,.cr-arena .gp-card h2{font-size:26px!important}
 }
+
+/* Blocco 3: leggibilità e menu */
+.wave{font-size:15px}
+@media (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ #app .wave{font-size:17px;color:#fff} #app .stat{font-size:20px} }
+[data-tasto]::after{font-size:12px!important;line-height:17px!important;padding:0 6px!important}
+.cr-tab[data-tab="gioca"]:not(.on){box-shadow:none!important;background:rgba(255,208,58,.10)!important}
+body:has(#title:not([hidden])) #profToast{top:auto!important;bottom:calc(96px + env(safe-area-inset-bottom))!important}
+@media (max-height:620px){ .cr-pg[data-tab="premi"] .pr-rbox{zoom:.62;margin:2px auto!important} }
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -4616,7 +4624,7 @@ function draw(T){
       ctx.font = `400 ${fT}px "Lilita One", sans-serif`; ctx.lineJoin = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = '#141433'; ctx.fillStyle = S.banner.onda ? '#ffffff' : '#141433';
       if (S.banner.onda) ctx.strokeText(S.banner.titolo, 0, Y0 + fT + 6); ctx.fillText(S.banner.titolo, 0, Y0 + fT + 6);
       ctx.fillStyle = S.banner.onda ? '#fff4e0' : '#141433'; ctx.font = '700 13px "Atkinson Hyperlegible", sans-serif'; righe.forEach((r2, k) => ctx.fillText(r2, 0, Y0 + fT + 26 + k*17)); ctx.restore(); ctx.globalAlpha = 1; }
-    if (S.frana || S.modo){ ctx.font = '700 14px "Pixelify Sans", "Lilita One", monospace'; const t = S.modo ? (S.modo.tipo === 'trappola' ? 'Tocca una strada per il barile di pece' : S.modo.tipo === 'costruisci' ? 'Tocca un pallino bianco' : 'Tocca dove mandare i soldati') : 'Tocca una strada per far cadere il masso'; const w = ctx.measureText(t).width + 16;
+    if (S.frana || S.modo){ ctx.font = '700 15px "Atkinson Hyperlegible", sans-serif'; const t = S.modo ? (S.modo.tipo === 'trappola' ? 'Tocca una strada per il barile di pece' : S.modo.tipo === 'costruisci' ? 'Tocca un pallino bianco' : 'Tocca dove mandare i soldati') : 'Tocca una strada per far cadere il masso'; const w = ctx.measureText(t).width + 16;
       ctx.fillStyle = 'rgba(32,32,40,.85)'; ctx.fillRect(SW/2 - w/2, 6, w, 24); ctx.fillStyle = '#f8f8f0'; ctx.fillText(t, SW/2, 23); }
   }
 }
@@ -4656,6 +4664,8 @@ function compra(L){ const c = costoLivello(L); if (L.lvl >= 3 || S.castagne < c)
   S.castagne -= c; L.speso += c; L.lvl++; if (L.lvl >= 2) S.potenziato = true; S.maxDif = Math.max(S.maxDif || 0, S.luoghi.filter(q => q.lvl).length); L.cd = 0; L.anim = 1; costruisci(L); ui(); aggiornaHud(); }
 function costruisci(L){ if (L.tipo === 'milizia') aggiornaMilizia(L); L.costr = 1; try { SUONI.suona('costruisci'); } catch(e){}  scoppio(L.e, L.n, L.z + 1, 16, ['#c8b48a','#a89670','#e8dcc0'], 14, .8, 8); }
 // guida della prima partita: passo passo, poi sparisce
+// il tasto "‹ Indietro" in alto serve solo se la finestra scorre: se si vede tutto, resta solo quello in fondo (niente doppioni)
+function doppioVia(alto, basso){ setTimeout(() => { if (!alto.isConnected || !basso.isConnected) return; const r = basso.getBoundingClientRect(); if (r.bottom <= innerHeight - 4 && r.top >= 0) alto.remove(); }, 80); }
 const GKEY_CL = 'difendi-smerillo-guida-classica';
 function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; try { fatto = localStorage.getItem(GKEY_CL) === '1'; } catch(e){}
   document.querySelectorAll('.punta').forEach(x => x.classList.remove('punta')); g.hidden = true;
@@ -5245,7 +5255,7 @@ function mostraMenu(pannello){
       const tx = document.createElement('span'); tx.innerHTML = `<span class="bn">${nome}</span><span class="bd">${desc}</span>`; box.append(cv2, tx); }
   }
   { const pan = c.querySelector('.pan'); if (pan && !pan.querySelector('.indietro')){ const ult = [...pan.querySelectorAll('button[data-p]')].filter(b => /Indietro/.test(b.textContent)).pop();
-      if (ult){ const b = document.createElement('button'); b.type = 'button'; b.className = 'indietro'; b.textContent = '‹ Indietro'; b.dataset.p = ult.dataset.p; pan.prepend(b); } } } // il tasto per tornare indietro anche in alto, senza scorrere
+      if (ult){ const b = document.createElement('button'); b.type = 'button'; b.className = 'indietro'; b.textContent = '‹ Indietro'; b.dataset.p = ult.dataset.p; pan.prepend(b); doppioVia(b, ult); } } } // il tasto per tornare indietro anche in alto, senza scorrere
   c.scrollTop = 0;
   c.querySelectorAll('[data-p]').forEach(bt => bt.onclick = () => mostraMenu(bt.dataset.p));
   c.querySelectorAll('[data-cm]').forEach(bt => bt.onclick = () => { CMIS = +bt.dataset.cm; mostraMenu('gioca'); });
@@ -6780,7 +6790,7 @@ const _render = render; render = (T) => { _render(T); disegnaOnline(); disegnaPi
 function overlay(html){ document.querySelectorAll('.fx-ban').forEach(b => b.remove()); const o = el('tbOv'), hud = document.querySelector('#tb .tbhud'); o.style.top = (hud.offsetTop + hud.offsetHeight + 6) + 'px'; o.innerHTML = html; o.hidden = false;
   // i bottoni in fondo stanno sempre in basso, a portata di pollice (se sono pochi restano visibili anche scorrendo)
   { const d = o.querySelector('.dlg'); if (d && !d.querySelector('.indietro')){ const b = [...d.querySelectorAll('button.big')].find(x => /^(Indietro|Torna al menu)$/.test(x.textContent.trim()));
-      if (b){ const t = document.createElement('button'); t.type = 'button'; t.className = 'indietro'; t.textContent = '‹ ' + (b.textContent.trim() === 'Torna al menu' ? 'Menu' : 'Indietro'); t.onclick = () => b.click(); d.prepend(t); } } }
+      if (b){ const t = document.createElement('button'); t.type = 'button'; t.className = 'indietro'; t.textContent = '‹ ' + (b.textContent.trim() === 'Torna al menu' ? 'Menu' : 'Indietro'); t.onclick = () => b.click(); d.prepend(t); doppioVia(t, b); } } }
   queueMicrotask(() => { const d = o.querySelector('.dlg'); if (d && !d.querySelector('.dlgfoot')){ const fin = []; let n = d.lastElementChild; while (n && n.tagName === 'BUTTON' && n.classList.contains('big')){ fin.unshift(n); n = n.previousElementSibling; }
       if (fin.length > 2 && d.scrollHeight > o.clientHeight){ // tanti bottoni e finestra lunga: in basso fisso resta solo il principale
         const f = document.createElement('div'); f.className = 'dlgfoot'; fin.slice(1).forEach(b => f.append(b)); const g = document.createElement('div'); g.className = 'dlgfoot fisso'; g.append(fin[0]); d.append(f, g); }
@@ -10617,7 +10627,7 @@ const RITORNO = window.RITORNO = (() => {
     if (!hVisto && daHome() && !lg(HKEY)){ hVisto = true; quandoPronto(premioHome); return; }
     if (!gVisto && g.p !== g.u){ gVisto = true; quandoPronto(() => { if (giorni().p !== giorni().u) finestraGiorno(); }); return; }
     if (!vVisto && votoPronto()){ vVisto = true; quandoPronto(() => { if (votoPronto()) finestraVoto(); }); } }
-  function finestraGiorno(){ const g = giorni(); if (g.p === g.u) return; const tipo = premioG(g.s);
+  function finestraGiorno(){ const g = giorni(); if (g.p === g.u || document.querySelector('.gf-pop')) return; /* mai due finestre uguali una sopra l'altra */ const tipo = premioG(g.s);
     const b = finestra(`<div class="gf-top"><span class="gf-serie"><b>${g.s}</b><small>${g.s === 1 ? 'giorno' : 'giorni'}</small></span><span><span class="fd-k">${g.s === 1 ? 'BENTORNATO' : 'SEI TORNATO'}</span><h2>${g.s === 1 ? 'Il premio di oggi' : g.s + ' giorni di fila!'}</h2></span></div>
       <div class="gf-pop"><span class="gf-raggi"></span>${cassa(tipo)}<b>Scrigno di ${NOMEG[tipo]}</b><div class="gf-st">${strisciaG(g)}</div></div>
       <p class="acc-sub">${g.s % 7 === 0 ? 'Hai completato la settimana!' : `Torna ogni giorno: al giorno ${Math.ceil(g.s/7)*7} c’è lo scrigno d’oro. Se salti un giorno si ricomincia.`}</p><button class="big" data-x>Ritira lo scrigno</button>`, true);
