@@ -2631,7 +2631,7 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
 /* PC: etichetta del tasto sui pulsanti */
 @media (pointer:fine) and (hover:hover){
   [data-tasto]::after{content:attr(data-tasto);position:absolute;top:-9px;left:-7px;z-index:3;background:#fff;color:#141433;border:2px solid #141433;border-radius:6px;padding:0 5px;font:700 11px/16px var(--f-body);letter-spacing:0;box-shadow:0 2px 0 #141433;pointer-events:none;white-space:nowrap;text-transform:none}
-  #bGo,#bFalco,#bFrana,#bPausa,#bVel,#tbMenu,#cqPausa,#tbFine,#tbUndo,#tbShop,#cqFine,#cqDip,#cqCos,#cqAtt,#cqRec,.chip.shop{position:relative}
+  .cards .card,#bGo,#bFalco,#bFrana,#bPausa,#bVel,#tbMenu,#cqPausa,#tbFine,#tbUndo,#tbShop,#cqFine,#cqDip,#cqCos,#cqAtt,#cqRec,.chip.shop{position:relative}
   [data-tasto]{overflow:visible!important}
 }
 
@@ -2647,6 +2647,15 @@ body:has(#tbOv:not([hidden])) #pcTasti,body:has(#cqOv:not([hidden])) #pcTasti{di
   #tbOv .dlg .dlgfoot.fisso.mis-foot{position:sticky!important;bottom:-22px!important;margin:6px 0 -22px!important;padding:10px 0 14px!important;background:linear-gradient(180deg,rgba(26,35,90,0) 0,#1f2a6b 12px)!important;z-index:2}
   .mis-prima .mis-t{font-size:30px!important;margin:2px 0!important}
 }
+
+/* festa a fine ondata */
+#rtFesta{position:fixed;left:50%;top:38%;z-index:60;transform:translate(-50%,-50%) scale(.6);opacity:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--giallo,#ffd03a);color:#141433;border:4px solid #141433;border-radius:22px;padding:14px 28px 12px;box-shadow:0 7px 0 #141433,0 18px 40px rgba(0,0,0,.35);text-align:center;white-space:nowrap}
+#rtFesta b{font:400 34px/1 var(--f-big)}
+#rtFesta span{font:400 19px/1 var(--f-big);display:flex;align-items:center;gap:6px}
+#rtFesta .rtf-n{display:inline-flex}
+#rtFesta.on{animation:rtFesta 1.45s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes rtFesta{0%{opacity:0;transform:translate(-50%,-50%) scale(.5) rotate(-4deg)}14%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(1deg)}24%{transform:translate(-50%,-50%) scale(1) rotate(0)}82%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-62%) scale(.96)}}
+@media (prefers-reduced-motion: reduce){ #rtFesta.on{animation:none;opacity:1;transform:translate(-50%,-50%)} }
 </style>
 
 <section id="title" hidden><canvas id="titleCv"></canvas><div id="titleVelo" aria-hidden="true"></div><div class="velo"></div><div class="tc" id="titleC"></div></section>
@@ -4267,9 +4276,17 @@ function ondataFinita(){
   S.castagne += premio + interesse; S.fossili = []; S.vieAttive = [];
   if (S.ondata >= ONDATE){ vittoria(); return; }
   const avanti = () => { preparaOndata(); S.attesaCarta = true; mostraCarte(premio, interesse); ui(); };
-  try { if (RITORNO.ondataRT(S.ondata, avanti)){ S.attesaCarta = true; ui(); return; } } catch(e){ console.error(e); }
-  avanti();
+  // festa: "Ondata superata!" per un attimo, poi le carte (o la fine dell'assaggio)
+  S.attesaCarta = true; ui(); festaOndata(premio + interesse);
+  setTimeout(() => { if (!S || S.fine) return; try { if (RITORNO.ondataRT(S.ondata, avanti)){ S.attesaCarta = true; ui(); return; } } catch(e){ console.error(e); } avanti(); }, 1500);
 }
+function festaOndata(premio){ let d = document.getElementById('rtFesta'); if (!d){ d = document.createElement('div'); d.id = 'rtFesta'; document.body.append(d); }
+  const tot = totOndate(), ultima = S.ondata >= tot;
+  d.innerHTML = `<b>${ultima ? 'VITTORIA!' : 'Ondata superata!'}</b><span>${S.ondata}/${tot} · +${premio} <i class="rtf-n"></i></span>`; d.querySelector('.rtf-n').append(nutIcon());
+  d.classList.remove('on'); void d.offsetWidth; d.classList.add('on'); clearTimeout(festaOndata.t); festaOndata.t = setTimeout(() => d.classList.remove('on'), 1450);
+  try { EPICO.coriandoli(ultima ? 150 : 70); } catch(e){} try { SUONI.suona(ultima ? 'leggenda' : 'stella2'); } catch(e){} S.shake = Math.max(S.shake || 0, 3); }
+// nell'assaggio la partita è di 3 ondate: il contatore lo dice, così la fine non arriva a sorpresa
+function totOndate(){ try { if (RITORNO.stato().in === 'tempo') return RITORNO.ONDATE_ASS; } catch(e){} return ONDATE; }
 
 /* ================= DISEGNO ================= */
 const cv = $('#cv'), ctx = cv.getContext('2d');
@@ -4586,7 +4603,7 @@ const nutIconVecchio = () => { const c = document.createElement('canvas'); c.cla
 
 function aggiornaHud(){
   $('#hCast').textContent = S ? Math.floor(S.castagne) : 0; $('#hVite').textContent = S ? S.vite : 20;
-  $('#hWave').textContent = MOD ? 'Modifica la mappa' : S ? `Ondata ${S.ondata}/${ONDATE}` : 'Smerillo';
+  $('#hWave').textContent = MOD ? 'Modifica la mappa' : S ? `Ondata ${S.ondata}/${totOndate()}` : 'Smerillo';
   document.querySelectorAll('.stat').forEach(el => { el.hidden = MOD; });
   const go = $('#bGo'); go.disabled = !S || S.inCorso || S.fine || S.attesaCarta;
   go.textContent = !S ? 'Avvia ondata' : S.inCorso ? `In arrivo: ${S.coda.length + S.nemici.length}` : S.ondata >= ONDATE ? 'Finito' : 'Avvia ondata';
@@ -4819,6 +4836,7 @@ function tocca(ev){
   if (S.modo){ let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     const m = S.modo; S.modo = null;
     if (m.tipo === 'trappola'){ if (S.ordini > 0 && S.castagne >= COSTO_TRAPPOLA) piazzaTrappola(e, n); }
+    else if (m.tipo === 'costruisci' && m.guida && (() => { const pv = pallinoVicino(sx, sy); return pv.q && pv.d*scale < 26; })()){ S.modo = m; const q = pallinoVicino(sx, sy).q; if (piazzaDifesa('vedetta', q[0], q[1])){ S.modo = null; S.sel = null; costruisciTorri(); } ui(); aggiornaHud(); return; }
     else if (m.tipo === 'costruisci'){ S.modo = m; const P_ = POSTI || [], q = P_.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]);
       if (Math.hypot(q[0]-e, q[1]-n) < 14){ if (m.guida){ if (piazzaDifesa('vedetta', q[0], q[1])){ S.modo = null; S.sel = null; costruisciTorri(); } ui(); aggiornaHud(); return; } m.ghost = {e:q[0], n:q[1], z:alt(q[0], q[1]), err:null}; } else S.fx.push({k:'txt', e, n, z:alt(e, n)+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'}); ui(); }
     else if (m.tipo === 'raduno'){ const L = m.L, r = STAT.milizia.range[L.lvl-1];
@@ -4848,7 +4866,8 @@ function tocca(ev){
     let z = Z0, e = 0, n = 0; for (let k = 0; k < 8; k++){ n = N0 - ((sy - TOP)/K + z)/KY; e = (sx - E0)/K - z*SK; z = alt(e, n); }
     POSTI = POSTI || calcolaPosti(); const q = POSTI.reduce((a, c) => Math.hypot(c[0]-e, c[1]-n) < Math.hypot(a[0]-e, a[1]-n) ? c : a, [1e9, 1e9]);
     S.sel = null; ui();
-    if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 12 : 16) && COACH_RT === 'pallino' && !S.luoghi.some(L => L.lvl)){ piazzaDifesa('vedetta', q[0], q[1]); S.sel = null; chiudiAnello(); costruisciTorri(); ui(); }
+    const pvG = COACH_RT === 'pallino' && !S.luoghi.some(L => L.lvl) ? pallinoVicino(sx, sy) : null;
+    if (pvG && pvG.q && pvG.d*scale < 26){ piazzaDifesa('vedetta', pvG.q[0], pvG.q[1]); S.sel = null; chiudiAnello(); costruisciTorri(); ui(); }
     else if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 12 : 16)){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
     else if (!S.inCorso) S.fx.push({k:'txt', e, n, z:z+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'});
     aggiornaHud(); return; }
@@ -5263,7 +5282,7 @@ function mostraCarte(premio, interesse){
   c.innerHTML = `<div class="dlg box"><span class="kicker">Ondata ${S.ondata} respinta · +${premio} castagne${interesse ? ' · +' + interesse + ' di risparmio' : ''}</span><h2>Scegli un dono del paese</h2><div class="cards"></div></div>`;
   const box = c.querySelector('.cards');
   scelte.forEach(k => { const bt = document.createElement('button'); bt.className = 'card'; bt.innerHTML = `<div class="t">${k.t}</div><div class="d">${k.d}</div>`;
-    bt.onclick = () => { k.f(S.bonus, S); S.attesaCarta = false; c.hidden = true; ui(); aggiornaHud(); }; box.append(bt); });
+    bt.dataset.tasto = String(box.children.length + 1); bt.onclick = () => { k.f(S.bonus, S); S.attesaCarta = false; c.hidden = true; ui(); aggiornaHud(); }; box.append(bt); });
   c.hidden = false;
 }
 function vittoria(){ S.fine = true; const e = $('#end'); try { RITORNO.partita('tempo', true, {ondata: S.ondata, diff: S.diff}); } catch(e){} if (unaVoltaOggi('rt-' + S.diff)) regalaScrigno({facile:'legno', normale:'argento', difficile:'oro'}[S.diff] || 'legno', 'Difesa in tempo reale vinta');
@@ -10238,7 +10257,7 @@ document.addEventListener('keydown', e => {
     if (k === ' ' || k === 'Enter') clic('#tbFine'); else if (k === 'z' || k === 'Backspace') clic('#tbUndo'); else if (k === 'b') clic('#tbShop'); else if (k === 'Escape' || k === 'm' || k === 'p') clic('#tbMenu');
     return; }
   if (!$('#title').hidden || !S || MOD) return;
-  for (const id of ['#cards', '#end', '#pausa']){ const o = $(id); if (o && !o.hidden){ if (k === 'Enter' || k === ' ') clic(id + ' .big:not(.alt)'); else if ((k === 'Escape' || k === 'p') && id === '#pausa') clic('#pausa .big'); return; } }
+  for (const id of ['#cards', '#end', '#pausa']){ const o = $(id); if (o && !o.hidden){ if (id === '#cards' && k >= '1' && k <= '3'){ const cs = o.querySelectorAll('.card'); if (cs[+k - 1]){ e.preventDefault(); cs[+k - 1].click(); } return; } if (k === 'Enter' || k === ' ') clic(id + ' .big:not(.alt)'); else if ((k === 'Escape' || k === 'p') && id === '#pausa') clic('#pausa .big'); return; } }
   if (k === ' ' || k === 'Enter') clic('#bGo');
   else if (k === 'f') clic('#bFalco');
   else if (k === 'r') clic('#bFrana');
@@ -10520,8 +10539,9 @@ const RITORNO = window.RITORNO = (() => {
       traccia('assaggio', {passo:'fine', fz: scelta || null}); chiudi(); if (nelMenu()) RIENTRA('gioca'); }; soloMenu(); }
   // dopo ogni partita: se è un passo dell'assaggio, lo chiude
   function fineTurni(vinto){ const s = stato(); if (s.in !== 'turni') return false; fatto('turni', vinto ? 'vinto' : 'perso'); try { TB.esci(); } catch(e){ mostraMenu(); } return true; }
-  function ondataRT(n, continua){ const s = stato(); if (s.in !== 'tempo' || n < 2) return false; fatto('tempo', 'vinto');
-    const b = finestra(`<span class="fd-k">ASSAGGIO 1 DI 3 FATTO</span><h2>Hai fermato 2 ondate!</h2><p class="acc-sub">La partita intera ne ha 12. Finiscila ora o prova il prossimo assaggio.</p>${pallini(stato().passo)}
+  const ONDATE_ASS = 3;
+  function ondataRT(n, continua){ const s = stato(); if (s.in !== 'tempo' || n < ONDATE_ASS) return false; fatto('tempo', 'vinto');
+    const b = finestra(`<span class="fd-k">ASSAGGIO 1 DI 3 FATTO</span><h2>Hai difeso Smerillo! 🏆</h2><p class="acc-sub">Il gioco completo ha 12 ondate: puoi continuare questa partita quando vuoi.</p>${pallini(stato().passo)}
       <button class="big" data-go>${stato().passo >= 2 ? 'Avanti: la Conquista ▸' : 'Avanti: le missioni ▸'}</button><button class="big alt" data-st>Continuo questa partita</button>`);
     b.querySelector('[data-go]').onclick = () => { chiudi(); mostraMenu(); };
     b.querySelector('[data-st]').onclick = () => { chiudi(); continua(); }; return true; }
@@ -10591,7 +10611,7 @@ const RITORNO = window.RITORNO = (() => {
       else o.s = 'altro'; o.ass = stato().passo; const c = document.querySelector('#coach:not([hidden]) .co-t'); if (c) o.guida = c.textContent.trim().slice(0, 40); } catch(e){ o.err = 1; } return o; }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') traccia('chiudi', {sec: Math.round((Date.now() - T0)/1000), tap: TAP, dove: dove()}, true); });
   function subito(){ const s = stato(); if (s.passo !== 0 || s.in) return false; aspettaPasso = true; avviaPasso(PASSI[0]); setTimeout(() => { aspettaPasso = false; }, 4000); return true; }
-  return {versione: VERSIONE, rivediGuide, subito, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
+  return {versione: VERSIONE, ONDATE_ASS, rivediGuide, subito, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
 })();
 
 fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){ console.error(e); }
