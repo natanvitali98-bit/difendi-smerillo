@@ -27,7 +27,7 @@ FISSI = [
     ("'🟡 <b>Costruisci</b> (legno ' + S.legname + ')' : T.ferma ? '🎯 <b>Ferma</b>' : '🎯 <b>Colpisci</b> il rosso'", "'🟡 <b>Build</b> (wood ' + S.legname + ')' : T.ferma ? '🎯 <b>Block</b>' : '🎯 <b>Hit</b> the red one'"),
     ("' Passo' + (m ? ' · <b>Scatto</b>: ancora 1' : '') : m ? '🟢 <b>Vai</b> sul verde' : '–'} · ${u.agito ? ico('ok') + ' Azione'", "' Step' + (m ? ' · <b>Dash</b>: 1 more' : '') : m ? '🟢 <b>Go</b> to green' : '–'} · ${u.agito ? ico('ok') + ' Action'"),
     ("'Legno finito' : 'Nessuno vicino'}", "'No wood left' : 'Nobody near'}"),
-    ("<small>Benvenuto a</small>Smerillo</div>'", "<small>Welcome to</small>Smerillo</div>'"),
+    ("<span class=\"lg-n\">Benvenuto a</span>", "<span class=\"lg-n\">Welcome to</span>"),
     ("${f ? 'Il tuo regalo' : 'Per chi giochi?'}", "${f ? 'Your gift' : 'Who do you play for?'}"),
     ("NOMEG = {legno:'legno', argento:'argento', oro:'oro'}", "NOMEG = {legno:'wood', argento:'silver', oro:'gold'}"),
     ("`Sconfiggi ${n} ${n === 1 ? 'volta' : 'volte'} il Cavaliere Nero`", "`Defeat the Black Knight ${n} ${n === 1 ? 'time' : 'times'}`"),
