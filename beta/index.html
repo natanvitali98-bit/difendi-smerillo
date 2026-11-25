@@ -2012,7 +2012,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 @media (min-width:900px) and (min-aspect-ratio:1/1){ .lg2 .lg-s{font-size:76px} .lg2 .lg-n{font-size:22px} }
 @media (max-height:640px){ .lg2 .lg-s{font-size:clamp(38px,11vw,50px)} .lg2 .lg-n{font-size:15px;padding:3px 12px 4px} }
 .logo.lg3,.bv-logo.lg3{-webkit-text-stroke:0!important;text-shadow:none!important;transform:none!important;line-height:0!important;display:block}
-.lg3 .lg-svg{display:block;width:min(86vw,400px);height:auto;margin:0 auto;overflow:visible;filter:drop-shadow(0 6px 10px rgba(10,12,40,.45))}
+.lg3 .lg-svg{display:block;width:min(90vw,410px);height:auto;margin:0 auto;overflow:visible;filter:drop-shadow(0 6px 10px rgba(10,12,40,.45))}
 .cr-arena .logo.lg3{position:relative;margin:auto 0 0}
 .cr-arena .logo.lg3::before{content:'';position:absolute;left:50%;top:55%;width:120%;height:150%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(14,18,52,.55),transparent);z-index:-1;pointer-events:none} /* alone scuro morbido: il logo si legge anche sopra la mappa piena di dettagli */
 @media (min-width:900px) and (min-aspect-ratio:1/1){ .lg3 .lg-svg{width:440px} }
@@ -6043,13 +6043,15 @@ const IMG = {
 
 // ===== ICONE in pixel art, con la stessa tavolozza dei personaggi =====
 // logo del gioco in SVG: contorno uguale ovunque, nitido a ogni misura, uguale su iPhone e Android
-window.logoSVG = function(sopra){ const id = 'lg' + Math.random().toString(36).slice(2, 7), F = "'Lilita One','Arial Black',sans-serif";
-  return `<svg class="lg-svg" viewBox="0 0 560 190" role="img" aria-label="${sopra} Smerillo"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff7cf"/><stop offset=".45" stop-color="#ffd84a"/><stop offset="1" stop-color="#f2a516"/></linearGradient></defs>
-    <g font-family="${F}" text-anchor="middle">
-      <g fill="#ffd03a" font-size="30" letter-spacing="6"><text x="280" y="44" stroke="#141433" stroke-width="7" stroke-linejoin="round" paint-order="stroke fill">${sopra}</text></g>
-      <rect x="40" y="31" width="${Math.max(10, 170 - sopra.length*9)}" height="6" rx="3" fill="#ffd03a" stroke="#141433" stroke-width="3"/><rect x="${520 - Math.max(10, 170 - sopra.length*9)}" y="31" width="${Math.max(10, 170 - sopra.length*9)}" height="6" rx="3" fill="#ffd03a" stroke="#141433" stroke-width="3"/>
-      <text x="280" y="170" font-size="112" letter-spacing="2" fill="#141433" stroke="#141433" stroke-width="16" stroke-linejoin="round">SMERILLO</text>
-      <text x="280" y="160" font-size="112" letter-spacing="2" fill="url(#${id})" stroke="#141433" stroke-width="12" stroke-linejoin="round" paint-order="stroke fill">SMERILLO</text>
+window.logoSVG = function(sopra){ const id = 'lg' + Math.random().toString(36).slice(2, 7), F = "'Pixelify Sans','Lilita One',monospace", W = 'SMERILLO';
+  // logo in pixel art: lettere a pixel, contorno a scalini (8 copie spostate), oro in 3 fasce nette, ombra rossa a gradino. SVG: identico su ogni telefono
+  const giro = (x, y, col, s) => [[-s,0],[s,0],[0,-s],[0,s],[-s,-s],[s,-s],[-s,s],[s,s]].map(([dx, dy]) => `<text x="${x + dx}" y="${y + dy}" fill="${col}">${W}</text>`).join('');
+  const lw = Math.round(sopra.length*19 + 44);
+  return `<svg class="lg-svg" viewBox="0 0 560 176" role="img" aria-label="${sopra} Smerillo" shape-rendering="crispEdges"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".36" stop-color="#fff3b0"/><stop offset=".36" stop-color="#ffd03a"/><stop offset=".7" stop-color="#ffd03a"/><stop offset=".7" stop-color="#f29a1a"/><stop offset="1" stop-color="#f29a1a"/></linearGradient></defs>
+    <g font-family="${F}" font-weight="700" text-anchor="middle">
+      <rect x="${280 - lw/2 - 4}" y="6" width="${lw + 8}" height="44" fill="#141433"/><rect x="${280 - lw/2}" y="10" width="${lw}" height="36" fill="#d8402f"/><rect x="${280 - lw/2}" y="10" width="${lw}" height="6" fill="#ff7a5c"/><rect x="${280 - lw/2}" y="40" width="${lw}" height="6" fill="#8f2318"/>
+      <text x="280" y="38" font-size="24" letter-spacing="5" fill="#fff">${sopra}</text>
+      <g font-size="96" letter-spacing="4">${giro(280, 160, '#141433', 6)}<text x="280" y="160" fill="#8f2318">${W}</text>${giro(280, 150, '#141433', 6)}<text x="280" y="150" fill="url(#${id})">${W}</text></g>
     </g></svg>`; };
 const ICONE = {
   moneta:['..kkkkkk..','.kyyyyyyk.','kyyywwyyyk','kyywyyyyok','kyywyyyyok','kyywyyyyok','kyyyyyyyok','kyyyyyyook','.kyoooook.','..kkkkkk..'],
