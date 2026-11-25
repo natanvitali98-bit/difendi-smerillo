@@ -2276,6 +2276,29 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 #coach.mini{padding:6px 12px;border-radius:999px;width:max-content;max-width:calc(100vw - 24px);box-shadow:0 3px 0 #141433;cursor:pointer}
 #coach.mini .co-h,#coach.mini .co-s{display:none}
 body.novizio #title .cr-nav,body.novizio #title .gp-row,body.novizio #title .pv-box,body.novizio #title .gp-strada,body.novizio #title .gp-st,body.novizio #title #hmProf,body.novizio #title .cr-res,body.novizio #asChip{display:none!important} body.novizio #title .gp-go{font-size:30px;padding:20px 0;animation:tbpulse 1.2s ease-in-out infinite} /* giocatore nuovo: solo il grande GIOCA */
+/* fine partita in tempo reale */
+#end .fine-rt{text-align:center} #end .fine-rt h2{margin:4px 0 8px}
+#end .fr-top{display:grid;place-items:center;width:96px;height:96px;margin:-6px auto 4px;border-radius:50%;border:4px solid #141433;box-shadow:0 5px 0 #141433;animation:frTop .6s cubic-bezier(.2,1.6,.4,1) both}
+#end .vinto .fr-top{background:radial-gradient(circle,#fff3b0,#ffd03a 70%)} #end .perso .fr-top{background:radial-gradient(circle,#ffb0a0,#e8553f 70%);animation:frTop .6s cubic-bezier(.2,1.6,.4,1) both,frTrema .5s .6s ease-in-out}
+#end .fr-onde{display:flex;align-items:center;justify-content:center;gap:3px;margin:4px 0 10px} #end .fr-onde i{width:14px;height:18px;border-radius:4px;background:rgba(255,255,255,.18);border:2px solid rgba(0,0,0,.35)}
+#end .fr-onde i.ok{background:#3fbf5a;animation:frSeg .25s calc(.35s + var(--i)*60ms) both} #end .fr-onde i.ko{background:#e8553f;animation:frSeg .25s 1.1s both} #end .fr-onde b{margin-left:8px;font:400 20px/1 var(--f-big)}
+#end .fine-rt .stelle{justify-content:center;font-size:44px} #end .fine-rt .stelle span{display:inline-block} #end .fine-rt .stelle .si{animation:frStella .5s calc(.5s + var(--i)*.25s) cubic-bezier(.2,1.8,.4,1) both} #end .fine-rt .stelle .no{opacity:.35}
+@media (max-height:620px){ #end .fr-top{width:64px;height:64px;margin-top:0} #end .fr-top img{width:48px;height:auto} #end .fine-rt .stelle{font-size:30px} }
+@keyframes frTop{0%{transform:scale(0) rotate(-30deg)}100%{transform:none}} @keyframes frTrema{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes frSeg{0%{transform:scale(0)}100%{transform:none}} @keyframes frStella{0%{transform:scale(0) rotate(-90deg);opacity:0}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){ #end .fr-top,#end .fr-onde i,#end .fine-rt .stelle .si{animation:none!important} }
+/* doni dopo ogni ondata: 3 carte a icone, grandi e colorate */
+#cards .dono h2{text-align:center;margin:2px 0 10px} #cards .dono .kicker{display:flex;justify-content:center;align-items:center;gap:4px}
+.cards.doni{grid-template-columns:repeat(3,1fr);gap:10px;perspective:700px}
+#app .cards.doni .card.dn,.cards.doni .card.dn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:150px;padding:12px 6px;text-align:center;border-radius:16px;border:3px solid #141433;box-shadow:0 5px 0 #141433;background:linear-gradient(180deg,color-mix(in srgb,var(--dc) 30%,#fff) 0%,#fff 62%)!important;color:#141433;animation:dnIn .45s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(var(--i)*90ms);transition:transform .12s}
+.cards.doni .card.dn:active{transform:translateY(3px) scale(.97);box-shadow:0 2px 0 #141433}
+.dn-ic{display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:var(--dc);border:3px solid #141433;box-shadow:inset 0 -5px 0 rgba(0,0,0,.18)} .dn-ic img{filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.dn-v{font:400 30px/1 var(--f-big);color:#141433;-webkit-text-stroke:0;margin-top:4px} .dn-e{font-weight:800;font-size:14px;line-height:1.1;color:#3a3f70}
+.cards.doni.fatto .card.dn:not(.presa){animation:dnVia .35s ease-in forwards} .cards.doni .card.dn.presa{animation:dnPresa .45s ease-out forwards;z-index:2}
+@keyframes dnIn{0%{opacity:0;transform:translateY(40px) rotateY(80deg) scale(.8)}100%{opacity:1;transform:none}}
+@keyframes dnVia{to{opacity:0;transform:translateY(60px) rotate(8deg)}}
+@keyframes dnPresa{40%{transform:translateY(-14px) scale(1.12);box-shadow:0 0 0 6px var(--dc),0 10px 0 #141433}100%{transform:translateY(-30px) scale(.9);opacity:0}}
+@media (prefers-reduced-motion: reduce){ .cards.doni .card.dn,.cards.doni .card.dn.presa,.cards.doni.fatto .card.dn{animation:none} }
 #coach.solo.vicino{position:fixed;width:max-content!important;right:auto!important;bottom:auto!important;transform:none!important;margin:0!important} #coach.solo.mini{padding:10px 16px 12px} #coach.solo.mini .co-h{display:flex}
 #coach.solo{width:max-content!important;max-width:calc(100vw - 24px);padding:10px 16px 12px;text-align:center} #coach.solo .co-h{position:absolute;top:-12px;right:-12px;margin:0} #coach.solo .co-n{display:none} #coach.solo .co-salta{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;border:3px solid #141433;color:#141433;font-weight:900;line-height:22px;text-decoration:none} #coach.solo .co-t{font-size:24px;margin:0;white-space:nowrap} #coach.solo .co-s{margin-top:4px;text-align:center} /* guida senza frasi: solo 2 parole e la mano */
 #coach.mini .co-t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -3107,15 +3130,15 @@ const RECKEY = 'difendi-smerillo-record';
 const leggiRecord = () => { try { return JSON.parse(localStorage.getItem(RECKEY)) || {}; } catch(e){ return {}; } };
 const scriviRecord = r => { try { localStorage.setItem(RECKEY, JSON.stringify(r)); } catch(e){} };
 const CARTE = [
-  {t:'Dardi di ferro', d:'Le Balestre fanno il 25% di danno in più.', f:b=>b.vedetta*=1.25},
-  {t:'Castagne grosse', d:'Le castagne ardenti colpiscono un’area più larga del 30%.', f:b=>b.splash*=1.3},
-  {t:'Campane a festa', d:'Il rintocco stordisce 0,4 secondi in più.', f:b=>b.stun+=.4},
-  {t:'Falchi affamati', d:'I Falchi fanno il 25% di danno in più.', f:b=>b.nido*=1.25},
-  {t:'Raccolta d’autunno', d:'Ricevi subito 60 castagne.', f:(b,S)=>S.castagne+=60},
-  {t:'Muri riparati', d:'Il borgo recupera 4 punti di resistenza.', f:(b,S)=>S.vite=Math.min(S.viteMax,S.vite+4)},
-  {t:'Risparmio', d:'Da ora l’interesse sulle castagne risparmiate arriva fino a 40.', f:b=>b.interesse=40},
-  {t:'Occhio di falco', d:'Il tuo Falco si ricarica il 30% più in fretta.', f:b=>b.falcoCd*=.7},
-  {t:'Arenaria fragile', d:'La frana è più larga e torna pronta 3 secondi prima.', f:b=>{b.frana*=1.3; b.franaCd-=3;}},
+  {t:'Dardi di ferro', d:'Le Balestre fanno il 25% di danno in più.', ic:'freccia', v:'+25%', e:'Balestre', c:'#e8553f', f:b=>b.vedetta*=1.25},
+  {t:'Castagne grosse', d:'Le castagne ardenti colpiscono un’area più larga del 30%.', ic:'fiamma', v:'+30%', e:'Fuoco', c:'#f08a24', f:b=>b.splash*=1.3},
+  {t:'Campane a festa', d:'Il rintocco stordisce 0,4 secondi in più.', ic:'campana', v:'+0,4 s', e:'Stordire', c:'#9b6be0', f:b=>b.stun+=.4},
+  {t:'Falchi affamati', d:'I Falchi fanno il 25% di danno in più.', ic:'spada', v:'+25%', e:'Falchi', c:'#e8553f', f:b=>b.nido*=1.25},
+  {t:'Raccolta d’autunno', d:'Ricevi subito 60 castagne.', ic:'castagna', v:'+60', e:'Castagne', c:'#e0a72a', f:(b,S)=>S.castagne+=60},
+  {t:'Muri riparati', d:'Il borgo recupera 4 punti di resistenza.', ic:'cuore', v:'+4', e:'Vite', c:'#3fbf5a', f:(b,S)=>S.vite=Math.min(S.viteMax,S.vite+4)},
+  {t:'Risparmio', d:'Da ora l’interesse sulle castagne risparmiate arriva fino a 40.', ic:'moneta', v:'40', e:'Interesse', c:'#e0a72a', f:b=>b.interesse=40},
+  {t:'Occhio di falco', d:'Il tuo Falco si ricarica il 30% più in fretta.', ic:'clessidra', v:'−30%', e:'Ricarica Falco', c:'#3a8fe0', f:b=>b.falcoCd*=.7},
+  {t:'Arenaria fragile', d:'La frana è più larga e torna pronta 3 secondi prima.', ic:'massi', v:'+30%', e:'Frana', c:'#3a8fe0', f:b=>{b.frana*=1.3; b.franaCd-=3;}},
 ];
 
 const EVENTI = [
@@ -5340,12 +5363,24 @@ function disegnaTitolo(T){
 }
 function mostraCarte(premio, interesse){
   const c = $('#cards'); const scelte = shuffle(CARTE.slice()).slice(0,3);
-  c.innerHTML = `<div class="dlg box"><span class="kicker">Ondata ${S.ondata} respinta · +${premio} castagne${interesse ? ' · +' + interesse + ' di risparmio' : ''}</span><h2>Scegli un dono del paese</h2><div class="cards"></div></div>`;
-  const box = c.querySelector('.cards');
-  scelte.forEach(k => { const bt = document.createElement('button'); bt.className = 'card'; bt.innerHTML = `<div class="t">${k.t}</div><div class="d">${k.d}</div>`;
-    bt.dataset.tasto = String(box.children.length + 1); bt.onclick = () => { k.f(S.bonus, S); S.attesaCarta = false; c.hidden = true; ui(); aggiornaHud(); }; box.append(bt); });
+  c.innerHTML = `<div class="dlg box dono"><span class="kicker">+${premio} ${TB.ico('castagna', 2)}${interesse ? ' · +' + interesse + ' di risparmio' : ''}</span><h2>Scegli un dono</h2><div class="cards doni"></div></div>`;
+  const box = c.querySelector('.cards'); let scelto = false;
+  scelte.forEach((k, i) => { const bt = document.createElement('button'); bt.className = 'card dn'; bt.style.setProperty('--dc', k.c); bt.style.setProperty('--i', i); bt.title = k.t + ': ' + k.d; bt.setAttribute('aria-label', k.t + '. ' + k.d);
+    bt.innerHTML = `<span class="dn-ic">${TB.ico(k.ic, 4)}</span><b class="dn-v">${k.v}</b><span class="dn-e">${k.e}</span>`;
+    bt.dataset.tasto = String(box.children.length + 1);
+    // tocco: la carta scelta si alza e brilla, le altre cadono; poi si riparte
+    bt.onclick = () => { if (scelto) return; scelto = true; try { SUONI.suona('costruisci'); } catch(e){} box.classList.add('fatto'); bt.classList.add('presa');
+      setTimeout(() => { k.f(S.bonus, S); S.attesaCarta = false; c.hidden = true; ui(); aggiornaHud(); }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 480); }; box.append(bt); });
   c.hidden = false;
 }
+// fine partita in tempo reale: icona grande, barra delle 12 ondate, stelle che arrivano una alla volta, una sola frase
+function vestiFineRT(e, vinto, stelle){ const d = e.querySelector('.dlg'); if (!d) return; d.classList.add('fine-rt', vinto ? 'vinto' : 'perso');
+  const h = d.querySelector('h2'), top = document.createElement('div'); top.className = 'fr-top'; top.innerHTML = TB.ico(vinto ? 'coppa' : 'teschio', 6); d.insertBefore(top, d.firstChild);
+  const n = vinto ? ONDATE : Math.max(0, S.ondata - 1), bar = document.createElement('div'); bar.className = 'fr-onde'; bar.setAttribute('aria-label', 'Ondate respinte: ' + n + ' di ' + ONDATE);
+  bar.innerHTML = Array.from({length: ONDATE}, (_, i) => `<i class="${i < n ? 'ok' : i === n && !vinto ? 'ko' : ''}" style="--i:${i}"></i>`).join('') + `<b>${n}/${ONDATE}</b>`; if (h) h.after(bar);
+  const st = d.querySelector('.stelle'); if (st && vinto){ st.innerHTML = [0, 1, 2].map(i => `<span class="${i < stelle ? 'si' : 'no'}" style="--i:${i}">${i < stelle ? '★' : '☆'}</span>`).join(''); }
+  const p = d.querySelector('p'); if (p){ const t = p.textContent.trim(), m = t.match(/^[^.!?]*[.!?]/); if (m && m[0].length < t.length) p.textContent = m[0]; }
+  if (vinto){ try { EPICO.coriandoli(120); } catch(er){} } }
 function vittoria(){ S.fine = true; const e = $('#end'); try { RITORNO.partita('tempo', true, {ondata: S.ondata, diff: S.diff}); } catch(e){} if (unaVoltaOggi('rt-' + S.diff)) regalaScrigno({facile:'legno', normale:'argento', difficile:'oro'}[S.diff] || 'legno', 'Difesa in tempo reale vinta');
   PROF.daiXP({facile:40, normale:70, difficile:110}[S.diff] || 50);
   if (S.diff !== 'facile' && !S.potenziato) PROF.leggenda('nopot');
@@ -5359,14 +5394,14 @@ function vittoria(){ S.fine = true; const e = $('#end'); try { RITORNO.partita('
   e.innerHTML = `<div class="dlg box"><span class="kicker">Missione ${S.miss || 1} · 12 ondate respinte · ${DIFF[S.diff].nome}</span><h2>${(CMISSIONI[S.miss] || {}).salvo || 'Smerillo è salva!'}</h2><div class="stelle">${'★'.repeat(stelle)}${'☆'.repeat(3-stelle)}</div><p>${S.miss >= 2 ? 'Il Cavaliere Nero è tornato alla Rocca.' : 'Il Re della Nebbia è tornato giù nella valle.'} Resistenza rimasta: ${S.vite} su ${S.viteMax}.${stelle < 3 ? ' Per 3 stelle non devi perdere quasi niente.' : ''}${nuovo ? ' Nuovo record!' : ''}</p>${apre2 ? '<p class="olavv">🔓 Hai aperto la <b>Missione 2: L’assalto della Rocca</b>!</p><button class="big" id="eM2">Gioca la Missione 2</button>' : ''}<button class="big ${apre2 ? 'alt' : ''}" id="eAgain">Gioca di nuovo</button><button class="big alt" id="eMenu">Le missioni</button></div>`;
   const m2 = e.querySelector('#eM2'); if (m2) m2.onclick = () => { e.hidden = true; CMIS = 2; nuovaPartita(); };
   e.querySelector('#eMenu').onclick = () => { e.hidden = true; mostraMenu('cmis'); };
-  e.hidden = false; e.querySelector('#eAgain').onclick = () => { e.hidden = true; nuovaPartita(); }; }
+  e.hidden = false; vestiFineRT(e, true, stelle); e.querySelector('#eAgain').onclick = () => { e.hidden = true; nuovaPartita(); }; }
 function sconfitta(){ S.fine = true; S.inCorso = false; const e = $('#end'); try { RITORNO.partita('tempo', false, {ondata: S.ondata, diff: S.diff}); if (RITORNO.persoRT()) return; } catch(er){}
   const rec = leggiRecord(), kk = RK(S.diff); if (!rec[kk] || (!rec[kk].stelle && S.ondata > rec[kk].ondata)){ rec[kk] = {stelle:0, ondata:S.ondata}; scriviRecord(rec); }
   e.innerHTML = S.miss >= 3 ? `<div class="dlg box"><span class="kicker">Missione ${S.miss} · Ondata ${S.ondata} di ${ONDATE}</span><h2>${CMISSIONI[S.miss].perso}</h2><p>Guarda i cartelli rossi: da lì entrano i nemici. Metti le difese lungo le loro strade prima che arrivino a ${CMISSIONI[S.miss].meta}. I cavalieri hanno l’armatura: servono colpi forti.</p><button class="big" id="eRetry">Riprova</button><button class="big alt" id="eMenu">Le missioni</button></div>`
     : S.miss === 2 ? `<div class="dlg box"><span class="kicker">Missione 2 · Ondata ${S.ondata} di ${ONDATE}</span><h2>I cavalieri hanno preso il piazzale</h2><p>Quasi tutti scendono da <b>Via dei Caduti</b>: difendi quella strada per prima. I cavalieri hanno l’armatura: servono colpi forti (Balestre potenziate, Braciere). I portabandiera rinforzano chi hanno vicino: abbattili per primi.</p><button class="big" id="eRetry">Riprova</button><button class="big alt" id="eMenu">Le missioni</button></div>`
     : `<div class="dlg box"><span class="kicker">Ondata ${S.ondata} di ${ONDATE}</span><h2>La nebbia ha raggiunto il piazzale</h2><p>Guarda da quale strada arriva la prossima ondata e difendi quella. Per corvi e fate servono la Balestra e il Falco. Tieni la frana per quando arrivano tanti nemici insieme.</p><button class="big" id="eRetry">Riprova</button><button class="big alt" id="eMenu">Le missioni</button></div>`;
   e.querySelector('#eMenu').onclick = () => { e.hidden = true; mostraMenu('cmis'); };
-  e.hidden = false; e.querySelector('#eRetry').onclick = () => { e.hidden = true; nuovaPartita(); }; aggiornaHud(); }
+  e.hidden = false; vestiFineRT(e, false); e.querySelector('#eRetry').onclick = () => { e.hidden = true; nuovaPartita(); }; aggiornaHud(); }
 
 /* =====================================================================
    MODALITÀ A TURNI · 3 MISSIONI: PORTA NORD, CUORE DEL PAESE, ROCCA

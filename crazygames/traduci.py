@@ -22,6 +22,7 @@ def esc_tpl(v):
 
 # parole singole usate come valori (non si possono tradurre in automatico senza rischiare le chiavi)
 FISSI = [
+    ("'Ondate respinte: ' + n + ' di ' + ONDATE", "'Waves held: ' + n + ' of ' + ONDATE"),
     ("Queste due strade sono corte: tieni qualcuno vicino alla <b>chiesetta</b>.'", "These two roads are short: keep someone near the <b>little church</b>.'"),
     ("'<b>Giallo</b> = costruisci (legno: '", "'<b>Yellow</b> = build (wood: '"),
     ("'<b>Mirino</b> = puoi fermare'", "'<b>Sight</b> = you can block'"),
