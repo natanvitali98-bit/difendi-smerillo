@@ -6463,7 +6463,9 @@ function attacca(S, d, x, evs){
 
 /* ---------- stato dell'interfaccia ---------- */
 let tempoT = 0, tempoMax = 0, tempoUlt = -1, inBottega = false; // il tempo per pensare, dalla missione 3
-const POS = new Map(), COLP = new Map(); let FANT = [], ATT = null, uccisiT = 0, ritardoFx = 0; const adesso = () => performance.now()/1000; // animazioni dei colpi e dei passi del giocatore
+const POS = new Map(), COLP = new Map(); let FANT = [], ATT = null, uccisiT = 0, ritardoFx = 0; let HS_INI = 0, HS_FINE = 0, HS_OFF = 0; // fermo-immagine di un istante quando il colpo arriva (si sente il peso)
+const adesso = () => { const t = performance.now()/1000; if (t < HS_FINE) return HS_INI - HS_OFF; if (HS_FINE){ HS_OFF += HS_FINE - HS_INI; HS_FINE = 0; } return t - HS_OFF; };
+function fermoColpo(d){ if (riduci) return; adesso(); HS_INI = performance.now()/1000; HS_FINE = HS_INI + d; } // animazioni dei colpi e dei passi del giocatore
 let ultimaScelta = '', scalaU = 1, scossa = 0, modoC = false, modoS = false, S = null, V = null, storia = [], sel = null, prev = [], coda = [], ev = null, evT = 0, fx = [], attivo = false, ovAperto = false;
 let SW = 1, SH = 1, dpr = 1, sc = 1, ox = 0, oy = 0, camX = 0, camY = 0, fitS = 1;
 function aggiornaAnteprima(){ prev = S && !S.esito ? faseNemici(clona(S)) : []; }
@@ -6491,7 +6493,7 @@ function dopoAzione(evs){
     POS.set(A.id, {k: lontano ? 'rinculo' : 'affondo', a:A.x.nodo, t0, d: lontano ? .24 : .32});
     if (lontano && N0 && N1){ fx.push({k:'proj', e:N0.e, n:N0.n, z:N0.z, e1:N1.e, n1:N1.n, z1:N1.z, t:0, d:imp, falco:A.tipo === 'falco'}); SUONI.suona('tiro'); }
     if (N1) fx.push({k:'ring', e:N1.e, n:N1.n, z:N1.z, t:-imp});
-    COLP.set(A.x.id, {da:A.daNodo, t0:t0 + imp});
+    COLP.set(A.x.id, {da:A.daNodo, t0:t0 + imp}); setTimeout(() => fermoColpo(evs.some(e => e.k === 'cade') ? .11 : .07), imp*1000);
     const vivo = S.nem.find(q => q.id === A.x.id);
     if (!vivo) FANT.push({u:A.x, fino:t0 + imp}); else if (vivo.nodo !== A.x.nodo) POS.set(vivo.id, {k:'mossa', da:A.x.nodo, t0:t0 + imp, d:.22}); }
   ritardoFx = imp;
@@ -6579,7 +6581,7 @@ const DUR = {masso:.45, boom:.3, passo:.34, colpo:.34, cade:.32, cura:.25, arriv
 function applica(e){ // aggiorna la copia che si vede durante l'animazione
   const suona = n => SUONI.suona(n);
   if (e.k === 'passo'){ const x = V.nem.find(q => q.id === e.id); if (x) x.nodo = e.a; }
-  else if (e.k === 'colpo'){ suona(e.a === 'porta' ? 'allarme' : 'colpo'); if (e.a === 'porta'){ scossa = 6; } if (e.a === 'porta') V.porta = Math.max(0, V.porta - e.danno); else { const u = [...V.dif, ...V.nem, ...V.bar].find(q => q.id === e.a); if (u) u.hp -= e.danno; } testo(e.nodo, e.a === 'porta' ? 'Porta −' + e.danno : '−' + e.danno, '#ff6a4a'); { const N = NODI[e.nodo]; if (N && !riduci) fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0}); scintille(e.nodo, ['#ffffff','#ff9a7a'], 8); } }
+  else if (e.k === 'colpo'){ suona(e.a === 'porta' ? 'allarme' : 'colpo'); fermoColpo(.06); if (e.a === 'porta'){ scossa = 6; } if (e.a === 'porta') V.porta = Math.max(0, V.porta - e.danno); else { const u = [...V.dif, ...V.nem, ...V.bar].find(q => q.id === e.a); if (u) u.hp -= e.danno; } testo(e.nodo, e.a === 'porta' ? 'Porta −' + e.danno : '−' + e.danno, '#ff6a4a'); { const N = NODI[e.nodo]; if (N && !riduci) fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0}); scintille(e.nodo, ['#ffffff','#ff9a7a'], 8); } }
   else if (e.k === 'cade'){ effettoCaduta(e);
     suona('cade'); V.dif = V.dif.filter(q => q.id !== e.id); V.nem = V.nem.filter(q => q.id !== e.id); V.bar = V.bar.filter(q => q.id !== e.id); scintille(e.nodo, e.chi === 'dif' ? ['#e04830','#f8d048'] : ['#c8a060','#5c3818']); }
   else if (e.k === 'cura'){ suona('cura'); const u = V.dif.find(q => q.id === e.id); if (u) u.hp++; testo(e.nodo, '+1', '#7ee070'); }
@@ -6639,7 +6641,7 @@ function disegnaUnita(u, k, T){
     else if (q >= 0){ const N1 = NODI[PA.a]; if (N1){ const [tx, ty] = scr(N1.e, N1.n, N1.z), f = PA.k === 'affondo' ? (q < .35 ? -Math.sin(q/.35*Math.PI/2)*.12 : Math.sin((q - .35)/.65*Math.PI)*.5) : -Math.sin(q*Math.PI)*.12; x += (tx - x)*f; y += (ty - y)*f; } } }
   if (ev && ev.k === 'colpo' && ev.da === u.id){ const N = NODI[ev.nodo], [tx,ty] = scr(N.e, N.n, N.z), q = Math.min(1, evT/DUR.colpo), f = q < .35 ? -Math.sin(q/.35*Math.PI/2)*.08 : Math.sin((q - .35)/.65*Math.PI)*.45; x += (tx-x)*f; y += (ty-y)*f; }
   let squash = 1; if (ev && ev.k === 'colpo' && ev.a === u.id && ev.da){ const A = [...(V || S).dif, ...(V || S).nem].find(q => q.id === ev.da); if (A){ const NA = NODI[A.nodo], [ax, ay] = scr(NA.e, NA.n, NA.z), q = Math.min(1, evT/DUR.colpo); if (q > .45){ const k2 = Math.sin((q - .45)/.55*Math.PI), dl = Math.hypot(x - ax, y - ay) || 1; x += (x - ax)/dl*7*k2; y += (y - ay)/dl*4*k2; squash = 1 - .18*k2; } } }
-  let flashC = false; { const CA = COLP.get(u.id); if (CA){ const q = (ora_ - CA.t0)/.34; if (q >= 1) COLP.delete(u.id); else if (q >= 0){ const NA = NODI[CA.da]; if (NA){ const [ax, ay] = scr(NA.e, NA.n, NA.z), k2 = Math.sin(Math.min(1, q*1.6)*Math.PI)*(1 - q*.4), dl = Math.hypot(x - ax, y - ay) || 1; x += (x - ax)/dl*10*k2; y += (y - ay)/dl*5*k2; squash = Math.min(squash, 1 - .22*k2); } flashC = q < .3; } } }
+  let flashC = false; { const CA = COLP.get(u.id); if (CA){ const q = (ora_ - CA.t0)/.34; if (q >= 1) COLP.delete(u.id); else if (q >= 0){ const NA = NODI[CA.da]; if (NA){ const [ax, ay] = scr(NA.e, NA.n, NA.z), k2 = Math.sin(Math.min(1, q*1.6)*Math.PI)*(1 - q*.4), dl = Math.hypot(x - ax, y - ay) || 1; x += (x - ax)/dl*16*k2; y += (y - ay)/dl*7*k2; squash = Math.min(squash, 1 - .3*k2); } flashC = q < .14 || (q > .24 && q < .36); } } } // colpito: spinto indietro, schiacciato e lampeggia due volte
   const flash = flashC || (ev && ev.k === 'colpo' && ev.a === u.id && evT > DUR.colpo*.45 && evT < DUR.colpo*.75);
   const nuovo = ev && ev.k === 'arriva' && ev.x.id === u.id; let pop = 1; if (nuovo){ const qa = Math.min(1, evT/DUR.arriva); g.globalAlpha = qa; if (!riduci) pop = 1 + .55*(1 - qa)*(1 - qa); } // chi arriva entra con un piccolo balzo
   // anello sotto i piedi: giallo = può ancora agire, grigio = ha finito
@@ -6791,7 +6793,8 @@ function provaCoach(){ if (!PROVA || !S) return; const P = PROVE[PROVA.k], u = S
   if (f === 'ok'){ const k0 = PROVA.k; setTimeout(() => { if (PROVA && PROVA.k === k0 && PROVA.vis === 'ok'){ if (k0 >= PROVE.length - 1) provaFine(false); else provaVia(k0 + 1); } }, 1500); } // si passa da soli al prossimo soldato, e poi alla missione // si passa da soli al prossimo soldato
   const ultima = PROVA.k === PROVE.length - 1, tx = P[f], colpita = !!(x && x.hp < x.max) || !x;
   const testo = f === 'ok' && PROVA.k === 2 && !colpita ? '🔨 Strada chiusa!' : tx[0], sotto = tx[1];
-  COACH.mostra({solo: true, saltaT: '✕', passo: PROVA.k + 1, tot: PROVE.length, testo, sotto,
+  const mostraC = cfgC => { if (f !== 'ok') return COACH.mostra(cfgC); try { COACH.nascondi(); } catch(e){} const k1 = PROVA.k; setTimeout(() => { if (PROVA && PROVA.k === k1 && PROVA.vis === 'ok') COACH.mostra(cfgC); }, 950); }; // dopo un colpo la nuvoletta aspetta: prima si vede il nemico che cade
+  mostraC({solo: true, saltaT: '✕', giu: f === 'ok', passo: PROVA.k + 1, tot: PROVE.length, testo, sotto,
     salta: f === 'ok' ? null : () => provaFine(true), bottone: f === 'ok' ? (ultima ? 'Alla missione ▸' : 'Avanti ▸') : null, // il tasto dice cosa fa (prima c'era solo una freccina)
     ok: () => { if (!PROVA) return; if (ultima) provaFine(false); else provaVia(PROVA.k + 1); },
     pausa: () => !attivo || ovAperto || !S || !!V,
@@ -10525,7 +10528,7 @@ const COACH = window.COACH = (() => {
       else { box.classList.remove('lato', 'dx', 'sx');
         // lato della nuvoletta con un margine: se il punto da toccare si muove (la mappa scorre) non salta su e giù di continuo
         const era = box.classList.contains('sopra') ? true : box.classList.contains('sotto') ? false : null, lim = era === true ? .37 : era === false ? .53 : .45;
-        const alto = !!(!b || b.y > innerHeight*lim || (cfg.su && b.y > (era === false ? 190 : 150))); box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
+        const alto = !!((!b && !cfg.giu) || (b && b.y > innerHeight*lim) || (b && cfg.su && b.y > (era === false ? 190 : 150))); // giu: senza bersaglio sta in basso, lontano dall'azione box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
         // se la nuvoletta copre il punto da toccare la accorcio, e resta accorciata finché non cambia passo (prima si allungava e accorciava a ogni fotogramma)
         if (b && !box.classList.contains('stretto')){ const r = box.getBoundingClientRect(); if (b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8) box.classList.add('stretto'); } }
       // guida senza frasi: le 2 parole stanno attaccate alla mano, non in fondo allo schermo
