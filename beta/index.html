@@ -2145,6 +2145,18 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 #accOv[hidden]{display:none}
 
 /* ===== assaggio, giorni di fila, sfida delle frazioni ===== */
+#rtOv.bv{background:linear-gradient(180deg,rgba(10,14,46,.35) 0%,transparent 22%,transparent 45%,rgba(10,14,46,.82) 100%);align-items:flex-end;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+#rtOv.bv .rr-box{position:static;width:min(440px,100%);margin:0 auto;animation:bvSu .55s cubic-bezier(.2,.9,.3,1.15) .35s both}
+#rtOv.bv .bv-logo{position:fixed;left:0;right:0;top:calc(9vh + env(safe-area-inset-top));text-align:center;font:400 clamp(52px,16vw,96px)/.92 var(--f-big);color:var(--giallo,#ffd03a);-webkit-text-stroke:2px #141433;text-shadow:0 6px 0 #141433;pointer-events:none;animation:pgLogo .7s cubic-bezier(.2,.9,.3,1.3) both,logoRespira 4s ease-in-out 1s infinite}
+#rtOv.bv .bv-logo small{display:block;font-size:.36em;-webkit-text-stroke:1.5px #141433;text-shadow:0 3px 0 #141433;color:#fff;margin-bottom:4px}
+#rtOv.bv .fd-festa{margin-top:-46px}
+#rtOv.bv h2{text-align:center}
+#rtOv.bv .as-fz{background:none;padding:0}
+#rtOv.bv [data-x]:disabled{opacity:.45;filter:saturate(.4)}
+@keyframes bvSu{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+body.bv-on #titleC,body.bv-on #titleVelo,body.bv-on #title .velo,body.bv-on #asChip{opacity:0!important;pointer-events:none!important;transition:opacity .35s}
+@media (max-height:600px){ #rtOv.bv .bv-logo{top:8px;font-size:clamp(34px,9vh,56px)} }
+@media (prefers-reduced-motion: reduce){ #rtOv.bv .rr-box,#rtOv.bv .bv-logo{animation:none!important} }
 #rtOv{position:fixed;inset:0;z-index:100003;background:rgba(14,22,70,.62);display:flex;align-items:center;justify-content:center;padding:12px 10px calc(12px + env(safe-area-inset-bottom));overflow-y:auto}
 #rtOv[hidden]{display:none}
 .rr-box{width:100%;max-width:440px;margin:auto;background:#fff;color:#141433;border:3px solid #141433;border-radius:22px;box-shadow:0 6px 0 #141433;padding:20px 18px;display:flex;flex-direction:column;gap:10px;animation:accIn .25s cubic-bezier(.2,1.3,.4,1);font-family:var(--f-body,system-ui)}
@@ -10598,7 +10610,7 @@ const RITORNO = window.RITORNO = (() => {
   let ov = null, chip = null;
   function finestra(html, chiudibile = false){ if (!ov){ ov = document.createElement('div'); ov.id = 'rtOv'; document.body.append(ov); ov.addEventListener('click', e => { if (e.target === ov && ov.dataset.ch === '1') chiudi(); }); }
     ov.dataset.ch = chiudibile ? '1' : ''; ov.innerHTML = `<div class="rr-box">${html}</div>`; ov.hidden = false; try { SUONI.suona('tocco'); } catch(e){} return ov.firstElementChild; }
-  function chiudi(){ if (ov){ ov.hidden = true; ov.innerHTML = ''; } }
+  function chiudi(){ if (ov){ ov.hidden = true; ov.innerHTML = ''; ov.classList.remove('bv'); } document.body.classList.remove('bv-on'); }
   const aperta = () => !!(ov && !ov.hidden) || !!(document.getElementById('accOv') && !document.getElementById('accOv').hidden);
   const titolo = () => document.getElementById('title');
   const nelMenu = () => { const t = titolo(); return !!t && !t.hidden && !document.getElementById('caricamento') && !document.querySelector('.tr-velo, .acc-in, .acc-gate, #tb:not([hidden]), #cq:not([hidden]), #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), .scr-stage'); }; // dentro una partita non si apre niente sopra
@@ -10606,7 +10618,7 @@ const RITORNO = window.RITORNO = (() => {
   function quandoPronto(f, prove = 0){ if (prove > 150) return; if (!nelMenu() || aperta()){ setTimeout(() => quandoPronto(f, prove + 1), 400); return; } setTimeout(() => { if (nelMenu() && !aperta()) f(); else quandoPronto(f, prove + 1); }, 700); }
 
   // ---------- ASSAGGIO: al primo accesso provi le modalità, poi entri nel menu
-  const SKEY = 'difendi-smerillo-assaggio', PASSI = ['tempo']; // al primo avvio si impara un gioco solo: le altre modalità si scoprono dal menu
+  const SKEY = 'difendi-smerillo-assaggio', PASSI = ['turni']; // al primo avvio si impara un gioco solo, le missioni a turni (il cuore del gioco): le altre modalità si scoprono dal menu
   const INFO = {
     turni:{ic:'scudo', t:'Le missioni a turni', d:'Muovi i difensori uno alla volta, come a scacchi, e difendi la Chiesa. Ti guido io, passo passo.', go:'Gioca la missione'},
     tempo:{ic:'torre', t:'La difesa in tempo reale', d:'Costruisci le difese vicino alla strada e ferma <b>2 ondate</b> di nemici. Qui si gioca veloce.', go:'Difendi il paese'},
@@ -10686,15 +10698,16 @@ const RITORNO = window.RITORNO = (() => {
     b.querySelector('[data-no]').onclick = () => { const s2 = stato(); traccia('assaggio', {passo: PASSI[s2.passo], ev:'salta tutto'}); s2.passo = 3; s2.in = null; s2.saltato = 1; salvaS(s2); finestraFine(); };
     return true; }
   function finestraFine(){ const s = stato(), f = frazione(), saltato = s.saltato;
-    const b = finestra(`<div class="fd-festa"><span class="as-scr"></span></div><span class="fd-k">${saltato ? 'REGALO DI BENVENUTO' : 'BENVENUTO A SMERILLO'}</span><h2>${saltato ? 'Eccoti a Smerillo!' : 'Ora scegli tu!'}</h2>
+    const b = finestra(`<div class="fd-festa"><span class="as-scr"></span></div><h2>${f ? 'Il tuo regalo' : 'Per chi giochi?'}</h2>
       ${lg('difendi-smerillo-benvenuto') ? '' : '<p class="acc-sub">🎁 Uno <b>scrigno d’argento</b> per te.</p>'}
-      ${f ? '' : `<div class="as-fz"><b>La tua frazione?</b>
+      ${f ? '' : `<div class="as-fz">
         <div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div></div>`}
-      <button class="big" data-x>Entra nel gioco ▸</button>`);
-    let scelta = f; b.querySelectorAll('[data-fz]').forEach(x => x.onclick = () => { scelta = x.dataset.fz; b.querySelectorAll('[data-fz]').forEach(y => y.classList.toggle('on', y === x)); try { SUONI.suona('tocco'); } catch(e){} });
+      <button class="big" data-x ${f ? '' : 'disabled'}>Entra nel gioco ▸</button>`);
+    ov.classList.add('bv'); document.body.classList.add('bv-on'); ov.insertAdjacentHTML('afterbegin', '<div class="bv-logo" aria-hidden="true"><small>Benvenuto a</small>Smerillo</div>'); // niente menu sbiadito sotto: si vede solo il paese
+    let scelta = f; b.querySelectorAll('[data-fz]').forEach(x => x.onclick = () => { scelta = x.dataset.fz; b.querySelectorAll('[data-fz]').forEach(y => y.classList.toggle('on', y === x)); b.querySelector('[data-x]').disabled = false; try { SUONI.suona('tocco'); } catch(e){} });
     try { SUONI.suona('leggenda'); EPICO.coriandoli(120); } catch(e){}
     b.querySelector('[data-x]').onclick = () => { const s2 = stato(); s2.passo = 9; s2.in = null; salvaS(s2); if (scelta && scelta !== f) scegliFrazione(scelta); // la frazione si sceglie solo la prima volta (e a fine settimana): rivedendo la guida non si richiede
-      const apriOra = !lg('difendi-smerillo-benvenuto') && novizio(); // chi è nuovo apre subito lo scrigno: la pagina Premi arriva dopo
+      const apriOra = !lg('difendi-smerillo-benvenuto'); // lo scrigno di benvenuto si apre subito, una cosa alla volta: frazione, scrigno, menu
       if (!lg('difendi-smerillo-benvenuto')){ sc('difendi-smerillo-benvenuto', '1'); if (!apriOra) try { regalaScrigno('argento', 'Regalo di benvenuto'); } catch(e){} }
       const g = giorni(); g.p = g.u; scJ(GKEY, g); // il giorno 1 è già questo regalo
       traccia('assaggio', {passo:'fine', fz: scelta || null}); chiudi(); if (nelMenu()) RIENTRA('gioca'); if (apriOra) setTimeout(() => { try { TB.premiaSopra('argento'); } catch(e){ try { regalaScrigno('argento', 'Regalo di benvenuto'); } catch(e2){} } }, 500); }; soloMenu(); }
