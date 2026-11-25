@@ -900,7 +900,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 @media (prefers-reduced-motion: reduce){ .fx-raggi,.fx-luce,.rivela.raro::after{animation:none!important} .fx-ban,.fx-ban-in{animation-duration:1.4s!important} .vittoria .stelle > *{opacity:1} }
 
 /* ===== apertura scrigno: palco a tutto schermo ===== */
-.scr-stage{position:absolute;inset:-30px;padding:30px;z-index:80;overflow:hidden;background:radial-gradient(circle at 50% 55%,#2a2f6a 0%,#141433 55%,#08081a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.scr-stage{position:fixed;inset:-30px; /* fissata allo schermo: su iPhone lo scrigno finiva in fondo */padding:30px;z-index:80;overflow:hidden;background:radial-gradient(circle at 50% 55%,#2a2f6a 0%,#141433 55%,#08081a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .scr-fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
 .scr-flash{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:6}
 .scr-raggi{position:absolute;left:50%;top:55%;width:1400px;height:1400px;margin:-700px 0 0 -700px;opacity:0;transition:opacity .4s;pointer-events:none;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--rc,#ffd03a) 55%,transparent) 0 9deg,transparent 9deg 20deg);-webkit-mask:radial-gradient(circle,#000 0,#000 12%,transparent 55%);mask:radial-gradient(circle,#000 0,#000 12%,transparent 55%);animation:fxGira 10s linear infinite}
@@ -920,7 +920,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .scr-lucch{position:absolute;left:50%;bottom:-26px;width:34px;height:38px;margin-left:-17px;background:linear-gradient(#ffe27a,#e0a500);border:4px solid #141433;border-radius:8px;z-index:3}
 .scr-lucch::after{content:'';position:absolute;left:50%;top:12px;width:8px;height:12px;margin-left:-4px;background:#141433;border-radius:4px 4px 1px 1px}
 .scr-luce{position:absolute;left:30px;right:30px;top:86px;height:18px;z-index:1;opacity:0;border-radius:50%;background:var(--lc,#fff);box-shadow:0 0 30px 14px var(--lc,#fff),0 -30px 60px 20px color-mix(in srgb,var(--lc,#fff) 50%,transparent);transition:opacity .2s,background .2s,box-shadow .2s}
-.scr-stage.aperto .scr-luce{opacity:1!important;--lc:var(--rc);top:70px;height:40px;box-shadow:0 0 50px 30px var(--rc),0 -120px 120px 40px color-mix(in srgb,var(--rc) 55%,transparent)}
+.scr-stage.aperto .scr-luce{opacity:1!important;--lc:var(--rc);top:40px;height:90px;left:-10px;right:-10px;background:radial-gradient(ellipse at 50% 60%,#fff 0%,color-mix(in srgb,var(--rc) 70%,#fff) 30%,transparent 70%)!important;border-radius:50%;box-shadow:0 0 60px 26px rgba(255,244,210,.5)}
 .scr-hint{position:absolute;bottom:15%;left:0;right:0;text-align:center;color:#fff;font-family:var(--f-big),sans-serif;font-size:22px;z-index:4;opacity:0;transition:opacity .25s;margin:0;text-shadow:0 3px 0 #000}
 .scr-hint.su{opacity:1;animation:scrHint 1s ease-in-out infinite}
 @keyframes scrHint{50%{transform:scale(1.08)}}
@@ -1098,7 +1098,7 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .rt-premio > *{position:absolute;left:0;top:0;transform:translate(-50%,-50%)}
 .rt-pr-raggi{width:230px;height:230px;border-radius:50%;background:repeating-conic-gradient(rgba(255,240,170,.9) 0 10deg,transparent 10deg 20deg);-webkit-mask:radial-gradient(circle,#000 20%,transparent 70%);mask:radial-gradient(circle,#000 20%,transparent 70%);opacity:0}
 .rt-pr-ic{width:96px;height:96px;display:grid;place-items:center;border-radius:28px;background:radial-gradient(circle at 35% 30%,#fffbe6,#ffd03a 60%,#d99a12);box-shadow:0 0 0 5px var(--linea),0 10px 0 5px var(--linea),0 0 40px rgba(255,220,90,.9);opacity:0}
-.rt-pr-t{top:72px!important;white-space:nowrap;font-family:"Lilita One",sans-serif;font-weight:400;font-size:20px;color:#fff;background:#e63b2e;padding:4px 14px;border-radius:12px;box-shadow:0 0 0 3px var(--linea),0 4px 0 3px var(--linea);opacity:0}
+.rt-pr-t{top:88px!important;white-space:nowrap;font-family:"Lilita One",sans-serif;font-weight:400;font-size:20px;color:#fff;background:#e63b2e;padding:4px 14px;border-radius:12px;box-shadow:0 0 0 3px var(--linea),0 4px 0 3px var(--linea);opacity:0}
 .rt-premio.su .rt-pr-raggi{animation:rtPrRaggi 2.6s ease-out forwards}
 .rt-premio.su .rt-pr-ic{animation:rtPrIc 2.6s cubic-bezier(.2,1.5,.4,1) forwards}
 .rt-premio.su .rt-pr-t{animation:rtPrT 2.6s ease-out forwards}
@@ -1106,6 +1106,8 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 @keyframes rtPrIc{0%{opacity:0;transform:translate(-50%,-50%) scale(.1) rotate(-30deg)}14%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(6deg)}24%{transform:translate(-50%,-50%) scale(1) rotate(0)}82%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.6) translateY(-30px)}}
 @keyframes rtPrT{0%,14%{opacity:0;transform:translate(-50%,-50%) scale(.4)}26%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}34%{transform:translate(-50%,-50%) scale(1)}82%{opacity:1}100%{opacity:0}}
 .rt-esito.vinto,.pr-esito.vinto{animation:rtPremio .55s cubic-bezier(.2,1.6,.4,1) both;font-size:1.12em}
+.pr-rbox:has(.rt-premio.su) .rt-ruota,.rt-box:has(.rt-premio.su) .rt-ruota{animation:rtScura 2.6s ease-out both}
+@keyframes rtScura{0%{filter:none}12%,80%{filter:brightness(.45) saturate(.6)}100%{filter:none}}
 @keyframes rtPremio{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){ .rt-raggi,.rt-luci i,.rt-vinto .rt-ruota,.rt-vinto::after,.rt-freccia.tic,.rt-premio > *{animation:none!important} .rt-premio.su > *{opacity:1} }
 .rt-esito{text-align:center;font-size:17px;min-height:26px;margin:6px 0}
@@ -5258,7 +5260,7 @@ function mostraMenu(pannello){
           // la ruota si deve vedere tutta mentre gira: se è tagliata in alto, la pagina scorre prima
           let attesa = 0; { const pg = W.closest('.cr-pg'), bx = W.closest('.pr-ruota') || W.parentElement; if (pg && bx){ const rb = bx.getBoundingClientRect(), rp = pg.getBoundingClientRect(), sg = pg.querySelector('.cr-seg'), alto = rp.top + (sg ? sg.offsetHeight + 8 : 8); if (rb.top < alto || rb.bottom > rp.bottom){ pg.scrollTo({top: pg.scrollTop + rb.top - alto - 6, behavior: lento ? 'auto' : 'smooth'}); attesa = lento ? 0 : 380; } } }
           setTimeout(() => animaRuota(W, r.i, r.n, () => { es.innerHTML = r.msg; es.classList.add('vinto'); go.textContent = 'Domani'; { const pr = c.querySelector('#prRuota'); if (pr) pr.classList.remove('pronta'); } try { SUONI.suona(r.x.k === 'fort' || r.x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(r.x.k === 'fort' || r.x.v === 'oro' ? 160 : 70); } catch(e){}
-            if (r.x.k === 'scr') setTimeout(() => { if (!document.body.contains(go)) return; scrignoRuotaTogli(r.x.v); const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 1700); else setTimeout(() => { if (!document.body.contains(go)) return; /* aggiorno solo la scritta in alto: ridisegnare tutta la pagina faceva un lampo scuro */ const sb = c.querySelector('#prRsub'); if (sb){ sb.innerHTML = 'Di nuovo tra <span id="prTimer">--:--</span>'; const tm = sb.querySelector('#prTimer'), agg = () => { if (!document.body.contains(tm)) return clearInterval(iv2); const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); const s = Math.max(0, Math.floor((m - d)/1000)); tm.textContent = String(Math.floor(s/3600)).padStart(2, '0') + ':' + String(Math.floor(s/60) % 60).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }, iv2 = setInterval(agg, 1000); agg(); } }, 2900); }, TB.ico(r.x.ic, 4), r.x.t), attesa); };
+            if (r.x.k === 'scr') setTimeout(() => { if (!document.body.contains(go)) return; scrignoRuotaTogli(r.x.v); const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 1700); else setTimeout(() => { if (!document.body.contains(go)) return; /* aggiorno solo la scritta in alto: ridisegnare tutta la pagina faceva un lampo scuro */ const sb = c.querySelector('#prRsub'); if (sb){ sb.innerHTML = 'Di nuovo tra <span id="prTimer">--:--</span>'; const tm = sb.querySelector('#prTimer'), agg = () => { if (!document.body.contains(tm)) return clearInterval(iv2); const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); const s = Math.max(0, Math.floor((m - d)/1000)); tm.textContent = String(Math.floor(s/3600)).padStart(2, '0') + ':' + String(Math.floor(s/60) % 60).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }, iv2 = setInterval(agg, 1000); agg(); } }, 2900); }, TB.ico(r.x.ic, 6), r.x.t), attesa); };
         try { decoraRuota(W, TB.RUOTA.length); } catch(e){}
         const riga = (box, x) => { const d = document.createElement('div'); d.className = 'pr-q' + (x.stato === 'preso' ? ' ok' : '');
           d.innerHTML = `<span class="pr-qt">${x.stato === 'preso' ? TB.ico('ok', 2) : ''}${x.t}${x.max ? ' <small>' + '★'.repeat(x.stelle) + '☆'.repeat(x.max - x.stelle) + '</small>' : ''}</span><span class="pr-qr"><span class="pr-bar"><i style="width:${Math.min(100, x.v/x.n*100)}%"></i><em>${Math.min(x.v, x.n)}/${x.n}</em></span></span>`;
@@ -6026,10 +6028,11 @@ const ICONE = {
   attenzione:['....kk....','...kyyk...','...kyyk...','..kykkyk..','..kykkyk..','.kyykkyyk.','.kyyyyyyk.','kyyykkyyyk','kyyyyyyyyk','kkkkkkkkkk'],
   lampadina:['..kkkk..','.kyyyyk.','kyywyyyk','kyywyyyk','kyyyyyyk','.kyyyyk.','..knnk..','..knnk..','...kk...'],
   cavallo:['....kk..','...kbbk.','..kbbbbk','.kbbkbbk','kbbbbbbk','kbbkkkk.','kbk.....','kk......'],
+  scrigno:['.kkkkkkkk.','kbbkbbkbbk','kbbkbbkbbk','kkkkyykkkk','kbbkyykbbk','kbbkkkkbbk','kbbbbbbbbk','kkkkkkkkkk'],
 
 };
 const ICOC = {}; for (const [k, r] of Object.entries(ICONE)) ICOC[k] = sprite(r);
-ICOC.stellaV = sprite(ICONE.stella, {y:'n'}); ICOC.cuoreV = sprite(ICONE.cuore, {r:'n', R:'N', w:'n'}); ICOC.pallinoG = ICOC.pallino; ICOC.pallinoY = sprite(ICONE.pallino, {l:'w', g:'y', G:'o'}); ICOC.pallinoB = sprite(ICONE.pallino, {l:'w', g:'c', G:'P'});
+ICOC.scrignoA = sprite(ICONE.scrigno, {b:'n'}); ICOC.scrignoO = sprite(ICONE.scrigno, {b:'o', y:'w'}); ICOC.stellaV = sprite(ICONE.stella, {y:'n'}); ICOC.cuoreV = sprite(ICONE.cuore, {r:'n', R:'N', w:'n'}); ICOC.pallinoG = ICOC.pallino; ICOC.pallinoY = sprite(ICONE.pallino, {l:'w', g:'y', G:'o'}); ICOC.pallinoB = sprite(ICONE.pallino, {l:'w', g:'c', G:'P'});
 const ICOURL = {};
 const ico = (k, px = 2) => { const c = ICOC[k]; if (!ICOURL[k]) ICOURL[k] = c.toDataURL(); return `<img class="pxi" src="${ICOURL[k]}" width="${c.width*px}" height="${c.height*px}" alt="">`; };
 // ogni emoji del testo diventa un'icona pixel, così tutto ha lo stesso stile
@@ -6766,7 +6769,7 @@ function provaCoach(){ if (!PROVA || !S) return; const P = PROVE[PROVA.k], u = S
   const ultima = PROVA.k === PROVE.length - 1, tx = P[f], colpita = !!(x && x.hp < x.max) || !x;
   const testo = f === 'ok' && PROVA.k === 2 && !colpita ? '🔨 Strada chiusa!' : tx[0], sotto = tx[1];
   COACH.mostra({solo: true, saltaT: '✕', passo: PROVA.k + 1, tot: PROVE.length, testo, sotto,
-    salta: f === 'ok' ? null : () => provaFine(true), bottone: f === 'ok' ? '▸' : null,
+    salta: f === 'ok' ? null : () => provaFine(true), bottone: f === 'ok' ? (ultima ? 'Alla missione ▸' : 'Avanti ▸') : null, // il tasto dice cosa fa (prima c'era solo una freccina)
     ok: () => { if (!PROVA) return; if (ultima) provaFine(false); else provaVia(PROVA.k + 1); },
     pausa: () => !attivo || ovAperto || !S || !!V,
     dove: () => { if (!S || !PROVA || f === 'ok') return null; const id = f === 'sel' ? u.nodo : PROVA.k === 2 ? 'piazzale' : (S.nem[0] && S.nem[0].nodo); if (!id || !NODI[id]) return null; const [px, py] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + px, y: r.top + py - 8, r: 30}; }}); }
@@ -7152,9 +7155,9 @@ function bottino(vinto){ if (RUN || NET) return; let serie = 0; try { serie = +l
 // la Ruota della fortuna: un giro gratis al giorno
 const RUOTA = [
   {k:'xp', v:50, w:24, ic:'stella', t:'50 punti', col:'#ffd03a'}, {k:'tal', v:1, w:22, ic:'cuore', t:'Talismano', col:'#7cc4ff'},
-  {k:'xp', v:120, w:14, ic:'stella', t:'120 punti', col:'#ffb347'}, {k:'scr', v:'legno', w:16, ic:'carta', t:'Scrigno di legno', col:'#c8a06a'},
-  {k:'tal', v:2, w:8, ic:'trifoglio', t:'2 talismani', col:'#8fd694'}, {k:'scr', v:'argento', w:9, ic:'carta', t:'Scrigno d’argento', col:'#dfe5ee'},
-  {k:'fort', w:4, ic:'trifoglio', t:'Premio fortunato', col:'#3cb043'}, {k:'scr', v:'oro', w:3, ic:'carta', t:'Scrigno d’oro', col:'#f5b301'}];
+  {k:'xp', v:120, w:14, ic:'stella', t:'120 punti', col:'#ffb347'}, {k:'scr', v:'legno', w:16, ic:'scrigno', t:'Scrigno di legno', col:'#c8a06a'},
+  {k:'tal', v:2, w:8, ic:'trifoglio', t:'2 talismani', col:'#8fd694'}, {k:'scr', v:'argento', w:9, ic:'scrignoA', t:'Scrigno d’argento', col:'#dfe5ee'},
+  {k:'fort', w:4, ic:'trifoglio', t:'Premio fortunato', col:'#3cb043'}, {k:'scr', v:'oro', w:3, ic:'scrignoO', t:'Scrigno d’oro', col:'#f5b301'}];
 const oggiStr = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate(); };
 const ruotaPronta = () => { try { return localStorage.getItem(RUOTAKEY) !== oggiStr() || localStorage.getItem('difendi-smerillo-tester') === '1'; } catch(e){ return false; } };
 function ruota(){
@@ -7176,7 +7179,7 @@ function ruota(){
       SUONI.suona(x.k === 'fort' || x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(x.k === 'fort' || x.v === 'oro' ? 160 : 70);
       const es = o.querySelector('#rtEs'); if (es){ es.innerHTML = r.msg; es.classList.add('vinto'); }
       if (x.k === 'scr') setTimeout(() => { if (el('tbOv').hidden) return; scrignoRuotaTogli(x.v); chiudiOv(); mostraScrigno(x.v, ruota); }, 1700); else setTimeout(() => { if (!el('tbOv').hidden) ruota(); }, 2800);
-    }, ico(x.ic, 4), x.t); };
+    }, ico(x.ic, 6), x.t); };
   try { decoraRuota(o.querySelector('#rtW'), n); } catch(e){}
 }
 function intro(){
@@ -10803,7 +10806,7 @@ const RITORNO = window.RITORNO = (() => {
 })();
 
 // nessuna emoji nel gioco: ogni emoji scritta nei testi diventa l'icona in pixel del gioco (stesso stile ovunque)
-(() => { const M = {'⚔':'spade','✓':'ok','✔':'ok','✅':'ok','🏆':'coppa','🐴':'cavallo','🛡':'scudo','🌰':'castagna','🔒':'lucchetto','🔓':'aperto','🍀':'trifoglio','🪙':'moneta','⏳':'clessidra','🟢':'pallino','🔨':'martello','💡':'lampadina','🏹':'arco','📜':'pergamena','🎯':'spada','🟡':'pallino','🔵':'pallino','🧪':'provetta','🔇':'muto','🔊':'suono','💀':'teschio','👣':'passi','🏰':'torre','🔥':'fiamma','📍':'pin','⛪':'chiesa','🌳':'albero','🏠':'casa','🪨':'massi','⭐':'stella','⚠':'attenzione','🔔':'campana','❤':'cuore','🌫':'nebbia','🌙':'luna','🌐':'globo','💾':'salva','📥':'scarica','📋':'copia','🛒':'moneta','🤝':'amici','🚧':'martello','🎡':'trifoglio','⬆':'freccia','🎁':'stella','💥':'fiamma','👍':'ok','🦅':'freccia','🗺':'mappa','🎉':'stella','🏅':'coppa','🔑':'lucchetto','🐎':'cavallo','🗡':'spada','⚡':'fiamma','🌾':'albero','🍞':'castagna','🪵':'albero','👑':'coppa','🏳':'bandiera','🚩':'bandiera','⛰':'rupe'};
+(() => { const M = {'⚔':'spade','✓':'ok','✔':'ok','✅':'ok','🏆':'coppa','🐴':'cavallo','🛡':'scudo','🌰':'castagna','🔒':'lucchetto','🔓':'aperto','🍀':'trifoglio','🪙':'moneta','⏳':'clessidra','🟢':'pallino','🔨':'martello','💡':'lampadina','🏹':'arco','📜':'pergamena','🎯':'spada','🟡':'pallino','🔵':'pallino','🧪':'provetta','🔇':'muto','🔊':'suono','💀':'teschio','👣':'passi','🏰':'torre','🔥':'fiamma','📍':'pin','⛪':'chiesa','🌳':'albero','🏠':'casa','🪨':'massi','⭐':'stella','⚠':'attenzione','🔔':'campana','❤':'cuore','🌫':'nebbia','🌙':'luna','🌐':'globo','💾':'salva','📥':'scarica','📋':'copia','🛒':'moneta','🤝':'amici','🚧':'martello','🎡':'trifoglio','⬆':'freccia','🎁':'scrigno','💥':'fiamma','👍':'ok','🦅':'freccia','🗺':'mappa','🎉':'stella','🏅':'coppa','🔑':'lucchetto','🐎':'cavallo','🗡':'spada','⚡':'fiamma','🌾':'albero','🍞':'castagna','🪵':'albero','👑':'coppa','🏳':'bandiera','🚩':'bandiera','⛰':'rupe'};
   const RX = /(?:[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2B06}])\u{FE0F}?/gu, TEST = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2B06}]/u, TIENI = /[✕★☆]/u, NO = 'script,style,textarea,input,select,option,svg,canvas,title,[contenteditable]';
   const cache = {}; const icona = k => { if (!cache[k]){ const t = document.createElement('template'); try { t.innerHTML = TB.ico(k, 2); } catch(e){ return null; } const im = t.content.firstElementChild; if (!im) return null; im.classList.add('emo'); im.alt = ''; cache[k] = im; } return cache[k].cloneNode(); };
   const conv = n => { const t = n.nodeValue; if (!t || !TEST.test(t)) return; const p = n.parentElement; if (!p || p.closest(NO)) return;
