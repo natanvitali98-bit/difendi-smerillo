@@ -1101,18 +1101,29 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 @keyframes rtBotta{25%{scale:1.08}55%{scale:.97}100%{scale:1}}
 .rt-vinto::after{content:'';position:absolute;left:50%;top:0;width:44%;height:50%;margin-left:-22%;clip-path:polygon(50% 100%,8% 0,92% 0);background:linear-gradient(rgba(255,255,255,.85),rgba(255,255,255,.1));z-index:2;pointer-events:none;animation:rtSpicchio .45s ease-in-out infinite alternate;mix-blend-mode:screen}
 @keyframes rtSpicchio{from{opacity:.25}to{opacity:.9}}
+.rt-ombra{position:absolute;inset:0;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(255,255,255,.28) 0 14%,rgba(255,255,255,0) 36%,rgba(0,0,0,0) 62%,rgba(0,0,0,.3) 100%)}
+.rt-scia{position:absolute;inset:4px;border-radius:50%;pointer-events:none;z-index:2;opacity:0;background:repeating-conic-gradient(rgba(255,255,255,0) 0 5deg,rgba(255,255,255,.5) 5deg 6deg,rgba(255,255,255,0) 6deg 11deg);-webkit-mask:radial-gradient(circle,transparent 24%,#000 34%);mask:radial-gradient(circle,transparent 24%,#000 34%)}
+.rt-ic{width:32px!important;height:32px!important;margin:-16px 0 0 -16px!important;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff,rgba(255,255,255,.82) 70%);box-shadow:0 0 0 2px rgba(20,20,51,.55),0 2px 0 2px rgba(20,20,51,.35)}
+.rt-pr-ic{width:112px!important;height:112px!important;border-radius:50%!important;background:radial-gradient(circle at 35% 30%,#fffbe6,#ffd03a 55%,#c98a12)!important;box-shadow:0 0 0 5px var(--linea),0 8px 0 5px var(--linea),0 0 0 11px rgba(255,236,150,.55),0 0 50px 10px rgba(255,220,90,.85)!important;overflow:hidden}
+.rt-pr-ic::after{content:'';position:absolute;top:-20%;bottom:-20%;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.8),transparent);transform:skewX(-18deg);animation:rtPrLuce 1.1s ease-in-out .5s 2}
+@keyframes rtPrLuce{to{left:130%}}
+.rt-pr-ic img{width:60px!important;height:auto!important;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
+.rt-pr-onda{width:120px;height:120px;border-radius:50%;border:6px solid #fff;opacity:0}
+.rt-premio.su .rt-pr-onda{animation:rtOnda .7s ease-out forwards}
+@keyframes rtOnda{0%{opacity:.9;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.4)}}
+.rt-pr-t{top:92px!important;transform-origin:50% 50%}
+@keyframes rtPrT{0%,14%{opacity:0;transform:translate(-50%,-50%) scaleX(.1)}26%{opacity:1;transform:translate(-50%,-50%) scaleX(1.12)}34%{transform:translate(-50%,-50%) scaleX(1)}82%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-50%)}}
 /* il premio che esce dalla ruota */
 .rt-premio{position:absolute;left:50%;top:50%;width:0;height:0;z-index:6;pointer-events:none}
 .rt-premio > *{position:absolute;left:0;top:0;transform:translate(-50%,-50%)}
 .rt-pr-raggi{width:230px;height:230px;border-radius:50%;background:repeating-conic-gradient(rgba(255,240,170,.9) 0 10deg,transparent 10deg 20deg);-webkit-mask:radial-gradient(circle,#000 20%,transparent 70%);mask:radial-gradient(circle,#000 20%,transparent 70%);opacity:0}
 .rt-pr-ic{width:96px;height:96px;display:grid;place-items:center;border-radius:28px;background:radial-gradient(circle at 35% 30%,#fffbe6,#ffd03a 60%,#d99a12);box-shadow:0 0 0 5px var(--linea),0 10px 0 5px var(--linea),0 0 40px rgba(255,220,90,.9);opacity:0}
-.rt-pr-t{top:88px!important;white-space:nowrap;font-family:"Lilita One",sans-serif;font-weight:400;font-size:20px;color:#fff;background:#e63b2e;padding:4px 14px;border-radius:12px;box-shadow:0 0 0 3px var(--linea),0 4px 0 3px var(--linea);opacity:0}
+.rt-pr-t{top:96px!important;white-space:nowrap;font-family:"Lilita One",sans-serif;font-weight:400;font-size:20px;color:#fff;background:#e63b2e;padding:4px 14px;border-radius:12px;box-shadow:0 0 0 3px var(--linea),0 4px 0 3px var(--linea);opacity:0}
 .rt-premio.su .rt-pr-raggi{animation:rtPrRaggi 2.6s ease-out forwards}
 .rt-premio.su .rt-pr-ic{animation:rtPrIc 2.6s cubic-bezier(.2,1.5,.4,1) forwards}
 .rt-premio.su .rt-pr-t{animation:rtPrT 2.6s ease-out forwards}
 @keyframes rtPrRaggi{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(0)}15%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.15) rotate(120deg)}}
 @keyframes rtPrIc{0%{opacity:0;transform:translate(-50%,-50%) scale(.1) rotate(-30deg)}14%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(6deg)}24%{transform:translate(-50%,-50%) scale(1) rotate(0)}82%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.6) translateY(-30px)}}
-@keyframes rtPrT{0%,14%{opacity:0;transform:translate(-50%,-50%) scale(.4)}26%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}34%{transform:translate(-50%,-50%) scale(1)}82%{opacity:1}100%{opacity:0}}
 .rt-esito.vinto,.pr-esito.vinto{animation:rtPremio .55s cubic-bezier(.2,1.6,.4,1) both;font-size:1.12em}
 .pr-rbox:has(.rt-premio.su) .rt-ruota,.rt-box:has(.rt-premio.su) .rt-ruota{animation:rtScura 2.6s ease-out both}
 @keyframes rtScura{0%{filter:none}12%,80%{filter:brightness(.45) saturate(.6)}100%{filter:none}}
@@ -5198,7 +5209,7 @@ function mostraMenu(pannello){
         <section class="cr-pg" data-tab="premi">${scrigniAttesa().length ? `<button type="button" class="pr-scr" id="prScr"><span class="pr-scri"></span><span><b>${scrigniAttesa().length === 1 ? "Hai 1 scrigno da aprire" : "Hai " + scrigniAttesa().length + " scrigni da aprire"}</b><small>${SCRIGNI_N[scrigniAttesa()[0].tipo]} · ${scrigniAttesa()[0].da}</small></span><i>Apri</i></button>` : ""}<h2 class="cr-h">Premi</h2>
           <div class="pr-ruota ${rp ? 'pronta' : ''}" id="prRuota">
             <div class="pr-rh"><b>Ruota della fortuna</b><small id="prRsub">${rp ? 'Un giro gratis oggi!' : 'Di nuovo tra <span id="prTimer">--:--</span>'}</small></div>
-            <div class="pr-rbox"><div class="rt-freccia"></div><div class="rt-ruota" id="prW" style="transform:rotate(${window.RUOTA_A || 0}deg);background:conic-gradient(${TB.RUOTA.map((x, k, A) => `${x.col} ${k*360/A.length}deg ${(k+1)*360/A.length}deg`).join(',')})">${TB.RUOTA.map((x, k, A) => { const a = (k + .5)*360/A.length; return `<span class="rt-ic" style="transform:rotate(${a}deg) translateY(-62px) rotate(${-a}deg)">${TB.ico(x.ic, 2)}</span>`; }).join('')}<span class="rt-centro">${TB.ico('trifoglio', 2)}</span></div></div>
+            <div class="pr-rbox"><div class="rt-freccia"></div><div class="rt-ruota" id="prW" style="transform:rotate(${window.RUOTA_A || 0}deg);background:conic-gradient(${TB.RUOTA.map((x, k, A) => `${x.col} ${k*360/A.length}deg ${(k+1)*360/A.length}deg`).join(',')})">${TB.RUOTA.map((x, k, A) => { const a = (k + .5)*360/A.length; return `<span class="rt-ic" style="transform:rotate(${a}deg) translateY(-60px)">${TB.ico(x.ic, 2)}</span>`; }).join('')}<span class="rt-centro">${TB.ico('trifoglio', 2)}</span></div></div>
             <p class="pr-esito" id="prEs">${rp ? '' : 'Hai già girato oggi.'}</p>
             <button class="pr-go" id="prGira" ${rp ? '' : 'disabled'}>${rp ? 'GIRA!' : 'Domani'}</button>
             <details class="pr-prob"><summary>Cosa puoi vincere</summary><div>${TB.RUOTA.slice().sort((a, b) => b.w - a.w).map(x => `<span>${TB.ico(x.ic)} ${x.t} <small>${x.w}%</small></span>`).join('')}</div></details>
@@ -5573,7 +5584,7 @@ window.regalaScrigno = regalaScrigno;
 function decoraRuota(W, n){ if (!W || W.dataset.dec) return; W.dataset.dec = '1'; n = n || 8; const box = W.parentElement;
   const mk = (cl, dove, prima) => { const d = document.createElement('div'); d.className = cl; prima ? dove.insertBefore(d, prima) : dove.append(d); return d; };
   mk('rt-raggi', box, box.firstChild); mk('rt-cornice', box, W);
-  const sep = mk('rt-sep', W, W.firstChild); sep.style.background = `repeating-conic-gradient(from -1deg, rgba(255,255,255,.9) 0 2deg, transparent 2deg ${360/n}deg)`;
+  mk('rt-ombra', W, W.firstChild); const scia = mk('rt-scia', W); const sep = mk('rt-sep', W, W.firstChild); sep.style.background = `repeating-conic-gradient(from -1deg, rgba(255,255,255,.9) 0 2deg, transparent 2deg ${360/n}deg)`;
   for (let k = 0; k < n; k++){ const a = (k*360/n - 90)*Math.PI/180, q = document.createElement('i'); q.className = 'rt-perno'; q.style.left = `calc(50% + ${Math.cos(a).toFixed(4)} * (50% - 9px))`; q.style.top = `calc(50% + ${Math.sin(a).toFixed(4)} * (50% - 9px))`; W.append(q); }
   mk('rt-vetro', box); const L = mk('rt-luci', box);
   for (let k = 0; k < 20; k++){ const a = (k*18 - 90)*Math.PI/180, b = document.createElement('i'); b.style.left = `calc(50% + ${Math.cos(a).toFixed(4)} * (50% + 7px))`; b.style.top = `calc(50% + ${Math.sin(a).toFixed(4)} * (50% + 7px))`; b.style.setProperty('--k', k); L.append(b); }
@@ -5587,20 +5598,22 @@ function animaRuota(W, i, n, fine, icona, nome){
   const fineA = 360*7 + (360 - (i + .5)*360/n) + (Math.random() - .5)*(240/n); // dentro lo spicchio, mai sul bordo
   box.classList.remove('rt-vinto'); box.classList.add('rt-gira'); W.style.transition = 'none';
   const vinci = () => { window.RUOTA_A = fineA % 360; /* ridisegnando la pagina la ruota resta ferma dove si è fermata (prima tornava indietro di scatto) */ box.classList.remove('rt-gira'); box.classList.add('rt-vinto');
-    if (pr && icona){ pr.innerHTML = `<div class="rt-pr-raggi"></div><div class="rt-pr-ic">${icona}</div><b class="rt-pr-t">${nome || ''}</b>`; pr.classList.remove('su'); void pr.offsetWidth; pr.classList.add('su'); }
+    if (pr && icona){ pr.innerHTML = `<div class="rt-pr-onda"></div><div class="rt-pr-raggi"></div><div class="rt-pr-ic">${icona}</div><b class="rt-pr-t">${nome || ''}</b>`; pr.classList.remove('su'); void pr.offsetWidth; pr.classList.add('su'); }
     if (navigator.vibrate) try { navigator.vibrate([30, 40, 60]); } catch(e){} fine(); };
   if (lento){ W.style.transform = `rotate(${fineA}deg)`; setTimeout(vinci, 300); return; }
-  const T1 = 420, T2 = 4600, t0 = performance.now(); let ultimo = null, tic = 0;
+  const T1 = 420, T2 = 4400, T3 = 650, t0 = performance.now(), OV = 4.5; let ultimo = null, tic = 0, prec = a0, scia = W.querySelector('.rt-scia');
   const ease = q => 1 - Math.pow(1 - q, 4.2);
   (function passo(now){ const t = now - t0; let a;
     if (t < T1){ const q = t/T1; a = a0 - 22*Math.sin(q*Math.PI/2); } // carica all'indietro
-    else { const q = Math.min(1, (t - T1)/T2); a = a0 - 22 + (fineA - a0 + 22)*ease(q); }
+    else if (t < T1 + T2){ const q = (t - T1)/T2; a = a0 - 22 + (fineA + OV - a0 + 22)*ease(q); } // gira e va un filo oltre
+    else { const d = t - T1 - T2; a = fineA + OV*Math.exp(-d/160)*Math.cos(d/95); } // torna indietro sul premio come una molla
     W.style.transform = `rotate(${a}deg)`;
+    if (scia){ const v = Math.min(1, Math.abs(a - prec)/18); scia.style.opacity = v.toFixed(2); } prec = a;
     const sp = Math.floor((a + 360*20) / (360/n)); // ogni piolo che passa sotto la freccia
     if (t >= T1 && ultimo !== null && sp !== ultimo){ if (fr && fr.animate){ try { fr.animate([{transform:'rotate(0)'}, {transform:'rotate(-26deg)', offset:.25}, {transform:'rotate(0)'}], {duration:140, easing:'ease-out'}); } catch(e){} } if (now - tic > 65){ tic = now; try { SUONI.suona('tocco'); } catch(e){} } }
     ultimo = sp;
     
-    if (t < T1 + T2) requestAnimationFrame(passo); else vinci();
+    if (t < T1 + T2 + T3) requestAnimationFrame(passo); else { W.style.transform = `rotate(${fineA}deg)`; if (scia) scia.style.opacity = 0; vinci(); }
   })(t0);
 }
 // lo scrigno vinto alla ruota va subito nella lista dei Premi: se esci mentre gira non lo perdi
@@ -7200,7 +7213,7 @@ const ruotaPronta = () => { try { return localStorage.getItem(RUOTAKEY) !== oggi
 function ruota(){
   const t = leggiTal(), [fa, ft] = PROF.quantiFortunati(), pronta = ruotaPronta(), n = RUOTA.length;
   const spicchi = RUOTA.map((x, i) => `${x.col} ${i*360/n}deg ${(i+1)*360/n}deg`).join(',');
-  const icone = RUOTA.map((x, i) => { const a = (i + .5)*360/n; return `<span class="rt-ic" style="transform:rotate(${a}deg) translateY(-78px) rotate(${-a}deg)">${ico(x.ic, 2)}</span>`; }).join('');
+  const icone = RUOTA.map((x, i) => { const a = (i + .5)*360/n; return `<span class="rt-ic" style="transform:rotate(${a}deg) translateY(-74px)">${ico(x.ic, 2)}</span>`; }).join('');
   const o = overlay(`<div class="dlg box rt"><button type="button" class="indietro" id="rtBack">‹ Menu</button><h2>${ico('trifoglio', 3)} Ruota della fortuna</h2>
     <p>Un giro <b>gratis ogni giorno</b>. Puoi vincere punti, <b>talismani</b>, scrigni e i rarissimi <b>premi fortunati</b>, che non si trovano in nessun altro modo.</p>
     <div class="rt-box"><div class="rt-freccia"></div><div class="rt-ruota" id="rtW" style="background:conic-gradient(${spicchi})">${icone}<span class="rt-centro">${ico('trifoglio', 3)}</span></div></div>
