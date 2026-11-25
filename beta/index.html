@@ -2389,7 +2389,20 @@ body.novizio #title .cr-nav,body.novizio #title .gp-row,body.novizio #title .pv-
 @keyframes dnVia{to{opacity:0;transform:translateY(60px) rotate(8deg)}}
 @keyframes dnPresa{40%{transform:translateY(-14px) scale(1.12);box-shadow:0 0 0 6px var(--dc),0 10px 0 #141433}100%{transform:translateY(-30px) scale(.9);opacity:0}}
 @media (prefers-reduced-motion: reduce){ .cards.doni .card.dn,.cards.doni .card.dn.presa,.cards.doni.fatto .card.dn{animation:none} }
-img.emo{display:inline-block;height:1.15em;width:auto;vertical-align:-.2em;image-rendering:pixelated;margin:0 .08em}
+img.emo{display:inline-block;height:auto;width:auto;max-height:1.6em;vertical-align:-.25em;image-rendering:pixelated;margin:0 .1em}
+/* ===== regole di stile fisse =====
+   1) due caratteri: Lilita One per titoli, numeri ed etichette, Atkinson per le frasi (il carattere pixel non si usa più)
+   2) pixel nitidi: le icone restano a misura intera (2x, 3x...), mai stirate
+   3) scritte piccole più chiare sullo sfondo blu
+   4) tutto quello che si tocca è grande almeno 44 pixel (anche se il disegno è più piccolo) */
+:root{--f-pixel:"Lilita One","Arial Black",system-ui,sans-serif}
+body{font-synthesis:none}
+img.pxi,.pxi,canvas.pxi{image-rendering:pixelated}
+.gp-k i,.gp-st i{color:#c3cbf5!important}
+.gp-k{letter-spacing:1.5px}
+#coach .co-salta,.cr-top .cr-ing,.cr-top .cr-res,.scr-salta,#tbI,.indietro{position:relative}
+#coach .co-salta::after,.cr-top .cr-ing::after,#tbI::after,.indietro::after{content:'';position:absolute;inset:-7px;border-radius:inherit}
+
 #coach.solo.vicino{position:fixed;width:max-content!important;right:auto!important;bottom:auto!important;transform:none!important;margin:0!important} #coach.solo.mini{padding:10px 16px 12px} #coach.solo.mini .co-h{display:flex}
 #coach.solo{width:max-content!important;max-width:calc(100vw - 24px);padding:10px 28px 12px 18px;text-align:center} #coach.solo .co-h{position:absolute;top:-12px;right:-12px;margin:0} #coach.solo .co-n{display:none} #coach.solo .co-salta{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;border:3px solid #141433;color:#141433;font-weight:900;line-height:22px;text-decoration:none} #coach.solo .co-t{font-size:24px;margin:0;white-space:nowrap} #coach.solo .co-s{margin-top:4px;text-align:center} /* guida senza frasi: solo 2 parole e la mano */
 #coach.mini .co-t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
