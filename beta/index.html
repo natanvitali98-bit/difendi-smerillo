@@ -2350,6 +2350,7 @@ body.novizio #title .cr-nav,body.novizio #title .gp-row,body.novizio #title .pv-
 @keyframes dnVia{to{opacity:0;transform:translateY(60px) rotate(8deg)}}
 @keyframes dnPresa{40%{transform:translateY(-14px) scale(1.12);box-shadow:0 0 0 6px var(--dc),0 10px 0 #141433}100%{transform:translateY(-30px) scale(.9);opacity:0}}
 @media (prefers-reduced-motion: reduce){ .cards.doni .card.dn,.cards.doni .card.dn.presa,.cards.doni.fatto .card.dn{animation:none} }
+img.emo{display:inline-block;height:1.15em;width:auto;vertical-align:-.2em;image-rendering:pixelated;margin:0 .08em}
 #coach.solo.vicino{position:fixed;width:max-content!important;right:auto!important;bottom:auto!important;transform:none!important;margin:0!important} #coach.solo.mini{padding:10px 16px 12px} #coach.solo.mini .co-h{display:flex}
 #coach.solo{width:max-content!important;max-width:calc(100vw - 24px);padding:10px 28px 12px 18px;text-align:center} #coach.solo .co-h{position:absolute;top:-12px;right:-12px;margin:0} #coach.solo .co-n{display:none} #coach.solo .co-salta{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;border:3px solid #141433;color:#141433;font-weight:900;line-height:22px;text-decoration:none} #coach.solo .co-t{font-size:24px;margin:0;white-space:nowrap} #coach.solo .co-s{margin-top:4px;text-align:center} /* guida senza frasi: solo 2 parole e la mano */
 #coach.mini .co-t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -7185,7 +7186,7 @@ function intro(){
   const diffN = /difficilissima/i.test(M.livello) ? 4 : /difficile/i.test(M.livello) ? 3 : /media/i.test(M.livello) ? 2 : 1;
   const pallini = [1,2,3,4].map(k => `<i class="${k <= diffN ? 'on' : ''}"></i>`).join('');
   let provaVista = false; try { provaVista = localStorage.getItem('difendi-smerillo-prova') === '1'; } catch(e){}
-  const prima = MI === 0 && guida >= 0 && !RUN && !SFIDA && !M.evento && !online() && !provaVista; // la prova dei soldati si fa una volta sola: se esci e rientri non ricomincia
+  const primaVolta = MI === 0 && guida >= 0 && !RUN && !SFIDA && !M.evento && !online() && !provaVista, prima = false; // la prima volta niente prova separata dei soldati: si gioca subito la missione con la mano che guida (prima il tutorial si faceva due volte)
   const o = prima ? overlay(`<div class="dlg box mis mis-prima">
     <button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>
     <div class="mis-top"><span class="mis-n">Missione 1 · Si impara</span></div>
@@ -7238,6 +7239,7 @@ function intro(){
   const primoNuovo = o.querySelector('.mis-pg.nuovo'); if (primoNuovo) primoNuovo.click();
   o.querySelector('#tbVia').onclick = () => { chiudiOv(); if (prima){ try { localStorage.setItem('difendi-smerillo-prova', '1'); } catch(e){} provaVia(0); return; } usaTalismano(); if (!RUN){ SUONI.suona('banner'); EPICO.banner(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
   const bk = o.querySelector('#misBack'); if (bk) bk.onclick = () => { if (provenienza === 'missioni') scelta(M.evento ? undefined : (M.luogo || 'smerillo')); else esci(); };
+  if (primaVolta){ try { localStorage.setItem('difendi-smerillo-prova', '1'); } catch(e){} o.style.visibility = 'hidden'; setTimeout(() => { const v = o.querySelector('#tbVia'); if (v) v.click(); o.style.visibility = ''; }, 0); }
   const bq = o.querySelector('#tbSqC'); if (bq) bq.onclick = () => { chiudiOv(); squadra(MI); };
 }
 // obiettivi per le stelle: ogni missione chiede due cose diverse, così non basta una sola tattica
@@ -10797,6 +10799,17 @@ const RITORNO = window.RITORNO = (() => {
   return {versione: VERSIONE, novizio, ONDATE_ASS, rivediGuide, subito, traccia, inizio, partita, menu, fineTurni, ondataRT, persoRT, dopoStagione, stato, giorni, frazione, scegliFrazione, mostraChip, finestraHome, _test:{finestraVoto, premioHome, finestraPasso, finestraFine, finestraGiorno, puntiDi, reset: () => { try { localStorage.removeItem(SKEY); } catch(e){} }}};
 })();
 
+// nessuna emoji nel gioco: ogni emoji scritta nei testi diventa l'icona in pixel del gioco (stesso stile ovunque)
+(() => { const M = {'⚔':'spade','✓':'ok','✔':'ok','✅':'ok','🏆':'coppa','🐴':'cavallo','🛡':'scudo','🌰':'castagna','🔒':'lucchetto','🔓':'aperto','🍀':'trifoglio','🪙':'moneta','⏳':'clessidra','🟢':'pallino','🔨':'martello','💡':'lampadina','🏹':'arco','📜':'pergamena','🎯':'spada','🟡':'pallino','🔵':'pallino','🧪':'provetta','🔇':'muto','🔊':'suono','💀':'teschio','👣':'passi','🏰':'torre','🔥':'fiamma','📍':'pin','⛪':'chiesa','🌳':'albero','🏠':'casa','🪨':'massi','⭐':'stella','⚠':'attenzione','🔔':'campana','❤':'cuore','🌫':'nebbia','🌙':'luna','🌐':'globo','💾':'salva','📥':'scarica','📋':'copia','🛒':'moneta','🤝':'amici','🚧':'martello','🎡':'trifoglio','⬆':'freccia','🎁':'stella','💥':'fiamma','👍':'ok','🦅':'freccia','🗺':'mappa','🎉':'stella','🏅':'coppa','🔑':'lucchetto','🐎':'cavallo','🗡':'spada','⚡':'fiamma','🌾':'albero','🍞':'castagna','🪵':'albero','👑':'coppa','🏳':'bandiera','🚩':'bandiera','⛰':'rupe'};
+  const RX = /(?:[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2B06}])\u{FE0F}?/gu, TEST = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2B06}]/u, TIENI = /[✕★☆]/u, NO = 'script,style,textarea,input,select,option,svg,canvas,title,[contenteditable]';
+  const cache = {}; const icona = k => { if (!cache[k]){ const t = document.createElement('template'); try { t.innerHTML = TB.ico(k, 2); } catch(e){ return null; } const im = t.content.firstElementChild; if (!im) return null; im.classList.add('emo'); im.alt = ''; cache[k] = im; } return cache[k].cloneNode(); };
+  const conv = n => { const t = n.nodeValue; if (!t || !TEST.test(t)) return; const p = n.parentElement; if (!p || p.closest(NO)) return;
+    const f = document.createDocumentFragment(); let i = 0, cambiato = false; t.replace(RX, (m, at) => { const c = m.replace('️', ''); if (TIENI.test(c)) return m; f.append(t.slice(i, at)); const k = M[c]; const im = k && icona(k); if (im) f.append(im); i = at + m.length; cambiato = true; return m; });
+    if (!cambiato) return; f.append(t.slice(i)); n.replaceWith(f); };
+  const giro = r => { if (r.nodeType === 3){ conv(r); return; } if (r.nodeType !== 1 || r.closest && r.closest(NO)) return; const w = document.createTreeWalker(r, NodeFilter.SHOW_TEXT), L = []; for (let n; (n = w.nextNode());) if (TEST.test(n.nodeValue)) L.push(n); L.forEach(conv); };
+  let coda = new Set(), att = false; const svuota = () => { att = false; const c = coda; coda = new Set(); c.forEach(n => { if (n.isConnected) giro(n); }); };
+  new MutationObserver(ms => { for (const m of ms){ if (m.type === 'characterData') coda.add(m.target); else m.addedNodes.forEach(n => coda.add(n)); } if (!att){ att = true; queueMicrotask(svuota); } }).observe(document.body, {childList:true, subtree:true, characterData:true});
+  giro(document.body); })();
 fit(); mostraMenu(); requestAnimationFrame(loop); try { ACC.avvia(); } catch(e){ console.error(e); }
 // caricamento: disegno subito il paese e aspetto i caratteri, poi tolgo la schermata (fino ad allora i tocchi sono bloccati)
 (async () => { const ld = document.getElementById('caricamento'); if (!ld) return; const bar = document.getElementById('ldBar'), tx = document.getElementById('ldTxt');
