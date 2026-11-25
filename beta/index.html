@@ -2450,7 +2450,7 @@ body.itch-va .tr-velo,body.itch-va #coach,body.itch-va #coachRing,body.itch-va #
 #caricamento.acc-rec .ld-su{opacity:0;transition:opacity .3s}
 #caricamento.acc-gate-on .ld-giu{max-height:calc(100% - 16px);overflow-y:auto;padding-top:8px}
 @media (max-height:760px){ #caricamento.acc-gate-on:not(.acc-entrando) .ld-su{transform:scale(.8);transform-origin:top center} }
-body:has(.scr-stage) #asChip,body:has(.scr-stage) #mnToast{display:none!important} /* lo scrigno resta pulito */
+body:has(.scr-stage) #asChip,body:has(.scr-stage) #mnToast,body:has(.scr-stage) #profToast{display:none!important} /* lo scrigno resta pulito */
 @media (min-width:900px) and (max-height:559.98px){ /* PC con la finestra non a schermo intero: la barra in basso resta una pillola arrotondata, non tagliata ai lati */ .cr-nav{width:min(700px,calc(100% - 32px));margin:0 auto 6px;border:3px solid var(--linea);border-radius:20px;padding:4px 10px 6px;box-shadow:0 4px 0 var(--linea),0 8px 24px rgba(0,0,0,.35)} }
 @media (max-height:620px){ /* finestra bassa (PC 960x540): il modulo dell'account sta tutto nello schermo */ #caricamento.acc-gate-on .acc-card .acc-sub{display:none!important} #caricamento.acc-gate-on .acc-card{gap:5px!important;padding:10px 14px!important} #caricamento.acc-gate-on .acc-card .acc-h{font-size:22px!important} #caricamento.acc-gate-on .acc-card .acc-f input{padding:6px 12px!important} #caricamento.acc-gate-on .ld-giu{padding-top:4px} }
 
@@ -7277,7 +7277,7 @@ function fine(){
     if (M.num >= 5 && !(S.st && S.st.bar) && S.portaPersa === 0) PROF.leggenda('nobar');
     if (MISSIONI.every(m => ((leggiRec()['m' + m.num] || {}).stelle || 0) >= 3)) PROF.leggenda('tutte');
     if (meglio){ mostraScrigno(n >= 3 ? 'oro' : n === 2 ? 'argento' : 'legno', fine); return; } }
-  if (!SFIDA && !M.evento){ try { if (RITORNO.fineTurni(vinto)) return; } catch(e){ console.error(e); } }
+  let tut = false; if (!SFIDA && !M.evento){ try { tut = RITORNO.stato().in === 'turni'; } catch(e){} } // prima missione: si vede la vittoria con le stelle, poi un solo tasto Avanti
   const dopo = vinto && !SFIDA && !M.evento && MI >= 0 && MI + 1 < MISSIONI.length ? MISSIONI[MI + 1] : null, pt = puntiPartita(), am = SFIDA_AMICO && String(SFIDA_AMICO.m) === String(M.num) ? SFIDA_AMICO : null;
   const o = overlay(`<div class="dlg box ${vinto ? 'vittoria' : 'sconfitta'}">${vinto ? '<div class="fx-raggi" aria-hidden="true"></div>' : ''}<span class="kicker">Missione ${M.num} · ${M.titolo}</span>
     <h2 class="fx-tit">${vinto ? (M.evento ? 'Castagne salve!' : dopo ? 'Missione riuscita!' : 'Hai salvato il comune!') : M.caduta}</h2>
@@ -7291,6 +7291,8 @@ function fine(){
     <div class="rigabtn">${dopo ? `<button class="big alt mini" id="tbAgain">Riprova</button>` : ''}${vinto ? `<button class="big alt mini" id="tbShare">⚔️ Sfida un amico</button>` : ''}<button class="big alt mini" id="tbScegli">Missioni</button><button class="big alt mini" id="tbDifF">Difensori</button><button class="big alt mini" id="tbMenuF">🏠 Menu</button></div><p class="fz" id="tbShTxt"></p></div>`);
   if (vinto){ EPICO.coriandoli(n >= 3 ? 160 : 90); [0,1,2].forEach(k => setTimeout(() => { if (k < n) SUONI.suona('stella' + k); const st = o.querySelectorAll('.stelle > *')[k]; if (st){ st.classList.add('boom'); } if (k === 2 && n >= 3){ const d = o.querySelector('.dlg'); d && d.classList.add('scuoti'); } }, 350 + k*260)); }
   else { const d = o.querySelector('.dlg'); d && d.classList.add('scuoti'); }
+  if (tut){ o.querySelectorAll('.rigabtn, #tbNext, #tbAgain, .fz, #tbShTxt').forEach(x => x.remove()); const av = document.createElement('button'); av.className = 'big'; av.id = 'tbAvanti'; av.innerHTML = 'Avanti ' + ico('play'); (o.querySelector('.dlg') || o).append(av);
+    av.onclick = () => { chiudiOv(); try { if (RITORNO.fineTurni(vinto)) return; } catch(e){ console.error(e); } esci(); }; return; }
   o.querySelector('#tbDifF').onclick = () => { chiudiOv(); collezione(fine); };
   o.querySelector('#tbMenuF').onclick = esci;
   o.querySelector('#tbAgain').onclick = () => { chiudiOv(); avvia(false); };
