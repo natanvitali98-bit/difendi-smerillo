@@ -2275,6 +2275,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 /* dopo qualche secondo la nuvoletta si fa piccola: resta solo cosa toccare, e la mappa si vede. Se la tocchi si riapre */
 #coach.mini{padding:6px 12px;border-radius:999px;width:max-content;max-width:calc(100vw - 24px);box-shadow:0 3px 0 #141433;cursor:pointer}
 #coach.mini .co-h,#coach.mini .co-s{display:none}
+#coach.solo{width:max-content;max-width:calc(100vw - 24px);padding:10px 16px 12px;text-align:center} #coach.solo .co-h{position:absolute;top:-12px;right:-12px;margin:0} #coach.solo .co-n{display:none} #coach.solo .co-salta{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;border:3px solid #141433;color:#141433;font-weight:900;line-height:22px;text-decoration:none} #coach.solo .co-t{font-size:24px;margin:0;white-space:nowrap} #coach.solo .co-s{margin-top:4px;text-align:center} /* guida senza frasi: solo 2 parole e la mano */
 #coach.mini .co-t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #coach.mini{top:calc(env(safe-area-inset-top) + 58px) !important;bottom:auto !important}
 #coach.mini.giu.lato{top:auto !important;bottom:calc(env(safe-area-inset-bottom) + 14px) !important;left:50% !important;right:auto !important;transform:translateX(-50%)} /* in orizzontale: in basso al centro, tra Frana e Avvia ondata */
@@ -4110,7 +4111,7 @@ function avviaOndata(){
   try { SUONI.suona('arriva'); } catch(e){} if (S.inizioFacile && S.ondata <= 3 && !PCK){ const L = S.luoghi.find(q => q.lvl); if (L){ const [x, y] = P(L.e, L.n + 3, L.z); S.camT = {x, y}; } } // prima partita: la telecamera va dove si combatte, così vedi i nemici cadere
   S.banner = {t:0, onda:true, titolo: S.ondata === ONDATE ? 'Ultima ondata: ' + CMISSIONI[S.miss || 1].capo : S.ev.nome ? 'Ondata ' + S.ondata + ': ' + S.ev.nome : 'Ondata ' + S.ondata, testo: S.ev.desc};
   S.coda = pr.coda;
-  S.intervallo = Math.max(.35, 1.4 / (1 + .06*S.ondata)); S.multVita = (1 + .11*(S.ondata-1)) * S.hpDiff * (S.miss === 2 ? .82 : S.miss === 3 ? .95 : 1); if (S.inizioFacile && S.ondata <= 2) S.multVita *= .4; // i cavalieri hanno l'armatura: un po' meno vita S.multVel = (1 + .02*S.ondata) * (S.ev.vel || 1); S.timer = .4;
+  S.intervallo = Math.max(.35, 1.4 / (1 + .06*S.ondata)); S.multVita = (1 + .11*(S.ondata-1)) * S.hpDiff * (S.miss === 2 ? .82 : S.miss === 3 ? .95 : 1); if (S.inizioFacile && S.ondata <= (totOndate() < ONDATE ? 3 : 2)) S.multVita *= .4; // i cavalieri hanno l'armatura: un po' meno vita S.multVel = (1 + .02*S.ondata) * (S.ev.vel || 1); S.timer = .4;
   aggiornaHud(); ui();
 }
 function genera(id, from, via){
@@ -4193,7 +4194,7 @@ function update(dt){
       if (dd <= passo){ x.e = te; x.n = tn; x.z = tz; passo -= dd; x.prog += dd; x.seg++; }
       else { x.e += de/dd*passo; x.n += dn/dd*passo; const L = Math.hypot(te-pe, tn-pn) || 1; x.z = pz + (tz-pz) * (1 - Math.hypot(te-x.e, tn-x.n)/L); x.prog += passo; passo = 0; }
     }
-    if (x.seg >= V.length){ x.morto = true; S.vite -= x.d.boss ? 5 : 1; S.fx.push({k:'hit', t:0}); S.shake = Math.max(S.shake, 3); try { SUONI.suona('tonfo'); } catch(e){} }
+    if (x.seg >= V.length){ x.morto = true; S.vite -= x.d.boss ? 5 : 1; if (S.inizioFacile && totOndate() < ONDATE && S.vite < 3) S.vite = 3; /* la prima prova non si perde */ S.fx.push({k:'hit', t:0}); S.shake = Math.max(S.shake, 3); try { SUONI.suona('tonfo'); } catch(e){} }
   }
 
   const vivi = () => S.nemici.filter(x => !x.morto);
@@ -4699,17 +4700,17 @@ function guidaCl(){ const g = $('#guidaCl'); if (!g) return; let fatto = false; 
         if (q0){ const [x, y] = P(q0[0], q0[1], altB(q0[0], q0[1])); S.camT = {x, y}; return null; } } } return best; };
   const PC = matchMedia('(pointer:fine)').matches && !ORIZ;
   // guida corta in 3 passi: metti una torre (un tocco), VIA!, colpisci
-  if (!costruite){ k = 'pallino'; n = 1; t = '<b>Metti una torre</b>'; sub = 'Tocca un pallino bianco.'; mappa = pallino;
+  if (!costruite){ k = 'pallino'; n = 1; t = '<b>Tocca qui</b>'; sub = ''; mappa = pallino;
     if (!ORIZ && !(S.modo && S.modo.tipo === 'costruisci')){ NEG = false; S.sel = null; S.modo = {tipo:'costruisci', t:'vedetta', guida:true}; POSTI = calcolaPosti(); costruisciTorri(); setTimeout(ui, 0); } }
-  else if (S.ondata === 0 && !S.inCorso){ k = 'go'; n = 2; t = '<b>▶ VIA!</b>'; sub = PC ? '<kbd>Spazio</kbd> via · <kbd>P</kbd> pausa · <kbd>1</kbd>–<kbd>6</kbd> torri' : ''; punta = () => document.querySelector('#bGo'); }
-  else if (S.inCorso && S.ondata === 1 && !S.toccoNem){ k = 'nem'; n = 3; t = '<b>Colpisci!</b>'; sub = 'Tocca un nemico.';
+  else if (S.ondata === 0 && !S.inCorso){ k = 'go'; n = 2; t = '<b>▶ VIA!</b>'; sub = PC ? '<kbd>Spazio</kbd>' : ''; punta = () => document.querySelector('#bGo'); }
+  else if (S.inCorso && S.ondata === 1 && !S.toccoNem){ k = 'nem'; n = 3; t = '<b>Colpisci!</b>'; sub = '';
     mappa = () => { const r = cv.getBoundingClientRect(), x = S.nemici.find(m => !m.morto); if (!x) return null; const [a, b] = P(x.e, x.n, x.z || 0), sx = r.left + a*scale + ox, sy = r.top + b*scale + oy; if (sx < 0 || sx > innerWidth || sy < 60 || sy > innerHeight - 120) return null; return {x: sx, y: sy - 10, r: 28}; }; }
-  else { k = 'fine'; n = 0; t = '<b>Bravo!</b> Ora giochi tu.'; sub = ''; ok = false; }
+  else { k = 'fine'; n = 0; t = '<b>Bravo!</b> 👍'; sub = ''; ok = false; }
   if (COACH_RT === k) return; COACH_RT = k;
   if (k === 'fine') setTimeout(() => { if (COACH_RT === 'fine'){ try { localStorage.setItem(GKEY_CL, '1'); } catch(e){} COACH_RT = ''; COACH.nascondi(); } }, 2500);
   const basta = () => { try { localStorage.setItem(GKEY_CL, '1'); } catch(e){} COACH_RT = ''; COACH.nascondi(); };
   const bastaG = () => { if (S && S.modo && S.modo.guida){ S.modo = null; costruisciTorri(); } basta(); ui(); };
-  COACH.mostra({passo: n || null, tot: 3, tag: n ? null : 'GUIDA', testo: t, sotto: sub, giu: true, bottone: null, ok: basta, salta: k === 'fine' ? null : bastaG,
+  COACH.mostra({solo: true, saltaT: '✕', passo: n || null, tot: 3, tag: n ? null : 'GUIDA', testo: t, sotto: sub, giu: true, bottone: null, ok: basta, salta: k === 'fine' ? null : bastaG,
     // se stai guardando una difesa o costruendo fuori dalla guida, il fumetto si fa da parte: niente finestre una sopra l'altra
     pausa: () => !S || S.fine || S.attesaCarta || S.pausa || !$('#title').hidden || !!document.querySelector('#pausa:not([hidden]), #cards:not([hidden]), #end:not([hidden]), #rtOv:not([hidden]), #rtFesta.on') || (k !== 'pallino' && (S.sel !== null || !!S.modo || !!ANELLO)), dove: mappa || punta }); }
 let COACH_RT = '';
@@ -4923,7 +4924,7 @@ function tocca(ev){
     const pvG = COACH_RT === 'pallino' && !S.luoghi.some(L => L.lvl) ? pallinoVicino(sx, sy) : null;
     if (pvG && pvG.q && pvG.d*scale < 26){ piazzaDifesa('vedetta', pvG.q[0], pvG.q[1]); S.sel = null; chiudiAnello(); costruisciTorri(); ui(); }
     else if (Math.hypot(q[0]-e, q[1]-n) < (S.inCorso ? 12 : 16)){ const [x2, y2] = P(q[0], q[1], altB(q[0], q[1])); anelloCostruisci(q[0], q[1], ox + x2*scale, oy + y2*scale); }
-    else if (!S.inCorso) S.fx.push({k:'txt', e, n, z:z+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'});
+    else if (!S.inCorso && COACH_RT !== 'pallino') S.fx.push({k:'txt', e, n, z:z+8, t:0, s:'Tocca un pallino bianco', col:'#ffffff'});
     aggiornaHud(); return; }
   if (idx === null && PCK){ const pv = pallinoVicino(sx, sy); if (pv.q && pv.d*scale < 18 && !S.luoghi.some(L => Math.hypot(L.e - pv.q[0], L.n - pv.q[1]) < 6)){ S.sel = null; NEG = false; ui(); const [x2, y2] = P(pv.q[0], pv.q[1], altB(pv.q[0], pv.q[1])); anelloCostruisci(pv.q[0], pv.q[1], ox + x2*scale, oy + y2*scale); aggiornaHud(); return; } }
   if (ANELLO) chiudiAnello();
@@ -10369,8 +10370,8 @@ const COACH = window.COACH = (() => {
         // se la nuvoletta copre il punto da toccare la accorcio, e resta accorciata finché non cambia passo (prima si allungava e accorciava a ogni fotogramma)
         if (b && !box.classList.contains('stretto')){ const r = box.getBoundingClientRect(); if (b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8) box.classList.add('stretto'); } } } }
   function armaMini(){ clearTimeout(tMini); if (cfg && !cfg.bottone) tMini = setTimeout(() => { if (cfg && !cfg.bottone && box && !box.hidden) box.classList.add('mini'); }, MINI_DOPO + (cfg.sotto ? 1200 : 0)); }
-  function mostra(c){ crea(); cfg = c; box.classList.remove('mini', 'stretto'); box.classList.toggle('giu', !!c.giu);
-    box.innerHTML = `<div class="co-h"><span class="co-n">${c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : (c.tag || 'GUIDA')}</span>${c.salta ? '<button type="button" class="co-salta">' + (c.saltaT || 'Salta la guida') + '</button>' : ''}</div>
+  function mostra(c){ crea(); cfg = c; box.classList.remove('mini', 'stretto'); box.classList.toggle('giu', !!c.giu); box.classList.toggle('solo', !!c.solo);
+    box.innerHTML = `<div class="co-h"><span class="co-n">${c.solo ? '' : c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : (c.tag || 'GUIDA')}</span>${c.salta ? '<button type="button" class="co-salta">' + (c.saltaT || 'Salta la guida') + '</button>' : ''}</div>
       <p class="co-t">${c.testo}</p>${c.sotto ? `<p class="co-s">${c.sotto}</p>` : ''}${c.bottone ? `<button type="button" class="co-ok">${c.bottone}</button>` : ''}`;
     const s = box.querySelector('.co-salta'); if (s) s.onclick = e => { e.stopPropagation(); if (!s.dataset.sicuro && !c.tag){ s.dataset.sicuro = '1'; const t0 = s.textContent; s.textContent = 'Sicuro? Tocca ancora'; s.classList.add('co-sic'); setTimeout(() => { if (s.isConnected){ delete s.dataset.sicuro; s.textContent = t0; s.classList.remove('co-sic'); } }, 2500); return; } const f = c.salta; nascondi(); f(); }; // un tocco per sbaglio non salta la guida: chiede conferma
     const o = box.querySelector('.co-ok'); if (o) o.onclick = e => { e.stopPropagation(); const f = c.ok; if (f) f(); };
@@ -10518,7 +10519,7 @@ const RITORNO = window.RITORNO = (() => {
   function quandoPronto(f, prove = 0){ if (prove > 150) return; if (!nelMenu() || aperta()){ setTimeout(() => quandoPronto(f, prove + 1), 400); return; } setTimeout(() => { if (nelMenu() && !aperta()) f(); else quandoPronto(f, prove + 1); }, 700); }
 
   // ---------- ASSAGGIO: al primo accesso provi le modalità, poi entri nel menu
-  const SKEY = 'difendi-smerillo-assaggio', PASSI = ['tempo', 'turni', 'conquista'];
+  const SKEY = 'difendi-smerillo-assaggio', PASSI = ['tempo']; // al primo avvio si impara un gioco solo: le altre modalità si scoprono dal menu
   const INFO = {
     turni:{ic:'scudo', t:'Le missioni a turni', d:'Muovi i difensori uno alla volta, come a scacchi, e difendi la Chiesa. Ti guido io, passo passo.', go:'Gioca la missione'},
     tempo:{ic:'torre', t:'La difesa in tempo reale', d:'Costruisci le difese vicino alla strada e ferma <b>2 ondate</b> di nemici. Qui si gioca veloce.', go:'Difendi il paese'},
@@ -10566,16 +10567,16 @@ const RITORNO = window.RITORNO = (() => {
     else if (k === 'tempo'){ try { avviaRT(); } catch(e){ console.error(e); } }
     else if (k === 'conquista') CQ.apri();
     setTimeout(mostraChip, 1200); }
-  function mostraChip(){ const s = stato(); if (!s.in || s.passo >= 3){ togliChip(); return; } const i = PASSI.indexOf(s.in);
+  function mostraChip(){ const s = stato(); if (!s.in || s.passo >= PASSI.length){ togliChip(); return; } const i = PASSI.indexOf(s.in);
     if (!chip){ chip = document.createElement('button'); chip.type = 'button'; chip.id = 'asChip'; document.body.append(chip); chip.onclick = () => chiediSalta(); }
-    chip.innerHTML = `<small>PROVA</small><span>${i + 1}/3</span><b>▸</b>`; chip.title = `Assaggio ${i + 1} di 3: ${i < 2 ? 'vai al prossimo' : 'finisci'}`; chip.setAttribute('aria-label', chip.title); chip.hidden = false;
+    chip.innerHTML = `<small>PROVA</small><b>▸</b>`; chip.title = 'Salta la prova'; chip.setAttribute('aria-label', chip.title); chip.hidden = false;
     // sparisce quando c'è altro sopra (scrigni, finestre, fine partita)
     if (!chip._t) chip._t = setInterval(() => { if (!chip || chip.hidden) return; chip.classList.toggle('via', !!document.querySelector('.scr-stage, #pausa:not([hidden]), #tbOv:not([hidden]), #cqOv:not([hidden]), #end:not([hidden]), #cards:not([hidden]), #rtOv:not([hidden]), #accOv:not([hidden]), #coach:not([hidden]), body.tb-prova')); }, 400); }
   function togliChip(){ if (chip) chip.hidden = true; }
   // il passo è finito (o saltato): si torna al menu e si vede il prossimo
-  function fatto(k, come){ const s = stato(); if (s.passo >= 3 || PASSI[s.passo] !== k) return false; s.passo++; if (s.torna && PASSI[s.passo] === 'turni') s.passo++; s.in = null; s.ultimo = {k, come}; salvaS(s); togliChip(); traccia('assaggio', {passo: k, ev: come}); return true; }
+  function fatto(k, come){ const s = stato(); if (s.passo >= PASSI.length || PASSI[s.passo] !== k) return false; s.passo++; if (s.torna && PASSI[s.passo] === 'turni') s.passo++; s.in = null; s.ultimo = {k, come}; salvaS(s); togliChip(); traccia('assaggio', {passo: k, ev: come}); return true; }
   // toccata per sbaglio non ti butta fuori: prima chiede
-  function chiediSalta(){ const s = stato(); if (!s.in) return; const b = finestra(`<span class="fd-k">PROVA ${PASSI.indexOf(s.in) + 1} DI 3</span><h2>Passi alla prossima prova?</h2><p class="acc-sub">Questa partita finisce qui.</p><button class="big" data-si>Sì, prossima prova ▸</button><button class="big alt" data-no>No, continuo</button>`);
+  function chiediSalta(){ const s = stato(); if (!s.in) return; const b = finestra(`<h2>Vai al menu?</h2><button class="big" data-si>Sì, al menu ▸</button><button class="big alt" data-no>No, continuo</button>`);
     b.querySelector('[data-no]').onclick = chiudi; b.querySelector('[data-si]').onclick = () => { chiudi(); salta(); }; }
   function salta(){ const s = stato(); if (!s.in) return; const k = s.in; fatto(k, 'avanti'); chiudi();
     if (k === 'turni') TB.esci(); else if (k === 'tempo') mostraMenu(); else if (k === 'conquista') CQ.esci(); }
@@ -10584,11 +10585,11 @@ const RITORNO = window.RITORNO = (() => {
     if (s.in){ traccia('assaggio', {passo: s.in, ev:'uscito'}); s.passo = 9; s.in = null; s.saltato = 1; salvaS(s); togliChip();
       if (!lg('difendi-smerillo-benvenuto')){ sc('difendi-smerillo-benvenuto', '1'); try { regalaScrigno('argento', 'Regalo di benvenuto'); } catch(e){} }
       return false; }
-    if (s.passo >= 3){ finestraFine(); return true; }
+    if (s.passo >= PASSI.length){ finestraFine(); return true; }
     const k = PASSI[s.passo], I = INFO[k], u = s.ultimo; let su = '';
     if (s.passo === 0 && !u && !s.torna){ avviaPasso(k); return true; }
     if (s.passo === 0 && !u) su = `<span class="fd-k">BENVENUTO A SMERILLO</span><h2>Ti faccio provare il gioco</h2><p class="acc-sub">Tre assaggi brevi delle modalità. Poi entri nel menu e scegli tu come continuare.</p>`;
-    else if (s.torna && s.passo === 0 && !u) su = `<span class="fd-k">BENTORNATO</span><h2>Hai provato solo le missioni</h2><p class="acc-sub">Difendi Smerillo ha anche altre modalità. Ti faccio fare due assaggi veloci, poi scegli tu.</p>`;
+    else if (s.torna && s.passo === 0 && !u) su = `<span class="fd-k">BENTORNATO</span><h2>Prova la difesa in tempo reale</h2>`;
     else su = `<span class="fd-k">ASSAGGIO ${s.passo} DI 3 FATTO</span><h2>${u && u.come === 'perso' ? 'Ci hai provato!' : 'Bravo!'}</h2>${u && u.come === 'perso' ? '<p class="acc-sub">Non è andata, ma ora sai come funziona: la riprovi quando vuoi dal menu.</p>' : ''}`;
     const b = finestra(`${su}${pallini(s.passo)}<div class="as-card"><span class="as-ic">${ico(I.ic, 4)}</span><span><b>${s.passo + 1}. ${I.t}</b><small>${I.d}</small></span></div>
       <button class="big" data-go>${I.go} ▸</button><button class="as-salta" data-no>Salta gli assaggi e vai al menu</button>`);
@@ -10596,11 +10597,10 @@ const RITORNO = window.RITORNO = (() => {
     b.querySelector('[data-no]').onclick = () => { const s2 = stato(); traccia('assaggio', {passo: PASSI[s2.passo], ev:'salta tutto'}); s2.passo = 3; s2.in = null; s2.saltato = 1; salvaS(s2); finestraFine(); };
     return true; }
   function finestraFine(){ const s = stato(), f = frazione(), saltato = s.saltato;
-    const b = finestra(`<div class="fd-festa"><span class="as-scr"></span></div><span class="fd-k">${saltato ? 'REGALO DI BENVENUTO' : 'HAI PROVATO TUTTO'}</span><h2>${saltato ? 'Eccoti a Smerillo!' : 'Ora scegli tu!'}</h2>
-      ${lg('difendi-smerillo-benvenuto') ? '' : '<p class="acc-sub">Per cominciare ti regalo uno <b>scrigno d’argento</b>: lo apri nella pagina Premi.</p>'}
-      ${f ? '' : `<div class="as-fz"><b>Per quale frazione giochi?</b><small>Ogni partita dà punti alla tua frazione. La domenica si vede chi ha vinto la settimana.</small>
+    const b = finestra(`<div class="fd-festa"><span class="as-scr"></span></div><span class="fd-k">${saltato ? 'REGALO DI BENVENUTO' : 'BENVENUTO A SMERILLO'}</span><h2>${saltato ? 'Eccoti a Smerillo!' : 'Ora scegli tu!'}</h2>
+      ${lg('difendi-smerillo-benvenuto') ? '' : '<p class="acc-sub">🎁 Uno <b>scrigno d’argento</b> per te.</p>'}
+      ${f ? '' : `<div class="as-fz"><b>La tua frazione?</b>
         <div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div></div>`}
-      <p class="as-dom">${ico('calendario', 2)} Torna anche domani: ogni giorno di fila lo scrigno è più ricco.</p>
       <button class="big" data-x>Entra nel gioco ▸</button>`);
     let scelta = f; b.querySelectorAll('[data-fz]').forEach(x => x.onclick = () => { scelta = x.dataset.fz; b.querySelectorAll('[data-fz]').forEach(y => y.classList.toggle('on', y === x)); try { SUONI.suona('tocco'); } catch(e){} });
     try { SUONI.suona('leggenda'); EPICO.coriandoli(120); } catch(e){}
@@ -10612,8 +10612,8 @@ const RITORNO = window.RITORNO = (() => {
   function fineTurni(vinto){ const s = stato(); if (s.in !== 'turni') return false; fatto('turni', vinto ? 'vinto' : 'perso'); try { TB.esci(); } catch(e){ mostraMenu(); } return true; }
   const ONDATE_ASS = 3;
   function ondataRT(n, continua){ const s = stato(); if (s.in !== 'tempo' || n < ONDATE_ASS) return false; fatto('tempo', 'vinto');
-    const b = finestra(`<span class="fd-k">ASSAGGIO 1 DI 3 FATTO</span><h2>Hai difeso Smerillo! 🏆</h2><p class="acc-sub">Il gioco completo ha 12 ondate: puoi continuare questa partita quando vuoi.</p>${pallini(stato().passo)}
-      <button class="big" data-go>${stato().passo >= 2 ? 'Avanti: la Conquista ▸' : 'Avanti: le missioni ▸'}</button><button class="big alt" data-st>Continuo questa partita</button>`);
+    const b = finestra(`<h2>Hai difeso Smerillo! 🏆</h2>
+      <button class="big" data-go>Avanti ▸</button><button class="big alt" data-st>Continuo a giocare</button>`);
     b.querySelector('[data-go]').onclick = () => { chiudi(); mostraMenu(); };
     b.querySelector('[data-st]').onclick = () => { chiudi(); continua(); }; return true; }
   function persoRT(){ const s = stato(); if (s.in !== 'tempo') return false; fatto('tempo', 'perso'); mostraMenu(); return true; }
