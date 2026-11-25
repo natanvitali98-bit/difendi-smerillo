@@ -1088,7 +1088,7 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .rt-freccia::after{content:'';position:absolute;left:-9px;top:-46px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff7d0,#ffd03a 50%,#b8790a);box-shadow:0 0 0 3px var(--linea)}
 .rt-freccia.tic{animation:rtTic .14s ease-out}
 @keyframes rtTic{25%{transform:rotate(-26deg)}100%{transform:none}}
-.rt-gira .rt-ruota{filter:blur(calc(var(--vel, 0) * 2px)) saturate(calc(1 + var(--vel, 0) * .4))}
+.rt-gira .rt-ruota{will-change:transform} /* niente sfocatura mentre gira: sui telefoni scattava */
 .rt-vinto .rt-ruota{animation:rtBotta .55s ease-out}
 @keyframes rtBotta{25%{scale:1.08}55%{scale:.97}100%{scale:1}}
 .rt-vinto::after{content:'';position:absolute;left:50%;top:0;width:44%;height:50%;margin-left:-22%;clip-path:polygon(50% 100%,8% 0,92% 0);background:linear-gradient(rgba(255,255,255,.85),rgba(255,255,255,.1));z-index:2;pointer-events:none;animation:rtSpicchio .45s ease-in-out infinite alternate;mix-blend-mode:screen}
@@ -1188,8 +1188,8 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .cr-tab.salta .cr-ti{animation:tabSalta .45s cubic-bezier(.34,1.56,.64,1)}
 @keyframes tabSalta{0%{transform:scale(1)}40%{transform:scale(1.45) translateY(-4px) rotate(-6deg)}70%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1.25)}}
 #titleCv{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
-.cr-pg.entra > *{animation:pgEntra .45s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--i, 0) * 55ms)}
-@keyframes pgEntra{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:none}}
+.cr-pg.entra > *{animation:pgEntra .38s cubic-bezier(.2,.9,.3,1.15) both;animation-delay:calc(min(var(--i, 0), 5) * 35ms)}
+@keyframes pgEntra{from{opacity:.15;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
 .cr-arena.entra .logo{animation:pgLogo .6s cubic-bezier(.2,.9,.3,1.3) both}
 @keyframes pgLogo{from{opacity:0;transform:translateY(-26px) scale(.85) rotate(-3deg)}to{opacity:1;transform:none}}
 .cr-top{animation:crTop .45s ease-out both}
@@ -1431,7 +1431,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 /* ruota e incarichi direttamente nella pagina Premi */
 .cr-pg > *{flex-shrink:0}
 .pr-ruota{flex-direction:column;align-items:stretch;gap:6px;min-height:0}
-.pr-rh{position:relative;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.pr-rh{position:relative;display:flex;align-items:baseline;gap:8px;flex-wrap:nowrap}.pr-rh b{white-space:nowrap}.pr-rh small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .pr-rh b{font:400 22px var(--f-big);text-shadow:0 2px 0 rgba(0,0,0,.25)}
 .pr-rh small{font-size:14px}
 .pr-rbox{position:relative;width:176px;height:176px;margin:8px auto 2px}
@@ -1931,6 +1931,9 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cr-seg button i{position:absolute;top:-6px;right:4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#e04830;color:#fff;border:2px solid #141433;font:700 11px/16px var(--f-body,system-ui);font-style:normal}
 .cr-sg{display:flex;flex-direction:column;gap:12px}
 .cr-sg[hidden]{display:none!important}
+.cr-pg.entra > .cr-sg,.cr-sg{animation:sgIn .24s ease-out both!important;animation-delay:0s!important} /* cambiando scheda (Oggi, Imprese...) il contenuto nuovo c'è subito, niente schermo vuoto */
+@keyframes sgIn{from{opacity:.4;transform:translateX(10px)}to{opacity:1;transform:none}}
+.cr-seg button{transition:background .1s,color .1s!important}
 .cr-sg>.cr-sub:first-child{margin-top:0}
 .cr-fatti{margin-top:6px}
 .cr-fatti summary{cursor:pointer;font:700 13px var(--f-body,system-ui);color:#6a7090;padding:8px 2px;list-style:none}
@@ -5183,8 +5186,8 @@ function mostraMenu(pannello){
       <div class="cr-pagine" id="crPag">
         <section class="cr-pg" data-tab="premi">${scrigniAttesa().length ? `<button type="button" class="pr-scr" id="prScr"><span class="pr-scri"></span><span><b>${scrigniAttesa().length === 1 ? "Hai 1 scrigno da aprire" : "Hai " + scrigniAttesa().length + " scrigni da aprire"}</b><small>${SCRIGNI_N[scrigniAttesa()[0].tipo]} · ${scrigniAttesa()[0].da}</small></span><i>Apri</i></button>` : ""}<h2 class="cr-h">Premi</h2>
           <div class="pr-ruota ${rp ? 'pronta' : ''}" id="prRuota">
-            <div class="pr-rh"><b>Ruota della fortuna</b><small id="prRsub">${rp ? 'Un giro gratis oggi!' : 'Prossimo giro tra <span id="prTimer">--:--</span>'}</small></div>
-            <div class="pr-rbox"><div class="rt-freccia"></div><div class="rt-ruota" id="prW" style="background:conic-gradient(${TB.RUOTA.map((x, k, A) => `${x.col} ${k*360/A.length}deg ${(k+1)*360/A.length}deg`).join(',')})">${TB.RUOTA.map((x, k, A) => { const a = (k + .5)*360/A.length; return `<span class="rt-ic" style="transform:rotate(${a}deg) translateY(-62px) rotate(${-a}deg)">${TB.ico(x.ic, 2)}</span>`; }).join('')}<span class="rt-centro">${TB.ico('trifoglio', 2)}</span></div></div>
+            <div class="pr-rh"><b>Ruota della fortuna</b><small id="prRsub">${rp ? 'Un giro gratis oggi!' : 'Di nuovo tra <span id="prTimer">--:--</span>'}</small></div>
+            <div class="pr-rbox"><div class="rt-freccia"></div><div class="rt-ruota" id="prW" style="transform:rotate(${window.RUOTA_A || 0}deg);background:conic-gradient(${TB.RUOTA.map((x, k, A) => `${x.col} ${k*360/A.length}deg ${(k+1)*360/A.length}deg`).join(',')})">${TB.RUOTA.map((x, k, A) => { const a = (k + .5)*360/A.length; return `<span class="rt-ic" style="transform:rotate(${a}deg) translateY(-62px) rotate(${-a}deg)">${TB.ico(x.ic, 2)}</span>`; }).join('')}<span class="rt-centro">${TB.ico('trifoglio', 2)}</span></div></div>
             <p class="pr-esito" id="prEs">${rp ? '' : 'Hai già girato oggi.'}</p>
             <button class="pr-go" id="prGira" ${rp ? '' : 'disabled'}>${rp ? 'GIRA!' : 'Domani'}</button>
             <details class="pr-prob"><summary>Cosa puoi vincere</summary><div>${TB.RUOTA.slice().sort((a, b) => b.w - a.w).map(x => `<span>${TB.ico(x.ic)} ${x.t} <small>${x.w}%</small></span>`).join('')}</div></details>
@@ -5226,7 +5229,7 @@ function mostraMenu(pannello){
     </div>`;
     // le pagine si scorrono col dito come in un gioco da telefono; la barra in basso dice dove sei
     { const pag = c.querySelector('#crPag'), tabs = [...c.querySelectorAll('.cr-tab')], pgs = [...c.querySelectorAll('.cr-pg')];
-      let auto = false, tgt = -1, tgtT = 0; const vai = (k, liscio) => { const i = pgs.findIndex(s => s.dataset.tab === k); if (i < 0){ if (k !== 'gioca') vai('gioca', liscio); return; } try { pag.getAnimations().forEach(a => a.cancel()); } catch(e){} pag.style.opacity = ''; auto = !!liscio; tgt = liscio ? i : -1; tgtT = performance.now(); const mio = tgtT; const cur = Math.round(pag.scrollLeft / Math.max(1, pag.clientWidth)); if (cur === i){ auto = false; tgt = -1; } if (liscio && Math.abs(i - cur) > 1 && pag.animate){ const dir = i > cur ? 1 : -1; pag.animate([{opacity:1}, {opacity:0, transform:`translateX(${-dir*18}px)`}], {duration:110, easing:'ease-in'}).onfinish = () => { if (tgtT !== mio) return; pag.scrollTo({left: i*pag.clientWidth, behavior:'auto'}); pag.animate([{opacity:0, transform:`translateX(${dir*24}px)`}, {opacity:1, transform:'none'}], {duration:200, easing:'ease-out'}); }; } else pag.scrollTo({left: i*pag.clientWidth, behavior: liscio ? 'smooth' : 'auto'}); segna(k); try { sessionStorage.setItem('ds-tab', k); } catch(e){} };
+      let auto = false, tgt = -1, tgtT = 0; const vai = (k, liscio) => { const i = pgs.findIndex(s => s.dataset.tab === k); if (i < 0){ if (k !== 'gioca') vai('gioca', liscio); return; } try { pag.getAnimations().forEach(a => a.cancel()); } catch(e){} pag.style.opacity = ''; auto = !!liscio; tgt = liscio ? i : -1; tgtT = performance.now(); const mio = tgtT; const cur = Math.round(pag.scrollLeft / Math.max(1, pag.clientWidth)); if (cur === i){ auto = false; tgt = -1; } if (liscio && Math.abs(i - cur) > 1){ auto = false; tgt = -1; pag.scrollTo({left: i*pag.clientWidth, behavior:'auto'}); } /* salto di più pagine: subito, senza dissolvenza (prima per un attimo si vedeva lo schermo vuoto) */ else pag.scrollTo({left: i*pag.clientWidth, behavior: liscio ? 'smooth' : 'auto'}); segna(k); try { sessionStorage.setItem('ds-tab', k); } catch(e){} };
       const nav = c.querySelector('.cr-nav'), ind = document.createElement('span'); ind.className = 'cr-ind'; nav.prepend(ind); let ultima = null;
       const segna = (k, anima = true) => { tabs.forEach(b => b.classList.toggle('on', b.dataset.tab === k)); const b = tabs.find(x => x.dataset.tab === k); if (!b) return;
         ind.style.width = b.offsetWidth + 'px'; ind.style.transform = `translateX(${b.offsetLeft}px)`; ind.classList.toggle('oro', k === 'gioca'); { const v = document.getElementById('titleVelo'); if (v){ v.style.transition = ''; v.style.opacity = k === 'gioca' ? 0 : 1; } }
@@ -5251,8 +5254,10 @@ function mostraMenu(pannello){
       { const W = c.querySelector('#prW'), go = c.querySelector('#prGira'), es = c.querySelector('#prEs');
         if (go) go.onclick = () => { try { PROF.pausaAvvisi(matchMedia('(prefers-reduced-motion: reduce)').matches ? 400 : 4000); } catch(e){} const r = TB.giraRuota(); if (!r) return; go.disabled = true; go.textContent = '…'; const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
           try { SUONI.suona('carica1'); } catch(e){} go.textContent = 'Gira…';
-          animaRuota(W, r.i, r.n, () => { es.innerHTML = r.msg; es.classList.add('vinto'); go.textContent = 'Domani'; { const pr = c.querySelector('#prRuota'); if (pr) pr.classList.remove('pronta'); } try { SUONI.suona(r.x.k === 'fort' || r.x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(r.x.k === 'fort' || r.x.v === 'oro' ? 160 : 70); } catch(e){}
-            if (r.x.k === 'scr') setTimeout(() => { if (!document.body.contains(go)) return; scrignoRuotaTogli(r.x.v); const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 1700); else setTimeout(() => { if (!t.hidden && document.body.contains(go)){ const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; mostraMenu('home'); } }, 2900); }, TB.ico(r.x.ic, 4), r.x.t); };
+          // la ruota si deve vedere tutta mentre gira: se è tagliata in alto, la pagina scorre prima
+          let attesa = 0; { const pg = W.closest('.cr-pg'), bx = W.closest('.pr-ruota') || W.parentElement; if (pg && bx){ const rb = bx.getBoundingClientRect(), rp = pg.getBoundingClientRect(), sg = pg.querySelector('.cr-seg'), alto = rp.top + (sg ? sg.offsetHeight + 8 : 8); if (rb.top < alto || rb.bottom > rp.bottom){ pg.scrollTo({top: pg.scrollTop + rb.top - alto - 6, behavior: lento ? 'auto' : 'smooth'}); attesa = lento ? 0 : 380; } } }
+          setTimeout(() => animaRuota(W, r.i, r.n, () => { es.innerHTML = r.msg; es.classList.add('vinto'); go.textContent = 'Domani'; { const pr = c.querySelector('#prRuota'); if (pr) pr.classList.remove('pronta'); } try { SUONI.suona(r.x.k === 'fort' || r.x.v === 'oro' ? 'leggenda' : 'stella2'); EPICO.coriandoli(r.x.k === 'fort' || r.x.v === 'oro' ? 160 : 70); } catch(e){}
+            if (r.x.k === 'scr') setTimeout(() => { if (!document.body.contains(go)) return; scrignoRuotaTogli(r.x.v); const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 1700); else setTimeout(() => { if (!document.body.contains(go)) return; /* aggiorno solo la scritta in alto: ridisegnare tutta la pagina faceva un lampo scuro */ const sb = c.querySelector('#prRsub'); if (sb){ sb.innerHTML = 'Di nuovo tra <span id="prTimer">--:--</span>'; const tm = sb.querySelector('#prTimer'), agg = () => { if (!document.body.contains(tm)) return clearInterval(iv2); const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); const s = Math.max(0, Math.floor((m - d)/1000)); tm.textContent = String(Math.floor(s/3600)).padStart(2, '0') + ':' + String(Math.floor(s/60) % 60).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }, iv2 = setInterval(agg, 1000); agg(); } }, 2900); }, TB.ico(r.x.ic, 4), r.x.t), attesa); };
         try { decoraRuota(W, TB.RUOTA.length); } catch(e){}
         const riga = (box, x) => { const d = document.createElement('div'); d.className = 'pr-q' + (x.stato === 'preso' ? ' ok' : '');
           d.innerHTML = `<span class="pr-qt">${x.stato === 'preso' ? TB.ico('ok', 2) : ''}${x.t}${x.max ? ' <small>' + '★'.repeat(x.stelle) + '☆'.repeat(x.max - x.stelle) + '</small>' : ''}</span><span class="pr-qr"><span class="pr-bar"><i style="width:${Math.min(100, x.v/x.n*100)}%"></i><em>${Math.min(x.v, x.n)}/${x.n}</em></span></span>`;
@@ -5570,7 +5575,7 @@ function animaRuota(W, i, n, fine, icona, nome){
   const a0 = (parseFloat((W.style.transform.match(/-?[\d.]+/) || [0])[0]) || 0) % 360;
   const fineA = 360*7 + (360 - (i + .5)*360/n) + (Math.random() - .5)*(240/n); // dentro lo spicchio, mai sul bordo
   box.classList.remove('rt-vinto'); box.classList.add('rt-gira'); W.style.transition = 'none';
-  const vinci = () => { box.classList.remove('rt-gira'); box.classList.add('rt-vinto');
+  const vinci = () => { window.RUOTA_A = fineA % 360; /* ridisegnando la pagina la ruota resta ferma dove si è fermata (prima tornava indietro di scatto) */ box.classList.remove('rt-gira'); box.classList.add('rt-vinto');
     if (pr && icona){ pr.innerHTML = `<div class="rt-pr-raggi"></div><div class="rt-pr-ic">${icona}</div><b class="rt-pr-t">${nome || ''}</b>`; pr.classList.remove('su'); void pr.offsetWidth; pr.classList.add('su'); }
     if (navigator.vibrate) try { navigator.vibrate([30, 40, 60]); } catch(e){} fine(); };
   if (lento){ W.style.transform = `rotate(${fineA}deg)`; setTimeout(vinci, 300); return; }
@@ -5581,9 +5586,9 @@ function animaRuota(W, i, n, fine, icona, nome){
     else { const q = Math.min(1, (t - T1)/T2); a = a0 - 22 + (fineA - a0 + 22)*ease(q); }
     W.style.transform = `rotate(${a}deg)`;
     const sp = Math.floor((a + 360*20) / (360/n)); // ogni piolo che passa sotto la freccia
-    if (t >= T1 && ultimo !== null && sp !== ultimo){ if (fr){ fr.classList.remove('tic'); void fr.offsetWidth; fr.classList.add('tic'); } if (now - tic > 65){ tic = now; try { SUONI.suona('tocco'); } catch(e){} } }
+    if (t >= T1 && ultimo !== null && sp !== ultimo){ if (fr && fr.animate){ try { fr.animate([{transform:'rotate(0)'}, {transform:'rotate(-26deg)', offset:.25}, {transform:'rotate(0)'}], {duration:140, easing:'ease-out'}); } catch(e){} } if (now - tic > 65){ tic = now; try { SUONI.suona('tocco'); } catch(e){} } }
     ultimo = sp;
-    const v = t < T1 ? 0 : 1 - Math.min(1, (t - T1)/T2); box.style.setProperty('--vel', v.toFixed(3));
+    
     if (t < T1 + T2) requestAnimationFrame(passo); else vinci();
   })(t0);
 }
@@ -6967,7 +6972,7 @@ function mostraScrigno(tipo, poi){
   const chiudi = () => { if (finito) return; finito = true; vivo = false; cancelAnimationFrame(raf); st.remove(); document.body.classList.remove('scr-on'); ovAperto = false; riepilogo(); };
   // --- 1. lo scrigno cade dall'alto e atterra ---
   (async () => {
-    cassa.animate([{transform:'translateY(-120vh) rotate(-8deg)'}, {transform:'translateY(0) scale(1.15,.8)', offset:.78}, {transform:'translateY(-14px) scale(.95,1.06)', offset:.9}, {transform:'translateY(0) scale(1)'}], {duration:calma ? 1 : 750, easing:'cubic-bezier(.5,0,.75,0)', fill:'both'});
+    cassa.animate([{transform:'translateY(-55vh) rotate(-8deg)'}, {transform:'translateY(0) scale(1.15,.8)', offset:.78}, {transform:'translateY(-14px) scale(.95,1.06)', offset:.9}, {transform:'translateY(0) scale(1)'}], {duration:calma ? 1 : 560, easing:'cubic-bezier(.45,0,.75,.2)', fill:'both'});
     $('.scr-ombra').animate([{transform:'scale(.2)', opacity:0}, {transform:'scale(1)', opacity:1}], {duration:calma ? 1 : 750, fill:'both'});
     $('.scr-tit').animate([{opacity:0, transform:'translateY(-20px)'}, {opacity:1, transform:'none'}], {duration:400, delay:300, fill:'both'});
     await att(600); SUONI.suona('tonfo'); trema(9, 350); const [cx, cy] = centro(); scoppio(cx, cy + 60, 26, ['#c8b89a','#a89878','#e8dcc8'], 4, .12, 40, 6);
