@@ -2275,7 +2275,8 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 /* dopo qualche secondo la nuvoletta si fa piccola: resta solo cosa toccare, e la mappa si vede. Se la tocchi si riapre */
 #coach.mini{padding:6px 12px;border-radius:999px;width:max-content;max-width:calc(100vw - 24px);box-shadow:0 3px 0 #141433;cursor:pointer}
 #coach.mini .co-h,#coach.mini .co-s{display:none}
-#coach.solo{width:max-content;max-width:calc(100vw - 24px);padding:10px 16px 12px;text-align:center} #coach.solo .co-h{position:absolute;top:-12px;right:-12px;margin:0} #coach.solo .co-n{display:none} #coach.solo .co-salta{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;border:3px solid #141433;color:#141433;font-weight:900;line-height:22px;text-decoration:none} #coach.solo .co-t{font-size:24px;margin:0;white-space:nowrap} #coach.solo .co-s{margin-top:4px;text-align:center} /* guida senza frasi: solo 2 parole e la mano */
+#coach.solo.vicino{position:fixed;width:max-content!important;right:auto!important;bottom:auto!important;transform:none!important;margin:0!important} #coach.solo.mini{padding:10px 16px 12px} #coach.solo.mini .co-h{display:flex}
+#coach.solo{width:max-content!important;max-width:calc(100vw - 24px);padding:10px 16px 12px;text-align:center} #coach.solo .co-h{position:absolute;top:-12px;right:-12px;margin:0} #coach.solo .co-n{display:none} #coach.solo .co-salta{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;border:3px solid #141433;color:#141433;font-weight:900;line-height:22px;text-decoration:none} #coach.solo .co-t{font-size:24px;margin:0;white-space:nowrap} #coach.solo .co-s{margin-top:4px;text-align:center} /* guida senza frasi: solo 2 parole e la mano */
 #coach.mini .co-t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #coach.mini{top:calc(env(safe-area-inset-top) + 58px) !important;bottom:auto !important}
 #coach.mini.giu.lato{top:auto !important;bottom:calc(env(safe-area-inset-bottom) + 14px) !important;left:50% !important;right:auto !important;transform:translateX(-50%)} /* in orizzontale: in basso al centro, tra Frana e Avvia ondata */
@@ -6625,8 +6626,7 @@ const GUIDAKEY = 'difendi-smerillo-guida';
 let guida = (() => { try { return localStorage.getItem(GUIDAKEY) ? -1 : 0; } catch(e){ return 0; } })();
 const dif = t => S && S.dif.find(d => d.tipo === t);
 const GUIDA = [
-  {get t(){ return `Abbatti i <b>${nemiciTot()} nemici</b> prima che arrivino alla <b>Chiesa</b>!`; }, sub:'Muovi i soldati verso di loro, poi <b>Fine turno</b>.', punta:null, ok:() => false, bottone:'Vai!'},
-  {quando:() => S.turno >= 2, t:'<b>Linee rosse</b> = dove vanno i nemici.', sub:'Vai loro incontro.', punta:null, ok:() => false, bottone:'Ok'},
+  {get t(){ return `🛡️ <b>Difendi la Chiesa!</b>`; }, sub:'', punta:null, ok:() => false, bottone:'▶ VIA!'},
 ];
 function passoGuida(){ if (!S || guida < 0 || MI !== 0 || NET) return null; while (guida < GUIDA.length && GUIDA[guida].ok()) guida++; if (guida >= GUIDA.length){ fineGuida(); return null; } if (PROVA) return null; if (GUIDA[guida].quando && !GUIDA[guida].quando()) return null; return GUIDA[guida]; }
 let COACH_TB = -1;
@@ -6634,17 +6634,17 @@ let COACH_TB = -1;
 let PROVA = null;
 const PROVE = [
   {tipo:'lanciere', da:'piazzale', nem:'fessa', hp:2,
-   sel:['Inizia dai <b>Lancieri</b>. Toccali.', 'Forti, da vicino.'],
-   az:['Ora tocca il <b>nemico</b> con il mirino rosso.', ''],
+   sel:['<b>Tocca qui</b>', ''],
+   az:['<b>Colpisci!</b>', ''],
    ok:['💥 Abbattuto!', '']},
   {tipo:'arciere', da:'porta', nem:'fessa', hp:1,
-   sel:['Ora gli <b>Arcieri</b>. Toccali.', 'Tirano da lontano.'],
-   az:['Tocca il <b>nemico</b> lontano, con il mirino rosso.', ''],
-   ok:['🏹 Colpito da lontano!', 'Sono fragili: tienili dietro.']},
+   sel:['<b>Tocca qui</b>', ''],
+   az:['<b>Colpisci!</b>', ''],
+   ok:['🏹 Colpito da lontano!', '']},
   {tipo:'carpentiere', da:'porta', nem:'fessa', hp:2,
-   sel:['Ora i <b>Carpentieri</b>. Toccali.', 'Non combattono: costruiscono.'],
-   az:['Tocca il <b>cerchio giallo</b> sulla strada del nemico.', ''],
-   ok:['🔨 Il nemico si è fermato!', 'La barricata chiude la strada.']},
+   sel:['<b>Tocca qui</b>', ''],
+   az:['<b>Costruisci!</b>', ''],
+   ok:['🔨 Strada chiusa!', '']},
 ];
 function provaVia(k){ const P = PROVE[k]; PROVA = {k, vis:'', turno:false}; document.body.classList.add('tb-prova');
   S = nuovo(); S.prova = k; S.coda = []; S.bar = []; S.nem = []; const mx = vitaDi(P.tipo);
@@ -6663,10 +6663,11 @@ function provaCoach(){ if (!PROVA || !S) return; const P = PROVE[PROVA.k], u = S
   else f = PROVA.k === 2 && (V || S.turno < 2) ? 'att' : 'ok';
   if (PROVA.vis === f) return; PROVA.vis = f;
   if (f === 'att'){ COACH.nascondi(); return; }
+  if (f === 'ok' && PROVA.k < PROVE.length - 1){ const k0 = PROVA.k; setTimeout(() => { if (PROVA && PROVA.k === k0 && PROVA.vis === 'ok') provaVia(k0 + 1); }, 1500); } // si passa da soli al prossimo soldato
   const ultima = PROVA.k === PROVE.length - 1, tx = P[f], colpita = !!(x && x.hp < x.max) || !x;
-  const testo = f === 'ok' && PROVA.k === 2 && !colpita ? '🔨 Barricata costruita!' : tx[0], sotto = f === 'ok' && PROVA.k === 2 && !colpita ? 'La barricata chiude la strada.' : tx[1];
-  COACH.mostra({passo: PROVA.k + 1, tot: PROVE.length, testo, sotto,
-    salta: f === 'ok' ? null : () => provaFine(true), bottone: f === 'ok' ? (ultima ? 'Inizia la missione!' : 'Avanti') : null,
+  const testo = f === 'ok' && PROVA.k === 2 && !colpita ? '🔨 Strada chiusa!' : tx[0], sotto = tx[1];
+  COACH.mostra({solo: true, saltaT: '✕', passo: PROVA.k + 1, tot: PROVE.length, testo, sotto,
+    salta: f === 'ok' ? null : () => provaFine(true), bottone: f === 'ok' ? (ultima ? '▶ VIA!' : '▸') : null,
     ok: () => { if (!PROVA) return; if (ultima) provaFine(false); else provaVia(PROVA.k + 1); },
     pausa: () => !attivo || ovAperto || !S || !!V,
     dove: () => { if (!S || !PROVA || f === 'ok') return null; const id = f === 'sel' ? u.nodo : PROVA.k === 2 ? 'piazzale' : (S.nem[0] && S.nem[0].nodo); if (!id || !NODI[id]) return null; const [px, py] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + px, y: r.top + py - 8, r: 30}; }}); }
@@ -6698,14 +6699,14 @@ function aiuto(){ if (!aiutoOk()) return; if (guida >= 0){ fineGuida(); COACH_TB
   let fase = '';
   const giro = () => { if (!AIUTO) return; if (!S || S.esito || V || S.turno !== turno || ovAperto){ aiutoStop(); return; }
     let f, cfg;
-    if (m.k === 'fine'){ f = 'fine'; const resta = S.dif.some(x => !x.mosso && TIPI[x.tipo].passo); cfg = {testo: resta ? 'Ora tocca <b>Fine turno</b>.' : 'Hai fatto tutto: tocca <b>Fine turno</b>.', sotto: resta ? 'I tuoi soldati sono già al posto giusto. Adesso si muovono i nemici.' : 'Adesso si muovono i nemici.', dove: () => el('tbFine')}; }
+    if (m.k === 'fine'){ f = 'fine'; const resta = S.dif.some(x => !x.mosso && TIPI[x.tipo].passo); cfg = {testo: '<b>Tocca qui</b>', dove: () => el('tbFine')}; }
     else { const d = S.dif.find(x => x.id === m.d.id); if (!d || (m.k === 'colpisci' ? d.agito : d.mosso)){ aiutoStop(); return; }
       const nome = TIPI[d.tipo].nome, pl = /i$/i.test(nome), voc = /^([aeiouh]|s[^aeiou]|z|gn|ps|x|y)/i.test(nome);
       const art = pl ? (voc ? 'gli ' : 'i ') : (/^[aeiouh]/i.test(nome) ? 'l’' : voc ? 'lo ' : 'il ');
-      if (!(sel && sel.k === 'dif' && sel.id === d.id)){ f = 'sel'; cfg = {testo: `Tocca ${art}<b>${nome}</b>.`, sotto: m.k === 'colpisci' ? (pl ? 'Da lì possono colpire un nemico.' : 'Da lì può colpire un nemico.') : (pl ? 'Li spostiamo verso i nemici.' : 'Lo spostiamo verso i nemici.'), dove: punto(d.nodo)}; }
-      else if (m.k === 'colpisci'){ f = 'col'; cfg = {testo: 'Tocca il <b>nemico con il mirino rosso</b>.', sotto: 'Colpisci quello più vicino alla Chiesa.', dove: punto(m.nodo)}; }
-      else { f = 'mov'; cfg = {testo: 'Tocca qui per <b>spostarti</b>.', sotto: 'Così vai incontro al nemico e gli blocchi la strada.', dove: punto(m.nodo)}; } }
-    if (f !== fase){ fase = f; COACH.mostra(Object.assign({testo: '', pausa: () => !attivo || ovAperto || !S, salta: () => aiutoStop()}, cfg)); } };
+      if (!(sel && sel.k === 'dif' && sel.id === d.id)){ f = 'sel'; cfg = {testo: '<b>Tocca qui</b>', dove: punto(d.nodo)}; }
+      else if (m.k === 'colpisci'){ f = 'col'; cfg = {testo: '<b>Colpisci!</b>', dove: punto(m.nodo)}; }
+      else { f = 'mov'; cfg = {testo: '<b>Vai qui</b>', dove: punto(m.nodo)}; } }
+    if (f !== fase){ fase = f; COACH.mostra(Object.assign({solo: true, saltaT: '✕', testo: '', pausa: () => !attivo || ovAperto || !S, salta: () => aiutoStop()}, cfg)); } };
   AIUTO = {t: setInterval(giro, 150)}; giro(); }
 // il tasto Aiuto sta sempre appena sopra il riquadro del personaggio, mai sopra
 function postoAiuto(){ const b = el('tbAiuto'), i = el('tbInfo'); if (!b || b.hidden || !i || !b.offsetParent) return; const pr = b.offsetParent.getBoundingClientRect(), ir = i.getBoundingClientRect(); if (!ir.height) return; b.style.bottom = Math.max(8, pr.bottom - ir.top + 8) + 'px'; }
@@ -6760,13 +6761,13 @@ function info(){
   if (V){ aggiornaOlBar(); box.classList.add('mini'); metti(box, `<p class="tbtip"><b>Turno dei nemici…</b></p>`); return; }
   if (online() && infoOnline(box)) return; if (!online()) aggiornaOlBar();
   if (piazza && S.turno === 1 && !S.esito){ const f = S.dif.find(d => d.id === piazza.id);
-    if (f){ box.classList.remove('mini'); if (metti(box, `<div class="tbguida"><p>🦅 <b>Dove metti il ${TIPI[f.tipo].nome}?</b> Tocca un <b>cerchio giallo</b>. Non si muoverà più per tutta la partita, ma colpisce i nemici ovunque. Mettilo al sicuro, oppure usalo per bloccare una strada.</p><button class="big alt" id="tbPzOk">Lascialo qui</button></div>`)){ box.querySelector('#tbPzOk').onclick = () => { piazza = null; SUONI.suona('tocco'); render(); }; } return; } }
+    if (f){ box.classList.remove('mini'); if (metti(box, `<div class="tbguida"><p>🦅 <b>Tocca un cerchio giallo</b></p><button class="big alt" id="tbPzOk">Lascialo qui</button></div>`)){ box.querySelector('#tbPzOk').onclick = () => { piazza = null; SUONI.suona('tocco'); render(); }; } return; } }
   if (PROVA){ box.classList.add('mini'); metti(box, `<p class="tbtip">👆 Segui il dito</p>`); provaCoach(); return; }
   const pg = passoGuida(); el('tbFine').classList.toggle('guida', !!(pg && pg.punta === 'fine'));
   if (pg){ box.classList.add('mini'); metti(box, `<p class="tbtip">👆 Segui il dito</p>`);
     if (COACH_TB !== guida){ COACH_TB = guida; const fine = () => { COACH_TB = -1; COACH.nascondi(); fineGuida(); info(); render(); };
       const g0 = guida, avanti = () => { if (guida !== g0) return; if (guida >= GUIDA.length - 1) return fine(); guida++; COACH_TB = -1; COACH.nascondi(); info(); render(); }; // un doppio tocco non salta un passo
-      COACH.mostra({passo: guida + 1, tot: GUIDA.length, testo: pg.t, sotto: pg.sub, salta: pg.bottone ? null : fine, bottone: pg.bottone || null, ok: avanti,
+      COACH.mostra({solo: true, saltaT: '✕', passo: guida + 1, tot: GUIDA.length, testo: pg.t, sotto: pg.sub, salta: pg.bottone ? null : fine, bottone: pg.bottone || null, ok: avanti,
         pausa: () => !attivo || ovAperto || !S, dove: () => { if (!S) return null; if (pg.punta === 'fine') return el('tbFine'); if (pg.punta === 'aiuto'){ const ba = el('tbAiuto'); return ba && !ba.hidden ? ba : null; } if (typeof pg.punta === 'function'){ const id = pg.punta(); if (!id || !NODI[id]) return null; const [x, y] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + x, y: r.top + y - 8, r: 30}; } return null; }}); }
     return; }
   if (COACH_TB !== -1){ COACH_TB = -1; COACH.nascondi(); }
@@ -9620,7 +9621,7 @@ function cosaFaccio(){ if (!S || GIOCA || SCELTA || ovAperto() || mpAttesa() || 
     const f = m.k === 'fine' ? 'fine' : sel !== m.terra ? 't' : 'b';
     if (f === 'b' && (ovAperto() || !el(m.btn))){ stopCH(); return; }
     if (CH.f === f) return; CH.f = f; if (f === 't'){ if (sel){ sel = null; pannello(); } vaiA(m.terra); }
-    COACH.mostra({testo: f === 'fine' ? m.t : f === 't' ? m.t1 : m.t2, sotto: m.s, salta: stopCH, saltaT: 'Chiudi', tag: 'CONSIGLIO', pausa: () => !attivo || ovAperto() || !!GIOCA,
+    COACH.mostra({solo: true, testo: f === 'fine' ? '<b>Fine stagione</b>' : f === 't' ? '<b>Tocca qui</b>' : ({cqRec:'<b>Arruola</b>', cqAtt:'⚔️ <b>Attacca!</b>', cqStr:'<b>Costruisci:</b> ' + (CONS_STR === 'fattoria' ? 'Castagneto' : CONS_STR === 'segheria' ? 'Segheria' : 'Mercato')}[m.btn] || m.t2), sotto: '', salta: stopCH, saltaT: '✕', tag: 'CONSIGLIO', pausa: () => !attivo || ovAperto() || !!GIOCA,
       dove: f === 'fine' ? () => el('cqFine') : f === 't' ? () => puntoTerra(m.terra) : () => el(m.btn)}); };
   CH = {f: '', iv: setInterval(giro, 200)}; giro(); }
 
@@ -9641,20 +9642,21 @@ function passoCG(){ if (!CG || !S) return; if (!attivo){ COACH.nascondi(); CG.vi
   if (CG.k === 3 && (S.mosse < CG.m2 || S.terre[CG.terra].own === S.io)) CG.k = 4;
   if (CG.k === 2 && S.mosse <= 0) CG.k = 4;
   if (CG.k === 3 && sel !== CG.terra && !ovAperto()){ CG.k = 2; }
+  if (CG.k === 4 && S.mosse > 0 && S.turno === CG.turno && !ovAperto()){ const t3 = vicinaCG(); if (t3){ CG.terra = t3; CG.m2 = S.mosse; CG.k = 2; vaiA(t3); } }
   if (CG.k <= 4 && S.turno > CG.turno) CG.k = 5;
   if (CG.vista === CG.k) return; CG.vista = CG.k;
   const pausa = () => !attivo || ovAperto() || !!GIOCA || !!SCELTA || !!modo;
   const P = [
-    {t:'Questo è il tuo borgo. <b>Toccalo.</b>', s:'Vinci se conquisti i 2 borghi rivali, una terra alla volta.', dove: () => puntoTerra(S.io)},
-    {t:'Tocca <b>Arruola</b>, poi conferma.', s:'Nuovi soldati. Ogni azione usa 1 mossa.', dove: () => { const b = el('cqRec'); return b && b.offsetWidth && sel === S.io ? b : puntoTerra(S.io); }},
-    {t:'Ora tocca questa <b>terra vicina</b>.', s:'Puoi conquistarla.', dove: () => puntoTerra(CG && CG.terra)},
-    {t:'Tocca <b>Attacca</b>.', s:'Più soldati mandi, più è facile.', dove: () => { const b = el('cqAtt'); return b && b.offsetWidth ? b : puntoTerra(CG && CG.terra); }},
-    {get t(){ return S && S.mosse > 0 ? `Usa le <b>${S.mosse} mosse</b> rimaste, poi <b>Fine stagione</b>.` : 'Ora tocca <b>Fine stagione</b>.'; }, s:'Poi muovono gli altri borghi.', dove: () => el('cqFine')},
-    {t:'In alto: <b>monete, cibo e legna</b>.', s:'Monete = soldati. Cibo = li sfama. Legna = costruire.', dove: () => el('cqRis'), btn:'Ok', next: () => { if (CG){ CG.k = 6; CG.vista = -1; passoCG(); } }},
-    {t:'Bloccato? Tocca <b>💡</b>.', s:'Ti indico una mossa buona.', dove: () => el('cqCosa'), btn:'Ho capito', next: fineCG}];
+    {t:'🏰 <b>Tocca qui</b>', s:'', dove: () => puntoTerra(S.io)},
+    {t:'<b>Arruola</b>', s:'', dove: () => { const b = el('cqRec'); return b && b.offsetWidth && sel === S.io ? b : puntoTerra(S.io); }},
+    {t:'<b>Tocca qui</b>', s:'', dove: () => puntoTerra(CG && CG.terra)},
+    {t:'⚔️ <b>Attacca!</b>', s:'', dove: () => { const b = el('cqAtt'); return b && b.offsetWidth ? b : puntoTerra(CG && CG.terra); }},
+    {t:'<b>Fine stagione</b>', s:'', dove: () => el('cqFine')},
+    {t:'<b>Monete · cibo · legna</b>', s:'', dove: () => el('cqRis'), btn:'▸', next: () => { if (CG){ CG.k = 6; CG.vista = -1; passoCG(); } }},
+    {t:'💡 <b>= aiuto</b>', s:'', dove: () => el('cqCosa'), btn:'👍', next: fineCG}];
   const x = P[CG.k]; if (!x){ fineCG(); return; }
   if (CG.k === 0) vaiA(S.io);
-  COACH.mostra({passo: CG.k + 1, tot: P.length, testo: x.t, sotto: x.s, dove: x.dove, pausa, su: true, bottone: x.btn || null, ok: x.next || fineCG, salta: x.btn ? null : fineCG}); }
+  COACH.mostra({solo: true, saltaT: '✕', passo: CG.k + 1, tot: P.length, testo: x.t, sotto: x.s, dove: x.dove, pausa, su: true, bottone: x.btn || null, ok: x.next || fineCG, salta: x.btn ? null : fineCG}); }
 function guida(dopo){ const o = ov(`<div class="dlg box cq-dlg"><h2>Come si gioca</h2><div class="how">
     <span>1</span><span>Si gioca a <b>stagioni</b>: hai <b>${MOSSE_N()} mosse</b>, poi premi <b>Fine stagione</b> e muovono gli altri borghi.</span>
     <span>2</span><span>Hai tre risorse: <b>monete</b>, <b>cibo</b> e <b>legna</b>. Ogni ${MANGIANO} soldati mangiano 1 cibo: senza cibo i soldati se ne vanno. Tocca le risorse in alto per il bilancio.</span>
@@ -9713,7 +9715,7 @@ function scegli(){ let rec = {}; try { rec = JSON.parse(localStorage.getItem(KRE
   o.querySelector('#cqMe').onclick = () => { SCELTA = null; SCELTA_MOSTRA = null; VOLO = null; S = null; o.classList.remove('scelta'); esci(); };
   opt(); misura(); centra(); mostra(SCELTA, false); setTimeout(() => volaSu(SCELTA), 350); }
 let SCELTA_MOSTRA = null, SCELTA_MP = false;
-function dlgAnno(dopo){ try { if (RITORNO.stato().in === 'conquista' && !S.mp){ if (dopo) dopo(); return; } } catch(e){} // nell'assaggio si parte subito
+function dlgAnno(dopo){ try { if ((RITORNO.stato().in === 'conquista' || !(CAS && CAS.storia && CAS.storia.length)) && !S.mp){ if (dopo) dopo(); return; } } catch(e){} // nell'assaggio e nella prima partita si parte subito // nell'assaggio si parte subito
   const A = ANNI[S.anno], altri = Object.keys(FZ).filter(f => f !== S.io);
   const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('pergamena', 2)} Comincia una nuova generazione</span><h2>${A.nome}</h2><div class="cq-anno">${ico(A.ic, 4)}<p>${A.desc}</p></div>${ESP_IA() ? `<p class="cq-esp">${ico('spade', 2)} <b>I rivali ti conoscono.</b> Dopo ${CAS && CAS.vittorie} vittorie della tua casata gli altri borghi sono più forti: +${Math.round(ESP_IA()*100)}% di rendita e ${Math.round(ESP_IA()*10)} soldati in più nel borgo.</p>` : ''}
     ${S.veloce ? `<p class="cq-ok">${ico('clessidra', 2)} Partita veloce: ${VEL.stag} stagioni. Alla fine vince chi ha più punti: terre, borghi, Grande Fiera, alleati e strutture.</p>` : ''}<p>Vicini: ${altri.map(f => '<b>' + FZ[f].nome + '</b>').join(' e ')}. Il loro carattere lo scopri giocando.</p>
@@ -9764,7 +9766,7 @@ function avviaCQ(){ SCELTA_MP = false; if (APRI_DOPO === 'crea' || APRI_DOPO ===
     if (k === 'stemma'){ dlgStemma(torna); const no = el('cqOv').querySelector('#cqNo'); if (no) no.onclick = torna; }
     else { dlgCasata(); const o = el('cqOv'), no = o.querySelector('#cqNo'), st = o.querySelector('#cqStC'); if (no) no.onclick = torna; if (st) st.onclick = () => { dlgStemma(torna); const n2 = el('cqOv').querySelector('#cqNo'); if (n2) n2.onclick = torna; }; }
     return; }
-  APRI_DOPO = null; if (!leggiCas()){ root.classList.add('vuoto'); misura(); centra(); dlgStemma(() => avviaCQ()); return; }
+  APRI_DOPO = null; if (!leggiCas()){ let a = ''; try { a = (ACC.account && ACC.account.nome) || ''; } catch(e){} const nm = (a.length >= 2 ? a : 'Del Borgo').slice(0, 16); CAS = {nome: nm.charAt(0).toUpperCase() + nm.slice(1), stemma:{c1:0, c2:3, f:'partito', sim:'torre'}, gloria:0, gen:0, vittorie:0, storia:[]}; salvaCas(); } // la prima volta si parte subito: nome e stemma si cambiano dopo, dalla Casata
   requestAnimationFrame(() => { misura(); if (S) vaiA(S.io); else centra(); });
   const c = carica(); if (c){ S = c; impostaMappa(S.mappa || 'media'); if (!S.capIA && !S.mp) capIAinit(); for (const k of ['acc', 'patti', 'rep']) if (!S[k]) S[k] = {}; for (const k of ['proposte', 'richieste', 'missioni', 'cron', 'eventi']) if (!S[k]) S[k] = []; if (!S.car){ S.car = {}; S.noto = {}; const ks = Object.keys(CARATTERI).sort(() => rnd() - .5); Object.keys(FZ).filter(f => f !== S.io).forEach((f, i) => { S.car[f] = ks[i]; }); } if (!S.noto) S.noto = {}; if (!S.anno) S.anno = 'calmo'; sel = S.io; misura(); vaiA(S.io); aggiornaUI();
     const o = ov(`<div class="dlg box cq-dlg"><span class="kicker">${ico('bandiera', 2)} Conquista</span><h2>Bentornato a ${FZ[S.io].nome}</h2><p>${stagione(S.turno)}. Hai ${terreDi(S.io).length === 1 ? '1 terra' : terreDi(S.io).length + ' terre'} e ${sol(soldDi(S.io))}.</p><button class="big" id="cqCo">Continua la partita</button><button class="big alt" id="cqNu">Nuova partita</button><button class="big alt" id="cqMe">Torna al menu</button></div>`, false);
@@ -10368,7 +10370,12 @@ const COACH = window.COACH = (() => {
         const era = box.classList.contains('sopra') ? true : box.classList.contains('sotto') ? false : null, lim = era === true ? .37 : era === false ? .53 : .45;
         const alto = !!(!b || b.y > innerHeight*lim || (cfg.su && b.y > (era === false ? 190 : 150))); box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
         // se la nuvoletta copre il punto da toccare la accorcio, e resta accorciata finché non cambia passo (prima si allungava e accorciava a ogni fotogramma)
-        if (b && !box.classList.contains('stretto')){ const r = box.getBoundingClientRect(); if (b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8) box.classList.add('stretto'); } } } }
+        if (b && !box.classList.contains('stretto')){ const r = box.getBoundingClientRect(); if (b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8) box.classList.add('stretto'); } }
+      // guida senza frasi: le 2 parole stanno attaccate alla mano, non in fondo allo schermo
+      const vic = !!(cfg.solo && b); box.classList.toggle('vicino', vic);
+      if (vic){ const bw = box.offsetWidth, bh = box.offsetHeight; let y = b.y + b.h/2 + 40; if (y + bh > innerHeight - 80) y = b.y - b.h/2 - bh - 16; y = Math.max(8, y);
+        box.style.left = Math.max(8, Math.min(innerWidth - bw - 8, b.x - bw/2)) + 'px'; box.style.top = y + 'px'; }
+      else { box.style.left = ''; box.style.top = ''; } } }
   function armaMini(){ clearTimeout(tMini); if (cfg && !cfg.bottone) tMini = setTimeout(() => { if (cfg && !cfg.bottone && box && !box.hidden) box.classList.add('mini'); }, MINI_DOPO + (cfg.sotto ? 1200 : 0)); }
   function mostra(c){ crea(); cfg = c; box.classList.remove('mini', 'stretto'); box.classList.toggle('giu', !!c.giu); box.classList.toggle('solo', !!c.solo);
     box.innerHTML = `<div class="co-h"><span class="co-n">${c.solo ? '' : c.passo ? 'PASSO ' + c.passo + (c.tot ? ' DI ' + c.tot : '') : (c.tag || 'GUIDA')}</span>${c.salta ? '<button type="button" class="co-salta">' + (c.saltaT || 'Salta la guida') + '</button>' : ''}</div>
