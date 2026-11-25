@@ -771,6 +771,9 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 #tbBanner{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) scale(.85);z-index:8;pointer-events:none;opacity:0;transition:opacity .2s,transform .2s;font:400 24px var(--f-big);color:var(--testo);background:var(--carta);padding:10px 20px;border-radius:22px;border:3px solid var(--linea);box-shadow:0 6px 0 var(--linea);white-space:nowrap;text-align:center}
 #tbBanner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #tbBanner.io{background:var(--giallo)}#tbBanner.lui{background:var(--carta)}#tbBanner.nem{background:var(--rosso);color:#fff}
+/* "Tocca a te!" scende dall'alto e non copre i soldati in mezzo alla mappa */
+#tbBanner{top:calc(74px + env(safe-area-inset-top))!important;transform:translate(-50%,-26px) scale(.9)!important;font-size:20px!important;padding:7px 18px!important;transition:opacity .22s,transform .38s cubic-bezier(.34,1.56,.64,1)!important}
+#tbBanner.on{transform:translate(-50%,0) scale(1)!important}
 .tbpill{display:inline-block;padding:0 7px;border-radius:999px;font:400 12px var(--f-big);margin-left:4px;vertical-align:1px;background:rgba(255,255,255,.18);color:#fff}
 .tbpill.io{background:var(--giallo);color:var(--linea)}.tbpill.nem{background:var(--rosso);color:#fff}
 .olris{font:400 36px var(--f-big);text-align:center;padding:14px 8px;border-radius:18px;border:3px solid var(--linea);box-shadow:0 5px 0 var(--linea);margin:8px 0 12px;color:var(--linea)}
@@ -6404,7 +6407,7 @@ const visibileNem = (S, x, d) => !TIPI[x.tipo].nascosto || (d && stat(d.tipo).ve
 // quando un nemico è sul bordo della rupe e un Lanciere lo può colpire, il gioco lo dice (una volta per turno)
 let RUPE_T = -1; function consiglioRupe(){ try { if (!S || S.esito || ev || (coda && coda.length) || guida >= 0 || !mioTurno() || RUPE_T === S.turno + '|' + MI) return;
   for (const d of S.dif){ if (d.tipo !== 'lanciere' || d.agito || (typeof puoComandare === 'function' && !puoComandare(d))) continue; const b = bersagli(S, d).find(x => { const n = S.nem.find(e => e.id === x.id); return n && NODI[n.nodo] && NODI[n.nodo].rupe && !TIPI[n.tipo].pesante; });
-    if (b){ RUPE_T = S.turno + '|' + MI; const n = S.nem.find(e => e.id === b.id); setTimeout(() => { if (aiutoOk() && !AIUTO) aiuto({k:'colpisci', d, nodo:n.nodo, rupe:true}); else suggerisci(`${TIPI[n.tipo].nome} è sul bordo della rupe: colpiscilo con i Lancieri e cade giù!`); }, 400); return; } } } catch(e){} } // la mano mostra la mossa della rupe (vale una stella)
+    if (b){ RUPE_T = S.turno + '|' + MI; const n = S.nem.find(e => e.id === b.id); setTimeout(() => { if (aiutoOk() && !AIUTO) aiuto({k:'colpisci', d, nodo:n.nodo, rupe:true}); else suggerisci(`🪨 ${TIPI[n.tipo].nome} sulla rupe: colpiscilo, cade giù!`); }, 400); return; } } } catch(e){} } // la mano mostra la mossa della rupe (vale una stella)
 function bersagli(S, d){
   if (d.agito) return [];
   if (TIPI[d.tipo].costruisce) return S.legname > 0 ? ADJ[d.nodo].filter(c => !occ(S, c) && c !== META && !ARRIVO.has(c)).map(c => ({k:'costruisci', nodo:c})) : [];
@@ -6834,7 +6837,7 @@ function info(){
   const rimasti = R.nem.length + S.coda.length; metti(el('tbNem'), ico('teschio') + ' ' + rimasti + (S.vs ? '' : ' <small class="tbn-l">' + (rimasti === 1 ? 'nemico' : 'nemici') + '</small>'));
   el('tbUndo').disabled = !storia.length || !!V || !!S.esito; aggiornaAiuto();
   { const b = el('tbShop'), m = (R.monete ?? S.monete) || 0; if (b.dataset.m !== String(m)){ const su = b.dataset.m !== undefined && m > +b.dataset.m; b.dataset.m = m; b.innerHTML = ico('moneta', 3) + ' ' + m; if (su){ b.classList.remove('anim-su'); void b.offsetWidth; b.classList.add('anim-su'); } } b.disabled = !!V || !!S.esito; b.classList.toggle('pronto', !V && OFFERTE.some(f => m >= f.costo && f.ok(S))); }
-  { const m = S.monete || 0; if (moneteViste === null || V) moneteViste = moneteViste === null ? m : moneteViste; if (!V && m > moneteViste){ if (!S.moneteSpiegate && S.prova == null){ S.moneteSpiegate = true; suggerisci('🪙 Moneta! Spendila nella Bottega, in basso'); } moneteViste = m; } else if (m < moneteViste) moneteViste = m; }
+  { const m = S.monete || 0; if (moneteViste === null || V) moneteViste = moneteViste === null ? m : moneteViste; if (!V && m > moneteViste){ if (!S.moneteSpiegate && S.prova == null){ S.moneteSpiegate = true; suggerisci('🪙 +1 moneta: spendila in Bottega'); } moneteViste = m; } else if (m < moneteViste) moneteViste = m; }
   const liberi = S.dif.filter(d => (!d.mosso || !d.agito) && (!online() || puoComandare(d) || NET.modo === 'vs')).length;
   el('tbFine').disabled = !!V || !!S.esito; el('tbFine').classList.toggle('pronto', !V && liberi === 0);
   box.classList.remove('mini', 'su');
@@ -6866,7 +6869,7 @@ function info(){
     box.classList.toggle('dett', infoDett);
     let stato = '';
     if (!T.nemico){ const mm = mossePer(S, u), m = mm.length, b = bersagli(S, u).length;
-      stato = (T.costruisce && (b || m) ? `<div class="tbmodo"><button type="button" data-mc="0" aria-pressed="${!modoC}">${ico('muovi')} Muovi</button><button type="button" data-mc="1" aria-pressed="${modoC}">${ico('martello')} Costruisci</button></div>` : '') + `<span class="tbst">${u.mosso ? (m ? ico('ok') + ' Passo fatto · <b>Scatto</b>: usa l’azione per un altro passo' : ico('ok') + ' Passo fatto') : m ? '<b>Cerchio verde</b> = spostati lì' : 'Nessun passo libero'} · ${u.agito ? ico('ok') + ' Azione fatta' : b ? (T.costruisce ? '<b>Giallo</b> = costruisci (legno: ' + S.legname + ')' : T.ferma ? '<b>Mirino</b> = puoi fermare' : '<b>Mirino rosso</b> = tocca il nemico per colpirlo') : T.costruisce && !S.legname ? 'Legno finito' : 'Nessun nemico vicino: avvicinati, oppure aspettalo qui'}</span>`;
+      stato = (T.costruisce && (b || m) ? `<div class="tbmodo"><button type="button" data-mc="0" aria-pressed="${!modoC}">${ico('muovi')} Muovi</button><button type="button" data-mc="1" aria-pressed="${modoC}">${ico('martello')} Costruisci</button></div>` : '') + `<span class="tbst tbcorto">${u.mosso ? ico('ok') + ' Passo' + (m ? ' · <b>Scatto</b>: ancora 1' : '') : m ? '🟢 <b>Vai</b> sul verde' : '–'} · ${u.agito ? ico('ok') + ' Azione' : b ? (T.costruisce ? '🟡 <b>Costruisci</b> (legno ' + S.legname + ')' : T.ferma ? '🎯 <b>Ferma</b>' : '🎯 <b>Colpisci</b> il rosso') : T.costruisce && !S.legname ? 'Legno finito' : 'Nessuno vicino'}</span>`;
       stato = `<span class="tbruolo">${RUOLO[u.tipo] || T.corto || ''}</span>` + stato;
       if (mm.some(x => x.k === 'scambio')) stato += `<button type="button" class="tbscb" id="tbScambia" aria-pressed="${modoS}">${modoS ? 'Tocca il compagno (cerchio blu)' : 'Scambia posto con un compagno'}</button>`;
       { const sp = specialeDi(S, u); if (sp) stato = `<button type="button" class="tbspec" id="tbSpec">${ico(SPECIALI[sp].icona, 2)} ${SPECIALI[sp].nome} <small>(1 volta)</small></button><span class="tbst tbreg">${SPECIALI[sp].desc}</span>` + stato; }
@@ -6884,10 +6887,10 @@ function info(){
   if (sel && sel.k === 'nodo'){ box.classList.add('mini'); const N = NODI[sel.id]; metti(box, `<p class="tbtip"><b>${N.nome}</b>${N.id === META ? ' – è la meta dei nemici: se la colpiscono perde vite. Se ci metti un difensore, il nemico colpisce lui.' : N.arrivo ? ' – da qui arrivano i nemici. È fuori dal paese: i tuoi difensori non possono andarci.' : ''}</p>`); return; }
   // dico sempre cosa conviene fare adesso, e perché a volte si passa il turno senza colpire
   const puoColpire = S.dif.some(d => !d.agito && !TIPI[d.tipo].costruisce && bersagli(S, d).length);
-  const tip = !liberi ? 'Hai fatto tutto. Tocca <b>Fine turno</b>.'
-    : puoColpire ? '🎯 <b>Puoi colpire un nemico!</b> Tocca un soldato con il cerchio giallo.'
-    : S.nem.length ? 'I nemici sono ancora lontani. Sposta i soldati verso le loro strade, poi tocca <b>Fine turno</b>: così si avvicinano.'
-    : 'Nessun nemico in vista. Tocca <b>Fine turno</b> per farli arrivare.';
+  const tip = !liberi ? '✓ Fatto! Tocca <b>Fine turno</b>'
+    : puoColpire ? '🎯 <b>Colpisci!</b> Tocca un soldato giallo'
+    : S.nem.length ? '👣 Avvicina i soldati, poi <b>Fine turno</b>'
+    : 'Tocca <b>Fine turno</b>: arrivano i nemici';
   box.classList.add('mini'); metti(box, `<p class="tbtip">${tip}</p>`);
 }
 const _render = render; render = (T) => { _render(T); disegnaOnline(); disegnaPiazza(); info(); };
