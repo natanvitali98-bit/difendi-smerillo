@@ -933,6 +933,8 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .scr-cassa.px .scr-cop .cf,.scr-cassa.px .scr-cop .ci{position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat;image-rendering:pixelated;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .scr-cassa.px .scr-cop .ci{display:none}
 .scr-luce{background:radial-gradient(ellipse at 50% 50%,#fff 0%,rgba(255,255,255,.6) 35%,transparent 70%)!important;box-shadow:none!important}
+@media (max-width:420px){ .scr-salta{top:calc(36px + env(safe-area-inset-top))!important;right:36px!important;padding:6px 12px!important;font-size:13px!important;min-height:34px!important} .scr-tit{top:calc(9% + 34px)!important} } /* telefoni stretti: "Apri tutto" non copre il titolo */
+@media (max-height:560px){ .scr-carta-zona{transform:scale(.72);transform-origin:50% 0} .scr-tit{top:calc(30px + 3%)!important} .scr-tit b{font-size:30px!important} .scr-zona{transform:scale(1)!important;margin-top:40px!important} .scr-hint{bottom:7%!important;font-size:18px!important} } /* schermi bassi (PC piccolo, CrazyGames): la carta non copre il titolo */
 .scr-carta-zona{position:absolute;left:0;right:0;top:50%;height:0;display:flex;justify-content:center;z-index:8;pointer-events:none}
 .scr-carta{position:absolute;top:-170px;width:200px;height:290px;perspective:900px;pointer-events:auto;cursor:pointer}
 .scr-carta .sc-in{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.3,1.4,.5,1);transform-style:preserve-3d}
