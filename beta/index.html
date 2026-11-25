@@ -2011,6 +2011,13 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .lg2 .lg-s{position:relative;display:inline-block;font:400 clamp(54px,17vw,84px)/1 var(--f-big);letter-spacing:1px;color:#ffd03a;-webkit-text-fill-color:#ffd03a;-webkit-text-stroke:8px #141433;paint-order:stroke fill;text-shadow:0 4px 0 #141433,0 7px 0 #141433,0 10px 12px rgba(0,0,0,.45);padding:0 8px}
 @media (min-width:900px) and (min-aspect-ratio:1/1){ .lg2 .lg-s{font-size:76px} .lg2 .lg-n{font-size:22px} }
 @media (max-height:640px){ .lg2 .lg-s{font-size:clamp(38px,11vw,50px)} .lg2 .lg-n{font-size:15px;padding:3px 12px 4px} }
+.logo.lg3,.bv-logo.lg3{-webkit-text-stroke:0!important;text-shadow:none!important;transform:none!important;line-height:0!important;display:block}
+.lg3 .lg-svg{display:block;width:min(86vw,400px);height:auto;margin:0 auto;overflow:visible;filter:drop-shadow(0 6px 10px rgba(10,12,40,.45))}
+.cr-arena .logo.lg3{position:relative;margin:auto 0 0}
+.cr-arena .logo.lg3::before{content:'';position:absolute;left:50%;top:55%;width:120%;height:150%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(14,18,52,.55),transparent);z-index:-1;pointer-events:none} /* alone scuro morbido: il logo si legge anche sopra la mappa piena di dettagli */
+@media (min-width:900px) and (min-aspect-ratio:1/1){ .lg3 .lg-svg{width:440px} }
+@media (max-height:640px){ .lg3 .lg-svg{width:min(70vw,300px)} }
+#rtOv.bv .bv-logo.lg3 .lg-svg{width:min(88vw,420px)}
 .cr-arena .logo{animation:logoRespira 4s ease-in-out infinite}
 .cr-arena.entra .logo{animation:pgLogo .6s cubic-bezier(.2,.9,.3,1.3) both,logoRespira 4s ease-in-out .8s infinite}
 @keyframes logoRespira{0%,100%{translate:0 0;rotate:0deg}50%{translate:0 -4px;rotate:-1deg}}
@@ -5266,7 +5273,7 @@ function mostraMenu(pannello){
         <section class="cr-pg" data-tab="dif"><h2 class="cr-h">Collezione</h2><h3 class="cr-sub">${TB.ico('scudo', 2)} Difensori <small>${TB.contaDif()}</small></h3><div class="cr-difs">${difs}</div>
           <button class="big alt" id="tDif">Livelli e specialità</button><h3 class="cr-sub">${TB.ico('torre', 2)} Torri del tempo reale <small>dagli scrigni</small></h3><div class="cr-difs cr-torri" id="crTorri"></div><div class="cr-cq" id="crCq"></div></section>
         <section class="cr-pg cr-arena" data-tab="gioca">
-          <h1 class="logo lg2" aria-label="Difendi Smerillo"><span class="lg-n">Difendi</span><span class="lg-s" data-t="Smerillo">Smerillo</span></h1>
+          <h1 class="logo lg3">${logoSVG('DIFENDI')}</h1>
           <div class="cr-luogo">${TB.ico('pin', 2)} ${LUOGO}</div>
           <section class="hm-play gp-card">
             <div class="gp-top"><span class="gp-k">Missione ${pm.num} <i>di ${R.missioni.length}</i></span><span class="gp-st">${TB.ico('stella', 2)} ${tot}<i>/${R.missioni.length*3}</i></span></div>
@@ -6035,6 +6042,15 @@ const IMG = {
 };
 
 // ===== ICONE in pixel art, con la stessa tavolozza dei personaggi =====
+// logo del gioco in SVG: contorno uguale ovunque, nitido a ogni misura, uguale su iPhone e Android
+window.logoSVG = function(sopra){ const id = 'lg' + Math.random().toString(36).slice(2, 7), F = "'Lilita One','Arial Black',sans-serif";
+  return `<svg class="lg-svg" viewBox="0 0 560 190" role="img" aria-label="${sopra} Smerillo"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff7cf"/><stop offset=".45" stop-color="#ffd84a"/><stop offset="1" stop-color="#f2a516"/></linearGradient></defs>
+    <g font-family="${F}" text-anchor="middle">
+      <g fill="#ffd03a" font-size="30" letter-spacing="6"><text x="280" y="44" stroke="#141433" stroke-width="7" stroke-linejoin="round" paint-order="stroke fill">${sopra}</text></g>
+      <rect x="40" y="31" width="${Math.max(10, 170 - sopra.length*9)}" height="6" rx="3" fill="#ffd03a" stroke="#141433" stroke-width="3"/><rect x="${520 - Math.max(10, 170 - sopra.length*9)}" y="31" width="${Math.max(10, 170 - sopra.length*9)}" height="6" rx="3" fill="#ffd03a" stroke="#141433" stroke-width="3"/>
+      <text x="280" y="170" font-size="112" letter-spacing="2" fill="#141433" stroke="#141433" stroke-width="16" stroke-linejoin="round">SMERILLO</text>
+      <text x="280" y="160" font-size="112" letter-spacing="2" fill="url(#${id})" stroke="#141433" stroke-width="12" stroke-linejoin="round" paint-order="stroke fill">SMERILLO</text>
+    </g></svg>`; };
 const ICONE = {
   moneta:['..kkkkkk..','.kyyyyyyk.','kyyywwyyyk','kyywyyyyok','kyywyyyyok','kyywyyyyok','kyyyyyyyok','kyyyyyyook','.kyoooook.','..kkkkkk..'],
   mappa:['kkkkkkkkkk','kaaaaaaaak','kaAaaaaRak','kaaAaaRaRk','kaaaAaaRak','kaaaaAAaak','kaaGaaaAak','kaGGGaaaak','kaaBaaaaak','kkkkkkkkkk'],
@@ -10814,7 +10830,7 @@ const RITORNO = window.RITORNO = (() => {
       ${f ? '' : `<div class="as-fz">
         <div class="as-fzb">${Object.entries(FZ).map(([k, v]) => `<button type="button" data-fz="${k}" style="--fc:${v.c}">${v.n}</button>`).join('')}</div></div>`}
       <button class="big" data-x ${f ? '' : 'disabled'}>Entra nel gioco ▸</button>`);
-    ov.classList.add('bv'); document.body.classList.add('bv-on'); ov.insertAdjacentHTML('afterbegin', '<div class="bv-logo lg2" aria-hidden="true"><span class="lg-n">Benvenuto a</span><span class="lg-s" data-t="Smerillo">Smerillo</span></div>'); // niente menu sbiadito sotto: si vede solo il paese
+    ov.classList.add('bv'); document.body.classList.add('bv-on'); ov.insertAdjacentHTML('afterbegin', '<div class="bv-logo lg3" aria-hidden="true">' + logoSVG('BENVENUTO A') + '</div>'); // niente menu sbiadito sotto: si vede solo il paese
     let scelta = f; b.querySelectorAll('[data-fz]').forEach(x => x.onclick = () => { scelta = x.dataset.fz; b.querySelectorAll('[data-fz]').forEach(y => y.classList.toggle('on', y === x)); b.querySelector('[data-x]').disabled = false; try { SUONI.suona('tocco'); } catch(e){} });
     try { SUONI.suona('leggenda'); EPICO.coriandoli(120); } catch(e){}
     b.querySelector('[data-x]').onclick = () => { const s2 = stato(); s2.passo = 9; s2.in = null; salvaS(s2); if (scelta && scelta !== f) scegliFrazione(scelta); // la frazione si sceglie solo la prima volta (e a fine settimana): rivedendo la guida non si richiede
