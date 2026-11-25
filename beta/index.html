@@ -1079,7 +1079,7 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .rt-vinto .rt-raggi{animation-duration:5s;opacity:1;background:repeating-conic-gradient(rgba(255,240,170,.5) 0 9deg,transparent 9deg 18deg)}
 @keyframes rtRaggi{to{transform:rotate(360deg)}}
 .rt-cornice{position:absolute;inset:-14px;border-radius:50%;background:conic-gradient(#ffe27a,#c98a12,#fff1b0,#b87a0c,#ffe27a,#c98a12,#fff1b0,#b87a0c,#ffe27a);box-shadow:0 0 0 4px var(--linea),0 8px 0 4px var(--linea),0 0 30px rgba(255,200,60,.55);z-index:0}
-.rt-box .rt-ruota,.pr-rbox .rt-ruota{z-index:1;border-color:#7a4a08;box-shadow:inset 0 0 0 3px rgba(255,255,255,.35),inset 0 0 22px rgba(0,0,0,.35)}
+.rt-box .rt-ruota,.pr-rbox .rt-ruota{z-index:1;border-color:#7a4a08!important;box-shadow:inset 0 0 0 3px rgba(255,255,255,.35),inset 0 0 22px rgba(0,0,0,.35)!important}
 .rt-sep{position:absolute;inset:0;border-radius:50%;pointer-events:none}
 .rt-perno{position:absolute;width:9px;height:9px;margin:-4.5px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#d9d9d9 55%,#8a8a8a);box-shadow:0 1px 0 rgba(0,0,0,.5)}
 .rt-ic{z-index:1}
@@ -1458,7 +1458,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .pr-rh b{font:400 22px var(--f-big);text-shadow:0 2px 0 rgba(0,0,0,.25)}
 .pr-rh small{font-size:14px}
 .pr-rbox{position:relative;width:176px;height:176px;margin:8px auto 2px}
-.pr-rbox .rt-ruota{position:absolute;inset:0;border-radius:50%;border:5px solid var(--linea);box-shadow:0 6px 0 var(--linea),inset 0 0 0 4px rgba(255,255,255,.5)}
+.pr-rbox .rt-ruota{position:absolute;inset:0;border-radius:50%;border:5px solid var(--linea);box-shadow:inset 0 0 0 4px rgba(255,255,255,.5)} /* niente ombra sulla ruota che gira: girava con lei e finiva di lato */
 .pr-ruota.pronta .pr-rbox .rt-ruota{animation:none}
 .pr-esito{position:relative;text-align:center;margin:4px 0 0;font-size:16px;min-height:22px}
 .pr-ruota .pr-go{position:relative;align-self:center;font-size:22px;padding:8px 34px}
@@ -2005,12 +2005,10 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 @property --gx{syntax:'<percentage>';inherits:false;initial-value:85%}
 .cr-arena .logo.lg2{isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:0;-webkit-text-stroke:0!important;text-shadow:none!important;color:inherit;line-height:1;margin:auto 0 0;transform:rotate(-3deg)}
 .lg2 .lg-n{position:relative;z-index:1;display:inline-block;font:400 clamp(17px,5.2vw,24px)/1 var(--f-big);letter-spacing:3px;text-transform:uppercase;color:#fff;background:#d8402f;padding:5px 18px 6px;border:3px solid #141433;border-radius:6px;box-shadow:0 4px 0 #141433;margin-bottom:-10px;-webkit-text-stroke:0}
-.lg2 .lg-n::before,.lg2 .lg-n::after{content:'';position:absolute;top:8px;width:16px;height:100%;background:#a82a1e;border:3px solid #141433;z-index:-1}
-.lg2 .lg-n::before{left:-13px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%)}
-.lg2 .lg-n::after{right:-13px;clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%)}
-.lg2 .lg-s{position:relative;display:inline-block;font:400 clamp(54px,17vw,84px)/.95 var(--f-big);letter-spacing:1px;color:#ffd03a;background:linear-gradient(180deg,#fff6c4 0%,#ffe066 38%,#ffc21a 62%,#e69200 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding:0 6px}
-.lg2 .lg-s::before{content:attr(data-t);position:absolute;inset:0;padding:0 6px;z-index:-1;-webkit-text-fill-color:#141433;-webkit-text-stroke:9px #141433;text-shadow:0 3px 0 #141433,0 6px 0 #141433,0 9px 0 #141433,0 12px 14px rgba(0,0,0,.45)}
-.lg2 .lg-s::after{content:attr(data-t);position:absolute;inset:0;padding:0 6px;z-index:-1;-webkit-text-fill-color:#a5520c;-webkit-text-stroke:3px #a5520c;transform:translateY(5px)}
+.lg2 .lg-n::before,.lg2 .lg-n::after{content:'';position:absolute;top:9px;width:18px;height:calc(100% - 2px);background:#8f2318;z-index:-1}
+.lg2 .lg-n::before{left:-15px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,45% 50%)}
+.lg2 .lg-n::after{right:-15px;clip-path:polygon(0 0,100% 0,55% 50%,100% 100%,0 100%)}
+.lg2 .lg-s{position:relative;display:inline-block;font:400 clamp(54px,17vw,84px)/1 var(--f-big);letter-spacing:1px;color:#ffd03a;-webkit-text-fill-color:#ffd03a;-webkit-text-stroke:8px #141433;paint-order:stroke fill;text-shadow:0 4px 0 #141433,0 7px 0 #141433,0 10px 12px rgba(0,0,0,.45);padding:0 8px}
 @media (min-width:900px) and (min-aspect-ratio:1/1){ .lg2 .lg-s{font-size:76px} .lg2 .lg-n{font-size:22px} }
 @media (max-height:640px){ .lg2 .lg-s{font-size:clamp(38px,11vw,50px)} .lg2 .lg-n{font-size:15px;padding:3px 12px 4px} }
 .cr-arena .logo{animation:logoRespira 4s ease-in-out infinite}
