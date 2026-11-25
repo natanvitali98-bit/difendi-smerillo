@@ -6790,7 +6790,7 @@ const nemiciTot = () => Object.values(M.arrivi || {}).flat().length + (RUN ? 0 :
 let ULT_INPUT = Date.now();
 for (const t of ['pointerdown','keydown']) addEventListener(t, () => { ULT_INPUT = Date.now(); }, true);
 setInterval(() => { try { if (!S || !el('tb') || el('tb').hidden || ev || coda.length || ovAperto || AIUTO || !aiutoOk() || COACH.attivo) return;
-  if (Date.now() - ULT_INPUT > (MI === 0 ? 3500 : 10000)){ ULT_INPUT = Date.now(); aiuto(); } } catch(e){} }, 1000);
+  if (Date.now() - ULT_INPUT > (MI === 0 ? 6000 : 10000)){ /* dopo la prova dei soldati la mano non ripete subito le stesse cose */ ULT_INPUT = Date.now(); aiuto(); } } catch(e){} }, 1000);
 function aiutoStop(){ if (!AIUTO) return; clearInterval(AIUTO.t); AIUTO = null; try { COACH.nascondi(); } catch(e){} }
 function aiuto(mm){ if (!aiutoOk()) return; if (guida >= 0){ fineGuida(); COACH_TB = -1; } aiutoStop(); const m = mm || mossaBuona(), turno = S.turno; SUONI.suona('tocco'); try { RITORNO.traccia && RITORNO.traccia('aiuto', {mi: MI}); } catch(e){}
   const punto = id => () => { if (!S || !NODI[id]) return null; const [x, y] = scrN(id), r = cvt.getBoundingClientRect(); return {x: r.left + x, y: r.top + y - 8, r: 30}; };
@@ -7186,7 +7186,7 @@ function intro(){
   const diffN = /difficilissima/i.test(M.livello) ? 4 : /difficile/i.test(M.livello) ? 3 : /media/i.test(M.livello) ? 2 : 1;
   const pallini = [1,2,3,4].map(k => `<i class="${k <= diffN ? 'on' : ''}"></i>`).join('');
   let provaVista = false; try { provaVista = localStorage.getItem('difendi-smerillo-prova') === '1'; } catch(e){}
-  const primaVolta = MI === 0 && guida >= 0 && !RUN && !SFIDA && !M.evento && !online() && !provaVista, prima = false; // la prima volta niente prova separata dei soldati: si gioca subito la missione con la mano che guida (prima il tutorial si faceva due volte)
+  const prima = MI === 0 && guida >= 0 && !RUN && !SFIDA && !M.evento && !online() && !provaVista, primaVolta = false; // la prova dei soldati si fa una volta sola: se esci e rientri non ricomincia
   const o = prima ? overlay(`<div class="dlg box mis mis-prima">
     <button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>
     <div class="mis-top"><span class="mis-n">Missione 1 · Si impara</span></div>
