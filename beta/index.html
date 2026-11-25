@@ -1200,6 +1200,15 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 @media (max-height:640px){ .cr-arena .logo{font-size:clamp(32px,10vw,44px)!important} .cr-arena{gap:8px} }
 /* ===== animazioni di transizione ===== */
 .tr-velo{position:fixed;inset:0;z-index:100010;background:radial-gradient(circle at 50% 45%,#2f54d6,#141f52 70%);display:grid;place-items:center;pointer-events:all;clip-path:circle(0px at 50% 50%)}
+.tr-velo.stend{clip-path:none;background:linear-gradient(180deg,#a82a1e 0%,#d8402f 18%,#d8402f 82%,#b3301f 100%)!important;transform:translateY(-112%);bottom:28px;box-shadow:inset 26px 0 0 -16px #ffd03a,inset -26px 0 0 -16px #ffd03a}
+.tr-velo.stend::before{content:'';position:absolute;left:0;right:0;top:100%;height:28px;background:linear-gradient(135deg,#b3301f 50%,transparent 50%) 0 0/28px 28px repeat-x,linear-gradient(225deg,#b3301f 50%,transparent 50%) 0 0/28px 28px repeat-x;filter:drop-shadow(0 4px 0 #141433)}
+.tr-velo.stend::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 3px,transparent 3px 22px);pointer-events:none}
+.tr-velo.stend .st-logo{width:min(80vw,360px);margin:0 auto 10px}
+.tr-velo.stend .st-logo .lg-svg{width:100%;height:auto;display:block;filter:drop-shadow(0 5px 0 rgba(20,20,51,.45))}
+.tr-velo.stend .tr-ic{display:none}
+.tr-velo.stend .ld2-t{color:#fff;text-shadow:0 2px 0 #141433}
+.tr-velo.stend .ld2-tip{color:#ffe3dc}
+.tr-velo.stend .ld2-bar{border-color:#141433;background:#7a1e14}
 .tr-velo .tr-ic{animation:trIc .7s ease-in-out infinite alternate;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
 @keyframes trIc{from{transform:translateY(0) scale(1)}to{transform:translateY(-8px) scale(1.08)}}
 .cr-nav{position:relative}
@@ -5207,15 +5216,15 @@ function CARICA(fn, testo, ev){
   const lento = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const x = ev && ev.clientX != null && ev.clientX > 0 ? ev.clientX : innerWidth/2, y = ev && ev.clientY != null && ev.clientY > 0 ? ev.clientY : innerHeight/2;
   const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 20;
-  const v = document.createElement('div'); v.className = 'tr-velo ld2';
-  v.innerHTML = `<div class="ld2-in"><span class="tr-ic"></span><b class="ld2-t">${testo || 'Carico…'}</b><span class="ld2-bar"><i></i></span><small class="ld2-tip">${CONSIGLI_CARICA[Math.floor(Math.random()*CONSIGLI_CARICA.length)]}</small></div>`;
+  const v = document.createElement('div'); v.className = 'tr-velo ld2 stend';
+  v.innerHTML = `<div class="ld2-in"><div class="st-logo">${window.logoSVG ? logoSVG(window.CG_LINGUA === 'en' ? 'DEFEND' : 'DIFENDI') : ''}</div><span class="tr-ic"></span><b class="ld2-t">${testo || 'Carico…'}</b><span class="ld2-bar"><i></i></span><small class="ld2-tip">${CONSIGLI_CARICA[Math.floor(Math.random()*CONSIGLI_CARICA.length)]}</small></div>`;
   document.body.append(v); try { v.querySelector('.tr-ic').append(TB.icona('lanciere', 4)); } catch(e){}
   try { SUONI.suona('flip'); } catch(e){}
   const bar = v.querySelector('.ld2-bar i'); let fine = false, tMin = 0;
   const stato = CARICA_ON = {estendi(){ tMin = performance.now() + 500; }};
   const chiudi = () => { if (fine) return; fine = true; CARICA_ON = null; if (bar) bar.classList.add('fine');
     if (lento || !v.animate){ v.remove(); return; }
-    v.style.clipPath = 'none'; v.animate([{opacity:1, transform:'scale(1)'}, {opacity:0, transform:'scale(1.06)'}], {duration:300, easing:'ease-out', fill:'forwards'}).onfinish = () => v.remove(); };
+    v.style.clipPath = 'none'; v.animate([{transform:'translateY(0)'}, {transform:'translateY(3%)', offset:.25}, {transform:'translateY(-112%)'}], {duration:420, easing:'cubic-bezier(.5,0,.75,0)', fill:'forwards'}).onfinish = () => v.remove(); }; // lo stendardo risale e scopre la partita
   // aspetta che le immagini si muovano lisce: 12 fotogrammi di fila sotto i 34 ms (al massimo 7 secondi)
   const aspetta = () => { const t0 = performance.now(); tMin = t0 + 550; let ult = t0, buoni = 0;
     const giro = now => { if (fine) return; const dt = now - ult; ult = now; buoni = dt < 34 ? buoni + 1 : 0; const t = now - t0;
@@ -5223,7 +5232,7 @@ function CARICA(fn, testo, ev){
     requestAnimationFrame(giro); };
   const vai = () => { v.classList.add('ld2-vedi'); requestAnimationFrame(() => requestAnimationFrame(() => { try { fn(); } catch(e){ console.error(e); } aspetta(); })); };
   if (lento || !v.animate){ v.style.clipPath = 'none'; vai(); return; }
-  v.animate([{clipPath:`circle(0px at ${x}px ${y}px)`}, {clipPath:`circle(${r}px at ${x}px ${y}px)`}], {duration:230, easing:'cubic-bezier(.5,0,.3,1)', fill:'forwards'}).onfinish = vai;
+  v.style.clipPath = 'none'; v.animate([{transform:'translateY(-112%)'}, {transform:'translateY(2%)', offset:.8}, {transform:'translateY(0)'}], {duration:340, easing:'cubic-bezier(.2,.8,.3,1)', fill:'forwards'}).onfinish = vai; // uno stendardo rosso scende dall'alto
 }
 window.CARICA = CARICA;
 
@@ -6803,8 +6812,10 @@ function render(T = performance.now()/1000){
       if (q < .5){ g.strokeStyle = '#ffe9a8'; g.lineWidth = 3; g.beginPath(); for (let j = 0; j < 8; j++){ const an = j*Math.PI/4 + .4, r0 = 6 + q*30, r1 = 14 + q*52; g.moveTo(x + Math.cos(an)*r0, y - 16 + Math.sin(an)*r0*.7); g.lineTo(x + Math.cos(an)*r1, y - 16 + Math.sin(an)*r1*.7); } g.stroke(); }
       g.globalAlpha = 1; continue; }
     if (f.k === 't'){ const dan = /^−\d/.test(f.s), pop = f.t < .14 ? 1 + (1 - f.t/.14)*.9 : 1; g.globalAlpha = Math.max(0, 1 - f.t/1.1); etichetta(x + (dan ? Math.sin(f.t*40)*Math.max(0, 1 - f.t*6)*3 : 0), y - 40 - f.t*22 + f.dy, f.s.replace('🪙', ''), f.col, 'rgba(20,14,14,.85)', Math.round((f.big ? 24 : dan ? 17 : 13)*pop), f.s.includes('🪙') ? 'moneta' : null); /* la moneta in pixel, non l'emoji */ g.globalAlpha = 1; }
-    else if (f.k === 'g'){ if (f.t > .9) continue; const im = IMG[f.tipo]; if (!im) continue; const s2 = K*sc*1.1*scalaU, w = im.width*s2, h = im.height*s2; g.save(); g.globalAlpha = Math.max(0, .85 - f.t); g.translate(Math.round(x), Math.round(y - h - f.t*60)); if (f.nem) g.scale(-1, 1); g.rotate((f.nem ? 1 : -1)*f.t*.6); g.drawImage(BIANCHI[f.tipo] || im, -w/2, 0, w, h); g.restore(); g.globalAlpha = 1; }
-    else if (f.k === 'f'){ if (f.t > .7) continue; g.globalAlpha = Math.max(0, .7 - f.t); g.fillStyle = '#d8d4cc'; const rr = f.r*(1 + f.t*2); g.beginPath(); g.arc(x + f.x, y - 8 + f.y, rr, 0, 7); g.fill(); g.globalAlpha = 1; }
+    else if (f.k === 'g'){ if (f.t > .9) continue; const im = IMG[f.tipo]; if (!im) continue; const s2 = K*sc*1.1*scalaU, w = im.width*s2, h = im.height*s2; const dir = f.nem ? 1 : -1, sal = f.t*190 - f.t*f.t*300; g.save(); g.globalAlpha = f.t < .45 ? 1 : Math.max(0, 1 - (f.t - .45)/.45); g.translate(Math.round(x + dir*f.t*70), Math.round(y - h/2 - sal)); if (f.nem) g.scale(-1, 1); g.rotate(dir*f.t*5.5); /* il nemico abbattuto vola via a parabola girando */ g.drawImage(f.t < .12 ? (BIANCHI[f.tipo] || im) : im, -w/2, -h/2, w, h); g.restore(); g.globalAlpha = 1; }
+    else if (f.k === 'f'){ if (f.t > .7) continue; // fumo a pixel: quadrati che crescono, salgono e schiariscono
+      const q = f.t/.7, px = 3, rr = Math.round(f.r*(1 + q*1.6)/px)*px, cx = Math.round((x + f.x)/px)*px, cy = Math.round((y - 8 + f.y - q*14)/px)*px; g.globalAlpha = Math.max(0, .9 - q);
+      g.fillStyle = 'rgba(20,20,51,.55)'; g.fillRect(cx - rr + px, cy - rr + px, rr*2, rr*2); g.fillStyle = q < .25 ? '#ffffff' : q < .55 ? '#e6e1d8' : '#b9b3a8'; g.fillRect(cx - rr, cy - rr, rr*2, rr*2); g.globalAlpha = 1; }
     else { g.fillStyle = f.col; g.fillRect(Math.round(x + f.x), Math.round(y - 10 + f.y), 3, 3); } }
 }
 
