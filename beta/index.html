@@ -6045,13 +6045,13 @@ const IMG = {
 // logo del gioco in SVG: contorno uguale ovunque, nitido a ogni misura, uguale su iPhone e Android
 window.logoSVG = function(sopra){ const id = 'lg' + Math.random().toString(36).slice(2, 7), F = "'Pixelify Sans','Lilita One',monospace", W = 'SMERILLO';
   // logo in pixel art: lettere a pixel, contorno a scalini (8 copie spostate), oro in 3 fasce nette, ombra rossa a gradino. SVG: identico su ogni telefono
-  const giro = (x, y, col, s) => [[-s,0],[s,0],[0,-s],[0,s],[-s,-s],[s,-s],[-s,s],[s,s]].map(([dx, dy]) => `<text x="${x + dx}" y="${y + dy}" fill="${col}">${W}</text>`).join('');
-  const lw = Math.round(sopra.length*19 + 44);
+  const giro = (x, y, col, s) => [[-s,0],[s,0],[0,-s],[0,s],[-s,-s],[s,-s],[-s,s],[s,s]].map(([dx, dy]) => `<text x="${x + dx}" y="${y + dy}" fill="${col}" textLength="${TL}" lengthAdjust="spacing">${W}</text>`).join('');
+  const lw = Math.round(sopra.length*19 + 44), TL = 476; // textLength: lettere distribuite in modo esatto, scritte sempre centrate (letter-spacing aggiungeva spazio dopo l'ultima lettera)
   return `<svg class="lg-svg" viewBox="0 0 560 176" role="img" aria-label="${sopra} Smerillo" shape-rendering="crispEdges"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".36" stop-color="#fff3b0"/><stop offset=".36" stop-color="#ffd03a"/><stop offset=".7" stop-color="#ffd03a"/><stop offset=".7" stop-color="#f29a1a"/><stop offset="1" stop-color="#f29a1a"/></linearGradient></defs>
     <g font-family="${F}" font-weight="700" text-anchor="middle">
       <rect x="${280 - lw/2 - 4}" y="6" width="${lw + 8}" height="44" fill="#141433"/><rect x="${280 - lw/2}" y="10" width="${lw}" height="36" fill="#d8402f"/><rect x="${280 - lw/2}" y="10" width="${lw}" height="6" fill="#ff7a5c"/><rect x="${280 - lw/2}" y="40" width="${lw}" height="6" fill="#8f2318"/>
-      <text x="280" y="38" font-size="24" letter-spacing="5" fill="#fff">${sopra}</text>
-      <g font-size="96" letter-spacing="4">${giro(280, 160, '#141433', 6)}<text x="280" y="160" fill="#8f2318">${W}</text>${giro(280, 150, '#141433', 6)}<text x="280" y="150" fill="url(#${id})">${W}</text></g>
+      <text x="280" y="38" font-size="24" fill="#fff" textLength="${lw - 30}" lengthAdjust="spacing">${sopra}</text>
+      <g font-size="96">${giro(280, 160, '#141433', 6)}<text x="280" y="160" fill="#8f2318" textLength="${TL}" lengthAdjust="spacing">${W}</text>${giro(280, 150, '#141433', 6)}<text x="280" y="150" fill="url(#${id})" textLength="${TL}" lengthAdjust="spacing">${W}</text></g>
     </g></svg>`; };
 const ICONE = {
   moneta:['..kkkkkk..','.kyyyyyyk.','kyyywwyyyk','kyywyyyyok','kyywyyyyok','kyywyyyyok','kyyyyyyyok','kyyyyyyook','.kyoooook.','..kkkkkk..'],
