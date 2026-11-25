@@ -6923,7 +6923,7 @@ function info(){
     let stato = '';
     if (!T.nemico){ const mm = mossePer(S, u), m = mm.length, b = bersagli(S, u).length;
       stato = (T.costruisce && (b || m) ? `<div class="tbmodo"><button type="button" data-mc="0" aria-pressed="${!modoC}">${ico('muovi')} Muovi</button><button type="button" data-mc="1" aria-pressed="${modoC}">${ico('martello')} Costruisci</button></div>` : '') + `<span class="tbst tbcorto">${u.mosso ? ico('ok') + ' Passo' + (m ? ' · <b>Scatto</b>: ancora 1' : '') : m ? '🟢 <b>Vai</b> sul verde' : '–'} · ${u.agito ? ico('ok') + ' Azione' : b ? (T.costruisce ? '🟡 <b>Costruisci</b> (legno ' + S.legname + ')' : T.ferma ? '🎯 <b>Ferma</b>' : '🎯 <b>Colpisci</b> il rosso') : T.costruisce && !S.legname ? 'Legno finito' : 'Nessuno vicino'}</span>`;
-      stato = `<span class="tbruolo">${RUOLO[u.tipo] || T.corto || ''}</span>` + stato;
+      stato = `<span class="tbruolo tbreg">${RUOLO[u.tipo] || T.corto || ''}</span>` + stato; // la frase sul ruolo solo toccando i: in gioco basta una riga
       if (mm.some(x => x.k === 'scambio')) stato += `<button type="button" class="tbscb" id="tbScambia" aria-pressed="${modoS}">${modoS ? 'Tocca il compagno (cerchio blu)' : 'Scambia posto con un compagno'}</button>`;
       { const sp = specialeDi(S, u); if (sp) stato = `<button type="button" class="tbspec" id="tbSpec">${ico(SPECIALI[sp].icona, 2)} ${SPECIALI[sp].nome} <small>(1 volta)</small></button><span class="tbst tbreg">${SPECIALI[sp].desc}</span>` + stato; }
       if (!u.mosso && !u.agito && u.hp < (u.max || T.hp)) stato += `<span class="tbst">Se resta fermo, non agisce e non viene colpito, recupera 1 vita.</span>`;
@@ -7273,13 +7273,13 @@ function intro(){
     ${RUN ? '' : `<button type="button" class="indietro" id="misBack">‹ ${provenienza === 'missioni' ? 'Le missioni' : 'Menu'}</button>`}
     <div class="mis-top"><span class="mis-n">${SFIDA ? ico('calendario') + ' Sfida del giorno' : M.evento ? '🌰 Evento a tempo' : SFIDA_AMICO ? '⚔️ Sfida di ' + escH(SFIDA_AMICO.n || 'un amico') + ': ' + (+SFIDA_AMICO.p || 0) + ' punti' : 'Missione ' + M.num + ' di ' + MISSIONI.length}</span><span class="mis-d" aria-label="Difficoltà: ${M.livello}">${pallini}<em>${M.livello.split(':')[0]}</em></span></div>
     <h2 class="mis-t">${M.titolo}</h2>
-    <div class="mis-goal"><span class="mg-ic">${ico('stella', 3)}</span><span>Difendi <b>${M.metaNome}</b><small>${ico('cuore')} <span id="misVite">${S.portaMax}</span> vite<span id="misTempo">${tempoTurno() ? ' · ' + tempoTurno() + ' secondi per turno' : ''}</span>${MI > 0 ? (SFIDA ? ' · oggi la stessa partita per tutti' : ' · nemici diversi ogni volta') : ''}</small></span></div>
-    <p class="mis-i">${M.intro}</p>
+    <div class="mis-goal"><span class="mg-ic">${ico('stella', 3)}</span><span>Difendi <b>${M.metaNome}</b><small>${ico('cuore')} <span id="misVite">${S.portaMax}</span> vite<span id="misTempo">${tempoTurno() ? ' · ' + tempoTurno() + ' secondi per turno' : ''}</span></small></span></div>
     <div class="mis-row"><span class="mis-h">Arrivano</span><div class="mis-icons" id="misNem"></div></div>
     <div class="mis-row"><span class="mis-h">La tua squadra</span><div class="mis-icons" id="misDif"></div></div>
-    <p class="mis-tip" id="misTip">Tocca un personaggio per sapere cosa fa.</p>
+    <p class="mis-tip" id="misTip" hidden></p>
     <div class="dlgfoot fisso mis-foot"><button class="big" id="tbVia">Inizia ${ico('play')}</button>${MI > 0 && !RUN ? '<button class="big alt" id="tbSqC">Cambia squadra</button>' : ''}</div>
     <details class="regole mis-piu"><summary>Stelle, difficoltà e altro</summary><div class="mis-piu-in">
+    <p class="mis-i">${M.intro}</p>
     ${RUN ? '' : `<div class="mis-obi"><span class="mis-h">Stelle</span>${obiettivi().map(o => `<span class="mo">${ico('stellaV')} ${o.t}</span>`).join('')}</div>`}
     ${RUN || SFIDA || M.evento || MI === 0 ? '' : `<div class="mis-diff" role="group" aria-label="Difficoltà"><button type="button" data-d="0" aria-pressed="${!DIFFICILE}">Normale</button><button type="button" data-d="1" aria-pressed="${DIFFICILE}">Difficile <small>${Math.max(3, M.vite - 3)} vite · più nemici · meno tempo</small></button></div>`}
     ${talOk() ? `<div class="mis-row"><span class="mis-h">Talismano <small>(facoltativo, si usa 1 volta)</small></span><div class="tal-row" id="misTal"></div></div>` : ''}
@@ -7307,7 +7307,7 @@ function intro(){
   const riempi = (box, lista, nemici) => { if (!box) return; for (const [t, n] of Object.entries(lista)){ const b = document.createElement('button'); b.type = 'button'; b.className = 'mis-pg' + (nemici ? ' nem' : '') + (nemici && !visti.has(t) ? ' nuovo' : '');
       b.setAttribute('aria-label', TIPI[t].nome); b.append(icona(t, 3)); if (n > 1){ const c = document.createElement('span'); c.className = 'mis-x'; c.textContent = '×' + n; b.append(c); }
       if (nemici && !visti.has(t)){ const c = document.createElement('span'); c.className = 'mis-new'; c.textContent = 'nuovo'; b.append(c); }
-      b.onclick = () => { o.querySelectorAll('.mis-pg').forEach(x => x.classList.toggle('sel', x === b)); tip.innerHTML = `<b>${TIPI[t].nome}</b> ${TIPI[t].corto || TIPI[t].desc}`; SUONI.suona('tocco'); };
+      b.onclick = () => { o.querySelectorAll('.mis-pg').forEach(x => x.classList.toggle('sel', x === b)); tip.hidden = false; tip.innerHTML = `<b>${TIPI[t].nome}</b> ${TIPI[t].corto || TIPI[t].desc}`; SUONI.suona('tocco'); };
       box.append(b); } };
   riempi(o.querySelector('#misNem'), nem, true); riempi(o.querySelector('#misDif'), dif, false);
   { const di = o.querySelector('#dlgIc'); if (di) di.append(icona(M.dlg[0], 3)); }
@@ -7322,7 +7322,7 @@ function intro(){
 const OBI = {1:['rupe:1','persi'], 2:['intatto','veloce:13'], 3:['lontano:9','nobar'], 4:['persi','veloce:13'], 5:['veloce:14','intatto'], 6:['intatto','persi'], 7:['lontano:14','rupe:2'], 8:['lontano:16','nobar'],
   9:['lontano:11','persi'], 10:['intatto','veloce:22'], 11:['rupe:1','persi'], 12:['intatto','rupe:1'], 13:['lontano:12','nobar'], 14:['rupe:2','persi'], 15:['intatto','lontano:12']};
 function obiettivo(spec){ const [k, v] = spec.split(':'), n = +v, st = k2 => (S && S.st && S.st[k2]) || 0;
-  if (k === 'rupe') return {t:`Butta giù ${n === 1 ? '1 nemico' : n + ' nemici'} dalla rupe: colpiscilo con un Lanciere quando è su un punto con l’icona della rupe`, ic:'rupe', ok:() => st('rupe') >= n};
+  if (k === 'rupe') return {t:`Butta giù ${n === 1 ? '1 nemico' : n + ' nemici'} dalla rupe`, ic:'rupe', ok:() => st('rupe') >= n};
   if (k === 'nobar') return {t:'Vinci senza costruire barricate', ic:'martello', ok:() => !st('bar')};
   if (k === 'veloce') return {t:`Vinci entro il turno ${n}`, ic:'clessidra', ok:() => S.turno - 1 <= n};
   const daM = s => /^il /i.test(s) ? 'dal ' + s.slice(3) : /^la /i.test(s) ? 'dalla ' + s.slice(3) : /^lo /i.test(s) ? 'dallo ' + s.slice(3) : /^l[’']/i.test(s) ? 'dall’' + s.slice(2) : 'da ' + s;
@@ -7361,7 +7361,7 @@ function fine(){
     <p>${vinto ? `Hai vinto in ${turni} ${turni === 1 ? 'turno' : 'turni'} · <b>${pt} punti</b>` : 'Consiglio: ' + M.consiglio}</p>
     ${am ? `<p class="sfres ${vinto && pt > (+am.p || 0) ? 'ok' : ''}">${vinto && pt > (+am.p || 0) ? `⚔️ Hai battuto ${escH(am.n || 'il tuo amico')}! (${pt} contro ${+am.p || 0})` : `⚔️ ${escH(am.n || 'Il tuo amico')} ha fatto ${+am.p || 0} punti. Riprova a batterlo!`}</p>` : ''}
     ${S.trovata ? `<p class="incok fort">${ico('trifoglio')} Trovata fortunata: <b>${S.trovata}</b></p>` : ''}${S.serie >= 2 ? `<p class="incok serie">🔥 <b>${S.serie} vittorie di fila</b>: la fortuna cresce!</p>` : ''}
-    ${S.incFatti && S.incFatti.length ? `<p class="incok">📜 Incarico completato: <b>${S.incFatti.join(', ')}</b>. Ritira lo scrigno negli Incarichi!</p>` : ''}
+    ${S.incFatti && S.incFatti.length ? `<p class="incok">📜 Incarico fatto: <b>${S.incFatti.join(', ')}</b></p>` : ''}
     ${dopo ? `<button class="big" id="tbNext">Missione ${dopo.num} ${ico('play')}</button>` : `<button class="big" id="tbAgain">Riprova ${ico('play')}</button>`}
     <div class="rigabtn">${dopo ? `<button class="big alt mini" id="tbAgain">Riprova</button>` : ''}${vinto ? `<button class="big alt mini" id="tbShare">⚔️ Sfida un amico</button>` : ''}<button class="big alt mini" id="tbScegli">Missioni</button><button class="big alt mini" id="tbDifF">Difensori</button><button class="big alt mini" id="tbMenuF">🏠 Menu</button></div><p class="fz" id="tbShTxt"></p></div>`);
   if (vinto){ EPICO.coriandoli(n >= 3 ? 160 : 90); [0,1,2].forEach(k => setTimeout(() => { if (k < n) SUONI.suona('stella' + k); const st = o.querySelectorAll('.stelle > *')[k]; if (st){ st.classList.add('boom'); } if (k === 2 && n >= 3){ const d = o.querySelector('.dlg'); d && d.classList.add('scuoti'); } }, 350 + k*260)); }
