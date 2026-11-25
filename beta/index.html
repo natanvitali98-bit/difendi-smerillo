@@ -1322,6 +1322,7 @@ body.rt-kr #app > #modBar{position:fixed;bottom:0;left:0;right:0;z-index:9}
 body.rt-kr:has(#pausa:not([hidden]),#cards:not([hidden]),#end:not([hidden]),#menu:not([hidden])) :is(#bFalco,#bFrana,#bGo,#bVel,#guidaCl,#anello){display:none!important}
 /* verticale: una riga in basso per il pollice (Falco, Frana, Avvia), la velocità sopra Avvia */
 body.rt-kr:not(.rt-oriz) #app #bFalco,body.rt-kr:not(.rt-oriz) #app #bFrana{bottom:calc(10px + env(safe-area-inset-bottom));width:calc((100vw - 40px)*.29);min-height:58px;border-radius:20px!important}
+@media (max-width:399px){ body.rt-kr:not(.rt-oriz) #app .skill canvas{display:none} body.rt-kr:not(.rt-oriz) #app .skill{justify-content:center;text-align:center} } /* telefoni stretti: l'icona lascia posto alla scritta (Falco In ondata era tagliata) */
 body.rt-kr:not(.rt-oriz) #app #bFalco{left:10px} body.rt-kr:not(.rt-oriz) #app #bFrana{left:calc(20px + (100vw - 40px)*.29)}
 body.rt-kr:not(.rt-oriz) #app #bGo{right:10px;bottom:calc(10px + env(safe-area-inset-bottom));width:calc((100vw - 40px)*.42);min-height:58px;border-radius:20px!important;font-size:19px}
 body.rt-kr:not(.rt-oriz) #app #bVel{right:10px;bottom:calc(78px + env(safe-area-inset-bottom));min-width:60px;min-height:48px}
@@ -2332,7 +2333,7 @@ body.novizio #title .cr-nav,body.novizio #title .gp-row,body.novizio #title .pv-
 @keyframes dnPresa{40%{transform:translateY(-14px) scale(1.12);box-shadow:0 0 0 6px var(--dc),0 10px 0 #141433}100%{transform:translateY(-30px) scale(.9);opacity:0}}
 @media (prefers-reduced-motion: reduce){ .cards.doni .card.dn,.cards.doni .card.dn.presa,.cards.doni.fatto .card.dn{animation:none} }
 #coach.solo.vicino{position:fixed;width:max-content!important;right:auto!important;bottom:auto!important;transform:none!important;margin:0!important} #coach.solo.mini{padding:10px 16px 12px} #coach.solo.mini .co-h{display:flex}
-#coach.solo{width:max-content!important;max-width:calc(100vw - 24px);padding:10px 16px 12px;text-align:center} #coach.solo .co-h{position:absolute;top:-12px;right:-12px;margin:0} #coach.solo .co-n{display:none} #coach.solo .co-salta{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;border:3px solid #141433;color:#141433;font-weight:900;line-height:22px;text-decoration:none} #coach.solo .co-t{font-size:24px;margin:0;white-space:nowrap} #coach.solo .co-s{margin-top:4px;text-align:center} /* guida senza frasi: solo 2 parole e la mano */
+#coach.solo{width:max-content!important;max-width:calc(100vw - 24px);padding:10px 28px 12px 18px;text-align:center} #coach.solo .co-h{position:absolute;top:-12px;right:-12px;margin:0} #coach.solo .co-n{display:none} #coach.solo .co-salta{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;border:3px solid #141433;color:#141433;font-weight:900;line-height:22px;text-decoration:none} #coach.solo .co-t{font-size:24px;margin:0;white-space:nowrap} #coach.solo .co-s{margin-top:4px;text-align:center} /* guida senza frasi: solo 2 parole e la mano */
 #coach.mini .co-t{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #coach.mini{top:calc(env(safe-area-inset-top) + 58px) !important;bottom:auto !important}
 #coach.mini.giu.lato{top:auto !important;bottom:calc(env(safe-area-inset-bottom) + 14px) !important;left:50% !important;right:auto !important;transform:translateX(-50%)} /* in orizzontale: in basso al centro, tra Frana e Avvia ondata */
@@ -2681,6 +2682,7 @@ body:has(#tb.tb-pan:not([hidden])) #pcTasti{visibility:hidden}
 .cq-ocons{display:block}.cq-ocons .ico,.cq-ocons img,.cq-ocons canvas{vertical-align:middle}
 .fd-po{display:grid;place-items:center;width:130px;height:130px;border-radius:50%;background:radial-gradient(#ffb070,#ff8a3a);border:6px solid #141433;box-shadow:0 0 30px rgba(255,138,58,.6);font-family:var(--f-pixel);font-size:30px;font-weight:800;color:#141433}
 /* PC con finestra piccola (es. riquadro di CrazyGames): pannello più stretto, mappa più grande */
+@media (min-width:1100px) and (min-aspect-ratio:1/1) and (pointer:fine){ #app #bar .go{font-size:clamp(14px,1.2vw,18px)!important;white-space:nowrap;letter-spacing:-.3px;padding:6px 8px!important} } /* PC: Avvia ondata su una riga sola, non esce dal tasto */
 @media (min-width:640px) and (max-width:1099px) and (min-aspect-ratio:1/1) and (pointer:fine){
   #app{grid-template-columns:1fr 290px;gap:8px!important;padding:8px!important}
   #app #info{font-size:14px;min-height:0!important;padding:10px 12px!important}
@@ -10448,6 +10450,9 @@ const COACH = window.COACH = (() => {
         if (b && !box.classList.contains('stretto')){ const r = box.getBoundingClientRect(); if (b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8) box.classList.add('stretto'); } }
       // guida senza frasi: le 2 parole stanno attaccate alla mano, non in fondo allo schermo
       const vic = !!(cfg.solo && b); box.classList.toggle('vicino', vic);
+      // se il punto da toccare è un bottone, bastano anello e mano: la nuvoletta finiva sopra le scritte vicine (Leggi, titoli, tasti)
+      const fuori = !!(b && (b.x < 4 || b.y < 4 || b.x > innerWidth - 4 || b.y > innerHeight - 4));   // il punto è fuori dallo schermo: niente nuvoletta che indica il vuoto
+      box.style.visibility = (vic && b.el) || (vic && fuori) ? 'hidden' : '';
       if (vic){ const bw = box.offsetWidth, bh = box.offsetHeight; let y = b.y + b.h/2 + 40; if (y + bh > innerHeight - 80) y = b.y - b.h/2 - bh - 16; y = Math.max(8, y);
         box.style.left = Math.max(8, Math.min(innerWidth - bw - 8, b.x - bw/2)) + 'px'; box.style.top = y + 'px'; }
       else { box.style.left = ''; box.style.top = ''; } } }
