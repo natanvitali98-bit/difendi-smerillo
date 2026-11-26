@@ -934,6 +934,19 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .scr-cassa.px .scr-cop .cf,.scr-cassa.px .scr-cop .ci{position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat;image-rendering:pixelated;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .scr-cassa.px .scr-cop .ci{display:none}
 .scr-luce{background:radial-gradient(ellipse at 50% 50%,#fff 0%,rgba(255,255,255,.6) 35%,transparent 70%)!important;box-shadow:none!important}
+/* scrigno aperto: fasci di luce a pixel che escono dall'apertura (prima era una macchia sfocata) */
+.scr-cassa.px .scr-luce{z-index:0}
+.scr-stage.aperto .scr-cassa.px .scr-luce{top:-190px!important;height:290px!important;left:-60px!important;right:-60px!important;border-radius:0!important;box-shadow:none!important;opacity:1!important;transform-origin:50% 100%;
+  background:repeating-conic-gradient(from -42deg at 50% 100%,color-mix(in srgb,var(--rc) 22%,#fff4c2) 0 7deg,transparent 7deg 14deg)!important;
+  -webkit-mask:radial-gradient(circle at 50% 100%,#000 0 120px,rgba(0,0,0,.7) 120px 175px,rgba(0,0,0,.42) 175px 225px,rgba(0,0,0,.18) 225px 270px,transparent 270px),conic-gradient(from -42deg at 50% 100%,#000 0 84deg,transparent 84deg);-webkit-mask-composite:source-in;mask:radial-gradient(circle at 50% 100%,#000 0 120px,rgba(0,0,0,.7) 120px 175px,rgba(0,0,0,.42) 175px 225px,rgba(0,0,0,.18) 225px 270px,transparent 270px),conic-gradient(from -42deg at 50% 100%,#000 0 84deg,transparent 84deg);mask-composite:intersect;
+  animation:scrFasci .45s steps(6,end) both,scrPulsa 1.6s steps(4,end) .45s infinite}
+.scr-stage.aperto .scr-cassa.px .scr-luce::after{content:'';position:absolute;left:calc(50% - 60px);width:120px;bottom:0;height:14px;background:#fff;box-shadow:0 -6px 0 #fff4c2,0 -12px 0 rgba(255,208,58,.6)}
+@keyframes scrFasci{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes scrPulsa{0%,100%{opacity:1}50%{opacity:.78}}
+.scr-stage.aperto .scr-cassa.px::before,.scr-stage.aperto .scr-cassa.px::after{content:'';position:absolute;z-index:3;width:6px;height:6px;background:#fff;box-shadow:0 0 0 2px var(--rc);left:38%;top:70px;animation:scrBrill 1.4s steps(7,end) infinite;pointer-events:none}
+.scr-stage.aperto .scr-cassa.px::after{left:62%;animation-delay:.7s}
+@keyframes scrBrill{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-120px);opacity:0}}
+@media (prefers-reduced-motion: reduce){ .scr-stage.aperto .scr-cassa.px .scr-luce,.scr-stage.aperto .scr-cassa.px::before,.scr-stage.aperto .scr-cassa.px::after{animation:none!important} }
 @media (max-width:420px){ .scr-salta{top:calc(36px + env(safe-area-inset-top))!important;right:36px!important;padding:6px 12px!important;font-size:13px!important;min-height:34px!important} .scr-tit{top:calc(9% + 34px)!important} } /* telefoni stretti: "Apri tutto" non copre il titolo */
 @media (max-height:560px){ .scr-carta-zona{transform:scale(.72);transform-origin:50% 0} .scr-tit{top:calc(30px + 3%)!important} .scr-tit b{font-size:30px!important} .scr-zona{transform:scale(1)!important;margin-top:40px!important} .scr-hint{bottom:7%!important;font-size:18px!important} } /* schermi bassi (PC piccolo, CrazyGames): la carta non copre il titolo */
 .scr-carta-zona{position:absolute;left:0;right:0;top:50%;height:0;display:flex;justify-content:center;z-index:8;pointer-events:none}
