@@ -750,7 +750,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 }
 @media (min-width:900px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
   #stage > #cards.overlay,#stage > #end.overlay{position:fixed;inset:0;z-index:40;justify-content:center;align-items:center;padding:16px;background:rgba(10,16,52,.55)}
-  #stage > #cards.overlay > .dlg,#stage > #end.overlay > .dlg{margin:auto;width:min(600px,100%);max-height:calc(100vh - 32px);overflow-y:auto}
+  #stage > #cards.overlay > .dlg,#stage > #end.overlay > .dlg{margin:auto;width:min(600px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto}
   #app #bar > *{min-width:0}
 }
 @media (max-width:999px) and (pointer:fine){ #app #bar .go{white-space:normal!important;line-height:1.05} }
@@ -1842,7 +1842,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-link{background:none;border:0;color:var(--blu);font-weight:700;text-decoration:underline;padding:4px;align-self:center;min-height:36px}
 @media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
   #cqOv.scelta{background:linear-gradient(90deg,rgba(14,22,70,.35),rgba(14,22,70,0) 45%);padding:16px}
-  #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px);width:420px;margin:auto auto auto 0}
+  #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);width:420px;margin:auto auto auto 0}
 }
 #cqOv.scelta .cq-scbox{max-height:64vh;padding-bottom:0}
 .cq-scvai{position:sticky;bottom:0;margin:0 -14px;padding:8px 14px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,255,255,0),var(--carta) 30%);order:9}
@@ -1875,7 +1875,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 @keyframes cqPanIn{from{opacity:.3;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){ .cq-rip,.cq-burst,.cq-fl{display:none} #cqOv .dlg.box,.cq-panin,.cq-bump,.cq-entra,.cq-schip{animation:none!important} }
 #cqOv.scelta .cq-scbox{scroll-padding-bottom:90px}
-@media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px)} }
+@media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px)} }
 /* ===== missioni e premi ===== */
 .cq-nb{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#e04830;color:#fff;font-style:normal;font-size:12px;font-family:var(--f-body);font-weight:700;border:2px solid #141433;vertical-align:1px}
 .cq-schb{display:flex;gap:6px}
