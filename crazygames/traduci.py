@@ -22,6 +22,14 @@ def esc_tpl(v):
 
 # parole singole usate come valori (non si possono tradurre in automatico senza rischiare le chiavi)
 FISSI = [
+    ("`Tempo reale: respingi ${n} ondate`", "`Real time: repel ${n} waves`"),
+    ("`Tempo reale: vinci ${n} ${n === 1 ? 'partita' : 'partite'}`", "`Real time: win ${n} ${n === 1 ? 'game' : 'games'}`"),
+    ("`Tempo reale: vinci ${n} ${n === 1 ? 'volta' : 'volte'} a Difficile`", "`Real time: win ${n} ${n === 1 ? 'time' : 'times'} on Hard`"),
+    ("`Conquista: conquista ${n} terre`", "`Conquest: conquer ${n} lands`"),
+    ("`Conquista: arruola ${n} soldati`", "`Conquest: recruit ${n} soldiers`"),
+    ("`Conquista: vinci ${n} ${n === 1 ? 'partita' : 'partite'}`", "`Conquest: win ${n} ${n === 1 ? 'game' : 'games'}`"),
+    ("`Assedio: arriva alla tappa ${n}`", "`Siege: reach stage ${n}`"),
+    ("`Sfida del giorno: gioca ${n} giorni`", "`Daily Challenge: play ${n} days`"),
     ("'Ondate respinte: ' + n + ' di ' + ONDATE", "'Waves held: ' + n + ' of ' + ONDATE"),
     ("Queste due strade sono corte: tieni qualcuno vicino alla <b>chiesetta</b>.'", "These two roads are short: keep someone near the <b>little church</b>.'"),
     ("'🟡 <b>Costruisci</b> (legno ' + S.legname + ')' : T.ferma ? '🎯 <b>Ferma</b>' : '🎯 <b>Colpisci</b> il rosso'", "'🟡 <b>Build</b> (wood ' + S.legname + ')' : T.ferma ? '🎯 <b>Block</b>' : '🎯 <b>Hit</b> the red one'"),
