@@ -3286,6 +3286,11 @@ const CARTE = [
   {t:'Muri riparati', d:'Il borgo recupera 4 punti di resistenza.', ic:'cuore', v:'+4', e:'Vite', c:'#3fbf5a', f:(b,S)=>S.vite=Math.min(S.viteMax,S.vite+4)},
   {t:'Risparmio', d:'Da ora l’interesse sulle castagne risparmiate arriva fino a 40.', ic:'moneta', v:'40', e:'Interesse', c:'#e0a72a', f:b=>b.interesse=40},
   {t:'Occhio di falco', d:'Il tuo Falco si ricarica il 30% più in fretta.', ic:'clessidra', v:'−30%', e:'Ricarica Falco', c:'#3a8fe0', f:b=>b.falcoCd*=.7},
+  {t:'Mura alte', d:'Il borgo ha 3 punti di resistenza in più, anche al massimo.', ic:'cuore', v:'+3', e:'Vite max', c:'#3fbf5a', f:(b,S)=>{S.viteMax+=3; S.vite+=3;}},
+  {t:'Fiera di San Martino', d:'Ricevi subito 120 castagne, ma il borgo perde 2 punti di resistenza.', ic:'castagna', v:'+120', e:'ma −2 vite', c:'#e0a72a', f:(b,S)=>{S.castagne+=120; S.vite=Math.max(1,S.vite-2);}},
+  {t:'Fuoco e campane', d:'Il fuoco colpisce un’area più larga del 15% e la campana stordisce 0,2 secondi in più.', ic:'fiamma', v:'+15%', e:'Fuoco e Campana', c:'#f08a24', f:b=>{b.splash*=1.15; b.stun+=.2;}},
+  {t:'Falco reale', d:'I Falchi fanno il 15% di danno in più e il tuo Falco si ricarica il 15% più in fretta.', ic:'spada', v:'+15%', e:'Falchi', c:'#e8553f', f:b=>{b.nido*=1.15; b.falcoCd*=.85;}},
+  {t:'Frana dei Sibillini', d:'La frana è larga il 50% in più.', ic:'massi', v:'+50%', e:'Frana', c:'#3a8fe0', f:b=>b.frana*=1.5},
   {t:'Arenaria fragile', d:'La frana è più larga e torna pronta 3 secondi prima.', ic:'massi', v:'+30%', e:'Frana', c:'#3a8fe0', f:b=>{b.frana*=1.3; b.franaCd-=3;}},
 ];
 
@@ -6395,16 +6400,21 @@ const CARTE_RUN = [
   {id:'arciere', nome:'Arruola gli Arcieri', desc:'Un nuovo gruppo di Arcieri entra nella squadra (massimo 5 difensori).', f:R => { if (R.squadra.length < 5) R.squadra.push(nuovoMembro('arciere')); else R.squadra.forEach(u => u.hp = u.max); }},
   {id:'raro', nome:'Un aiuto da fuori', desc:'Un difensore Raro o Epico a caso entra nella squadra.', f:R => { const pool = DIFENSORI.filter(t => rarDi(t) === 1 || rarDi(t) === 2); if (R.squadra.length < 5) R.squadra.push(nuovoMembro(pool[Math.floor(Math.random()*pool.length)])); else R.squadra[0] = nuovoMembro(pool[Math.floor(Math.random()*pool.length)]); }},
   {id:'lame', nome:'Lance affilate', desc:'I Lancieri fanno 1 danno in più.', f:R => R.bonus.lanciere = (R.bonus.lanciere || 0) + 1},
+  {id:'carp', nome:'Arruola i Carpentieri', desc:'Un nuovo gruppo di Carpentieri entra nella squadra (massimo 5 difensori).', f:R => { if (R.squadra.length < 5) R.squadra.push(nuovoMembro('carpentiere')); else R.squadra.forEach(u => u.hp = u.max); }},
+  {id:'erbe', nome:'Erbe del bosco', desc:'Tutti i difensori recuperano 2 vite. +1 legno in ogni tappa.', f:R => { R.squadra.forEach(u => u.hp = Math.min(u.max, u.hp + 2)); R.legno++; }},
+  {id:'scudi', nome:'Scudi di quercia', desc:'I Lancieri hanno 2 vite massime in più (e le recuperano).', f:R => R.squadra.forEach(u => { if (u.tipo === 'lanciere'){ u.max += 2; u.hp += 2; } })},
+  {id:'olio', nome:'Olio bollente', desc:'La meta ha 1 vita in più in ogni tappa. Tutti i difensori recuperano 1 vita.', f:R => { R.vite++; R.squadra.forEach(u => u.hp = Math.min(u.max, u.hp + 1)); }},
   {id:'frecce', nome:'Frecce di ferro', desc:'Arcieri e Balestrieri fanno 1 danno in più.', f:R => { R.bonus.arciere = (R.bonus.arciere || 0) + 1; R.bonus.tiratore = (R.bonus.tiratore || 0) + 1; }},
 ];
 let RID = 1; const nuovoMembro = t => ({rid:'r' + (RID++) + '_' + Date.now() % 10000, tipo:t, hp:vitaDi(t), max:vitaDi(t)});
 function ondateCasuali(mappa, tappa){
-  const spawn = [...new Set(Object.values(mappa.arrivi).flat().map(a => a[1]).filter(n => mappa.nodi[n] && mappa.nodi[n].arrivo))];
+  let spawn = [...new Set(Object.values(mappa.arrivi).flat().map(a => a[1]).filter(n => mappa.nodi[n] && mappa.nodi[n].arrivo))];
+  if (spawn.length < 2) spawn = Object.keys(mappa.nodi).filter(n => mappa.nodi[n].arrivo); // San Martino e Ceresola: tutte le strade d’arrivo
   const costi = [['fante',1,1],['balestriere',2,2],['guastatore',2,2],['corvo',2,3],['corazzato',2,4],['spia',2,5],['cavaliere',3,3]];
   let budget = Math.round(3 + tappa*2.5 + tappa*tappa/8); const out = {}; let t = 0; const forza = Math.floor((tappa - 1)/4);
   while (budget > 0){ const ok = costi.filter(c => c[1] <= budget && c[2] <= tappa); const c = ok[Math.floor(Math.random()*ok.length)]; budget -= c[1];
     const n = spawn[Math.floor(Math.random()*spawn.length)]; (out[t] = out[t] || []).push([c[0], n, forza]); t += Math.random() < Math.min(.55, .15 + tappa*.06) ? 0 : 1 + (Math.random() < .3 ? 1 : 0); }
-  if (tappa % 5 === 0){ const n = spawn[0]; (out[t + 1] = out[t + 1] || []).push(['nero', n, forza]); }
+  if (tappa % 5 === 0){ const n = spawn[0]; (out[t + 1] = out[t + 1] || []).push([tappa % 10 === 0 ? 'mammone' : 'nero', n, forza]); }
   return out;
 }
 const RECM = 'difendi-smerillo-missioni';
@@ -7249,15 +7259,15 @@ function assedio(){
     <p>Giochi una tappa dopo l’altra, sempre più difficile. I nemici arrivano <b>a caso</b>: ogni partita è diversa.</p>
     <div class="how"><span>1</span><span>Dopo ogni tappa scegli <b>1 carta su 3</b> per rafforzare la squadra.</span>
     <span>2</span><span>Le ferite restano. <b>Chi cade è perso</b> fino alla fine dell’Assedio.</span>
-    <span>3</span><span>Ogni 5 tappe arriva il <b>Cavaliere Nero</b>.</span></div>
+    <span>3</span><span>Ogni 5 tappe arriva un capo: il <b>Cavaliere Nero</b> o il <b>Gatto Mammone</b>.</span><span>4</span><span>Dalla tappa 4 si combatte anche a <b>San Martino</b> e a <b>Ceresola</b>.</span></div>
     <p>${rec ? 'Il tuo record: <b>' + rec + ' tappe</b>.' : 'Non hai ancora un record.'}</p>
     <button class="big" id="tbRunGo">Inizia l’Assedio</button><button class="big alt" id="tbRunNo">Torna al menu</button></div>`);
   o.querySelector('#tbRunGo').onclick = () => { RUN = {tappa:0, squadra:base.map(nuovoMembro), legno:0, vite:5, bonus:{}}; chiudiOv(); prossimaTappa(); };
   o.querySelector('#tbRunNo').onclick = esci;
 }
 function prossimaTappa(){
-  RUN.tappa++; if (RUN.tappa > 1){ try { window.CONTA_INC && CONTA_INC('ass_tappe'); } catch(e){} } const mappe = [MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA], mp = mappe[(RUN.tappa - 1) % 3];
-  const m = Object.assign({}, mp, {num:'A' + RUN.tappa, titolo:'Assedio · tappa ' + RUN.tappa, livello:'Assedio', start:mp === MAPPA_NORD ? MISSIONI[1].start : mp.start, arrivi:ondateCasuali(mp, RUN.tappa)});
+  RUN.tappa++; if (RUN.tappa > 1){ try { window.CONTA_INC && CONTA_INC('ass_tappe'); } catch(e){} } const mappe = [MAPPA_NORD, MAPPA_CENTRO, MAPPA_ROCCA, MAPPA_SM, MAPPA_CE], mp = mappe[(RUN.tappa - 1) % 5];
+  const m = Object.assign({}, mp, {num:'A' + RUN.tappa, titolo:'Assedio · tappa ' + RUN.tappa + (mp.luogo ? ' · ' + mp.titolo : ''), livello:'Assedio', start:mp === MAPPA_NORD ? MISSIONI[1].start : mp.start, arrivi:ondateCasuali(mp, RUN.tappa)});
   caricaMissione(m); el('tbTit').innerHTML = ico('torre') + ' Tappa ' + RUN.tappa; fitCam();
   S = nuovo(); V = null; storia = []; sel = null; fx = []; coda = []; ev = null; aggiornaAnteprima(); render();
   const o = overlay(`<div class="dlg box"><span class="kicker">${ico('torre')} Assedio</span><h2>Tappa ${RUN.tappa}</h2><p>Difendi ${M.metaNome}. Arrivano ${Object.values(M.arrivi).flat().length} nemici, a caso. In squadra hai ${RUN.squadra.length} difensori${RUN.squadra.length > M.start.length ? ' (qui ne entrano ' + M.start.length + ')' : ''}.</p><button class="big" id="tbTapGo">Via!</button></div>`);
@@ -7270,11 +7280,11 @@ function fineTappa(){
     RUN.squadra = RUN.squadra.filter((u, k) => k >= M.start.length || vivi.has(u.rid)).map(u => { const d = vivi.get(u.rid); if (d) u.hp = Math.min(u.max, d.hp + 1); return u; });
     try { const r = +localStorage.getItem(RUNKEY) || 0; if (RUN.tappa > r) localStorage.setItem(RUNKEY, String(RUN.tappa)); } catch(e){}
     PROF.daiXP(6 + RUN.tappa); if (RUN.tappa >= 15) PROF.leggenda('ass15');
-    { const TR = {3:'legno', 6:'argento', 10:'oro', 15:'oro', 20:'oro', 25:'oro'}; if (TR[RUN.tappa] && unaVoltaOggi('ass-' + RUN.tappa)) regalaScrigno(TR[RUN.tappa], `Assedio: tappa ${RUN.tappa}`); }
+    { const TR = {3:'legno', 5:'legno', 6:'argento', 8:'argento', 10:'oro', 12:'argento', 15:'oro', 20:'oro', 25:'oro', 30:'oro'}; if (TR[RUN.tappa] && unaVoltaOggi('ass-' + RUN.tappa)) regalaScrigno(TR[RUN.tappa], `Assedio: tappa ${RUN.tappa}`); }
     const scelte = CARTE_RUN.slice().sort(() => Math.random() - .5).slice(0, 3);
     const o = overlay(`<div class="dlg box"><span class="kicker">${ico('torre')} Tappa ${RUN.tappa} superata!</span><h2>Scegli una carta</h2><div class="tbcol" id="tbRunC"></div></div>`);
     const box = o.querySelector('#tbRunC');
-    for (const c of scelte){ const b = document.createElement('button'); b.className = 'tbslot'; const icK = {cura:'cuore', vita:'scudo', legno:'martello', mura:'torre', lame:'spada', frecce:'arco', raro:'stella'}[c.id]; b.innerHTML = `<div class="tbcarta" style="--rc:#e8b830"><div class="ci">${icK ? ico(icK, 3) : ''}</div><div class="ct"><b>${c.nome}</b><span class="cd">${c.desc}</span></div></div>`; if (!icK) b.querySelector('.ci').append(icona(c.id === 'arciere' ? 'arciere' : 'lanciere', 3));
+    for (const c of scelte){ const b = document.createElement('button'); b.className = 'tbslot'; const icK = {cura:'cuore', vita:'scudo', legno:'martello', mura:'torre', lame:'spada', frecce:'arco', raro:'stella', carp:'martello', erbe:'cuore', scudi:'scudo', olio:'fiamma'}[c.id]; b.innerHTML = `<div class="tbcarta" style="--rc:#e8b830"><div class="ci">${icK ? ico(icK, 3) : ''}</div><div class="ct"><b>${c.nome}</b><span class="cd">${c.desc}</span></div></div>`; if (!icK) b.querySelector('.ci').append(icona(c.id === 'arciere' ? 'arciere' : 'lanciere', 3));
       b.onclick = () => { c.f(RUN); chiudiOv(); prossimaTappa(); }; box.append(b); }
     return; }
   const fatte = RUN.tappa - 1; let rec = 0; try { rec = +localStorage.getItem(RUNKEY) || 0; } catch(e){}

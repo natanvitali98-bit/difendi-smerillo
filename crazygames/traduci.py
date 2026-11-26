@@ -36,6 +36,8 @@ FISSI = [
     ("' Passo' + (m ? ' · <b>Scatto</b>: ancora 1' : '') : m ? '🟢 <b>Vai</b> sul verde' : '–'} · ${u.agito ? ico('ok') + ' Azione'", "' Step' + (m ? ' · <b>Dash</b>: 1 more' : '') : m ? '🟢 <b>Go</b> to green' : '–'} · ${u.agito ? ico('ok') + ' Action'"),
     ("'Legno finito' : 'Nessuno vicino'}", "'No wood left' : 'Nobody near'}"),
     ("logoSVG('BENVENUTO A')", "logoSVG('WELCOME TO')"),
+    ('<span>Ogni 5 tappe arriva un capo: il <b>Cavaliere Nero</b> o il <b>Gatto Mammone</b>.</span>', '<span>Every 5 stages a boss arrives: the <b>Black Knight</b> or the <b>Mammone Cat</b>.</span>'),
+    ('<span>Dalla tappa 4 si combatte anche a <b>San Martino</b> e a <b>Ceresola</b>.</span>', '<span>From stage 4 you also fight in <b>San Martino</b> and <b>Ceresola</b>.</span>'),
     ("${f ? 'Il tuo regalo' : 'Per chi giochi?'}", "${f ? 'Your gift' : 'Who do you play for?'}"),
     ("NOMEG = {legno:'legno', argento:'argento', oro:'oro'}", "NOMEG = {legno:'wood', argento:'silver', oro:'gold'}"),
     ("`Sconfiggi ${n} ${n === 1 ? 'volta' : 'volte'} il Cavaliere Nero`", "`Defeat the Black Knight ${n} ${n === 1 ? 'time' : 'times'}`"),
