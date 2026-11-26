@@ -949,6 +949,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 @media (prefers-reduced-motion: reduce){ .scr-stage.aperto .scr-cassa.px .scr-luce,.scr-stage.aperto .scr-cassa.px::before,.scr-stage.aperto .scr-cassa.px::after{animation:none!important} }
 @media (max-width:420px){ .scr-salta{top:calc(36px + env(safe-area-inset-top))!important;right:36px!important;padding:6px 12px!important;font-size:13px!important;min-height:34px!important} .scr-tit{top:calc(9% + 34px)!important} } /* telefoni stretti: "Apri tutto" non copre il titolo */
 @media (max-height:560px){ .scr-carta-zona{transform:scale(.72);transform-origin:50% 0} .scr-tit{top:calc(30px + 3%)!important} .scr-tit b{font-size:30px!important} .scr-zona{transform:scale(1)!important;margin-top:40px!important} .scr-hint{bottom:7%!important;font-size:18px!important} } /* schermi bassi (PC piccolo, CrazyGames): la carta non copre il titolo */
+.scr-onda{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border:6px solid var(--rc,#fff);border-radius:50%;pointer-events:none;z-index:2;opacity:0}
 .scr-carta-zona{position:absolute;left:0;right:0;top:50%;height:0;display:flex;justify-content:center;z-index:8;pointer-events:none}
 .scr-carta{position:absolute;top:-170px;width:200px;height:290px;perspective:900px;pointer-events:auto;cursor:pointer}
 .scr-carta .sc-in{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.3,1.4,.5,1);transform-style:preserve-3d}
@@ -1218,7 +1219,17 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 .tr-velo.stend{clip-path:none;background:linear-gradient(180deg,#a82a1e 0%,#d8402f 18%,#d8402f 82%,#b3301f 100%)!important;transform:translateY(-112%);bottom:28px;box-shadow:inset 26px 0 0 -16px #ffd03a,inset -26px 0 0 -16px #ffd03a}
 .tr-velo.stend::before{content:'';position:absolute;left:0;right:0;top:100%;height:28px;background:linear-gradient(135deg,#b3301f 50%,transparent 50%) 0 0/28px 28px repeat-x,linear-gradient(225deg,#b3301f 50%,transparent 50%) 0 0/28px 28px repeat-x;filter:drop-shadow(0 4px 0 #141433)}
 .tr-velo.stend::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 3px,transparent 3px 22px);pointer-events:none}
-.tr-velo.stend .st-logo{width:min(80vw,360px);margin:0 auto 10px}
+.tr-velo.stend .st-logo{width:min(80vw,360px);margin:0 auto 10px;opacity:0;transform:scale(.7);will-change:transform,opacity}
+.tr-velo.stend .st-logo{animation:stLogo .46s cubic-bezier(.3,1.5,.5,1) .2s forwards,stBob 1.8s ease-in-out .7s infinite alternate}
+@keyframes stLogo{0%{opacity:0;transform:scale(.7) translateY(14px)}60%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes stBob{from{transform:none}to{transform:translateY(-5px)}}
+.tr-velo.stend .ld2-t,.tr-velo.stend .ld2-bar,.tr-velo.stend .ld2-tip{transform:translateY(10px);transition:opacity .3s ease-out,transform .38s cubic-bezier(.2,.9,.3,1)}
+.tr-velo.stend.ld2-vedi .ld2-t{transition-delay:.12s}.tr-velo.stend.ld2-vedi .ld2-bar{transition-delay:.2s}.tr-velo.stend.ld2-vedi .ld2-tip{transition-delay:.28s}
+.tr-velo.stend.ld2-vedi .ld2-t,.tr-velo.stend.ld2-vedi .ld2-bar,.tr-velo.stend.ld2-vedi .ld2-tip{transform:none}
+.tr-velo.stend.st-esce .ld2-in{animation:stEsce .2s cubic-bezier(.5,0,.8,.4) forwards}
+@keyframes stEsce{to{transform:translateY(-30px) scale(.96);opacity:0}}
+.tr-velo.stend .st-luce{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 50% 42%,rgba(255,214,120,.28),transparent 70%);opacity:0;transition:opacity .5s}
+.tr-velo.stend.ld2-vedi .st-luce{opacity:1}
 .tr-velo.stend .st-logo .lg-svg{width:100%;height:auto;display:block;filter:drop-shadow(0 5px 0 rgba(20,20,51,.45))}
 .tr-velo.stend .tr-ic{display:none}
 .tr-velo.stend .ld2-t{color:#fff;text-shadow:0 2px 0 #141433}
@@ -5239,14 +5250,16 @@ function CARICA(fn, testo, ev){
   const x = ev && ev.clientX != null && ev.clientX > 0 ? ev.clientX : innerWidth/2, y = ev && ev.clientY != null && ev.clientY > 0 ? ev.clientY : innerHeight/2;
   const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 20;
   const v = document.createElement('div'); v.className = 'tr-velo ld2 stend';
-  v.innerHTML = `<div class="ld2-in"><div class="st-logo">${window.logoSVG ? logoSVG(window.CG_LINGUA === 'en' ? 'DEFEND' : 'DIFENDI') : ''}</div><span class="tr-ic"></span><b class="ld2-t">${testo || 'Carico…'}</b><span class="ld2-bar"><i></i></span><small class="ld2-tip">${CONSIGLI_CARICA[Math.floor(Math.random()*CONSIGLI_CARICA.length)]}</small></div>`;
+  v.innerHTML = `<i class="st-luce"></i><div class="ld2-in"><div class="st-logo">${window.logoSVG ? logoSVG(window.CG_LINGUA === 'en' ? 'DEFEND' : 'DIFENDI') : ''}</div><span class="tr-ic"></span><b class="ld2-t">${testo || 'Carico…'}</b><span class="ld2-bar"><i></i></span><small class="ld2-tip">${CONSIGLI_CARICA[Math.floor(Math.random()*CONSIGLI_CARICA.length)]}</small></div>`;
   document.body.append(v); try { v.querySelector('.tr-ic').append(TB.icona('lanciere', 4)); } catch(e){}
   try { SUONI.suona('flip'); } catch(e){}
   const bar = v.querySelector('.ld2-bar i'); let fine = false, tMin = 0;
   const stato = CARICA_ON = {estendi(){ tMin = performance.now() + 500; }};
   const chiudi = () => { if (fine) return; fine = true; CARICA_ON = null; if (bar) bar.classList.add('fine');
     if (lento || !v.animate){ v.remove(); return; }
-    v.style.clipPath = 'none'; v.animate([{transform:'translateY(0)'}, {transform:'translateY(3%)', offset:.25}, {transform:'translateY(-112%)'}], {duration:420, easing:'cubic-bezier(.5,0,.75,0)', fill:'forwards'}).onfinish = () => v.remove(); }; // lo stendardo risale e scopre la partita
+    // prima si vede la barra piena, poi il contenuto sale e lo stendardo si raccoglie verso l'alto
+    setTimeout(() => { v.classList.add('st-esce'); v.style.clipPath = 'none';
+      v.animate([{transform:'translateY(0)', easing:'cubic-bezier(.3,0,.5,1)'}, {transform:'translateY(2.5%)', offset:.22, easing:'cubic-bezier(.55,0,.85,.35)'}, {transform:'translateY(-114%)'}], {duration:540, delay:40, fill:'forwards'}).onfinish = () => v.remove(); }, 130); }; // lo stendardo risale e scopre la partita
   // aspetta che le immagini si muovano lisce: 12 fotogrammi di fila sotto i 34 ms (al massimo 7 secondi)
   const aspetta = () => { const t0 = performance.now(); tMin = t0 + 550; let ult = t0, buoni = 0;
     const giro = now => { if (fine) return; const dt = now - ult; ult = now; buoni = dt < 34 ? buoni + 1 : 0; const t = now - t0;
@@ -5254,7 +5267,8 @@ function CARICA(fn, testo, ev){
     requestAnimationFrame(giro); };
   const vai = () => { v.classList.add('ld2-vedi'); requestAnimationFrame(() => requestAnimationFrame(() => { try { fn(); } catch(e){ console.error(e); } aspetta(); })); };
   if (lento || !v.animate){ v.style.clipPath = 'none'; vai(); return; }
-  v.style.clipPath = 'none'; v.animate([{transform:'translateY(-112%)'}, {transform:'translateY(2%)', offset:.8}, {transform:'translateY(0)'}], {duration:340, easing:'cubic-bezier(.2,.8,.3,1)', fill:'forwards'}).onfinish = vai; // uno stendardo rosso scende dall'alto
+  // uno stendardo rosso scende dall'alto, pesante: tocca, rimbalza piano e si ferma
+  v.style.clipPath = 'none'; v.animate([{transform:'translateY(-114%)', easing:'cubic-bezier(.45,0,.9,.6)'}, {transform:'translateY(1.8%)', offset:.62, easing:'cubic-bezier(.2,.7,.4,1)'}, {transform:'translateY(-.8%)', offset:.82, easing:'ease-in-out'}, {transform:'translateY(0)'}], {duration:520, fill:'forwards'}).onfinish = vai;
 }
 window.CARICA = CARICA;
 
@@ -5431,8 +5445,8 @@ function mostraMenu(pannello){
     const st = k => Object.keys(DIFF).map(d => { const r = rec[(k >= 2 ? 'm' + k : '') + d]; return r && r.stelle ? `${DIFF[d].nome} ${'★'.repeat(r.stelle)}` : ''; }).filter(Boolean).join(' · ') || 'Non ancora vinta';
     c.innerHTML = `<div class="pan"><h2>Difesa in tempo reale</h2>
       <button class="hm-card hm-modo cm" data-cm="1"><span class="hm-ic hm-emo">🌫️</span><span class="hm-sx"><b>1. ${CMISSIONI[1].nome}</b><small>${CMISSIONI[1].desc}</small><small class="cmr">${st(1)}</small></span></button>
-      <button class="hm-card hm-modo cm ${aperta2 ? '' : 'chiusa'}" data-cm="2" ${aperta2 ? '' : 'disabled'}><span class="hm-ic hm-emo">${aperta2 ? '🌙' : '🔒'}</span><span class="hm-sx"><b>2. ${CMISSIONI[2].nome}</b><small>${aperta2 ? CMISSIONI[2].desc : 'Vinci la Missione 1 (anche in Facile) per aprirla.'}</small>${aperta2 ? `<small class="cmr">${st(2)}</small>` : ''}</span></button>
-      ${[3, 4].map(k => `<button class="hm-card hm-modo cm ${aperta2 ? '' : 'chiusa'}" data-cm="${k}" ${aperta2 ? '' : 'disabled'}><span class="hm-ic">${TB.ico(aperta2 ? (k === 3 ? 'torre' : 'campana') : 'lucchetto', 3)}</span><span class="hm-sx"><b>${k}. ${CMISSIONI[k].nome}</b><small>${aperta2 ? CMISSIONI[k].desc : 'Vinci la Missione 1 (anche in Facile) per aprirla.'}</small>${aperta2 ? `<small class="cmr">${st(k)}</small>` : ''}</span></button>`).join('')}
+      <button class="hm-card hm-modo cm ${aperta2 ? '' : 'chiusa'}" data-cm="2" ${aperta2 ? '' : 'disabled'}><span class="hm-ic hm-emo">${aperta2 ? '🌙' : '🔒'}</span><span class="hm-sx"><b>2. ${CMISSIONI[2].nome}</b><small>${aperta2 ? CMISSIONI[2].desc : 'Vinci la Missione 1 per aprirla.'}</small>${aperta2 ? `<small class="cmr">${st(2)}</small>` : ''}</span></button>
+      ${[3, 4].map(k => `<button class="hm-card hm-modo cm ${aperta2 ? '' : 'chiusa'}" data-cm="${k}" ${aperta2 ? '' : 'disabled'}><span class="hm-ic">${TB.ico(aperta2 ? (k === 3 ? 'torre' : 'campana') : 'lucchetto', 3)}</span><span class="hm-sx"><b>${k}. ${CMISSIONI[k].nome}</b><small>${aperta2 ? CMISSIONI[k].desc : 'Vinci la Missione 1 per aprirla.'}</small>${aperta2 ? `<small class="cmr">${st(k)}</small>` : ''}</span></button>`).join('')}
       <button class="big alt" data-p="modo">Indietro</button></div>`;
   } else if (pannello === 'gioca'){
     c.innerHTML = `<div class="pan"><h2>Missione ${CMIS} · scegli la difficoltà</h2><div class="dif">
@@ -5580,7 +5594,12 @@ const SUONI = (() => {
   const sblocca = () => { if (muto) return; try { if (!sblocco){ sblocco = new Audio('data:audio/wav;base64,UklGRsQPAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAPAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA'); sblocco.loop = true; sblocco.volume = .01; sblocco.setAttribute('playsinline', ''); } const pr = sblocco.play(); if (pr && pr.catch) pr.catch(() => {}); } catch(e){}
     apri(); if (ctx && ctx.state !== 'running'){ ctx.resume().catch(() => {}); } };
   for (const ev of ['pointerdown', 'touchend', 'click', 'keydown']) addEventListener(ev, sblocca, {capture:true, passive:true});
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && ctx && ctx.state !== 'running') ctx.resume().catch(() => {}); });
+  // app chiusa o in background (iPhone: web app, Safari): tutto l'audio si ferma, anche la musica. Riparte quando torni
+  let fermo = false;
+  const ferma = () => { fermo = true; try { if (ctx && ctx.state === 'running') ctx.suspend().catch(() => {}); } catch(e){} try { if (sblocco) sblocco.pause(); } catch(e){} try { if (navigator.audioSession) navigator.audioSession.type = 'auto'; } catch(e){} };
+  const riprendi = () => { if (!fermo || document.hidden) return; fermo = false; if (muto) return; try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch(e){} try { if (sblocco) sblocco.play().catch(() => {}); } catch(e){} if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {}); };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) ferma(); else riprendi(); });
+  addEventListener('pagehide', ferma); addEventListener('freeze', ferma); addEventListener('pageshow', () => setTimeout(riprendi, 50)); addEventListener('focus', riprendi);
   const nota = (f, t0, dur, tipo = 'square', vol = .06, f2 = null) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t0); if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(30, f2), t0 + dur);
     g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(.0005, t0 + dur); o.connect(g).connect(ctx.destination); o.start(t0); o.stop(t0 + dur + .02); };
   const rumore = (t0, dur, vol = .12, filtro = 900) => { const n = Math.floor(ctx.sampleRate*dur), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random()*2 - 1) * (1 - i/n);
@@ -5657,7 +5676,9 @@ const SUONI = (() => {
 const KSCR = 'difendi-smerillo-scrigni';
 function scrigniAttesa(){ try { const L = JSON.parse(localStorage.getItem(KSCR)); return Array.isArray(L) ? L : []; } catch(e){ return []; } }
 function regalaScrigno(tipo, da){ if (!SCRIGNI_N[tipo]) return; const L = scrigniAttesa(); if (L.length >= 15) return; L.push({tipo, da}); try { localStorage.setItem(KSCR, JSON.stringify(L)); } catch(e){}
-  try { PROF.avviso(`${SCRIGNI_N[tipo]}!`, `${da}: lo apri nella pagina Premi`); } catch(e){} }
+  // se sei già nella pagina Premi l'avviso non serve: lo scrigno è lì in alto
+  const qui = (() => { try { const t = document.getElementById('title'), pg = document.querySelector('.cr-pg[data-tab="premi"]'); if (!t || t.hidden || !pg) return false; const r = pg.getBoundingClientRect(); return r.width > 0 && Math.abs(r.left) < innerWidth*.3; } catch(e){ return false; } })();
+  if (!qui) try { PROF.avviso(`${SCRIGNI_N[tipo]}!`, `${da}: lo apri nella pagina Premi`); } catch(e){} }
 window.regalaScrigno = regalaScrigno;
 // ---- ruota della fortuna: animazione condivisa (pagina Premi e finestra) ----
 // carica all'indietro, gira veloce, rallenta con il "tic" della freccia a ogni spicchio, luci che corrono, spicchio vincente che brilla
@@ -7194,26 +7215,34 @@ function mostraScrigno(tipo, poi){
   const chiudi = () => { if (finito) return; finito = true; vivo = false; cancelAnimationFrame(raf); st.remove(); document.body.classList.remove('scr-on'); ovAperto = false; riepilogo(); };
   // --- 1. lo scrigno cade dall'alto e atterra ---
   (async () => {
-    cassa.animate([{transform:'translateY(-55vh) rotate(-8deg)'}, {transform:'translateY(0) scale(1.15,.8)', offset:.78}, {transform:'translateY(-14px) scale(.95,1.06)', offset:.9}, {transform:'translateY(0) scale(1)'}], {duration:calma ? 1 : 560, easing:'cubic-bezier(.45,0,.75,.2)', fill:'both'});
+    const cad = cassa.animate([{transform:'translateY(-55vh) rotate(-8deg)', easing:'cubic-bezier(.5,0,.9,.5)'}, {transform:'translateY(0) scale(1.18,.78)', offset:.7, easing:'cubic-bezier(.2,.8,.4,1)'}, {transform:'translateY(-22px) scale(.94,1.08) rotate(2deg)', offset:.86, easing:'cubic-bezier(.5,0,.8,.4)'}, {transform:'translateY(0) scale(1.05,.95)', offset:.94}, {transform:'translateY(0) scale(1)'}], {duration:calma ? 1 : 680, fill:'both'});
     $('.scr-ombra').animate([{transform:'scale(.2)', opacity:0}, {transform:'scale(1)', opacity:1}], {duration:calma ? 1 : 750, fill:'both'});
     $('.scr-tit').animate([{opacity:0, transform:'translateY(-20px)'}, {opacity:1, transform:'none'}], {duration:400, delay:300, fill:'both'});
     await att(600); SUONI.suona('tonfo'); trema(9, 350); const [cx, cy] = centro(); scoppio(cx, cy + 60, 26, ['#c8b89a','#a89878','#e8dcc8'], 4, .12, 40, 6);
     hint.classList.add('su'); atterrato = true;
+    await att(140); if (finito || aperto) return; try { cad.cancel(); } catch(e){}
+    if (!calma){ // attesa viva: un respiro lento e ogni tanto un sobbalzo, come se dentro qualcosa spingesse
+      idle = cassa.animate([{transform:'none'}, {transform:'scale(1.02,.98)', offset:.3}, {transform:'none', offset:.6}, {transform:'translateY(-6px) rotate(-3deg) scale(.98,1.03)', offset:.68}, {transform:'translateY(0) rotate(3deg) scale(1.03,.97)', offset:.76}, {transform:'rotate(-1.5deg)', offset:.84}, {transform:'none', offset:.9}, {transform:'none'}], {duration:1900, iterations:Infinity, easing:'ease-in-out'});
+      idleLuce = $('.scr-luce').animate([{opacity:.12}, {opacity:.4, offset:.72}, {opacity:.12}], {duration:1900, iterations:Infinity}); }
   })();
   // --- 2. tre tocchi: ogni tocco trema di più e la luce dalla fessura cambia colore fino alla rarità migliore ---
-  let colpi = 0, aperto = false, atterrato = false;
+  let colpi = 0, aperto = false, atterrato = false, idle = null, idleLuce = null;
   const COLORI = [RARITA[0].col, RARITA[Math.min(1, top)].col, colTop];
-  cassa.onclick = async () => { if (aperto || !atterrato || finito) return; colpi++; const k = colpi;
-    const luce = $('.scr-luce'); luce.style.setProperty('--lc', COLORI[Math.min(k, 3) - 1]); luce.style.opacity = .35 + k*.22;
-    SUONI.suona('carica' + Math.min(k, 3)); trema(4 + k*4, 260);
-    cassa.animate([{transform:'scale(1)'}, {transform:`scale(${1 + k*.05},${1 - k*.04}) rotate(${k % 2 ? -4 - k : 4 + k}deg)`}, {transform:`scale(${1 - k*.03},${1 + k*.06}) translateY(${-8*k}px) rotate(${k % 2 ? 3 : -3}deg)`}, {transform:'scale(1)'}], {duration:330, easing:'ease-out'});
-    cop.animate([{transform:'translateY(0)'}, {transform:`translateY(${-6 - k*5}px) rotate(${k % 2 ? -5 : 5}deg)`}, {transform:'translateY(0)'}], {duration:300});
-    const [cx, cy] = centro(); scoppio(cx, cy - 10, 10 + k*8, [COLORI[Math.min(k, 3) - 1], '#ffffff'], 4 + k, .15, 40, 4);
-    hint.textContent = k === 1 ? 'Ancora!' : k === 2 ? 'Ancora una volta!' : '';
-    if (k >= 1){ aperto = true; hint.classList.remove('su'); await apri(); } }; // un tocco basta
+  cassa.onclick = async () => { if (aperto || !atterrato || finito) return; aperto = true; hint.classList.remove('su'); hint.textContent = '';
+    try { idle && idle.cancel(); idleLuce && idleLuce.cancel(); } catch(e){}
+    for (let k = 1; k <= 3 && !finito; k++){ const luce = $('.scr-luce'); luce.style.setProperty('--lc', COLORI[k - 1]); luce.style.opacity = .3 + k*.22;
+      try { SUONI.suona('carica' + k); } catch(e){} trema(2 + k*3, 200);
+      cassa.animate([{transform:'none'}, {transform:`scale(${1 + k*.04},${1 - k*.05}) rotate(${k % 2 ? -3 - k*2 : 3 + k*2}deg)`, offset:.35}, {transform:`translateY(${-5*k}px) scale(${1 - k*.02},${1 + k*.04}) rotate(${k % 2 ? 2 + k : -2 - k}deg)`, offset:.7}, {transform:'none'}], {duration:calma ? 1 : 190 - k*20, easing:'ease-out'});
+      cop.animate([{transform:'none'}, {transform:`translateY(${-3 - k*3}px) rotate(${k % 2 ? -3 - k : 3 + k}deg)`}, {transform:'none'}], {duration:calma ? 1 : 170 - k*20});
+      const [cx, cy] = centro(); scoppio(cx, cy - 6, 6 + k*6, [COLORI[k - 1], '#ffffff'], 3 + k, .12, 34, 4);
+      await att(210 - k*25); }
+    await apri(); };
   // --- 3. il coperchio salta via: lampo, raggi del colore della rarità, esplosione ---
   async function apri(){
-    await att(160); SUONI.suona(top >= 3 ? 'leggenda' : top >= 2 ? 'epico' : 'apri'); flash('#fff'); trema(14, 500);
+    if (!calma){ cassa.animate([{transform:'none'}, {transform:'scale(1.16,.8)', offset:.45}, {transform:'translateY(-26px) scale(.92,1.1)', offset:.8}, {transform:'none'}], {duration:330, easing:'cubic-bezier(.3,0,.4,1)'}); await att(150); }
+    SUONI.suona(top >= 3 ? 'leggenda' : top >= 2 ? 'epico' : 'apri'); flash('#fff'); trema(14, 500);
+    if (!calma) for (let j = 0; j < (top >= 2 ? 3 : 2); j++){ const o = document.createElement('i'); o.className = 'scr-onda'; o.style.setProperty('--rc', j ? '#ffffff' : colTop); cassa.append(o);
+      o.animate([{transform:'scale(.4)', opacity:.95, borderWidth:'10px'}, {transform:`scale(${9 + j*3})`, opacity:0, borderWidth:'1px'}], {duration:620 + j*160, delay:j*110, easing:'cubic-bezier(.1,.7,.3,1)', fill:'both'}).onfinish = () => o.remove(); }
     if (cassa.classList.contains('px')) cop.animate([{transform:'translateY(0) rotate(0)'}, {transform:'translateY(3px) rotate(0) scaleY(.9)', offset:.12}, {transform:'translateY(-8px) rotate(-42deg)', offset:.5}, {transform:'translateY(-2px) rotate(-26deg)', offset:.75}, {transform:'translateY(-3px) rotate(-31deg)'}], {duration:calma ? 1 : 720, easing:'cubic-bezier(.25,.9,.35,1)', fill:'forwards'}); // il coperchio si apre sul cardine e rimbalza
     else cop.animate([{transform:'translateY(0) rotate(0)'}, {transform:'translate(40px,-60vh) rotate(160deg)', opacity:0}], {duration:calma ? 1 : 750, easing:'cubic-bezier(.2,.6,.4,1)', fill:'forwards'});
     st.style.setProperty('--rc', colTop); st.classList.add('aperto'); $('.scr-tit small').textContent = top >= 2 ? '★ ' + RARITA[top].nome + ' dentro! ★' : 'Dentro ci sono…';
@@ -7226,7 +7255,10 @@ function mostraScrigno(tipo, poi){
     const k = document.createElement('div'); k.className = 'scr-carta'; k.style.setProperty('--rc', r.col);
     k.innerHTML = `<div class="sc-in"><div class="sc-dorso"><span>?</span></div><div class="sc-fronte"><div class="sc-testa"><span class="sc-rar">${r.nome}</span><span class="sc-modo sc-m-${c.m}">${cartaModo(c)}</span></div><div class="sc-img"></div><small class="sc-tipo">${cartaTipo(c)}</small><b>${cartaNome(c)}</b><span class="sc-es">${cartaEsito(c)}</span></div></div><small class="sc-conta">${carte.length - i - 1 ? 'Ancora ' + (carte.length - i - 1) : 'Ultima!'}</small>`;
     k.querySelector('.sc-img').append(cartaImg(c, 6)); zonaC.append(k); hint.textContent = 'Tocca la carta'; hint.classList.add('su');
-    k.animate([{transform:'translateY(80px) scale(.2) rotate(-25deg)', opacity:0}, {transform:'translateY(-30px) scale(1.08) rotate(4deg)', opacity:1, offset:.7}, {transform:'none', opacity:1}], {duration:calma ? 1 : 520, easing:'cubic-bezier(.2,.9,.3,1.2)', fill:'both'});
+    let dy = 80; try { const rz = zonaC.getBoundingClientRect(), rc = cassa.getBoundingClientRect(); dy = Math.round(rc.top + rc.height*.35 - rz.top + 25); } catch(e){}
+    if (!calma) cassa.animate([{transform:'none'}, {transform:'scale(1.06,.92)', offset:.3}, {transform:'none'}], {duration:260, delay:40});
+    k.animate([{transform:`translateY(${dy}px) scale(.12) rotate(-12deg)`, opacity:0}, {transform:`translateY(${dy - 30}px) scale(.3) rotate(-8deg)`, opacity:1, offset:.18}, {transform:'translateY(-34px) scale(1.07) rotate(3deg)', opacity:1, offset:.72}, {transform:'translateY(4px) scale(.99) rotate(-1deg)', offset:.88}, {transform:'none', opacity:1}], {duration:calma ? 1 : 600, easing:'cubic-bezier(.25,.8,.35,1)', fill:'both'});
+    if (!calma){ const [cx, cy] = centro(); scoppio(cx, cy - 20, 14, [r.col, '#ffffff'], 6, .2, 40, 4); }
     SUONI.suona('esce');
     let girata = false, occupata = true, via = false; setTimeout(() => { occupata = false; }, calma ? 0 : 450); // la carta deve prima arrivare
     k.onclick = async () => { if (occupata || via || finito) return; // tocchi troppo veloci: si ignorano, nessuna carta saltata
