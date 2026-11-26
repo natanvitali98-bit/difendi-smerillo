@@ -1479,6 +1479,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cr-pg > *{flex-shrink:0}
 .pr-ruota{flex-direction:column;align-items:stretch;gap:6px;min-height:0}
 @media (max-width:380px){ .pr-rh{flex-wrap:wrap!important;row-gap:0} .pr-rh small{white-space:normal!important;overflow:visible!important} #tbTit{font-size:15px!important;letter-spacing:-.2px} } /* telefoni piccoli: scritte intere, niente puntini */
+.pr-qt{flex-wrap:wrap}.pr-pz{flex-basis:100%;display:block;font-style:normal;font-size:12px;font-weight:700;color:#ffd03a;margin-top:2px}
 .pr-rh{z-index:3;position:relative;display:flex;align-items:baseline;gap:8px;flex-wrap:nowrap}.pr-rh b{white-space:nowrap}.pr-rh small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .pr-rh b{font:400 22px var(--f-big);text-shadow:0 2px 0 rgba(0,0,0,.25)}
 .pr-rh small{font-size:14px}
@@ -5356,7 +5357,7 @@ function mostraMenu(pannello){
             if (r.x.k === 'scr') setTimeout(() => { if (!document.body.contains(go)) return; scrignoRuotaTogli(r.x.v); const pg = c.querySelector('.cr-pg[data-tab="premi"]'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.premiaSopra(r.x.v); }, 1700); else setTimeout(() => { if (!document.body.contains(go)) return; /* aggiorno solo la scritta in alto: ridisegnare tutta la pagina faceva un lampo scuro */ const sb = c.querySelector('#prRsub'); if (sb){ sb.innerHTML = 'Di nuovo tra <span id="prTimer">--:--</span>'; const tm = sb.querySelector('#prTimer'), agg = () => { if (!document.body.contains(tm)) return clearInterval(iv2); const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); const s = Math.max(0, Math.floor((m - d)/1000)); tm.textContent = String(Math.floor(s/3600)).padStart(2, '0') + ':' + String(Math.floor(s/60) % 60).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }, iv2 = setInterval(agg, 1000); agg(); } }, 2900); }, TB.ico(r.x.ic, 6), r.x.t), attesa); };
         try { decoraRuota(W, TB.RUOTA.length); } catch(e){}
         const riga = (box, x) => { const d = document.createElement('div'); d.className = 'pr-q' + (x.stato === 'preso' ? ' ok' : '');
-          d.innerHTML = `<span class="pr-qt">${x.stato === 'preso' ? TB.ico('ok', 2) : ''}${x.t}${x.max ? ' <small>' + '★'.repeat(x.stelle) + '☆'.repeat(x.max - x.stelle) + '</small>' : ''}</span><span class="pr-qr"><span class="pr-bar"><i style="width:${Math.min(100, x.v/x.n*100)}%"></i><em>${Math.min(x.v, x.n)}/${x.n}</em></span></span>`;
+          d.innerHTML = `<span class="pr-qt">${x.stato === 'preso' ? TB.ico('ok', 2) : ''}${x.t}${x.max ? ' <small>' + '★'.repeat(x.stelle) + '☆'.repeat(x.max - x.stelle) + '</small>' : ''}${x.pz ? '<em class="pr-pz">+ ' + x.pz + '</em>' : ''}</span><span class="pr-qr"><span class="pr-bar"><i style="width:${Math.min(100, x.v/x.n*100)}%"></i><em>${Math.min(x.v, x.n)}/${x.n}</em></span></span>`;
           const b = document.createElement('button'); b.type = 'button'; b.className = 'pr-rit ' + x.premio; b.disabled = x.stato !== 'pronto';
           b.innerHTML = x.stato === 'preso' ? '✓' : x.stato === 'pronto' ? 'Ritira!' : TB.SCRIGNI[x.premio].nome.replace('Scrigno ', '');
           if (x.stato === 'pronto') b.onclick = () => { const pg = b.closest('.cr-pg'); RIENTRO = {tab:'premi', top: pg ? pg.scrollTop : 0}; TB.ritiraInc(x.k, x.id); }; d.querySelector('.pr-qr').append(b); box.append(d); };
@@ -5711,12 +5712,20 @@ const PROF = (() => {
   const CORNICI = {legno:{n:'Legno', liv:1, c:'#a87c46'}, pietra:{n:'Pietra', liv:4, c:'#9a9aa6'}, argento:{n:'Argento', liv:7, c:'#dfe5ee'}, oro:{n:'Oro', liv:11, c:'#f5b301'},
     rubino:{n:'Rubino', liv:15, c:'#e0304a'}, smeraldo:{n:'Smeraldo', liv:20, c:'#2fb36a'}, notte:{n:'Notte', liv:26, c:'#4a2aa0'},
     fuoco:{n:'Fuoco', leg:'m9', c:'#ff6a1a'}, corona:{n:'Corona', leg:'tutte', c:'#ffd700'}, muro:{n:'Muro vivente', leg:'nobar', c:'#6b6b78'}, nebbia:{n:'Nebbia', leg:'nopot', c:'#b8c8ff'},
-       trifoglio:{n:'Quadrifoglio', leg:'f_trif', c:'#3cb043'}, castoro:{n:'Castagna d’oro', leg:'f_cast', c:'#c08a2a'}, arcob:{n:'Arcobaleno', leg:'f_arco', c:'#ff6ad5'}, pioniere:{n:'Pioniere della beta', leg:'beta', c:'#3fd0c9'}, primaora:{n:'Prima ora', leg:'primaora', c:'#ff8a3a'}};
+       trifoglio:{n:'Quadrifoglio', leg:'f_trif', c:'#3cb043'}, castoro:{n:'Castagna d’oro', leg:'f_cast', c:'#c08a2a'}, arcob:{n:'Arcobaleno', leg:'f_arco', c:'#ff6ad5'}, pioniere:{n:'Pioniere della beta', leg:'beta', c:'#3fd0c9'}, primaora:{n:'Prima ora', leg:'primaora', c:'#ff8a3a'},
+    i_ond:{n:'Ondata', leg:'imp:rt_ond:2', c:'#3fa0ff'}, i_sten:{n:'Stendardo', leg:'imp:cq_ter:2', c:'#d8402f'}, i_bal:{n:'Baluardo', leg:'imp:ass_max:2', c:'#a08b6c'},
+    i_cal:{n:'Giorno dopo giorno', leg:'imp:sf_g:2', c:'#ffb02e'}, i_all:{n:'Alloro', leg:'imp:vinte:2', c:'#6fbf3a'}, i_lame:{n:'Lame', leg:'imp:k:2', c:'#c9d2e3'}};
   const TITOLI = {recluta:{n:'Recluta', liv:1}, sentinella:{n:'Sentinella', liv:3}, guardia:{n:'Guardia del borgo', liv:5}, balestr:{n:'Balestriere scelto', liv:9}, capitano:{n:'Capitano delle mura', liv:13},
     difensore:{n:'Difensore di Smerillo', liv:17}, eroe:{n:'Eroe della Rocca', liv:22}, signore:{n:'Signore di Smerillo', liv:30},
     leggenda:{n:'Leggenda di Smerillo', leg:'tutte'}, assedio:{n:'Inarrestabile', leg:'ass15'}, costante:{n:'Mai un giorno senza', leg:'serie7'}, spartano:{n:'Senza aiuti', leg:'nopot'},
     intoccabile:{n:'Intoccabile', leg:'diffpieno'}, pochi:{n:'Pochi ma buoni', leg:'tre'}, mani:{n:'A mani nude', leg:'mani'}, rupe:{n:'Muro vivente', leg:'nobar'}, fuoco:{n:'Vincitore della Rocca', leg:'m9'},
-    fortunato:{n:'Baciato dalla fortuna', leg:'f_bacio'}, tesori:{n:'Cercatore di tesori', leg:'f_tesori'}, gatto:{n:'Più furbo del Gatto', leg:'f_gatto'}, pioniere:{n:'Pioniere della beta', leg:'beta'}, primaora:{n:'Difensore della prima ora', leg:'primaora'}};
+    fortunato:{n:'Baciato dalla fortuna', leg:'f_bacio'}, tesori:{n:'Cercatore di tesori', leg:'f_tesori'}, gatto:{n:'Più furbo del Gatto', leg:'f_gatto'}, pioniere:{n:'Pioniere della beta', leg:'beta'}, primaora:{n:'Difensore della prima ora', leg:'primaora'},
+    t_k:{n:'Flagello dei nemici', leg:'imp:k:3'}, t_bar:{n:'Mastro carpentiere', leg:'imp:bar:3'}, t_arcf:{n:'Occhio di falco', leg:'imp:arcf:3'}, t_rupe:{n:'Re della rupe', leg:'imp:rupe:3'},
+    t_vin:{n:'Campione di Smerillo', leg:'imp:vinte:3'}, t_perf:{n:'Nessuno resta indietro', leg:'imp:perf:3'}, t_corvi:{n:'Cacciatore di corvi', leg:'imp:corvi:3'}, t_cav:{n:'Spezzalance', leg:'imp:cav:3'},
+    t_nero:{n:'Terrore del Cavaliere Nero', leg:'imp:nero:3'}, t_ferma:{n:'Amico della Strega', leg:'imp:ferma:3'},
+    t_rond:{n:'Instancabile della torre', leg:'imp:rt_ond:3'}, t_rvin:{n:'Signore delle ondate', leg:'imp:rt_vin:3'}, t_rdif:{n:'Cuore di ferro', leg:'imp:rt_dif:3'},
+    t_cter:{n:'Conquistatore', leg:'imp:cq_ter:3'}, t_carr:{n:'Gran capitano', leg:'imp:cq_arr:3'}, t_cvin:{n:'Principe dei borghi', leg:'imp:cq_vin:3'},
+    t_ass:{n:'Ultimo baluardo', leg:'imp:ass_max:3'}, t_sfg:{n:'Sempre presente', leg:'imp:sf_g:3'}};
   const LEGGENDE = [
     {id:'m9', t:'Vinci la Missione 9 con 3 stelle', modo:'A turni'},
     {id:'nobar', t:'Vinci una missione dalla 5 in su senza costruire barricate e senza perdere vite', modo:'A turni'},
@@ -5739,7 +5748,7 @@ const PROF = (() => {
   const coda = []; let mostra = false;
   function avviso(tit, sub){ coda.push([tit, sub]); if (!mostra) prossimo(); }
   let pausaFino = 0; const pausaAvvisi = ms => { pausaFino = Date.now() + ms; };
-  function prossimo(){ if (Date.now() < pausaFino){ mostra = true; setTimeout(() => { mostra = false; prossimo(); }, pausaFino - Date.now() + 20); return; } const x = coda.shift(); if (!x){ mostra = false; return; } mostra = true; let el = document.getElementById('profToast');
+  function prossimo(){ if (document.querySelector('.scr-stage, #end:not([hidden])')){ mostra = true; setTimeout(() => { mostra = false; prossimo(); }, 700); return; } /* l'avviso aspetta che lo scrigno sia chiuso */ if (Date.now() < pausaFino){ mostra = true; setTimeout(() => { mostra = false; prossimo(); }, pausaFino - Date.now() + 20); return; } const x = coda.shift(); if (!x){ mostra = false; return; } mostra = true; let el = document.getElementById('profToast');
     if (!el){ el = document.createElement('div'); el.id = 'profToast'; document.body.append(el); }
     const ic = /Livello/.test(x[0]) ? '⬆' : '★'; el.innerHTML = `<span class="pt-ic">${ic}</span><span class="pt-tx"><b>${x[0].replace(/^⬆️\s*/, '')}</b>${x[1] ? '<small>' + x[1] + '</small>' : ''}</span>`; el.classList.remove('via'); el.classList.add('su');
     try { TB && SUONI.suona('scrigno'); } catch(e){}
@@ -5772,12 +5781,15 @@ const PROF = (() => {
     const gAv = c.querySelector('#pfAv'); for (const [k, v] of Object.entries(AVATAR)){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-it' + (p.avatar === k ? ' on' : ''); b.disabled = !ok;
       try { b.append(TB.icona(k, 3)); } catch(e){} b.insertAdjacentHTML('beforeend', `<small>${ok ? v.n : v.leg ? '🍀 Fortuna' : '🔒 Liv. ' + v.liv}</small>`); b.onclick = () => { const q = leggi(); q.avatar = k; scrivi(q); ridisegna(); }; gAv.append(b); }
     const gCo = c.querySelector('#pfCo'); for (const [k, v] of Object.entries(CORNICI).filter(([k, v]) => !(v.leg === 'beta' || v.leg === 'primaora') || p.leg[v.leg])){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-it' + (p.cornice === k ? ' on' : ''); b.disabled = !ok;
-      b.innerHTML = `<span class="pf-sw${v.leg ? ' pf-leg' : ''}" style="--fc:${v.c}"></span><small>${ok ? v.n : v.leg ? (v.leg.startsWith('f_') ? '🍀 Fortuna' : '🏆 Leggendaria') : '🔒 Liv. ' + v.liv}</small>`; b.onclick = () => { const q = leggi(); q.cornice = k; scrivi(q); ridisegna(); }; gCo.append(b); }
+      b.innerHTML = `<span class="pf-sw${v.leg ? ' pf-leg' : ''}" style="--fc:${v.c}"></span><small>${ok ? v.n : v.leg ? (v.leg.startsWith('f_') ? '🍀 Fortuna' : v.leg.startsWith('imp:') ? '🏅 Impresa ★★' : '🏆 Leggendaria') : '🔒 Liv. ' + v.liv}</small>`; b.onclick = () => { const q = leggi(); q.cornice = k; scrivi(q); ridisegna(); }; gCo.append(b); }
     const gTi = c.querySelector('#pfTi'); for (const [k, v] of Object.entries(TITOLI).filter(([k, v]) => !(v.leg === 'beta' || v.leg === 'primaora') || p.leg[v.leg])){ const ok = sbloccato(v, p, L), b = document.createElement('button'); b.className = 'pf-ti' + (p.titolo === k ? ' on' : '') + (v.leg ? ' leg' : ''); b.disabled = !ok;
-      b.textContent = ok ? v.n : (v.leg ? (v.leg.startsWith('f_') ? '🍀 ???' : '🏆 ???') : '🔒 Liv. ' + v.liv); b.onclick = () => { const q = leggi(); q.titolo = k; scrivi(q); ridisegna(); }; gTi.append(b); }
+      b.textContent = ok ? v.n : (v.leg ? (v.leg.startsWith('f_') ? '🍀 ???' : v.leg.startsWith('imp:') ? '🏅 Impresa ★★★' : '🏆 ???') : '🔒 Liv. ' + v.liv); b.onclick = () => { const q = leggi(); q.titolo = k; scrivi(q); ridisegna(); }; gTi.append(b); }
     c.querySelector('#pfBack').onclick = indietro; c.scrollTop = 0; }
   const leggende = () => { const p = leggi(); return LEGGENDE.map(q => ({...q, fatto: !!p.leg[q.id], premi: premiDi(q.id)})); };
-  return {daiXP, leggenda, chip, pagina, leggende, fortuna, quantiFortunati, avviso, pausaAvvisi, livello: () => livello(leggi().xp)};
+  // imprese: a 2 stelle una cornice, a 3 stelle un titolo
+  const premioImp = (id, l) => { const key = 'imp:' + id + ':' + l, c = Object.values(CORNICI).find(v => v.leg === key), t = Object.values(TITOLI).find(v => v.leg === key); return c ? 'Cornice ' + c.n : t ? 'Titolo «' + t.n + '»' : ''; };
+  function sbloccaImp(id, l, muto){ const p = leggi(); let nuovo = false; for (let x = 1; x <= l; x++){ const key = 'imp:' + id + ':' + x; if (!p.leg[key] && premioImp(id, x)){ p.leg[key] = Date.now(); nuovo = true; if (!muto) avviso('🏅 Nuovo premio!', premioImp(id, x) + ' · lo trovi nel profilo'); } } if (nuovo) scrivi(p); }
+  return {daiXP, leggenda, chip, pagina, leggende, fortuna, quantiFortunati, avviso, pausaAvvisi, premioImp, sbloccaImp, livello: () => livello(leggi().xp)};
 })();
 const TB = (() => {
 const el = id => document.getElementById(id);
@@ -6290,7 +6302,8 @@ IMPRESE.push(
   {id:'sf_g', t:n => `Sfida del giorno: gioca ${n} giorni`, k:'sfide_g', liv:[3,7,30]}
 );
 const PREMIO_IMP = ['legno', 'argento', 'oro'];
-function leggiInc(){ let d = null; try { d = JSON.parse(localStorage.getItem(INKEY)); } catch(e){} if (!d || typeof d !== 'object') d = {};
+let IMP_SINC = false;
+function leggiInc(){ let d = null; try { d = JSON.parse(localStorage.getItem(INKEY)); } catch(e){} if (!d || typeof d !== 'object') d = {}; if (!IMP_SINC && d.imp){ IMP_SINC = true; try { for (const [id, l] of Object.entries(d.imp)) PROF.sbloccaImp(id, l, true); } catch(e){ IMP_SINC = false; } }
   d.tot = d.tot || {}; d.imp = d.imp || {}; const g = oggi(); if (!d.oggi || d.oggi.g !== g) d.oggi = {g, c:{}, presi:[], bonus:false}; return d; }
 const scriviInc = d => { try { localStorage.setItem(INKEY, JSON.stringify(d)); } catch(e){} };
 // conta i progressi di tutte le modalità per incarichi e imprese. come: 'max' tiene il valore più alto, 'giorno' conta una volta al giorno
@@ -6331,7 +6344,7 @@ function incarichi(){
   for (const im of IMPRESE){ if (im.serve && !col[im.serve]) continue; const l = d.imp[im.id] || 0, v = d.tot[im.k] || 0;
     if (l >= im.liv.length){ riga(bi, im.t(im.liv[im.liv.length - 1]) + ' ★★★', v, im.liv[im.liv.length - 1], 'oro', 'preso'); continue; }
     const n = im.liv[l], pr = PREMIO_IMP[l];
-    riga(bi, im.t(n) + ' ' + '★'.repeat(l) + '☆'.repeat(im.liv.length - l), v, n, pr, v >= n ? 'pronto' : 'no', () => { const d2 = leggiInc(); if ((d2.imp[im.id] || 0) !== l) return; d2.imp[im.id] = l + 1; scriviInc(d2); PROF.daiXP([20, 45, 90][l]); chiudiOv(); mostraScrigno(pr, incarichi); }); }
+    let pz = ''; try { pz = PROF.premioImp(im.id, l + 1); } catch(e){} riga(bi, im.t(n) + ' ' + '★'.repeat(l) + '☆'.repeat(im.liv.length - l) + (pz ? ' · + ' + pz : ''), v, n, pr, v >= n ? 'pronto' : 'no', () => { const d2 = leggiInc(); if ((d2.imp[im.id] || 0) !== l) return; d2.imp[im.id] = l + 1; scriviInc(d2); try { PROF.sbloccaImp(im.id, l + 1); } catch(e){} PROF.daiXP([20, 45, 90][l]); chiudiOv(); mostraScrigno(pr, incarichi); }); }
   const bl = o.querySelector('#incL');
   for (const q of PROF.leggende()){ const r2 = document.createElement('div'); r2.className = 'incr leg' + (q.fatto ? ' fatto' : '');
     r2.innerHTML = `<div class="inct"><b>${q.t}</b><small class="incm">${q.modo} · Premio: ${q.premi.join(', ')}</small></div><span class="incb oro">${q.fatto ? '🏆 Fatta' : '🔒'}</span>`; bl.append(r2); }
@@ -7511,14 +7524,14 @@ function apri(modo){ provenienza = 'menu'; root.hidden = false; root.classList.t
 function premiaSopra(tipo){ root.classList.add('sopra'); root.hidden = false; attivo = false; RUN = null; mostraScrigno(tipo, () => esci()); }
 function righeInc(){ const d = leggiInc(), q = incDiOggi(), col = leggiCol(), out = {oggi:[], imp:[]};
   for (const x of q){ const v = d.oggi.c[x.k] || 0, preso = d.oggi.presi.includes(x.id); out.oggi.push({k:'g', id:x.id, t:x.t, v, n:x.n, premio:'legno', stato: preso ? 'preso' : v >= x.n ? 'pronto' : 'no'}); }
-  const fatti = q.filter(x => (d.oggi.c[x.k] || 0) >= x.n).length; out.oggi.push({k:'b', id:'bonus', t:'Bonus: completa tutti e 3', v:fatti, n:q.length || 3, premio:'argento', stato: d.oggi.bonus ? 'preso' : (q.length && fatti === q.length) ? 'pronto' : 'no'});
+  const fatti = q.filter(x => (d.oggi.c[x.k] || 0) >= x.n).length; out.oggi.push({k:'b', id:'bonus', t:'Bonus: completali tutti', v:fatti, n:q.length || 3, premio:'argento', stato: d.oggi.bonus ? 'preso' : (q.length && fatti === q.length) ? 'pronto' : 'no'});
   for (const im of IMPRESE){ if (im.serve && !col[im.serve]) continue; const l = d.imp[im.id] || 0, v = d.tot[im.k] || 0; if (l >= im.liv.length){ out.imp.push({k:'i', id:im.id, t:im.t(im.liv[im.liv.length-1]), stelle:l, max:im.liv.length, v, n:im.liv[im.liv.length-1], premio:'oro', stato:'preso'}); continue; }
-    out.imp.push({k:'i', id:im.id, t:im.t(im.liv[l]), stelle:l, max:im.liv.length, v, n:im.liv[l], premio:PREMIO_IMP[l], stato: v >= im.liv[l] ? 'pronto' : 'no'}); }
+    let pz = ''; try { pz = PROF.premioImp(im.id, l + 1); } catch(e){} out.imp.push({k:'i', id:im.id, t:im.t(im.liv[l]), stelle:l, max:im.liv.length, v, n:im.liv[l], premio:PREMIO_IMP[l], pz, stato: v >= im.liv[l] ? 'pronto' : 'no'}); }
   return out; }
 function ritiraInc(k, id){ const d2 = leggiInc();
   if (k === 'g'){ if (d2.oggi.presi.includes(id)) return; d2.oggi.presi.push(id); scriviInc(d2); PROF.daiXP(15); premiaSopra('legno'); }
   else if (k === 'b'){ if (d2.oggi.bonus) return; d2.oggi.bonus = true; scriviInc(d2); PROF.daiXP(30); premiaSopra('argento'); }
-  else { const im = IMPRESE.find(x => x.id === id); if (!im) return; const l = d2.imp[id] || 0; if ((d2.tot[im.k] || 0) < im.liv[l]) return; d2.imp[id] = l + 1; scriviInc(d2); PROF.daiXP([20, 45, 90][l]); premiaSopra(PREMIO_IMP[l]); } }
+  else { const im = IMPRESE.find(x => x.id === id); if (!im) return; const l = d2.imp[id] || 0; if ((d2.tot[im.k] || 0) < im.liv[l]) return; d2.imp[id] = l + 1; scriviInc(d2); try { PROF.sbloccaImp(id, l + 1); } catch(e){} PROF.daiXP([20, 45, 90][l]); premiaSopra(PREMIO_IMP[l]); } }
 function giraRuota(){ if (!ruotaPronta()) return null; try { localStorage.setItem(RUOTAKEY, oggiStr()); } catch(e){}
   const tot = RUOTA.reduce((s, x) => s + x.w, 0); let r = Math.random()*tot, i = 0; while ((r -= RUOTA[i].w) >= 0) i++; const x = RUOTA[i]; let msg = '';
   if (x.k === 'xp'){ PROF.daiXP(x.v); msg = `Hai vinto <b>${x.v} punti</b>!`; }
