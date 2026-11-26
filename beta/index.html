@@ -2038,7 +2038,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 @keyframes gpStelle{from{opacity:0;transform:translateX(-50%) translateY(-12px) scale(.4)}to{opacity:1;transform:translateX(-50%)}}
 #title .gp-go{overflow:hidden}
 #title .gp-go::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-40%;width:28%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);animation:gpLuce 3.2s ease-in-out 1.2s infinite;pointer-events:none}
-@keyframes gpLuce{0%,62%{left:-40%}100%{left:130%}}
+@keyframes gpLuce{0%,62%{transform:translateX(0) skewX(-18deg)}100%{transform:translateX(610%) skewX(-18deg)}}
 #title .gp-card::after{content:"";position:absolute;inset:-2px;border-radius:inherit;pointer-events:none;background:radial-gradient(120px 80px at var(--gx,85%) 0%,rgba(255,208,58,.22),transparent 70%);animation:gpBagliore 6s ease-in-out infinite alternate}
 @keyframes gpBagliore{from{--gx:15%}to{--gx:85%}}
 @property --gx{syntax:'<percentage>';inherits:false;initial-value:85%}
@@ -2077,7 +2077,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cr-tab[data-tab="gioca"]:not(.on) .cr-ti{animation:none!important}
 .gp-n.ora{animation-duration:2.6s!important}
 #title .gp-go::after{animation:gpLuce 5.5s ease-in-out 1.5s infinite!important}
-@keyframes gpLuce{0%,78%{left:-40%}100%{left:130%}}
+@keyframes gpLuce{0%,78%{transform:translateX(0) skewX(-18deg)}100%{transform:translateX(610%) skewX(-18deg)}}
 .gp-tile.sf{position:relative}
 .gp-tile.sf.nov::after{content:'';position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:#e04830;border:3px solid #141433}
 .gp-tile.sf.fatta{opacity:.75}
@@ -5525,6 +5525,7 @@ function importaSalvataggio(cod){ try { cod = (cod || '').trim().replace(/\s+/g,
   for (const k of ks) localStorage.setItem(k, d[k]); return true; } catch(e){ return false; } }
 // sfondo animato del titolo: il paese che scorre lento, con la nebbia e qualche cavaliere
 const tcv = $('#titleCv'), tctx = tcv.getContext('2d');
+let TIT_ULT = -1;
 function disegnaTitolo(T){
   if (!scena) scena = creaScena();
   const r = {width: tcv.clientWidth, height: tcv.clientHeight}, d = Math.min(2, window.devicePixelRatio || 1); // misura senza lo spostamento della transizione, così il canvas non si ridimensiona a ogni passo
@@ -10672,7 +10673,7 @@ function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); la
   if (S && !PCK && S.inizioFacile && S.inCorso && S.ondata <= 3 && !trascina && performance.now() - ULT_TRASC > 3500 && Math.floor(T*2) !== Math.floor((T - dt)*2)) seguiBattaglia();
   if (S && S.camT){ camX += (S.camT.x - camX)*Math.min(1, dt*6); camY += (S.camT.y - camY)*Math.min(1, dt*6); limita(); if (Math.hypot(S.camT.x - camX, S.camT.y - camY) < 1) S.camT = null; }
   if (S && Math.floor(T*4) !== Math.floor((T-dt)*4)) aggiornaTorri();
-  if (TB.attivo) TB.frame(T, dt); else if (CQ.attivo) CQ.frame(T, dt); else if (!$('#title').hidden) disegnaTitolo(T); else { draw(T); if (ANELLO) posAnello(); }
+  if (TB.attivo) TB.frame(T, dt); else if (CQ.attivo) CQ.frame(T, dt); else if (!$('#title').hidden){ const vel = document.getElementById('titleVelo'), coperto = vel && vel.style.opacity === '1' && $('#title').classList.contains('cr-on'); if (T - TIT_ULT >= (coperto ? .5 : 1/30 - .002)){ TIT_ULT = T; disegnaTitolo(T); } } else { draw(T); if (ANELLO) posAnello(); }
   requestAnimationFrame(loop); }
 new ResizeObserver(fit).observe($('#stage'));
 // ===== tastiera (versione PC) =====
