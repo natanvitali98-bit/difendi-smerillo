@@ -5977,6 +5977,29 @@ const MISSIONI = [
   consiglio:'Il Gatto Mammone salta un turno sì e uno no: colpiscilo quando resta a terra. Suona le campane di San Nicola quando arrivano in tanti.',
   start:[['lanciere','J'],['lanciere','piazza'],['arciere','chiesa'],['arciere','ovest'],['arciere','b1'],['carpentiere','tor1']],
   arrivi:{0:[['fante','basso'], ['fante','nordest']], 1:[['balestriere','vigna']], 2:[['cavaliere','nordovest'], ['corvo','nordest']], 3:[['catapulta','basso']], 5:[['guastatore','casale'], ['fante','nordovest']], 7:[['balestriere','basso'], ['spia','vigna']], 8:[['nero','basso']], 10:[['mammone','vigna']]}},
+ {...MAPPA_NORD, extra:[], num:16, titolo:'Il ritorno dei corvi', livello:'Difficile', vite:6, legname:5,
+  intro:'Dopo San Nicola il Re della Nebbia torna alla <b>Porta Nord</b> con uno stormo di <b>corvi</b>: volano sopra le barricate. Difendi la <b>Chiesa</b>.',
+  consiglio:'I corvi passano sopra le barricate: tienili con gli Arcieri. Le barricate servono per fermare i cavalieri.',
+  start:[['lanciere','piazzale'],['arciere','chiesa'],['arciere','cortS'],['lanciere','cadutiM'],['carpentiere','lupia1']],
+  arrivi:{0:[['fante','fessa'], ['fante','monte2']], 1:[['corvo','lupia2']], 2:[['fante','fessa']], 3:[['cavaliere','monte2']], 4:[['corvo','fessa']], 5:[['balestriere','lupia2']], 7:[['corvo','monte2']], 8:[['cavaliere','lupia2']], 9:[['corazzato','fessa']]}},
+ {...MAPPA_CENTRO, extra:[], num:17, titolo:'Le catapulte di Via Roma', livello:'Difficile', vite:6, legname:5,
+  intro:'Dal sud arrivano le <b>catapulte</b>, e i <b>Guastatori</b> provano ad aprire la strada verso il <b>Municipio</b>. Le catapulte colpiscono da lontano chi sta in Via Roma.',
+  consiglio:'Prendi le catapulte prima che si mettano in posizione. Costruisci le barricate solo dove i Guastatori non arrivano subito.',
+  start:[['lanciere','roma2'],['lanciere','spietro'],['arciere','piazza'],['carpentiere','roma3'],['arciere','roma1']],
+  arrivi:{0:[['fante','sud'], ['fante','cortell']], 1:[['catapulta','sud']], 2:[['guastatore','caduti']], 3:[['fante','cortell'], ['balestriere','sud']], 4:[['catapulta','caduti']], 6:[['guastatore','cortell'], ['cavaliere','sud']], 8:[['corazzato','caduti']], 9:[['catapulta','cortell']]}},
+ {...MAPPA_ROCCA, extra:[], num:18, titolo:'La Rocca nella nebbia', livello:'Difficile', vite:6, legname:5,
+  intro:'Una nebbia fitta copre la <b>Rocca</b>. Le <b>Spie</b> ci si nascondono dentro e i <b>Fanti corazzati</b> salgono dalla valle. Difendi <b>Piazza Indipendenza</b>.',
+  consiglio:'Le Spie si colpiscono solo con un difensore accanto: tieni i soldati vicini tra loro, non da soli.',
+  arrivi:{0:[['fante','caduti1'], ['spia','mura3']], 1:[['corazzato','sudO']], 2:[['spia','caduti1']], 3:[['balestriere','mura3']], 4:[['corazzato','caduti1'], ['spia','sudO']], 6:[['cavaliere','sudO']], 7:[['spia','mura3']], 9:[['corazzato','caduti1'], ['fante','sudO']]}},
+ {...MAPPA_NORD, extra:[], num:19, titolo:'Il Gatto alla Porta', livello:'Difficilissima', vite:6, legname:5,
+  intro:'Il <b>Gatto Mammone</b> è sceso dalle frazioni fino alla <b>Porta Nord</b>, con i cavalieri. Salta difensori e barricate un turno sì e uno no. Difendi la <b>Chiesa</b>.',
+  consiglio:'Colpisci il Gatto nei turni in cui resta a terra, tutti insieme. Intanto non lasciare passare i cavalieri dalla Salita.',
+  start:[['lanciere','piazzale'],['arciere','chiesa'],['lanciere','cadutiM'],['carpentiere','lupia1'],['arciere','cortS']],
+  arrivi:{0:[['fante','fessa'], ['fante','lupia2']], 1:[['cavaliere','monte2']], 2:[['balestriere','fessa']], 3:[['corvo','lupia2']], 4:[['cavaliere','fessa'], ['fante','monte2']], 6:[['mammone','monte2']], 8:[['guastatore','lupia2']], 9:[['cavaliere','fessa']]}},
+ {...MAPPA_ROCCA, extra:[], num:20, titolo:'La leggenda di Smerillo', livello:'Difficilissima', vite:7, legname:6,
+  intro:'L’ultima battaglia: il <b>Cavaliere Nero</b>, il <b>Gatto Mammone</b> e tutto l’esercito del Re della Nebbia salgono alla <b>Rocca</b>. Se resisti, la tua storia diventa la leggenda di Smerillo.',
+  consiglio:'Chiudi Via Marconi con le barricate, usa l’olio della Porta quando arrivano in tanti e tieni i Lancieri per i capi.',
+  arrivi:{0:[['fante','caduti1'], ['fante','mura3']], 1:[['balestriere','sudO']], 2:[['cavaliere','caduti1']], 3:[['catapulta','sudO']], 4:[['corvo','mura3']], 5:[['spia','caduti1']], 6:[['nero','sudO']], 7:[['corazzato','mura3']], 8:[['guastatore','caduti1']], 9:[['balestriere','mura3']], 11:[['mammone','caduti1']]}}
 ];
 // ===== una piccola storia: due righe prima di ogni missione (personaggi del paese, inventati) =====
 const DIALOGHI = {
@@ -5995,6 +6018,11 @@ const DIALOGHI = {
   13:['carpentiere','Il sagrestano di San Nicola','Scendono verso Ceresola! Le case sono tutte strette intorno alla chiesa: difendiamo la piazzetta.'],
   14:['fabbro','Il contadino di Ceresola','Si nascondevano nelle grotte dove tenevamo il grano. Ora escono da ogni parte!'],
   15:['lanciere','Il capitano delle guardie','Domani è la festa di San Nicola. Il Cavaliere Nero e il Gatto Mammone vogliono la chiesa prima della festa. Resistiamo!'],
+  16:['arciere','Il campanaro','Dal campanile vedo uno stormo nero sopra la Fessa. Sono i corvi del Re della Nebbia: tenete pronti gli archi!'],
+  17:['fabbro','Il fabbro','Altre catapulte, stavolta sono due. E i Guastatori hanno le asce: vogliono aprirsi Via Roma.'],
+  18:['guardia','La guardia della Rocca','Con questa nebbia non vedo le mie mani. Restate vicini: le Spie aspettano chi resta da solo.'],
+  19:['lanciere','Il capitano delle guardie','Il Gatto Mammone è alla Porta Nord! Stavolta porta con sé i cavalieri. Non fatelo arrivare alla Chiesa.'],
+  20:['guardia','La guardia della Rocca','Tutti alla Rocca! Il Cavaliere Nero e il Gatto Mammone salgono insieme. È la notte che ricorderanno per sempre.'],
   C:['carpentiere','La fornaia','È la Castagnata in Piazza! Il Gatto Mammone vuole rubare tutte le castagne. Difendi la piazza!']};
 MISSIONI.forEach(m => { m.dlg = DIALOGHI[m.num]; });
 // ===== evento a tempo: la Castagnata in Piazza (la terza domenica di ottobre), attivo da ottobre a metà novembre =====
@@ -7428,7 +7456,7 @@ function intro(){
 }
 // obiettivi per le stelle: ogni missione chiede due cose diverse, così non basta una sola tattica
 const OBI = {1:['rupe:1','persi'], 2:['intatto','veloce:13'], 3:['lontano:9','nobar'], 4:['persi','veloce:13'], 5:['veloce:14','intatto'], 6:['intatto','persi'], 7:['lontano:14','rupe:2'], 8:['lontano:16','nobar'],
-  9:['lontano:11','persi'], 10:['intatto','veloce:22'], 11:['rupe:1','persi'], 12:['intatto','rupe:1'], 13:['lontano:12','nobar'], 14:['rupe:2','persi'], 15:['intatto','lontano:12']};
+  9:['lontano:11','persi'], 10:['intatto','veloce:22'], 11:['rupe:1','persi'], 12:['intatto','rupe:1'], 13:['lontano:12','nobar'], 14:['rupe:2','persi'], 15:['intatto','lontano:12'], 16:['intatto','persi'], 17:['lontano:12','persi'], 18:['intatto','veloce:15'], 19:['persi','intatto'], 20:['intatto','persi']};
 function obiettivo(spec){ const [k, v] = spec.split(':'), n = +v, st = k2 => (S && S.st && S.st[k2]) || 0;
   if (k === 'rupe') return {t:`Butta giù ${n === 1 ? '1 nemico' : n + ' nemici'} dalla rupe`, ic:'rupe', ok:() => st('rupe') >= n};
   if (k === 'nobar') return {t:'Vinci senza costruire barricate', ic:'martello', ok:() => !st('bar')};
