@@ -597,7 +597,8 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .tboff{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:12px 14px;border-radius:14px;border:3px solid var(--linea,#141433);background:#fff;box-shadow:0 4px 0 var(--linea,#141433);color:var(--testo,#1c1c3c)}
 .tboff span{display:flex;flex-direction:column;gap:2px}.tboff b{font-family:var(--f-big,inherit);font-weight:400;font-size:18px}.tboff small{color:var(--grigio,#6a7194);font-size:13px}
 .tboff em{font-style:normal;font-family:var(--f-big,inherit);font-size:18px;background:var(--giallo,#ffd03a);border:2px solid var(--linea,#141433);border-radius:10px;padding:4px 8px;white-space:nowrap}
-.tboff:disabled{opacity:.45;box-shadow:none}
+.tboff:disabled{opacity:.6;box-shadow:none;filter:grayscale(.7)}
+#tbOv .tboff,#tbOv .tboff b{color:#141433!important}#tbOv .tboff small{color:#4a5285!important} /* in Bottega i nomi delle offerte non disponibili erano bianchi su bianco */
 .tboff:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 var(--linea,#141433)}
 .tbspsel{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
 .tbspsel button{border-radius:10px;border:2px solid #c8d1ee;background:#fff;padding:6px;text-align:left;font-size:12px;line-height:1.25;color:var(--testo,#1c1c3c)}
@@ -1115,6 +1116,7 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 @keyframes rtOnda{0%{opacity:.9;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.4)}}
 .rt-pr-t{top:92px!important;transform-origin:50% 50%}
 @keyframes rtPrT{0%,14%{opacity:0;transform:translate(-50%,-50%) scaleX(.1)}26%{opacity:1;transform:translate(-50%,-50%) scaleX(1.12)}34%{transform:translate(-50%,-50%) scaleX(1)}82%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-50%)}}
+@media (max-height:560px){ .pr-rbox{zoom:.74;margin:26px auto 10px!important} } /* schermi bassi (CrazyGames, PC piccolo): la ruota e GIRA stanno sopra la barra in basso */
 /* il premio che esce dalla ruota */
 .rt-premio{position:absolute;left:50%;top:50%;width:0;height:0;z-index:6;pointer-events:none}
 .rt-premio > *{position:absolute;left:0;top:0;transform:translate(-50%,-50%)}
@@ -1463,7 +1465,8 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 /* ruota e incarichi direttamente nella pagina Premi */
 .cr-pg > *{flex-shrink:0}
 .pr-ruota{flex-direction:column;align-items:stretch;gap:6px;min-height:0}
-.pr-rh{position:relative;display:flex;align-items:baseline;gap:8px;flex-wrap:nowrap}.pr-rh b{white-space:nowrap}.pr-rh small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+@media (max-width:380px){ .pr-rh{flex-wrap:wrap!important;row-gap:0} .pr-rh small{white-space:normal!important;overflow:visible!important} #tbTit{font-size:15px!important;letter-spacing:-.2px} } /* telefoni piccoli: scritte intere, niente puntini */
+.pr-rh{z-index:3;position:relative;display:flex;align-items:baseline;gap:8px;flex-wrap:nowrap}.pr-rh b{white-space:nowrap}.pr-rh small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .pr-rh b{font:400 22px var(--f-big);text-shadow:0 2px 0 rgba(0,0,0,.25)}
 .pr-rh small{font-size:14px}
 .pr-rbox{position:relative;width:176px;height:176px;margin:8px auto 2px}
@@ -2426,7 +2429,7 @@ body{font-synthesis:none}
 img.pxi,.pxi,canvas.pxi{image-rendering:pixelated}
 .gp-k i,.gp-st i{color:#c3cbf5!important}
 .gp-k{letter-spacing:1.5px}
-#coach .co-salta,.cr-top .cr-ing,.cr-top .cr-res,.scr-salta,#tbI,.indietro{position:relative}
+#coach .co-salta,.cr-top .cr-ing,.cr-top .cr-res,.indietro{position:relative} /* .scr-salta e #tbI sono già posizionati: non toccarli (prima "Apri tutto" finiva sotto la carta) */
 #coach .co-salta::after,.cr-top .cr-ing::after,#tbI::after,.indietro::after{content:'';position:absolute;inset:-7px;border-radius:inherit}
 
 #coach.solo.vicino{position:fixed;width:max-content!important;right:auto!important;bottom:auto!important;transform:none!important;margin:0!important} #coach.solo.mini{padding:10px 16px 12px} #coach.solo.mini .co-h{display:flex}
@@ -2528,7 +2531,7 @@ body.itch-va .tr-velo,body.itch-va #coach,body.itch-va #coachRing,body.itch-va #
 #caricamento.acc-rec .ld-su{opacity:0;transition:opacity .3s}
 #caricamento.acc-gate-on .ld-giu{max-height:calc(100% - 16px);overflow-y:auto;padding-top:8px}
 @media (max-height:760px){ #caricamento.acc-gate-on:not(.acc-entrando) .ld-su{transform:scale(.8);transform-origin:top center} }
-body:has(.scr-stage) #asChip,body:has(.scr-stage) #mnToast,body:has(.scr-stage) #profToast{display:none!important} /* lo scrigno resta pulito */
+body:has(.scr-stage) #asChip,body:has(.scr-stage) #mnToast,body:has(.scr-stage) #profToast,body:has(#end:not([hidden])) #profToast,body:has(#tbOv:not([hidden]) .vittoria) #profToast,body:has(#tbOv:not([hidden]) .sconfitta) #profToast{display:none!important} /* niente avvisi sopra scrigni e schermate di fine */ /* lo scrigno resta pulito */
 @media (min-width:900px) and (max-height:559.98px){ /* PC con la finestra non a schermo intero: la barra in basso resta una pillola arrotondata, non tagliata ai lati */ .cr-nav{width:min(700px,calc(100% - 32px));margin:0 auto 6px;border:3px solid var(--linea);border-radius:20px;padding:4px 10px 6px;box-shadow:0 4px 0 var(--linea),0 8px 24px rgba(0,0,0,.35)} }
 @media (max-height:620px){ /* finestra bassa (PC 960x540): il modulo dell'account sta tutto nello schermo */ #caricamento.acc-gate-on .acc-card .acc-sub{display:none!important} #caricamento.acc-gate-on .acc-card{gap:5px!important;padding:10px 14px!important} #caricamento.acc-gate-on .acc-card .acc-h{font-size:22px!important} #caricamento.acc-gate-on .acc-card .acc-f input{padding:6px 12px!important} #caricamento.acc-gate-on .ld-giu{padding-top:4px} }
 
