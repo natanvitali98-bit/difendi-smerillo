@@ -891,6 +891,13 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .fx-ban.boss b{color:#ff4d4d;text-shadow:0 4px 0 #141433;font-size:clamp(28px,8vw,46px)}
 @keyframes fxBanEntra{0%{transform:translateX(-110%) skewX(-12deg)}18%{transform:translateX(4%) skewX(-4deg)}26%{transform:none}78%{transform:none;opacity:1}100%{transform:translateX(110%) skewX(-12deg);opacity:0}}
 @keyframes fxBanSfondo{0%,100%{background:transparent}20%,80%{background:rgba(0,0,0,.25)}}
+/* inizio missione */
+.mi-ov{position:absolute;inset:0;z-index:58;overflow:hidden;cursor:pointer}
+.mi-velo{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(8,8,26,.15) 0,rgba(8,8,26,.85) 75%)}
+.mi-tit{position:absolute;left:0;right:0;top:36%;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
+.mi-k{font-family:var(--f-big),sans-serif;font-size:clamp(20px,6vw,28px);letter-spacing:5px;color:#fff;text-transform:uppercase;text-shadow:0 3px 0 #000}
+.mi-t{font-family:var(--f-big),sans-serif;font-weight:400;font-size:clamp(34px,10.5vw,56px);line-height:.95;text-align:center;color:#ffd03a;-webkit-text-stroke:2px #141433;text-shadow:0 5px 0 #a06200,0 9px 0 #000;padding:0 14px}
+.mi-go{position:absolute;left:50%;top:50%;font-family:var(--f-big),sans-serif;font-weight:400;font-size:clamp(38px,12vw,64px);color:#fff;-webkit-text-stroke:2px #141433;text-shadow:0 5px 0 #2a7a2a,0 9px 0 #000;white-space:nowrap;pointer-events:none}
 /* annuncio del capo (missioni a turni): velo, bande da cinema, il capo che sbatte giù, nome in due colpi */
 .capo{position:absolute;inset:0;z-index:61;pointer-events:none;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;--cc:#ff4d4d;--cd:#3a0a0a}
 .capo-velo{position:absolute;inset:0;background:radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--cc) 34%,transparent) 0,rgba(8,8,26,.55) 38%,rgba(8,8,26,.88) 78%)}
@@ -6819,7 +6826,7 @@ function fineTurno(){
 function tempoTurno(){ if (RUN || online() || MI < 2 || M.evento || !S) return 0; const base = 10 + 4*S.dif.length; return Math.round(S.difficile ? base*.75 : base); }
 function nuovoTempo(){ tempoMax = tempoTurno(); tempoT = tempoMax; tempoUlt = -1; const f = el('tbFine'); if (f){ f.classList.toggle('tempo', !!tempoMax); f.classList.remove('poco'); f.style.setProperty('--t', 1); f.dataset.s = tempoMax ? tempoMax + ' s' : ''; } }
 function aggiornaTempo(dt){ const f = el('tbFine'); if (!f || !tempoMax){ if (f) f.classList.remove('tempo', 'poco'); return; }
-  const corre = S && !S.esito && !ev && !V && (!ovAperto || inBottega) && !document.hidden && mioTurno();
+  const corre = S && !S.esito && !ev && !V && (!ovAperto || inBottega) && !document.hidden && mioTurno() && performance.now() > introFino;
   if (corre){ tempoT = Math.max(0, tempoT - dt); const s = Math.ceil(tempoT); if (s !== tempoUlt){ tempoUlt = s; if (s <= 5 && s > 0) SUONI.suona('tocco'); }
     if (tempoT <= 0){ suggerisci('Tempo scaduto! Tocca ai nemici.'); if (inBottega){ inBottega = false; chiudiOv(); } fineTurno(); } }
   const vis = !(S && S.esito) && !V; f.classList.toggle('tempo', vis); f.classList.toggle('poco', vis && tempoT <= 5); f.style.setProperty('--t', tempoT/tempoMax); const s = Math.ceil(tempoT) + ' s'; if (f.dataset.s !== s) f.dataset.s = s; }
@@ -6887,6 +6894,7 @@ function disegnaUnita(u, k, T){
   let [x,y] = scr(e, n, z); y -= saltello;
   const ora_ = adesso(), PA = POS.get(u.id);
   if (PA){ const q = (ora_ - PA.t0)/PA.d; if (q >= 1) POS.delete(u.id);
+    else if (PA.k === 'cade'){ if (q < 0) y -= 4000; else { const f = q < .62 ? (q/.62)*(q/.62) : 1; y -= (1 - f)*240; if (q >= .62) y -= Math.sin((q - .62)/.38*Math.PI)*12; } }
     else if (PA.k === 'mossa'){ const N0 = NODI[PA.da]; if (N0){ const [x0, y0] = scr(N0.e, N0.n, N0.z), qq = Math.max(0, q), f = 1 - (1 - qq)*(1 - qq); x = x0 + (x - x0)*f; y = y0 + (y - y0)*f - Math.sin(qq*Math.PI)*10; } }
     else if (q >= 0){ const N1 = NODI[PA.a]; if (N1){ const [tx, ty] = scr(N1.e, N1.n, N1.z), f = PA.k === 'affondo' ? (q < .35 ? -Math.sin(q/.35*Math.PI/2)*.12 : Math.sin((q - .35)/.65*Math.PI)*.5) : -Math.sin(q*Math.PI)*.12; x += (tx - x)*f; y += (ty - y)*f; } } }
   if (ev && ev.k === 'colpo' && ev.da === u.id){ const N = NODI[ev.nodo], [tx,ty] = scr(N.e, N.n, N.z), q = Math.min(1, evT/DUR.colpo), f = q < .35 ? -Math.sin(q/.35*Math.PI/2)*.08 : Math.sin((q - .35)/.65*Math.PI)*.45; x += (tx-x)*f; y += (ty-y)*f; }
@@ -6989,7 +6997,7 @@ function render(T = performance.now()/1000){
       if (f.falco && IMG.falco){ const im = IMG.falco, s2 = K*sc*.9*scalaU; for (let j = 3; j >= 0; j--){ const qj = Math.max(0, q - j*.06); g.globalAlpha = j ? .18 : 1; g.save(); g.translate(Math.round(px(qj)), Math.round(py(qj))); if (x1 < x) g.scale(-1, 1); g.drawImage(j ? (BIANCHI.falco || im) : im, -im.width*s2/2, -im.height*s2/2, im.width*s2, im.height*s2); g.restore(); } g.globalAlpha = 1; }
       else { g.save(); g.translate(Math.round(cx), Math.round(cy)); g.rotate(a); g.lineCap = 'round'; g.strokeStyle = '#14141e'; g.lineWidth = 5; g.beginPath(); g.moveTo(-12, 0); g.lineTo(8, 0); g.stroke(); g.strokeStyle = '#c8945a'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(-12, 0); g.lineTo(8, 0); g.stroke(); g.fillStyle = '#f4f4f0'; g.strokeStyle = '#14141e'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(13, 0); g.lineTo(6, -4); g.lineTo(6, 4); g.closePath(); g.fill(); g.stroke(); g.fillStyle = '#e04830'; g.fillRect(-14, -3, 4, 6); g.restore(); g.lineCap = g.lineJoin = 'round'; }
       continue; }
-    if (f.k === 'ring'){ const q = f.t/.35, r = 8 + q*34; g.globalAlpha = Math.max(0, 1 - q); g.strokeStyle = '#ffffff'; g.lineWidth = 1 + 5*(1 - q); g.beginPath(); g.ellipse(x, y - 16, r, r*.6, 0, 0, 7); g.stroke();
+    if (f.k === 'ring'){ const q = f.t/.35, r = (8 + q*34)*(f.big || 1); g.globalAlpha = Math.max(0, 1 - q); g.strokeStyle = f.col || '#ffffff'; g.lineWidth = 1 + 5*(1 - q); g.beginPath(); g.ellipse(x, y - 16, r, r*.6, 0, 0, 7); g.stroke();
       if (q < .5){ g.strokeStyle = '#ffe9a8'; g.lineWidth = 3; g.beginPath(); for (let j = 0; j < 8; j++){ const an = j*Math.PI/4 + .4, r0 = 6 + q*30, r1 = 14 + q*52; g.moveTo(x + Math.cos(an)*r0, y - 16 + Math.sin(an)*r0*.7); g.lineTo(x + Math.cos(an)*r1, y - 16 + Math.sin(an)*r1*.7); } g.stroke(); }
       g.globalAlpha = 1; continue; }
     if (f.k === 't'){ const dan = /^−\d/.test(f.s), pop = f.t < .14 ? 1 + (1 - f.t/.14)*.9 : 1; g.globalAlpha = Math.max(0, 1 - f.t/1.1); etichetta(x + (dan ? Math.sin(f.t*40)*Math.max(0, 1 - f.t*6)*3 : 0), y - 40 - f.t*22 + f.dy, f.s.replace('🪙', ''), f.col, 'rgba(20,14,14,.85)', Math.round((f.big ? 24 : dan ? 17 : 13)*pop), f.s.includes('🪙') ? 'moneta' : null); /* la moneta in pixel, non l'emoji */ g.globalAlpha = 1; }
@@ -7033,7 +7041,7 @@ function provaVia(k){ const P = PROVE[k]; PROVA = {k, vis:'', turno:false}; docu
 function provaFine(salta){ const era = PROVA; PROVA = null; document.body.classList.remove('tb-prova'); COACH_TB = -1; try { COACH.nascondi(); } catch(e){}
   try { RITORNO.traccia('prova', {k: salta ? 'salta' : 'fine', da: era ? era.k : null}); } catch(e){}
   moneteViste = null; S = nuovo(); piazza = null; V = null; storia = []; sel = null; fx = []; coda = []; ev = null; modoC = false; ultimoAnn = ''; nuovoTempo(); aggiornaAnteprima();
-  if (salta) fineGuida(); else { SUONI.suona('banner'); EPICO.banner('Missione ' + M.num, M.titolo); } render(); }
+  if (salta) fineGuida(); else { SUONI.suona('banner'); introMissione('Missione ' + M.num, M.titolo); } render(); }
 function provaCoach(){ if (!PROVA || !S) return; const P = PROVE[PROVA.k], u = S.dif[0], x = S.nem[0]; let f;
   if (!u){ provaFine(false); return; }
   if (PROVA.k === 2 && PROVA.turno) f = V || S.turno < 2 ? 'att' : 'ok'; // dopo il turno dei nemici la prova è finita
@@ -7529,6 +7537,30 @@ function ruota(){
     }, ico(x.ic, 6), x.t); };
   try { decoraRuota(o.querySelector('#rtW'), n); } catch(e){}
 }
+// inizio missione: la mappa scende dall'alto, il titolo sbatte, i soldati cadono al loro posto, le entrate dei nemici pulsano, poi "Tocca a te!" (circa 2,5 s; un tocco lo salta)
+let introFino = 0; // durante l'intro il tempo del turno non scorre
+function introMissione(kicker, titolo){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || !S){ EPICO.banner(kicker, titolo); return; }
+  const host = el('tb'); host.querySelectorAll('.mi-ov').forEach(x => x.remove());
+  const o = document.createElement('div'); o.className = 'mi-ov';
+  o.innerHTML = `<div class="mi-velo"></div><div class="mi-tit"><span class="mi-k">${kicker}</span><b class="mi-t">${titolo}</b></div><b class="mi-go">Tocca a te!</b>`;
+  host.append(o); const t0 = adesso(), D = 2900, A = []; introFino = performance.now() + D;
+  const an = (q, k, opt) => { const a = o.querySelector(q).animate(k, Object.assign({duration:D, fill:'both'}, opt)); A.push(a); return a; };
+  A.push(cvt.animate([{transform:'translateY(-7%) scale(1.32)', filter:'brightness(.55)'}, {transform:'none', filter:'brightness(1)', offset:.42, easing:'cubic-bezier(.2,.7,.2,1)'}, {transform:'none', filter:'brightness(1)'}], {duration:D, easing:'cubic-bezier(.3,0,.2,1)'}));
+  an('.mi-velo', [{opacity:1}, {opacity:.75, offset:.3}, {opacity:0, offset:.5}, {opacity:0}]);
+  an('.mi-k', [{opacity:0, transform:'scale(2.6)'}, {opacity:0, transform:'scale(2.6)', offset:.08, easing:'cubic-bezier(.2,.9,.3,1.4)'}, {opacity:1, transform:'scale(1)', offset:.15}, {opacity:1, transform:'none', offset:.36, easing:'ease-in'}, {opacity:0, transform:'translateY(-24px)', offset:.42}, {opacity:0, transform:'translateY(-24px)'}]);
+  an('.mi-t', [{opacity:0, transform:'scale(3) rotate(-5deg)'}, {opacity:0, transform:'scale(3) rotate(-5deg)', offset:.16, easing:'cubic-bezier(.2,.9,.3,1.3)'}, {opacity:1, transform:'scale(1) rotate(-2deg)', offset:.24}, {opacity:1, transform:'scale(1.04) rotate(-2deg)', offset:.27}, {opacity:1, transform:'rotate(-2deg)', offset:.31}, {opacity:1, transform:'rotate(-2deg)', offset:.36, easing:'ease-in'}, {opacity:0, transform:'translateY(-24px) rotate(-2deg)', offset:.42}, {opacity:0, transform:'translateY(-24px) rotate(-2deg)'}]);
+  an('.mi-go', [{opacity:0, transform:'translate(-50%,-50%) scale(2.4)'}, {opacity:0, transform:'translate(-50%,-50%) scale(2.4)', offset:.8, easing:'cubic-bezier(.2,.9,.3,1.4)'}, {opacity:1, transform:'translate(-50%,-50%) scale(1)', offset:.86}, {opacity:1, transform:'translate(-50%,-50%) scale(1)', offset:.94, easing:'ease-in'}, {opacity:0, transform:'translate(-50%,-50%) scale(.9)'}]);
+  setTimeout(() => { if (o.isConnected) SUONI.suona('tonfo'); }, D*.16);
+  // i soldati cadono uno dopo l'altro al loro posto
+  S.dif.forEach((d, i) => POS.set(d.id, {k:'cade', t0:t0 + 1.28 + i*.12, d:.42}));
+  S.dif.forEach((d, i) => setTimeout(() => { if (!o.isConnected || !NODI[d.nodo]) return; const N = NODI[d.nodo]; fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0}); try { SUONI.suona('passo'); } catch(e){} }, (1.28 + i*.12 + .26)*1000));
+  // le entrate dei nemici pulsano in rosso tre volte
+  const ent = [...ARRIVO].filter(n => NODI[n]).slice(0, 6);
+  for (const n of ent){ const N = NODI[n]; for (let j = 0; j < 3; j++) fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:-(1.95 + j*.3), col:'#ff4d4d', big:1.5}); }
+  const fine = () => { if (!o.isConnected) return; introFino = 0; A.forEach(a => { try { a.cancel(); } catch(e){} }); for (const d of S ? S.dif : []){ const P = POS.get(d.id); if (P && P.k === 'cade') POS.delete(d.id); } o.remove(); };
+  o.addEventListener('pointerdown', fine, {once:true}); setTimeout(fine, D + 30);
+}
 function intro(){
   const visti = new Set(MISSIONI.slice(0, MI).flatMap(m => Object.values(m.arrivi).flat().map(a => a[0]).concat((m.extra || []).map(a => a[1]))).concat(['fante']));
   const sq = M.start.map((s, k) => (SQUADRA && SQUADRA[k]) || s[0]);
@@ -7588,7 +7620,7 @@ function intro(){
   { const di = o.querySelector('#dlgIc'); if (di) di.append(icona(M.dlg[0], 3)); }
   // se c'è un nemico nuovo, lo presento subito
   const primoNuovo = o.querySelector('.mis-pg.nuovo'); if (primoNuovo) primoNuovo.click();
-  o.querySelector('#tbVia').onclick = () => { chiudiOv(); if (prima){ try { localStorage.setItem('difendi-smerillo-prova', '1'); } catch(e){} provaVia(0); return; } usaTalismano(); if (!RUN){ SUONI.suona('banner'); EPICO.banner(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
+  o.querySelector('#tbVia').onclick = () => { chiudiOv(); if (prima){ try { localStorage.setItem('difendi-smerillo-prova', '1'); } catch(e){} provaVia(0); return; } usaTalismano(); if (!RUN){ SUONI.suona('banner'); introMissione(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
   const bk = o.querySelector('#misBack'); if (bk) bk.onclick = () => { if (provenienza === 'missioni') scelta(M.evento ? undefined : (M.luogo || 'smerillo')); else esci(); };
   if (primaVolta){ try { localStorage.setItem('difendi-smerillo-prova', '1'); } catch(e){} o.style.visibility = 'hidden'; setTimeout(() => { const v = o.querySelector('#tbVia'); if (v) v.click(); o.style.visibility = ''; }, 0); }
   const bq = o.querySelector('#tbSqC'); if (bq) bq.onclick = () => { chiudiOv(); squadra(MI); };
