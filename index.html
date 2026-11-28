@@ -750,7 +750,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 }
 @media (min-width:900px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
   #stage > #cards.overlay,#stage > #end.overlay{position:fixed;inset:0;z-index:40;justify-content:center;align-items:center;padding:16px;background:rgba(10,16,52,.55)}
-  #stage > #cards.overlay > .dlg,#stage > #end.overlay > .dlg{margin:auto;width:min(600px,100%);max-height:calc(100vh - 32px);overflow-y:auto}
+  #stage > #cards.overlay > .dlg,#stage > #end.overlay > .dlg{margin:auto;width:min(600px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto}
   #app #bar > *{min-width:0}
 }
 @media (max-width:999px) and (pointer:fine){ #app #bar .go{white-space:normal!important;line-height:1.05} }
@@ -891,6 +891,19 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .fx-ban.boss b{color:#ff4d4d;text-shadow:0 4px 0 #141433;font-size:clamp(28px,8vw,46px)}
 @keyframes fxBanEntra{0%{transform:translateX(-110%) skewX(-12deg)}18%{transform:translateX(4%) skewX(-4deg)}26%{transform:none}78%{transform:none;opacity:1}100%{transform:translateX(110%) skewX(-12deg);opacity:0}}
 @keyframes fxBanSfondo{0%,100%{background:transparent}20%,80%{background:rgba(0,0,0,.25)}}
+/* annuncio del capo (missioni a turni): velo, bande da cinema, il capo che sbatte giù, nome in due colpi */
+.capo{position:absolute;inset:0;z-index:61;pointer-events:none;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;--cc:#ff4d4d;--cd:#3a0a0a}
+.capo-velo{position:absolute;inset:0;background:radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--cc) 34%,transparent) 0,rgba(8,8,26,.55) 38%,rgba(8,8,26,.88) 78%)}
+.capo-bar{position:absolute;left:0;right:0;height:11%;background:#08081a}
+.capo-bar.su{top:0;border-bottom:4px solid var(--cc)}.capo-bar.giu{bottom:0;border-top:4px solid var(--cc)}
+.capo-raggi{position:absolute;left:50%;top:40%;width:900px;height:900px;margin:-450px 0 0 -450px;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--cc) 40%,transparent) 0 8deg,transparent 8deg 22deg);-webkit-mask:radial-gradient(circle,#000 0,#000 10%,transparent 52%);mask:radial-gradient(circle,#000 0,#000 10%,transparent 52%);animation:fxGira 9s linear infinite;opacity:0}
+.capo-pg{position:relative;width:min(44vw,210px);height:auto;image-rendering:pixelated;filter:drop-shadow(0 8px 0 rgba(0,0,0,.55)) drop-shadow(0 0 22px color-mix(in srgb,var(--cc) 70%,transparent));margin-bottom:6px}
+.capo-ombra{width:min(40vw,190px);height:16px;border-radius:50%;background:rgba(0,0,0,.5);filter:blur(2px);margin-top:-14px;position:relative}
+.capo-k{position:relative;margin-top:14px;font-family:var(--f-big),sans-serif;font-size:clamp(20px,6vw,28px);letter-spacing:6px;color:#fff;text-shadow:0 3px 0 #000}
+.capo-n{position:relative;font-family:var(--f-big),sans-serif;font-size:clamp(34px,11vw,58px);line-height:.95;text-align:center;color:var(--cc);-webkit-text-stroke:2px #141433;text-shadow:0 5px 0 var(--cd),0 9px 0 #000;padding:0 14px}
+.capo-s{position:relative;margin-top:12px;max-width:min(86%,420px);text-align:center;background:rgba(8,8,26,.85);border:2px solid var(--cc);color:#fff;font-weight:700;font-size:15px;line-height:1.3;padding:8px 14px;border-radius:12px}
+.capo-fl{position:absolute;inset:0;background:#fff;opacity:0}
+.capo i.pz{position:absolute;width:8px;height:8px;left:50%;top:50%}
 .tbscr{position:relative;overflow:hidden}
 .tbscr > *:not(.fx-luce){position:relative;z-index:1}
 .fx-luce{position:absolute;left:50%;top:190px;width:520px;height:520px;margin:-260px 0 0 -260px;z-index:0;pointer-events:none;background:radial-gradient(circle,rgba(255,208,58,.55) 0,rgba(255,208,58,.15) 35%,transparent 62%);animation:fxPulsa 1.4s ease-in-out infinite}
@@ -1065,15 +1078,6 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 #title .hm-path .mp:not(.ok):not(.ora){color:#5f6789!important}
 #title .hm-path .mp.ora,.mis-new{background:#d93636!important}
 .how > span:nth-child(odd){color:var(--blu)!important;font-weight:800}
-#giraTel{display:none}
-@media (orientation:landscape) and (max-height:500px) and (pointer:coarse){
- #giraTel{display:flex;position:fixed;inset:0;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#141433;color:#fff;font-family:var(--f-body);text-align:center;padding:20px}
- #giraTel b{font:400 28px var(--f-big);color:var(--giallo)}
- #giraTel span{font-size:15px;color:#f0f4ff}
- #giraTel .gt-tel{width:44px;height:76px;border:4px solid #fff;border-radius:10px;position:relative;animation:gtGira 1.8s ease-in-out infinite}
- #giraTel .gt-tel::after{content:'';position:absolute;left:50%;bottom:5px;width:10px;height:4px;margin-left:-5px;border-radius:2px;background:#fff}
-}
-@keyframes gtGira{0%,25%{transform:rotate(-90deg)}60%,100%{transform:rotate(0)}}
 #title .hm-path{gap:3px!important}
 #title .hm-path .mp{min-width:0;font-size:12px!important}
 /* ruota della fortuna e talismani */
@@ -1842,7 +1846,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cq-link{background:none;border:0;color:var(--blu);font-weight:700;text-decoration:underline;padding:4px;align-self:center;min-height:36px}
 @media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){
   #cqOv.scelta{background:linear-gradient(90deg,rgba(14,22,70,.35),rgba(14,22,70,0) 45%);padding:16px}
-  #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px);width:420px;margin:auto auto auto 0}
+  #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);width:420px;margin:auto auto auto 0}
 }
 #cqOv.scelta .cq-scbox{max-height:64vh;padding-bottom:0}
 .cq-scvai{position:sticky;bottom:0;margin:0 -14px;padding:8px 14px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,255,255,0),var(--carta) 30%);order:9}
@@ -1875,7 +1879,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 @keyframes cqPanIn{from{opacity:.3;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){ .cq-rip,.cq-burst,.cq-fl{display:none} #cqOv .dlg.box,.cq-panin,.cq-bump,.cq-entra,.cq-schip{animation:none!important} }
 #cqOv.scelta .cq-scbox{scroll-padding-bottom:90px}
-@media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px)} }
+@media (min-width:860px) and (min-aspect-ratio:1/1), (min-width:640px) and (min-aspect-ratio:1/1) and (pointer:fine){ #cqOv.scelta .cq-scbox{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px)} }
 /* ===== missioni e premi ===== */
 .cq-nb{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#e04830;color:#fff;font-style:normal;font-size:12px;font-family:var(--f-body);font-weight:700;border:2px solid #141433;vertical-align:1px}
 .cq-schb{display:flex;gap:6px}
@@ -2038,7 +2042,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 @keyframes gpStelle{from{opacity:0;transform:translateX(-50%) translateY(-12px) scale(.4)}to{opacity:1;transform:translateX(-50%)}}
 #title .gp-go{overflow:hidden}
 #title .gp-go::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-40%;width:28%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);animation:gpLuce 3.2s ease-in-out 1.2s infinite;pointer-events:none}
-@keyframes gpLuce{0%,62%{left:-40%}100%{left:130%}}
+@keyframes gpLuce{0%,62%{transform:translateX(0) skewX(-18deg)}100%{transform:translateX(610%) skewX(-18deg)}}
 #title .gp-card::after{content:"";position:absolute;inset:-2px;border-radius:inherit;pointer-events:none;background:radial-gradient(120px 80px at var(--gx,85%) 0%,rgba(255,208,58,.22),transparent 70%);animation:gpBagliore 6s ease-in-out infinite alternate}
 @keyframes gpBagliore{from{--gx:15%}to{--gx:85%}}
 @property --gx{syntax:'<percentage>';inherits:false;initial-value:85%}
@@ -2077,7 +2081,7 @@ button,a,.cr-tab,.hm-modo,.cr-dif{touch-action:manipulation} /* niente attesa de
 .cr-tab[data-tab="gioca"]:not(.on) .cr-ti{animation:none!important}
 .gp-n.ora{animation-duration:2.6s!important}
 #title .gp-go::after{animation:gpLuce 5.5s ease-in-out 1.5s infinite!important}
-@keyframes gpLuce{0%,78%{left:-40%}100%{left:130%}}
+@keyframes gpLuce{0%,78%{transform:translateX(0) skewX(-18deg)}100%{transform:translateX(610%) skewX(-18deg)}}
 .gp-tile.sf{position:relative}
 .gp-tile.sf.nov::after{content:'';position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:#e04830;border:3px solid #141433}
 .gp-tile.sf.fatta{opacity:.75}
@@ -2894,7 +2898,6 @@ body:has(#title:not([hidden])) #profToast{top:auto!important;bottom:calc(96px + 
   <div id="tbInfo" class="box"></div>
   <nav id="tbBar"><button id="tbUndo" class="big alt">↶ Annulla</button><button id="tbShop" class="big alt" aria-label="Bottega: spendi le monete" title="Bottega: spendi le monete">0</button><button id="tbFine" class="big">Fine turno ▶</button></nav>
 </section>
-<div id="giraTel" aria-live="polite"><div class="gt-tel"></div><b>Gira il telefono</b><span>Difendi Smerillo si gioca in verticale</span></div>
 <div id="caricamento" role="status" aria-live="polite">
   <div class="ld-cielo"><i class="ld-stelle"></i><i class="ld-luna"></i><i class="ld-nuv n1"></i><i class="ld-nuv n2"></i><i class="ld-nuv n3"></i>
     <svg class="ld-falco" viewBox="0 0 24 10" aria-hidden="true"><path d="M0 4 L7 2 L11 5 L13 5 L17 1 L24 3 L15 7 L12 9 L9 7 Z" fill="#141433"/></svg></div>
@@ -5525,6 +5528,7 @@ function importaSalvataggio(cod){ try { cod = (cod || '').trim().replace(/\s+/g,
   for (const k of ks) localStorage.setItem(k, d[k]); return true; } catch(e){ return false; } }
 // sfondo animato del titolo: il paese che scorre lento, con la nebbia e qualche cavaliere
 const tcv = $('#titleCv'), tctx = tcv.getContext('2d');
+let TIT_ULT = -1;
 function disegnaTitolo(T){
   if (!scena) scena = creaScena();
   const r = {width: tcv.clientWidth, height: tcv.clientHeight}, d = Math.min(2, window.devicePixelRatio || 1); // misura senza lo spostamento della transizione, così il canvas non si ridimensiona a ogni passo
@@ -6079,7 +6083,36 @@ const EPICO = (() => {
   // un banner grande che attraversa lo schermo
   function banner(titolo, sotto = '', tipo = ''){ const b = document.createElement('div'); b.className = 'fx-ban ' + tipo; b.innerHTML = `<div class="fx-ban-in"><b>${titolo}</b>${sotto ? '<small>' + sotto + '</small>' : ''}</div>`;
     (document.getElementById('tb') || document.body).append(b); setTimeout(() => b.remove(), calma() ? 1400 : 1900); }
-  return {coriandoli, banner};
+  // annuncio di un capo: il capo in pixel art sbatte giù sul colpo, poi "ARRIVA" e il nome, poi esce veloce (circa 2,2 s, non blocca la partita)
+  function capo(img, nome, sotto = '', col = '#ff4d4d', scuro = '#3a0a0a'){
+    const host = document.getElementById('tb') || document.body; host.querySelectorAll('.capo').forEach(x => x.remove());
+    const b = document.createElement('div'); b.className = 'capo'; b.style.setProperty('--cc', col); b.style.setProperty('--cd', scuro);
+    b.innerHTML = `<div class="capo-velo"></div><div class="capo-raggi"></div><div class="capo-bar su"></div><div class="capo-bar giu"></div><div class="capo-corpo" style="position:relative;display:flex;flex-direction:column;align-items:center"><div class="capo-ombra"></div><span class="capo-k">ARRIVA</span><b class="capo-n">${nome}</b>${sotto ? '<span class="capo-s">' + sotto + '</span>' : ''}</div><div class="capo-fl"></div>`;
+    const corpo = b.querySelector('.capo-corpo');
+    if (img){ const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; c.getContext('2d').drawImage(img, 0, 0); c.className = 'capo-pg'; corpo.prepend(c); }
+    host.append(b);
+    const $ = q => b.querySelector(q), pg = $('.capo-pg'), D = 2200;
+    if (calma()){ b.animate([{opacity:0}, {opacity:1, offset:.12}, {opacity:1, offset:.85}, {opacity:0}], {duration:1800, fill:'both'}).onfinish = () => b.remove(); return; }
+    const O = {duration:D, fill:'both'};
+    $('.capo-velo').animate([{opacity:0}, {opacity:1, offset:.08}, {opacity:1, offset:.84}, {opacity:0}], O);
+    $('.capo-raggi').animate([{opacity:0}, {opacity:0, offset:.14}, {opacity:.9, offset:.2}, {opacity:.9, offset:.84}, {opacity:0, offset:.92}, {opacity:0}], O);
+    $('.capo-bar.su').animate([{transform:'translateY(-100%)'}, {transform:'none', offset:.08, easing:'ease-in'}, {transform:'none', offset:.86}, {transform:'translateY(-100%)'}], O);
+    $('.capo-bar.giu').animate([{transform:'translateY(100%)'}, {transform:'none', offset:.08, easing:'ease-in'}, {transform:'none', offset:.86}, {transform:'translateY(100%)'}], O);
+    // il capo cade dall'alto e sbatte a 0,32 s (schiacciato, poi rimbalza)
+    if (pg) pg.animate([{transform:'translateY(-70vh) scale(1.5)', opacity:1, easing:'cubic-bezier(.55,0,.9,.4)'}, {transform:'translateY(0) scale(1.25,.72)', opacity:1, offset:.145, easing:'cubic-bezier(.2,.9,.3,1)'}, {transform:'translateY(-14px) scale(.94,1.08)', opacity:1, offset:.2}, {transform:'none', opacity:1, offset:.25}, {transform:'translateY(-4px)', opacity:1, offset:.55}, {transform:'none', opacity:1, offset:.84, easing:'ease-in'}, {transform:'translateY(-40px) scale(.9)', opacity:0, offset:.92}, {transform:'translateY(-40px) scale(.9)', opacity:0}], O);
+    $('.capo-ombra').animate([{transform:'scale(.2)', opacity:0}, {transform:'scale(.3)', opacity:.3, offset:.1}, {transform:'scale(1.15)', opacity:1, offset:.15}, {transform:'scale(1)', opacity:1, offset:.84}, {transform:'scale(1)', opacity:0, offset:.9}, {transform:'scale(1)', opacity:0}], O);
+    $('.capo-k').animate([{opacity:0, transform:'scale(2.6)'}, {opacity:0, transform:'scale(2.6)', offset:.17, easing:'cubic-bezier(.2,.9,.3,1.4)'}, {opacity:1, transform:'scale(1)', offset:.23}, {opacity:1, transform:'none', offset:.84, easing:'ease-in'}, {opacity:0, transform:'translateY(-30px)', offset:.92}, {opacity:0, transform:'translateY(-30px)'}], O);
+    $('.capo-n').animate([{opacity:0, transform:'scale(3) rotate(-6deg)'}, {opacity:0, transform:'scale(3) rotate(-6deg)', offset:.25, easing:'cubic-bezier(.2,.9,.3,1.3)'}, {opacity:1, transform:'scale(1) rotate(-2deg)', offset:.32}, {opacity:1, transform:'scale(1.04) rotate(-2deg)', offset:.36}, {opacity:1, transform:'rotate(-2deg)', offset:.42}, {opacity:1, transform:'rotate(-2deg)', offset:.84, easing:'ease-in'}, {opacity:0, transform:'translateY(-30px) rotate(-2deg)', offset:.92}, {opacity:0, transform:'translateY(-30px) rotate(-2deg)'}], O);
+    const ss = $('.capo-s'); if (ss) ss.animate([{opacity:0, transform:'translateY(14px)'}, {opacity:0, transform:'translateY(14px)', offset:.38, easing:'ease-out'}, {opacity:1, transform:'none', offset:.46}, {opacity:1, transform:'none', offset:.84}, {opacity:0, transform:'none', offset:.9}, {opacity:0, transform:'none'}], O);
+    // colpo: lampo, scossa, polvere a pixel
+    $('.capo-fl').animate([{opacity:0}, {opacity:0, offset:.145}, {opacity:.75, offset:.15}, {opacity:0, offset:.22}, {opacity:0, offset:.32}, {opacity:.35, offset:.325}, {opacity:0, offset:.37}, {opacity:0}], O);
+    corpo.animate([{transform:'none'}, {transform:'none', offset:.15}, {transform:'translate(-10px,4px)', offset:.165}, {transform:'translate(9px,-3px)', offset:.18}, {transform:'translate(-6px,2px)', offset:.195}, {transform:'translate(3px,0)', offset:.21}, {transform:'none', offset:.23}, {transform:'none', offset:.32}, {transform:'translate(5px,-2px)', offset:.335}, {transform:'translate(-4px,1px)', offset:.35}, {transform:'none', offset:.37}, {transform:'none'}], O);
+    setTimeout(() => { if (!b.isConnected || !pg) return; const r = pg.getBoundingClientRect(), h = b.getBoundingClientRect(), x0 = r.left - h.left + r.width/2, y0 = r.bottom - h.top - 6;
+      for (let i = 0; i < 16; i++){ const q = document.createElement('i'); q.className = 'pz'; q.style.left = x0 + 'px'; q.style.top = y0 + 'px'; q.style.background = i % 3 ? col : '#e8dcc8'; b.append(q);
+        const a = Math.PI + Math.random()*Math.PI, v = 60 + Math.random()*90; q.animate([{transform:'translate(-50%,-50%)', opacity:1}, {transform:`translate(calc(-50% + ${Math.cos(a)*v*1.6}px), calc(-50% + ${Math.sin(a)*v*.7}px)) scale(.4)`, opacity:0}], {duration:520 + Math.random()*260, easing:'cubic-bezier(.1,.7,.3,1)', fill:'forwards'}); } }, 320);
+    setTimeout(() => b.remove(), D + 50);
+  }
+  return {coriandoli, banner, capo};
 })();
 let ARRIVO = new Set(), M = MISSIONI[0], MI = 0, NODI = {}, ARCHI = [], ADJ = {}, VIA = {}, DISTP = {}, NEXT = {}, META = 'porta';
 function caricaMissione(i){
@@ -6769,7 +6802,7 @@ function applica(e){ // aggiorna la copia che si vede durante l'animazione
   else if (e.k === 'cade'){ effettoCaduta(e);
     suona('cade'); V.dif = V.dif.filter(q => q.id !== e.id); V.nem = V.nem.filter(q => q.id !== e.id); V.bar = V.bar.filter(q => q.id !== e.id); scintille(e.nodo, e.chi === 'dif' ? ['#e04830','#f8d048'] : ['#c8a060','#5c3818']); }
   else if (e.k === 'cura'){ suona('cura'); const u = V.dif.find(q => q.id === e.id); if (u) u.hp++; testo(e.nodo, '+1', '#7ee070'); }
-  else if (e.k === 'arriva'){ const boss = e.x.tipo === 'nero' || e.x.tipo === 'mammone'; suona(boss ? 'boss' : 'arriva'); V.nem.push(clona(e.x)); testo(e.x.nodo, 'Arriva!', '#f8b8a8', -16); if (boss){ scossa = 10; EPICO.banner('Arriva ' + (e.x.tipo === 'nero' ? 'il Cavaliere Nero!' : 'il Gatto Mammone!'), TIPI[e.x.tipo].corto, 'boss'); } }
+  else if (e.k === 'arriva'){ const boss = e.x.tipo === 'nero' || e.x.tipo === 'mammone'; suona(boss ? 'boss' : 'arriva'); V.nem.push(clona(e.x)); testo(e.x.nodo, 'Arriva!', '#f8b8a8', -16); if (boss){ scossa = 10; const nero = e.x.tipo === 'nero'; EPICO.capo(nero ? SPR.cavaliere_nero : SPR.gatto_mammone, nero ? 'Il Cavaliere Nero' : 'Il Gatto Mammone', TIPI[e.x.tipo].corto, nero ? '#ff4d4d' : '#ff9a3a', nero ? '#3a0a0a' : '#4a2200'); } }
   else if (e.k === 'bloccato'){} // ingresso occupato: il nemico aspetta (niente scritta, era solo confusione)
   else if (e.k === 'boom'){ suona('boom'); scossa = 7; testo(e.nodo, 'BOOM!', '#ff9a4a', -16); scintille(e.nodo, ['#ff9a4a','#f8d048','#4a4a58']); }
   else if (e.k === 'masso'){ suona('boom'); scossa = 9; testo(e.nodo, 'Masso!', '#d8c8a8', -16); for (const n of [e.nodo, ...ADJ[e.nodo]]) scintille(n, ['#a8a090','#d8c8a8','#4a4a58']); }
@@ -10672,7 +10705,7 @@ function loop(now){ const dt = Math.max(0, Math.min(.05, (now - last)/1000)); la
   if (S && !PCK && S.inizioFacile && S.inCorso && S.ondata <= 3 && !trascina && performance.now() - ULT_TRASC > 3500 && Math.floor(T*2) !== Math.floor((T - dt)*2)) seguiBattaglia();
   if (S && S.camT){ camX += (S.camT.x - camX)*Math.min(1, dt*6); camY += (S.camT.y - camY)*Math.min(1, dt*6); limita(); if (Math.hypot(S.camT.x - camX, S.camT.y - camY) < 1) S.camT = null; }
   if (S && Math.floor(T*4) !== Math.floor((T-dt)*4)) aggiornaTorri();
-  if (TB.attivo) TB.frame(T, dt); else if (CQ.attivo) CQ.frame(T, dt); else if (!$('#title').hidden) disegnaTitolo(T); else { draw(T); if (ANELLO) posAnello(); }
+  if (TB.attivo) TB.frame(T, dt); else if (CQ.attivo) CQ.frame(T, dt); else if (!$('#title').hidden){ const vel = document.getElementById('titleVelo'), coperto = vel && vel.style.opacity === '1' && $('#title').classList.contains('cr-on'); if (T - TIT_ULT >= (coperto ? .5 : 1/30 - .002)){ TIT_ULT = T; disegnaTitolo(T); } } else { draw(T); if (ANELLO) posAnello(); }
   requestAnimationFrame(loop); }
 new ResizeObserver(fit).observe($('#stage'));
 // ===== tastiera (versione PC) =====
@@ -10735,7 +10768,8 @@ const COACH = window.COACH = (() => {
       else { box.classList.remove('lato', 'dx', 'sx');
         // lato della nuvoletta con un margine: se il punto da toccare si muove (la mappa scorre) non salta su e giù di continuo
         const era = box.classList.contains('sopra') ? true : box.classList.contains('sotto') ? false : null, lim = era === true ? .37 : era === false ? .53 : .45;
-        const alto = !!((!b && !cfg.giu) || (b && b.y > innerHeight*lim) || (b && cfg.su && b.y > (era === false ? 190 : 150))); // giu: senza bersaglio sta in basso, lontano dall'azione box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
+        const alto = !!((!b && !cfg.giu) || (b && b.y > innerHeight*lim) || (b && cfg.su && b.y > (era === false ? 190 : 150))); // giu: senza bersaglio sta in basso, lontano dall'azione
+        box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
         // se la nuvoletta copre il punto da toccare la accorcio, e resta accorciata finché non cambia passo (prima si allungava e accorciava a ogni fotogramma)
         if (b && !box.classList.contains('stretto')){ const r = box.getBoundingClientRect(); if (b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8) box.classList.add('stretto'); } }
       // guida senza frasi: le 2 parole stanno attaccate alla mano, non in fondo allo schermo
@@ -10853,7 +10887,7 @@ const RITORNO = window.RITORNO = (() => {
 
   // ---------- aggiornamenti: il gioco sulla schermata Home resta aperto in memoria e non si ricarica da solo.
   // Controllo version.json (senza cache) all'avvio e ogni volta che si torna nel gioco: se c'è una versione nuova lo dico.
-  const VERSIONE = window.DS_VER = '20261126152929';
+  const VERSIONE = window.DS_VER = '20261128134248';
   let ultimoCheck = 0, nuovaV = null;
   async function controllaVersione(){ if (!/github\.io$/.test(location.hostname) || /prova=/.test(location.search) || Date.now() - ultimoCheck < 60000) return; ultimoCheck = Date.now();
     try { const r = await fetch('version.json?t=' + Date.now(), {cache:'no-store'}); if (!r.ok) return; const j = await r.json(); if (j && j.v && j.v !== VERSIONE){
