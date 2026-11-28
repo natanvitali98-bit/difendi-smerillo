@@ -995,8 +995,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .scr-carta.attesa .sc-dorso{box-shadow:0 0 0 4px var(--rc),0 0 46px 14px color-mix(in srgb,var(--rc) 75%,transparent);transition:box-shadow .45s}
 .sc-slam{position:absolute;left:50%;top:-66px;transform:translateX(-50%);white-space:nowrap;font-family:var(--f-big),sans-serif;font-weight:400;font-size:46px;color:var(--rc);-webkit-text-stroke:2px #141433;text-shadow:0 5px 0 #141433,0 0 24px color-mix(in srgb,var(--rc) 80%,transparent);pointer-events:none;z-index:9}
 .sc-onda{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;border:8px solid var(--rc);pointer-events:none}
-.scr-stage.carte .scr-zona{transition:transform .5s cubic-bezier(.45,0,.25,1.25);transform:translateY(var(--cy,200px)) scale(.62)}
-.scr-stage.carte .scr-hint{bottom:2%}
+.scr-stage.carte .scr-zona{transition:transform .38s cubic-bezier(.55,0,.9,.45),opacity .1s linear .3s;transform:translateY(var(--cy,600px)) scale(.8);opacity:0}
 .scr-stage.carte .scr-cassa.px .scr-luce{opacity:.45!important}
 .scr-stage.carte .scr-cassa.px::before,.scr-stage.carte .scr-cassa.px::after{display:none}
 @media (prefers-reduced-motion: reduce){ .scr-carta .sc-raggi,.scr-carta.rara.girata,.scr-carta.rara.girata .sc-luce::after{animation:none!important} }
@@ -7328,8 +7327,8 @@ function mostraScrigno(tipo, poi){
     hint.textContent = 'Tocca la carta'; hint.classList.add('su');
     let dy = 80; try { const rz = zonaC.getBoundingClientRect(), rc = cassa.getBoundingClientRect(); dy = Math.round(rc.top + rc.height*.35 - rz.top + 25); } catch(e){}
     if (!calma) cassa.animate([{transform:'none'}, {transform:'scale(1.06,.92)', offset:.3}, {transform:'none'}], {duration:260, delay:40});
-    if (!st.classList.contains('carte')) setTimeout(() => { if (finito) return; const z = $('.scr-zona'), rz = z.getBoundingClientRect(), rs = st.getBoundingClientRect(), hint0 = rs.height*.86;  // lo scrigno scende in basso e resta lì piccolo: prima il coperchio spuntava dietro la carta
-      z.style.setProperty('--cy', Math.round(hint0 - (rz.top - rs.top + rz.height/2)) + 'px'); st.classList.add('carte'); }, calma ? 0 : 380);
+    if (!st.classList.contains('carte')) setTimeout(() => { if (finito) return; const z = $('.scr-zona'), rz = z.getBoundingClientRect(), rs = st.getBoundingClientRect(), fondo = rs.height + 40;  // lo scrigno cade giù fuori dallo schermo dopo che è uscita la carta (prima il coperchio spuntava dietro la carta)
+      z.style.setProperty('--cy', Math.round(fondo - (rz.top - rs.top)) + 'px'); st.classList.add('carte'); }, calma ? 0 : 380);
     k.animate([{transform:`translateY(${dy}px) scale(.12) rotate(-12deg)`, opacity:0}, {transform:`translateY(${dy - 30}px) scale(.3) rotate(-8deg)`, opacity:1, offset:.18}, {transform:'translateY(-34px) scale(1.07) rotate(3deg)', opacity:1, offset:.72}, {transform:'translateY(4px) scale(.99) rotate(-1deg)', offset:.88}, {transform:'none', opacity:1}], {duration:calma ? 1 : 600, easing:'cubic-bezier(.25,.8,.35,1)', fill:'both'});
     if (!calma){ const [cx, cy] = centro(); scoppio(cx, cy - 20, 14, ['#c8d0ff', '#ffffff'], 6, .2, 40, 4); }
     SUONI.suona('esce');
