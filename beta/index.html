@@ -894,10 +894,20 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 /* inizio missione */
 .mi-ov{position:absolute;inset:0;z-index:58;overflow:hidden;cursor:pointer}
 .mi-velo{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(8,8,26,.15) 0,rgba(8,8,26,.85) 75%)}
-.mi-fascia{position:absolute;left:0;right:0;top:calc(36% - 18px);height:clamp(110px,28vw,150px);background:linear-gradient(180deg,rgba(8,8,26,.92),rgba(20,20,51,.92));border-top:4px solid #ffd03a;border-bottom:4px solid #ffd03a;box-shadow:0 8px 24px rgba(0,0,0,.5);transform-origin:50% 50%;pointer-events:none}
-.mi-tit{position:absolute;left:0;right:0;top:36%;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
-.mi-k{font-family:var(--f-big),sans-serif;font-size:clamp(20px,6vw,28px);letter-spacing:5px;color:#fff;text-transform:uppercase;text-shadow:0 3px 0 #000}
-.mi-t{font-family:var(--f-big),sans-serif;font-weight:400;font-size:clamp(34px,10.5vw,56px);line-height:.95;text-align:center;color:#ffd03a;-webkit-text-stroke:2px #141433;text-shadow:0 5px 0 #a06200,0 9px 0 #000;padding:0 14px}
+.mi-tit{position:absolute;left:0;right:0;top:27%;display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.mi-scudo{position:relative;width:96px;height:110px;display:grid;place-items:center;z-index:2;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45))}
+.mi-scudo::before{content:'';position:absolute;inset:0;background:#ffd03a;clip-path:polygon(0 0,100% 0,100% 55%,50% 100%,0 55%)}
+.mi-scudo::after{content:'';position:absolute;inset:6px 6px 8px;background:linear-gradient(160deg,#3b4bb8,#1a2266 70%);clip-path:polygon(0 0,100% 0,100% 55%,50% 100%,0 55%)}
+.mi-scudo b{position:relative;z-index:1;margin-top:-14px;font-family:var(--f-big),sans-serif;font-weight:400;font-size:54px;line-height:1;color:#fff;-webkit-text-stroke:2px #141433;text-shadow:0 4px 0 #0b0f30}
+.mi-nastro{position:relative;margin-top:-22px;padding:26px 44px 12px;min-width:min(78%,300px);max-width:94%;box-sizing:border-box;text-align:center;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45))}
+.mi-nastro::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#e0383f 0,#b81f2a 55%,#8e1520 100%);clip-path:polygon(0 0,100% 0,calc(100% - 22px) 50%,100% 100%,0 100%,22px 50%);box-shadow:inset 0 3px 0 rgba(255,255,255,.25)}
+.mi-nastro::after{content:'';position:absolute;left:22px;right:22px;top:5px;bottom:5px;border-top:2px dashed rgba(255,214,120,.65);border-bottom:2px dashed rgba(255,214,120,.65);pointer-events:none}
+.mi-k{position:relative;display:block;font-family:'Pixelify Sans',var(--f-big),sans-serif;font-weight:700;font-size:15px;letter-spacing:4px;color:#ffe9a8;text-transform:uppercase;text-shadow:0 2px 0 #5a0a10}
+.mi-t{position:relative;display:block;font-family:var(--f-big),sans-serif;font-weight:400;font-size:clamp(28px,8.6vw,44px);line-height:1;color:#fff;-webkit-text-stroke:1.5px #4a0810;text-shadow:0 4px 0 #5a0a10;white-space:nowrap}
+.mi-t i{display:inline-block;font-style:normal;white-space:pre}
+.mi-luce{position:absolute;inset:0;overflow:hidden;clip-path:polygon(0 0,100% 0,calc(100% - 22px) 50%,100% 100%,0 100%,22px 50%);pointer-events:none}
+.mi-luce::after{content:'';position:absolute;top:0;bottom:0;left:-40%;width:30%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);animation:miLuce 2.9s ease-in-out .9s 1 both}
+@keyframes miLuce{0%{left:-40%}30%,100%{left:130%}}
 .mi-go{position:absolute;left:50%;top:50%;font-family:var(--f-big),sans-serif;font-weight:400;font-size:clamp(38px,12vw,64px);color:#fff;-webkit-text-stroke:2px #141433;text-shadow:0 5px 0 #2a7a2a,0 9px 0 #000;white-space:nowrap;pointer-events:none}
 /* annuncio del capo (missioni a turni): velo, bande da cinema, il capo che sbatte giù, nome in due colpi */
 .capo{position:absolute;inset:0;z-index:61;pointer-events:none;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;--cc:#ff4d4d;--cd:#3a0a0a}
@@ -7042,7 +7052,7 @@ function provaVia(k){ const P = PROVE[k]; PROVA = {k, vis:'', turno:false}; docu
 function provaFine(salta){ const era = PROVA; PROVA = null; document.body.classList.remove('tb-prova'); COACH_TB = -1; try { COACH.nascondi(); } catch(e){}
   try { RITORNO.traccia('prova', {k: salta ? 'salta' : 'fine', da: era ? era.k : null}); } catch(e){}
   moneteViste = null; S = nuovo(); piazza = null; V = null; storia = []; sel = null; fx = []; coda = []; ev = null; modoC = false; ultimoAnn = ''; nuovoTempo(); aggiornaAnteprima();
-  if (salta) fineGuida(); else { SUONI.suona('banner'); introMissione('Missione ' + M.num, M.titolo); } render(); }
+  if (salta) fineGuida(); else { SUONI.suona('banner'); introMissione('Missione', M.titolo, M.num); } render(); }
 function provaCoach(){ if (!PROVA || !S) return; const P = PROVE[PROVA.k], u = S.dif[0], x = S.nem[0]; let f;
   if (!u){ provaFine(false); return; }
   if (PROVA.k === 2 && PROVA.turno) f = V || S.turno < 2 ? 'att' : 'ok'; // dopo il turno dei nemici la prova è finita
@@ -7540,27 +7550,33 @@ function ruota(){
 }
 // inizio missione: la mappa scende dall'alto, il titolo sbatte, i soldati cadono al loro posto, le entrate dei nemici pulsano, poi "Tocca a te!" (circa 2,5 s; un tocco lo salta)
 let introFino = 0; // durante l'intro il tempo del turno non scorre
-function introMissione(kicker, titolo){
+function introMissione(kicker, titolo, num = ''){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || !S){ EPICO.banner(kicker, titolo); return; }
   const host = el('tb'); host.querySelectorAll('.mi-ov').forEach(x => x.remove());
   const o = document.createElement('div'); o.className = 'mi-ov';
-  o.innerHTML = `<div class="mi-velo"></div><div class="mi-fascia"></div><div class="mi-tit"><span class="mi-k">${kicker}</span><b class="mi-t">${titolo}</b></div><b class="mi-go">Tocca a te!</b>`;
-  host.append(o); const t0 = adesso(), D = 2900, A = []; introFino = performance.now() + D;
+  o.innerHTML = `<div class="mi-velo"></div><div class="mi-tit"><div class="mi-scudo"><b>${num || '★'}</b></div><div class="mi-nastro"><span class="mi-luce"></span><span class="mi-k">${kicker}</span><b class="mi-t">${[...titolo].map(c => '<i>' + c + '</i>').join('')}</b></div></div><b class="mi-go">Tocca a te!</b>`;
+  host.append(o); const t0 = adesso(), A = [], D = Math.max(2900, Math.round((1.75 + S.dif.length*.12 + .1 + S.nem.length*.12 + .9)/.8*1000)); introFino = performance.now() + D;
   const an = (q, k, opt) => { const a = o.querySelector(q).animate(k, Object.assign({duration:D, fill:'both'}, opt)); A.push(a); return a; };
   A.push(cvt.animate([{transform:'translateY(-7%) scale(1.32)', filter:'brightness(.55)'}, {transform:'none', filter:'brightness(1)', offset:.42, easing:'cubic-bezier(.2,.7,.2,1)'}, {transform:'none', filter:'brightness(1)'}], {duration:D, easing:'cubic-bezier(.3,0,.2,1)'}));
-  an('.mi-fascia', [{transform:'scaleY(0)'}, {transform:'scaleY(0)', offset:.04, easing:'cubic-bezier(.2,.9,.3,1.2)'}, {transform:'scaleY(1)', offset:.1}, {transform:'scaleY(1)', offset:.37, easing:'ease-in'}, {transform:'scaleY(0)', offset:.43}, {transform:'scaleY(0)'}]);
-  an('.mi-velo', [{opacity:1}, {opacity:.75, offset:.3}, {opacity:0, offset:.5}, {opacity:0}]);
-  an('.mi-k', [{opacity:0, transform:'scale(2.6)'}, {opacity:0, transform:'scale(2.6)', offset:.08, easing:'cubic-bezier(.2,.9,.3,1.4)'}, {opacity:1, transform:'scale(1)', offset:.15}, {opacity:1, transform:'none', offset:.36, easing:'ease-in'}, {opacity:0, transform:'translateY(-24px)', offset:.42}, {opacity:0, transform:'translateY(-24px)'}]);
-  an('.mi-t', [{opacity:0, transform:'scale(3) rotate(-5deg)'}, {opacity:0, transform:'scale(3) rotate(-5deg)', offset:.16, easing:'cubic-bezier(.2,.9,.3,1.3)'}, {opacity:1, transform:'scale(1) rotate(-2deg)', offset:.24}, {opacity:1, transform:'scale(1.04) rotate(-2deg)', offset:.27}, {opacity:1, transform:'rotate(-2deg)', offset:.31}, {opacity:1, transform:'rotate(-2deg)', offset:.36, easing:'ease-in'}, {opacity:0, transform:'translateY(-24px) rotate(-2deg)', offset:.42}, {opacity:0, transform:'translateY(-24px) rotate(-2deg)'}]);
+  an('.mi-velo', [{opacity:1}, {opacity:.75, offset:.35}, {opacity:0, offset:.55}, {opacity:0}]);
+  // lo scudo col numero cade e rimbalza girando, poi il nastro rosso si srotola e le lettere saltano fuori una dopo l'altra
+  an('.mi-scudo', [{transform:'translateY(-60vh) rotateY(0) scale(1)', opacity:1, easing:'cubic-bezier(.55,0,.9,.45)'}, {transform:'translateY(0) rotateY(540deg) scale(1.15,.85)', opacity:1, offset:.1, easing:'cubic-bezier(.2,.9,.3,1.3)'}, {transform:'translateY(0) rotateY(720deg) scale(1)', opacity:1, offset:.16}, {transform:'rotateY(720deg)', opacity:1, offset:.43, easing:'ease-in'}, {transform:'translateY(-40px) rotateY(720deg) scale(.7)', opacity:0, offset:.49}, {transform:'translateY(-40px) scale(.7)', opacity:0}]);
+  an('.mi-nastro', [{transform:'scaleX(0)', opacity:1}, {transform:'scaleX(0)', opacity:1, offset:.11, easing:'cubic-bezier(.2,.9,.3,1.25)'}, {transform:'scaleX(1)', opacity:1, offset:.19}, {transform:'scaleX(1)', opacity:1, offset:.43, easing:'ease-in'}, {transform:'translateY(-30px) scale(.8)', opacity:0, offset:.49}, {transform:'translateY(-30px) scale(.8)', opacity:0}]);
+  an('.mi-k', [{opacity:0}, {opacity:0, offset:.17}, {opacity:1, offset:.21}, {opacity:1}]);
+  o.querySelectorAll('.mi-t i').forEach((x, j) => { const a0 = .17 + j*.005; A.push(x.animate([{transform:'translateY(18px) scale(.2)', opacity:0}, {transform:'translateY(18px) scale(.2)', opacity:0, offset:Math.min(.9, a0), easing:'cubic-bezier(.2,.9,.3,1.6)'}, {transform:'none', opacity:1, offset:Math.min(.95, a0 + .035)}, {transform:'none', opacity:1}], {duration:D, fill:'both'})); });
+  setTimeout(() => { if (!o.isConnected) return; const r = o.querySelector('.mi-scudo').getBoundingClientRect(), h = o.getBoundingClientRect(); for (let j = 0; j < 14; j++){ const q = document.createElement('i'); q.className = 'pz'; Object.assign(q.style, {position:'absolute', width:'7px', height:'7px', left:(r.left - h.left + r.width/2) + 'px', top:(r.bottom - h.top - 20) + 'px', background:j % 2 ? '#ffd03a' : '#fff'}); o.append(q); const a = Math.random()*Math.PI*2, v = 50 + Math.random()*70; q.animate([{transform:'translate(-50%,-50%)', opacity:1}, {transform:`translate(calc(-50% + ${Math.cos(a)*v*1.5}px), calc(-50% + ${Math.sin(a)*v}px)) scale(.3)`, opacity:0}], {duration:520, easing:'cubic-bezier(.1,.7,.3,1)', fill:'forwards'}); } }, D*.1);
   an('.mi-go', [{opacity:0, transform:'translate(-50%,-50%) scale(2.4)'}, {opacity:0, transform:'translate(-50%,-50%) scale(2.4)', offset:.8, easing:'cubic-bezier(.2,.9,.3,1.4)'}, {opacity:1, transform:'translate(-50%,-50%) scale(1)', offset:.86}, {opacity:1, transform:'translate(-50%,-50%) scale(1)', offset:.94, easing:'ease-in'}, {opacity:0, transform:'translate(-50%,-50%) scale(.9)'}]);
   setTimeout(() => { if (o.isConnected) SUONI.suona('tonfo'); }, D*.16);
   // i soldati cadono uno dopo l'altro al loro posto
-  S.dif.forEach((d, i) => POS.set(d.id, {k:'cade', t0:t0 + 1.28 + i*.12, d:.42}));
-  S.dif.forEach((d, i) => setTimeout(() => { if (!o.isConnected || !NODI[d.nodo]) return; const N = NODI[d.nodo]; fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0}); scintille(d.nodo, ['#c8b48a', '#e8dcc0', '#8a7a5a'], 10); scossa = Math.max(scossa, 3); try { SUONI.suona('passo'); } catch(e){} }, (1.28 + i*.12 + .26)*1000));
+  S.dif.forEach((d, i) => POS.set(d.id, {k:'cade', t0:t0 + 1.75 + i*.12, d:.42}));
+  S.dif.forEach((d, i) => setTimeout(() => { if (!o.isConnected || !NODI[d.nodo]) return; const N = NODI[d.nodo]; fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0}); scintille(d.nodo, ['#c8b48a', '#e8dcc0', '#8a7a5a'], 10); scossa = Math.max(scossa, 3); try { SUONI.suona('passo'); } catch(e){} }, (1.75 + i*.12 + .26)*1000));
+  // poi cadono anche i nemici già sulla mappa, con polvere rossa
+  const t1 = 1.75 + S.dif.length*.12 + .1;
+  S.nem.forEach((d, i) => { POS.set(d.id, {k:'cade', t0:t0 + t1 + i*.12, d:.42}); setTimeout(() => { if (!o.isConnected || !NODI[d.nodo]) return; const N = NODI[d.nodo]; fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0, col:'#ff4d4d'}); scintille(d.nodo, ['#ff6a4d', '#c8b48a', '#8a2a20'], 10); scossa = Math.max(scossa, 3); try { SUONI.suona('passo'); } catch(e){} }, (t1 + i*.12 + .26)*1000); });
   // le entrate dei nemici pulsano in rosso tre volte
   const ent = [...ARRIVO].filter(n => NODI[n]).slice(0, 6);
-  for (const n of ent){ const N = NODI[n]; for (let j = 0; j < 3; j++) fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:-(1.95 + j*.3), col:'#ff4d4d', big:1.5}); }
-  const fine = () => { if (!o.isConnected) return; introFino = 0; A.forEach(a => { try { a.cancel(); } catch(e){} }); for (const d of S ? S.dif : []){ const P = POS.get(d.id); if (P && P.k === 'cade') POS.delete(d.id); } o.remove(); };
+  for (const n of ent){ const N = NODI[n]; for (let j = 0; j < 3; j++) fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:-(t1 + S.nem.length*.12 + .2 + j*.3), col:'#ff4d4d', big:1.5}); }
+  const fine = () => { if (!o.isConnected) return; introFino = 0; A.forEach(a => { try { a.cancel(); } catch(e){} }); for (const d of S ? [...S.dif, ...S.nem] : []){ const P = POS.get(d.id); if (P && P.k === 'cade') POS.delete(d.id); } o.remove(); };
   o.addEventListener('pointerdown', fine, {once:true}); setTimeout(fine, D + 30);
 }
 function intro(){
@@ -7622,7 +7638,7 @@ function intro(){
   { const di = o.querySelector('#dlgIc'); if (di) di.append(icona(M.dlg[0], 3)); }
   // se c'è un nemico nuovo, lo presento subito
   const primoNuovo = o.querySelector('.mis-pg.nuovo'); if (primoNuovo) primoNuovo.click();
-  o.querySelector('#tbVia').onclick = () => { chiudiOv(); if (prima){ try { localStorage.setItem('difendi-smerillo-prova', '1'); } catch(e){} provaVia(0); return; } usaTalismano(); if (!RUN){ SUONI.suona('banner'); introMissione(M.evento ? '🌰 Castagnata!' : SFIDA ? 'Sfida del giorno' : 'Missione ' + M.num, M.titolo); } };
+  o.querySelector('#tbVia').onclick = () => { chiudiOv(); if (prima){ try { localStorage.setItem('difendi-smerillo-prova', '1'); } catch(e){} provaVia(0); return; } usaTalismano(); if (!RUN){ SUONI.suona('banner'); introMissione(M.evento ? 'Castagnata' : SFIDA ? 'Sfida del giorno' : 'Missione', M.titolo, M.evento || SFIDA ? '' : M.num); } };
   const bk = o.querySelector('#misBack'); if (bk) bk.onclick = () => { if (provenienza === 'missioni') scelta(M.evento ? undefined : (M.luogo || 'smerillo')); else esci(); };
   if (primaVolta){ try { localStorage.setItem('difendi-smerillo-prova', '1'); } catch(e){} o.style.visibility = 'hidden'; setTimeout(() => { const v = o.querySelector('#tbVia'); if (v) v.click(); o.style.visibility = ''; }, 0); }
   const bq = o.querySelector('#tbSqC'); if (bq) bq.onclick = () => { chiudiOv(); squadra(MI); };
