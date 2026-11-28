@@ -982,6 +982,21 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .sc-es{font-weight:800;font-size:14px;color:#3a3f60}
 .scr-carta.nuovo .sc-es{font-family:var(--f-big),sans-serif;font-size:26px;color:#ff4d4d;-webkit-text-stroke:1px #141433;animation:scTimbro .45s cubic-bezier(.2,1.8,.4,1) both}
 @keyframes scTimbro{0%{transform:scale(3) rotate(-12deg);opacity:0}100%{transform:rotate(-6deg);opacity:1}}
+/* carte rare: raggi dietro la carta, luce che scorre sul fronte, scritta della rarità che sbatte */
+.scr-carta .sc-raggi{position:absolute;left:50%;top:50%;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;pointer-events:none;opacity:0;z-index:-1;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--rc) 60%,transparent) 0 10deg,transparent 10deg 24deg);-webkit-mask:radial-gradient(circle,#000 0,#000 18%,transparent 62%);mask:radial-gradient(circle,#000 0,#000 18%,transparent 62%);animation:fxGira 7s linear infinite}
+.scr-carta.rara.girata .sc-raggi{opacity:.8;transition:opacity .25s .15s}
+.scr-carta.r2.girata .sc-raggi,.scr-carta.r3.girata .sc-raggi{opacity:1;width:760px;height:760px;margin:-380px 0 0 -380px}
+.scr-carta .sc-luce{position:absolute;inset:0;border-radius:15px;overflow:hidden;pointer-events:none}
+.scr-carta .sc-luce::after{content:'';position:absolute;top:-20%;bottom:-20%;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-14deg);opacity:0}
+.scr-carta.rara.girata .sc-luce::after{animation:scLuce 2.2s ease-in-out .45s infinite}
+@keyframes scLuce{0%{left:-60%;opacity:1}45%{left:130%;opacity:1}46%,100%{left:130%;opacity:0}}
+.scr-carta.rara.girata{animation:scGalleggia 2.4s ease-in-out .7s infinite}
+@keyframes scGalleggia{50%{translate:0 -8px}}
+.scr-carta.attesa .sc-dorso{box-shadow:0 0 0 4px var(--rc),0 0 46px 14px color-mix(in srgb,var(--rc) 75%,transparent);transition:box-shadow .45s}
+.sc-slam{position:absolute;left:50%;top:-66px;transform:translateX(-50%);white-space:nowrap;font-family:var(--f-big),sans-serif;font-weight:400;font-size:46px;color:var(--rc);-webkit-text-stroke:2px #141433;text-shadow:0 5px 0 #141433,0 0 24px color-mix(in srgb,var(--rc) 80%,transparent);pointer-events:none;z-index:9}
+.sc-onda{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;border:8px solid var(--rc);pointer-events:none}
+.scr-stage.carte .scr-zona{transition:transform .35s ease,opacity .35s ease;transform:translateY(60px) scale(.8);opacity:.0}
+@media (prefers-reduced-motion: reduce){ .scr-carta .sc-raggi,.scr-carta.rara.girata,.scr-carta.rara.girata .sc-luce::after{animation:none!important} }
 .sc-conta{position:absolute;left:0;right:0;bottom:-34px;text-align:center;color:#c8d0ff;font-weight:700}
 @media (max-height:600px){ .scr-carta{transform:scale(.8)} .scr-zona{transform:scale(.8)} }
 body.scr-on #pcTasti{display:none!important}
@@ -7288,10 +7303,11 @@ function mostraScrigno(tipo, poi){
   function prossima(i){ if (finito) return; if (i >= carte.length){ chiudi(); return; }
     const c = carte[i], rar = cartaRar(c), r = RARITA[rar]; zonaC.innerHTML = '';
     const k = document.createElement('div'); k.className = 'scr-carta'; k.style.setProperty('--rc', r.col);
-    k.innerHTML = `<div class="sc-in"><div class="sc-dorso"><span>?</span></div><div class="sc-fronte"><div class="sc-testa"><span class="sc-rar">${r.nome}</span><span class="sc-modo sc-m-${c.m}">${cartaModo(c)}</span></div><div class="sc-img"></div><small class="sc-tipo">${cartaTipo(c)}</small><b>${cartaNome(c)}</b><span class="sc-es">${cartaEsito(c)}</span></div></div><small class="sc-conta">${carte.length - i - 1 ? 'Ancora ' + (carte.length - i - 1) : 'Ultima!'}</small>`;
-    k.querySelector('.sc-img').append(cartaImg(c, 6)); zonaC.append(k); hint.textContent = 'Tocca la carta'; hint.classList.add('su');
+    k.innerHTML = `<div class="sc-raggi"></div><div class="sc-in"><div class="sc-dorso"><span>?</span></div><div class="sc-fronte"><div class="sc-luce"></div><div class="sc-testa"><span class="sc-rar">${r.nome}</span><span class="sc-modo sc-m-${c.m}">${cartaModo(c)}</span></div><div class="sc-img"></div><small class="sc-tipo">${cartaTipo(c)}</small><b>${cartaNome(c)}</b><span class="sc-es">${cartaEsito(c)}</span></div></div><small class="sc-conta">${carte.length - i - 1 ? 'Ancora ' + (carte.length - i - 1) : 'Ultima!'}</small>`;
+    k.querySelector('.sc-img').append(cartaImg(c, 6)); zonaC.append(k); if (rar >= 1) k.classList.add('rara', 'r' + rar); hint.textContent = 'Tocca la carta'; hint.classList.add('su');
     let dy = 80; try { const rz = zonaC.getBoundingClientRect(), rc = cassa.getBoundingClientRect(); dy = Math.round(rc.top + rc.height*.35 - rz.top + 25); } catch(e){}
     if (!calma) cassa.animate([{transform:'none'}, {transform:'scale(1.06,.92)', offset:.3}, {transform:'none'}], {duration:260, delay:40});
+    setTimeout(() => st.classList.add('carte'), calma ? 0 : 420); // lo scrigno si fa da parte: prima il coperchio spuntava dietro la carta
     k.animate([{transform:`translateY(${dy}px) scale(.12) rotate(-12deg)`, opacity:0}, {transform:`translateY(${dy - 30}px) scale(.3) rotate(-8deg)`, opacity:1, offset:.18}, {transform:'translateY(-34px) scale(1.07) rotate(3deg)', opacity:1, offset:.72}, {transform:'translateY(4px) scale(.99) rotate(-1deg)', offset:.88}, {transform:'none', opacity:1}], {duration:calma ? 1 : 600, easing:'cubic-bezier(.25,.8,.35,1)', fill:'both'});
     if (!calma){ const [cx, cy] = centro(); scoppio(cx, cy - 20, 14, [r.col, '#ffffff'], 6, .2, 40, 4); }
     SUONI.suona('esce');
@@ -7301,7 +7317,11 @@ function mostraScrigno(tipo, poi){
         if (rar >= 2){ k.classList.add('attesa'); SUONI.suona('carica3'); await att(500); k.classList.remove('attesa'); } // per le rare un attimo di suspense
         k.classList.add('girata'); SUONI.suona(rar >= 3 ? 'leggenda' : rar >= 2 ? 'epico' : rar >= 1 ? 'scrigno' : 'flip');
         const b = k.getBoundingClientRect(), s = st.getBoundingClientRect(), x = b.left - s.left + b.width/2, y = b.top - s.top + b.height/2;
-        setTimeout(() => { scoppio(x, y, 20 + rar*35, [r.col, '#ffffff', rar >= 2 ? '#ffd03a' : r.col], 6 + rar*2.5, .2, 60, 5); if (rar >= 2){ flash(r.col, 500); trema(10, 400); } if (c.esito === 'nuovo') k.classList.add('nuovo'); }, calma ? 0 : 230);
+        setTimeout(() => { scoppio(x, y, 20 + rar*35, [r.col, '#ffffff', rar >= 2 ? '#ffd03a' : r.col], 6 + rar*2.5, .2, 60, 5); if (rar >= 2){ flash(r.col, 500); trema(10, 400); } if (c.esito === 'nuovo') k.classList.add('nuovo');
+          if (rar >= 1 && !calma){ k.animate([{scale:1}, {scale:rar >= 2 ? 1.22 : 1.12, offset:.25}, {scale:.97, offset:.6}, {scale:1}], {duration:420, easing:'cubic-bezier(.2,.9,.3,1)'});
+            for (let j = 0; j < (rar >= 2 ? 2 : 1); j++){ const o = document.createElement('i'); o.className = 'sc-onda'; k.append(o); o.animate([{transform:'scale(.6)', opacity:.95}, {transform:`scale(${3.2 + j})`, opacity:0}], {duration:620 + j*180, delay:j*120, easing:'cubic-bezier(.1,.7,.3,1)', fill:'both'}).onfinish = () => o.remove(); }
+            const t = document.createElement('b'); t.className = 'sc-slam'; t.textContent = ['', 'RARO!', 'EPICO!', 'LEGGENDARIO!'][rar]; k.append(t);
+            t.animate([{transform:'translateX(-50%) scale(3) rotate(-8deg)', opacity:0}, {transform:'translateX(-50%) scale(.9) rotate(-4deg)', opacity:1, offset:.6}, {transform:'translateX(-50%) scale(1) rotate(-4deg)', opacity:1}], {duration:380, easing:'cubic-bezier(.2,.9,.3,1.3)', fill:'both'}); } }, calma ? 0 : 230);
         setTimeout(() => { if (!k.isConnected) return; hint.textContent = i + 1 < carte.length ? 'Tocca per la prossima' : 'Tocca per continuare'; hint.classList.add('su'); }, 700);
         setTimeout(() => { if (k.isConnected && !via && !finito) k.onclick(); }, calma ? 600 : (rar >= 2 ? 2600 : 1600)); // va avanti da sola
         return; }
