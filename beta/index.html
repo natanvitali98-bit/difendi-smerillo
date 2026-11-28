@@ -1065,15 +1065,6 @@ img.pxe{height:1.1em;width:auto;vertical-align:-.18em;image-rendering:pixelated;
 #title .hm-path .mp:not(.ok):not(.ora){color:#5f6789!important}
 #title .hm-path .mp.ora,.mis-new{background:#d93636!important}
 .how > span:nth-child(odd){color:var(--blu)!important;font-weight:800}
-#giraTel{display:none}
-@media (orientation:landscape) and (max-height:500px) and (pointer:coarse){
- #giraTel{display:flex;position:fixed;inset:0;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#141433;color:#fff;font-family:var(--f-body);text-align:center;padding:20px}
- #giraTel b{font:400 28px var(--f-big);color:var(--giallo)}
- #giraTel span{font-size:15px;color:#f0f4ff}
- #giraTel .gt-tel{width:44px;height:76px;border:4px solid #fff;border-radius:10px;position:relative;animation:gtGira 1.8s ease-in-out infinite}
- #giraTel .gt-tel::after{content:'';position:absolute;left:50%;bottom:5px;width:10px;height:4px;margin-left:-5px;border-radius:2px;background:#fff}
-}
-@keyframes gtGira{0%,25%{transform:rotate(-90deg)}60%,100%{transform:rotate(0)}}
 #title .hm-path{gap:3px!important}
 #title .hm-path .mp{min-width:0;font-size:12px!important}
 /* ruota della fortuna e talismani */
@@ -2894,7 +2885,6 @@ body:has(#title:not([hidden])) #profToast{top:auto!important;bottom:calc(96px + 
   <div id="tbInfo" class="box"></div>
   <nav id="tbBar"><button id="tbUndo" class="big alt">↶ Annulla</button><button id="tbShop" class="big alt" aria-label="Bottega: spendi le monete" title="Bottega: spendi le monete">0</button><button id="tbFine" class="big">Fine turno ▶</button></nav>
 </section>
-<div id="giraTel" aria-live="polite"><div class="gt-tel"></div><b>Gira il telefono</b><span>Difendi Smerillo si gioca in verticale</span></div>
 <div id="caricamento" role="status" aria-live="polite">
   <div class="ld-cielo"><i class="ld-stelle"></i><i class="ld-luna"></i><i class="ld-nuv n1"></i><i class="ld-nuv n2"></i><i class="ld-nuv n3"></i>
     <svg class="ld-falco" viewBox="0 0 24 10" aria-hidden="true"><path d="M0 4 L7 2 L11 5 L13 5 L17 1 L24 3 L15 7 L12 9 L9 7 Z" fill="#141433"/></svg></div>
@@ -10736,7 +10726,8 @@ const COACH = window.COACH = (() => {
       else { box.classList.remove('lato', 'dx', 'sx');
         // lato della nuvoletta con un margine: se il punto da toccare si muove (la mappa scorre) non salta su e giù di continuo
         const era = box.classList.contains('sopra') ? true : box.classList.contains('sotto') ? false : null, lim = era === true ? .37 : era === false ? .53 : .45;
-        const alto = !!((!b && !cfg.giu) || (b && b.y > innerHeight*lim) || (b && cfg.su && b.y > (era === false ? 190 : 150))); // giu: senza bersaglio sta in basso, lontano dall'azione box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
+        const alto = !!((!b && !cfg.giu) || (b && b.y > innerHeight*lim) || (b && cfg.su && b.y > (era === false ? 190 : 150))); // giu: senza bersaglio sta in basso, lontano dall'azione
+        box.classList.toggle('sopra', alto); box.classList.toggle('sotto', !alto);
         // se la nuvoletta copre il punto da toccare la accorcio, e resta accorciata finché non cambia passo (prima si allungava e accorciava a ogni fotogramma)
         if (b && !box.classList.contains('stretto')){ const r = box.getBoundingClientRect(); if (b.y + b.h/2 > r.top - 8 && b.y - b.h/2 < r.bottom + 8) box.classList.add('stretto'); } }
       // guida senza frasi: le 2 parole stanno attaccate alla mano, non in fondo allo schermo
