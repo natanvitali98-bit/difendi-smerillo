@@ -894,6 +894,7 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 /* inizio missione */
 .mi-ov{position:absolute;inset:0;z-index:58;overflow:hidden;cursor:pointer}
 .mi-velo{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(8,8,26,.15) 0,rgba(8,8,26,.85) 75%)}
+.mi-fascia{position:absolute;left:0;right:0;top:calc(36% - 18px);height:clamp(110px,28vw,150px);background:linear-gradient(180deg,rgba(8,8,26,.92),rgba(20,20,51,.92));border-top:4px solid #ffd03a;border-bottom:4px solid #ffd03a;box-shadow:0 8px 24px rgba(0,0,0,.5);transform-origin:50% 50%;pointer-events:none}
 .mi-tit{position:absolute;left:0;right:0;top:36%;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
 .mi-k{font-family:var(--f-big),sans-serif;font-size:clamp(20px,6vw,28px);letter-spacing:5px;color:#fff;text-transform:uppercase;text-shadow:0 3px 0 #000}
 .mi-t{font-family:var(--f-big),sans-serif;font-weight:400;font-size:clamp(34px,10.5vw,56px);line-height:.95;text-align:center;color:#ffd03a;-webkit-text-stroke:2px #141433;text-shadow:0 5px 0 #a06200,0 9px 0 #000;padding:0 14px}
@@ -6892,20 +6893,20 @@ function disegnaUnita(u, k, T){
   if (ev && ev.k === 'passo' && ev.id === u.id){ const tq = Math.min(1, evT/DUR.passo), te = riduci ? tq : tq*tq*(3 - 2*tq); const q = lungoVia(ev.da, ev.a, te); e = q.e; n = q.n; z = q.z; if (!riduci) saltello = Math.abs(Math.sin(tq*Math.PI*2))*4; }
   else { const N = NODI[u.nodo]; e = N.e; n = N.n; z = N.z; }
   let [x,y] = scr(e, n, z); y -= saltello;
-  const ora_ = adesso(), PA = POS.get(u.id);
+  const ora_ = adesso(), PA = POS.get(u.id); let cadeOff = 0, cadeSq = 1; // cade: il soldato scende dall'alto (intro della missione), l'ombra resta a terra e cresce
   if (PA){ const q = (ora_ - PA.t0)/PA.d; if (q >= 1) POS.delete(u.id);
-    else if (PA.k === 'cade'){ if (q < 0) y -= 4000; else { const f = q < .62 ? (q/.62)*(q/.62) : 1; y -= (1 - f)*240; if (q >= .62) y -= Math.sin((q - .62)/.38*Math.PI)*12; } }
+    else if (PA.k === 'cade'){ if (q < 0){ cadeOff = 4000; } else { const f = q < .62 ? (q/.62)*(q/.62) : 1; cadeOff = (1 - f)*240 + (q >= .62 ? Math.sin((q - .62)/.38*Math.PI)*12 : 0); if (q >= .62 && q < .8) cadeSq = 1 - .28*Math.sin((q - .62)/.18*Math.PI); else if (q < .62) cadeSq = 1.08; } y -= cadeOff; }
     else if (PA.k === 'mossa'){ const N0 = NODI[PA.da]; if (N0){ const [x0, y0] = scr(N0.e, N0.n, N0.z), qq = Math.max(0, q), f = 1 - (1 - qq)*(1 - qq); x = x0 + (x - x0)*f; y = y0 + (y - y0)*f - Math.sin(qq*Math.PI)*10; } }
     else if (q >= 0){ const N1 = NODI[PA.a]; if (N1){ const [tx, ty] = scr(N1.e, N1.n, N1.z), f = PA.k === 'affondo' ? (q < .35 ? -Math.sin(q/.35*Math.PI/2)*.12 : Math.sin((q - .35)/.65*Math.PI)*.5) : -Math.sin(q*Math.PI)*.12; x += (tx - x)*f; y += (ty - y)*f; } } }
   if (ev && ev.k === 'colpo' && ev.da === u.id){ const N = NODI[ev.nodo], [tx,ty] = scr(N.e, N.n, N.z), q = Math.min(1, evT/DUR.colpo), f = q < .35 ? -Math.sin(q/.35*Math.PI/2)*.08 : Math.sin((q - .35)/.65*Math.PI)*.45; x += (tx-x)*f; y += (ty-y)*f; }
-  let squash = 1; if (ev && ev.k === 'colpo' && ev.a === u.id && ev.da){ const A = [...(V || S).dif, ...(V || S).nem].find(q => q.id === ev.da); if (A){ const NA = NODI[A.nodo], [ax, ay] = scr(NA.e, NA.n, NA.z), q = Math.min(1, evT/DUR.colpo); if (q > .45){ const k2 = Math.sin((q - .45)/.55*Math.PI), dl = Math.hypot(x - ax, y - ay) || 1; x += (x - ax)/dl*7*k2; y += (y - ay)/dl*4*k2; squash = 1 - .18*k2; } } }
+  let squash = cadeSq; if (ev && ev.k === 'colpo' && ev.a === u.id && ev.da){ const A = [...(V || S).dif, ...(V || S).nem].find(q => q.id === ev.da); if (A){ const NA = NODI[A.nodo], [ax, ay] = scr(NA.e, NA.n, NA.z), q = Math.min(1, evT/DUR.colpo); if (q > .45){ const k2 = Math.sin((q - .45)/.55*Math.PI), dl = Math.hypot(x - ax, y - ay) || 1; x += (x - ax)/dl*7*k2; y += (y - ay)/dl*4*k2; squash = 1 - .18*k2; } } }
   let flashC = false; { const CA = COLP.get(u.id); if (CA){ const q = (ora_ - CA.t0)/.34; if (q >= 1) COLP.delete(u.id); else if (q >= 0){ const NA = NODI[CA.da]; if (NA){ const [ax, ay] = scr(NA.e, NA.n, NA.z), k2 = Math.sin(Math.min(1, q*1.6)*Math.PI)*(1 - q*.4), dl = Math.hypot(x - ax, y - ay) || 1; x += (x - ax)/dl*16*k2; y += (y - ay)/dl*7*k2; squash = Math.min(squash, 1 - .3*k2); } flashC = q < .14 || (q > .24 && q < .36); } } } // colpito: spinto indietro, schiacciato e lampeggia due volte
   const flash = flashC || (ev && ev.k === 'colpo' && ev.a === u.id && evT > DUR.colpo*.45 && evT < DUR.colpo*.75);
   const nuovo = ev && ev.k === 'arriva' && ev.x.id === u.id; let pop = 1; if (nuovo){ const qa = Math.min(1, evT/DUR.arriva); g.globalAlpha = qa; if (!riduci) pop = 1 + .55*(1 - qa)*(1 - qa); } // chi arriva entra con un piccolo balzo
   // anello sotto i piedi: giallo = può ancora agire, grigio = ha finito
   const amico = online() && NET.modo === 'coop' && k === 'dif' && u.own && u.own !== NET.io;
   const base = k === 'nem' ? '#e04830' : k === 'bar' ? '#8c643c' : amico ? '#3d8bfd' : online() && NET.modo === 'coop' ? '#f5b301' : '#3d8bfd';
-  g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(x + 2, y + 4, 15, 7, 0, 0, 7); g.fill(); // ombra
+  g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); if (cadeOff && cadeOff < 4000){ const k3 = Math.max(.25, 1 - cadeOff/240); g.ellipse(x + 2, y + 4 + cadeOff, 15*k3, 7*k3, 0, 0, 7); } else if (!cadeOff) g.ellipse(x + 2, y + 4, 15, 7, 0, 0, 7); g.fill(); // ombra
   g.fillStyle = base; g.strokeStyle = '#14141e'; g.lineWidth = 2.5; g.beginPath(); g.ellipse(x, y + 1, 14, 6.5, 0, 0, 7); g.fill(); g.stroke();
   g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.ellipse(x - 3, y - 1, 7, 2.5, 0, 0, 7); g.fill();
   if (k === 'dif'){ const libero = !V && (!u.mosso || !u.agito); g.strokeStyle = sel && sel.id === u.id ? '#ffffff' : libero ? (amico ? '#9ad0ff' : '#f8d048') : 'rgba(0,0,0,0)'; g.lineWidth = 3; g.beginPath(); g.ellipse(x, y + 1, 18, 9, 0, 0, 7); g.stroke(); }
@@ -7543,10 +7544,11 @@ function introMissione(kicker, titolo){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || !S){ EPICO.banner(kicker, titolo); return; }
   const host = el('tb'); host.querySelectorAll('.mi-ov').forEach(x => x.remove());
   const o = document.createElement('div'); o.className = 'mi-ov';
-  o.innerHTML = `<div class="mi-velo"></div><div class="mi-tit"><span class="mi-k">${kicker}</span><b class="mi-t">${titolo}</b></div><b class="mi-go">Tocca a te!</b>`;
+  o.innerHTML = `<div class="mi-velo"></div><div class="mi-fascia"></div><div class="mi-tit"><span class="mi-k">${kicker}</span><b class="mi-t">${titolo}</b></div><b class="mi-go">Tocca a te!</b>`;
   host.append(o); const t0 = adesso(), D = 2900, A = []; introFino = performance.now() + D;
   const an = (q, k, opt) => { const a = o.querySelector(q).animate(k, Object.assign({duration:D, fill:'both'}, opt)); A.push(a); return a; };
   A.push(cvt.animate([{transform:'translateY(-7%) scale(1.32)', filter:'brightness(.55)'}, {transform:'none', filter:'brightness(1)', offset:.42, easing:'cubic-bezier(.2,.7,.2,1)'}, {transform:'none', filter:'brightness(1)'}], {duration:D, easing:'cubic-bezier(.3,0,.2,1)'}));
+  an('.mi-fascia', [{transform:'scaleY(0)'}, {transform:'scaleY(0)', offset:.04, easing:'cubic-bezier(.2,.9,.3,1.2)'}, {transform:'scaleY(1)', offset:.1}, {transform:'scaleY(1)', offset:.37, easing:'ease-in'}, {transform:'scaleY(0)', offset:.43}, {transform:'scaleY(0)'}]);
   an('.mi-velo', [{opacity:1}, {opacity:.75, offset:.3}, {opacity:0, offset:.5}, {opacity:0}]);
   an('.mi-k', [{opacity:0, transform:'scale(2.6)'}, {opacity:0, transform:'scale(2.6)', offset:.08, easing:'cubic-bezier(.2,.9,.3,1.4)'}, {opacity:1, transform:'scale(1)', offset:.15}, {opacity:1, transform:'none', offset:.36, easing:'ease-in'}, {opacity:0, transform:'translateY(-24px)', offset:.42}, {opacity:0, transform:'translateY(-24px)'}]);
   an('.mi-t', [{opacity:0, transform:'scale(3) rotate(-5deg)'}, {opacity:0, transform:'scale(3) rotate(-5deg)', offset:.16, easing:'cubic-bezier(.2,.9,.3,1.3)'}, {opacity:1, transform:'scale(1) rotate(-2deg)', offset:.24}, {opacity:1, transform:'scale(1.04) rotate(-2deg)', offset:.27}, {opacity:1, transform:'rotate(-2deg)', offset:.31}, {opacity:1, transform:'rotate(-2deg)', offset:.36, easing:'ease-in'}, {opacity:0, transform:'translateY(-24px) rotate(-2deg)', offset:.42}, {opacity:0, transform:'translateY(-24px) rotate(-2deg)'}]);
@@ -7554,7 +7556,7 @@ function introMissione(kicker, titolo){
   setTimeout(() => { if (o.isConnected) SUONI.suona('tonfo'); }, D*.16);
   // i soldati cadono uno dopo l'altro al loro posto
   S.dif.forEach((d, i) => POS.set(d.id, {k:'cade', t0:t0 + 1.28 + i*.12, d:.42}));
-  S.dif.forEach((d, i) => setTimeout(() => { if (!o.isConnected || !NODI[d.nodo]) return; const N = NODI[d.nodo]; fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0}); try { SUONI.suona('passo'); } catch(e){} }, (1.28 + i*.12 + .26)*1000));
+  S.dif.forEach((d, i) => setTimeout(() => { if (!o.isConnected || !NODI[d.nodo]) return; const N = NODI[d.nodo]; fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0}); scintille(d.nodo, ['#c8b48a', '#e8dcc0', '#8a7a5a'], 10); scossa = Math.max(scossa, 3); try { SUONI.suona('passo'); } catch(e){} }, (1.28 + i*.12 + .26)*1000));
   // le entrate dei nemici pulsano in rosso tre volte
   const ent = [...ARRIVO].filter(n => NODI[n]).slice(0, 6);
   for (const n of ent){ const N = NODI[n]; for (let j = 0; j < 3; j++) fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:-(1.95 + j*.3), col:'#ff4d4d', big:1.5}); }
