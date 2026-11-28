@@ -6771,7 +6771,7 @@ function dopoAzione(evs){
   for (const e of evs) if (e.k === 'colpo' && e.a !== 'porta') scintille(e.nodo, ['#ffffff','#f8d048','#ffe9a8'], 8);
   for (const e of evs){ if (e.k === 'colpo') testo(e.nodo, '−' + e.danno, '#ff6a4a'); if (e.k === 'cade'){ scintille(e.nodo, e.chi === 'nem' ? ['#9ad0ff','#f8f8f0','#4a4a58'] : ['#e04830','#f8d048']); effettoCaduta(e); } if (e.k === 'urto') testo(e.nodo, 'Urto!', '#f8d048', -14); if (e.k === 'spinta') testo(e.a, 'Spinto!', '#f8f0d0', -14); if (e.k === 'pesante') testo(e.nodo, 'Troppo pesante!', '#f8f0d0', -14); if (e.k === 'balzo') testo(e.nodo, 'BALZO!', '#ffb84a', -18); if (e.k === 'lontano') testo(e.nodo, 'Fermato lontano! +1🪙', '#9cf27a', -40); if (e.k === 'spine') testo(e.nodo, 'Punte! −1', '#f8d048', -30); if (e.k === 'cade' && e.chi === 'nem'){ testo(e.nodo, '+🪙', '#f8d048', -26); scossa = Math.max(scossa, 3); } if (e.k === 'incanto') testo(e.nodo, 'Fermo!', '#e0b8ff', -14); if (e.k === 'rupe'){ testo(e.nodo, 'Giù dalla rupe!', '#ffd27a', -24); } if (e.k === 'speciale') testo(e.nodo, SPECIALI[e.s].nome + '!', '#ffe08a', -30); if (e.k === 'boom') testo(e.nodo, 'BOOM!', '#ff9a4a', -14); }
   ritardoFx = 0;
-  aggiornaAnteprima(); render(); if (online()) invia({t:'stato', S}); if (S.esito) setTimeout(fine, 650 + imp*1000);
+  aggiornaAnteprima(); render(); if (online()) invia({t:'stato', S}); if (S.esito){ festaVittoria(); setTimeout(fine, 650 + imp*1000 + (S.esito === 'vinto' ? 600 : 0)); }
 }
 function tocca(cx, cy){
   if (!S || ev || ovAperto || S.esito) return;
@@ -6843,17 +6843,23 @@ function aggiornaTempo(dt){ const f = el('tbFine'); if (!f || !tempoMax){ if (f)
   const vis = !(S && S.esito) && !V; f.classList.toggle('tempo', vis); f.classList.toggle('poco', vis && tempoT <= 5); f.style.setProperty('--t', tempoT/tempoMax); const s = Math.ceil(tempoT) + ' s'; if (f.dataset.s !== s) f.dataset.s = s; }
 function prossimo(){
   ev = coda.shift() || null; evT = 0;
-  if (!ev){ V = null; nuovoTempo(); aggiornaAnteprima(); render(); if (S.esito) setTimeout(fine, 500); }
+  if (!ev){ V = null; nuovoTempo(); aggiornaAnteprima(); render(); if (S.esito){ festaVittoria(); setTimeout(fine, S.esito === 'vinto' ? 1100 : 500); } }
 }
 const DUR = {masso:.45, boom:.3, passo:.34, colpo:.34, cade:.32, cura:.25, arriva:.3, aspetta:.12, bloccato:.3};
+// reazioni dei personaggi: evviva (saltella), festa (salta di gioia a fine missione), paura (trema con il punto esclamativo)
+const REAZ = new Map(); let ULT_DA = null;
+function reagisci(id, k, d = .8, ritardo = 0){ if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; REAZ.set(id, {k, t0:adesso() + ritardo, d}); }
+function festaVittoria(){ if (S && S.esito === 'vinto') S.dif.forEach((d, i) => reagisci(d.id, 'festa', 1.5, i*.07)); }
 function applica(e){ // aggiorna la copia che si vede durante l'animazione
   const suona = n => SUONI.suona(n);
   if (e.k === 'passo'){ const x = V.nem.find(q => q.id === e.id); if (x) x.nodo = e.a; }
-  else if (e.k === 'colpo'){ suona(e.a === 'porta' ? 'allarme' : 'colpo'); fermoColpo(.06); if (e.a === 'porta'){ scossa = 6; } if (e.a === 'porta') V.porta = Math.max(0, V.porta - e.danno); else { const u = [...V.dif, ...V.nem, ...V.bar].find(q => q.id === e.a); if (u) u.hp -= e.danno; } testo(e.nodo, e.a === 'porta' ? 'Porta −' + e.danno : '−' + e.danno, '#ff6a4a'); { const N = NODI[e.nodo]; if (N && !riduci) fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0}); scintille(e.nodo, ['#ffffff','#ff9a7a'], 8); } }
+  else if (e.k === 'colpo'){ if (e.da) ULT_DA = e.da; suona(e.a === 'porta' ? 'allarme' : 'colpo'); fermoColpo(.06); if (e.a === 'porta'){ scossa = 6; } if (e.a === 'porta') V.porta = Math.max(0, V.porta - e.danno); else { const u = [...V.dif, ...V.nem, ...V.bar].find(q => q.id === e.a); if (u) u.hp -= e.danno; } testo(e.nodo, e.a === 'porta' ? 'Porta −' + e.danno : '−' + e.danno, '#ff6a4a'); { const N = NODI[e.nodo]; if (N && !riduci) fx.push({k:'ring', e:N.e, n:N.n, z:N.z, t:0}); scintille(e.nodo, ['#ffffff','#ff9a7a'], 8); } }
   else if (e.k === 'cade'){ effettoCaduta(e);
+    if (e.chi === 'nem' && ULT_DA && V.dif.some(q => q.id === ULT_DA)) reagisci(ULT_DA, 'evviva', .8, .1);
+    if (e.chi === 'dif'){ for (const q of V.dif) if (q.id !== e.id && NODI[q.nodo] && gdist(q.nodo, e.nodo) <= 2) reagisci(q.id, 'paura', .9); if (ULT_DA && V.nem.some(q => q.id === ULT_DA)) reagisci(ULT_DA, 'evviva', .7, .1); }
     suona('cade'); V.dif = V.dif.filter(q => q.id !== e.id); V.nem = V.nem.filter(q => q.id !== e.id); V.bar = V.bar.filter(q => q.id !== e.id); scintille(e.nodo, e.chi === 'dif' ? ['#e04830','#f8d048'] : ['#c8a060','#5c3818']); }
   else if (e.k === 'cura'){ suona('cura'); const u = V.dif.find(q => q.id === e.id); if (u) u.hp++; testo(e.nodo, '+1', '#7ee070'); }
-  else if (e.k === 'arriva'){ const boss = e.x.tipo === 'nero' || e.x.tipo === 'mammone'; suona(boss ? 'boss' : 'arriva'); V.nem.push(clona(e.x)); testo(e.x.nodo, 'Arriva!', '#f8b8a8', -16); if (boss){ scossa = 10; const nero = e.x.tipo === 'nero'; EPICO.capo(nero ? SPR.cavaliere_nero : SPR.gatto_mammone, nero ? 'Il Cavaliere Nero' : 'Il Gatto Mammone', TIPI[e.x.tipo].corto, nero ? '#ff4d4d' : '#ff9a3a', nero ? '#3a0a0a' : '#4a2200'); } }
+  else if (e.k === 'arriva'){ const boss = e.x.tipo === 'nero' || e.x.tipo === 'mammone'; suona(boss ? 'boss' : 'arriva'); V.nem.push(clona(e.x)); testo(e.x.nodo, 'Arriva!', '#f8b8a8', -16); if (boss){ scossa = 10; V.dif.forEach(q => reagisci(q.id, 'paura', 1.2, .3)); const nero = e.x.tipo === 'nero'; EPICO.capo(nero ? SPR.cavaliere_nero : SPR.gatto_mammone, nero ? 'Il Cavaliere Nero' : 'Il Gatto Mammone', TIPI[e.x.tipo].corto, nero ? '#ff4d4d' : '#ff9a3a', nero ? '#3a0a0a' : '#4a2200'); } }
   else if (e.k === 'bloccato'){} // ingresso occupato: il nemico aspetta (niente scritta, era solo confusione)
   else if (e.k === 'boom'){ suona('boom'); scossa = 7; testo(e.nodo, 'BOOM!', '#ff9a4a', -16); scintille(e.nodo, ['#ff9a4a','#f8d048','#4a4a58']); }
   else if (e.k === 'masso'){ suona('boom'); scossa = 9; testo(e.nodo, 'Masso!', '#d8c8a8', -16); for (const n of [e.nodo, ...ADJ[e.nodo]]) scintille(n, ['#a8a090','#d8c8a8','#4a4a58']); }
@@ -6923,6 +6929,8 @@ function disegnaUnita(u, k, T){
   if (k === 'nem' && sel && sel.id === u.id){ g.strokeStyle = '#ffffff'; g.lineWidth = 3; g.beginPath(); g.ellipse(x, y + 1, 17, 8.5, 0, 0, 7); g.stroke(); }
   const TT = TIPI[u.tipo] || {}, vola = k === 'nem' && TT.vola, celata = k === 'nem' && TT.nascosto && !visibileNem(V || S, u, null);
   const bob = (k === 'nem' && !riduci ? Math.round(Math.sin(T*3 + u.id.length)*1) : k === 'dif' && !riduci && !(sel && sel.id === u.id) ? Math.round(Math.sin(T*2.4 + u.id.charCodeAt(u.id.length - 1)*1.7)*.9) : 0) - (vola ? 14 + Math.round(Math.sin(T*5)*2) : 0) - (k === 'dif' && sel && sel.id === u.id && !riduci ? Math.round(Math.abs(Math.sin(T*7))*4) : 0);
+  const RZ = REAZ.get(u.id); let rzQ = -1; if (RZ){ const q = (ora_ - RZ.t0)/RZ.d; if (q >= 1) REAZ.delete(u.id); else if (q >= 0){ rzQ = q;
+      if (RZ.k === 'paura'){ x += Math.sin(ora_*70)*2.4*(1 - q); } else { const n = RZ.k === 'festa' ? 3 : 2, hop = Math.abs(Math.sin(q*Math.PI*n)); y -= hop*(RZ.k === 'festa' ? 15 : 11); if (hop < .15 && q > .05) squash = Math.min(squash, .86); } } }
   if (celata) g.globalAlpha = .35;
   const w = im.width*s, h = im.height*s, flip = k === 'nem';
   g.save(); g.translate(Math.round(x), Math.round(y + 2 + bob)); g.scale((flip ? -1 : 1)*(2 - squash)*pop, squash*pop); g.translate(0, -h);
@@ -6935,7 +6943,14 @@ function disegnaUnita(u, k, T){
   if (k === 'nem' && TT.arm){ const bx = x + w*.45, by = y - h + bob + 2; g.fillStyle = '#c8d0dc'; g.strokeStyle = '#14141e'; g.lineWidth = 2; g.beginPath(); g.moveTo(bx - 5, by); g.lineTo(bx + 5, by); g.lineTo(bx + 5, by + 6); g.lineTo(bx, by + 10); g.lineTo(bx - 5, by + 6); g.closePath(); g.fill(); g.stroke(); }
   if (u.fermo){ g.strokeStyle = '#c084fc'; g.lineWidth = 3; g.beginPath(); g.ellipse(x, y - h/2, w*.7, h*.6, 0, 0, 7); g.stroke(); }
   pips(x, Math.round(y - h - 6 + bob), u.hp, u.max || (TIPI[u.tipo] ? TIPI[u.tipo].hp : 2), k === 'nem' ? '#ff5a3c' : k === 'bar' ? '#d6aa6a' : '#58c838');
+  if (rzQ >= 0 && rzQ < .88) fumetto(x, Math.round(y - h - 20 + bob), RZ.k, rzQ);
 }
+// fumetto sopra la testa: ! rosso per la paura, stella gialla per la gioia (disegnati, niente emoji)
+function fumetto(x, y, k, q){ const p = q < .18 ? 1 + .35*Math.sin(q/.18*Math.PI) : 1, a = q > .75 ? 1 - (q - .75)/.13 : 1; g.save(); g.globalAlpha = Math.max(0, a); g.translate(Math.round(x + 12), Math.round(y)); g.scale(p, p);
+  g.fillStyle = '#ffffff'; g.strokeStyle = '#14141e'; g.lineWidth = 2; g.beginPath(); g.roundRect(-9, -11, 18, 18, 5); g.moveTo(-5, 7); g.lineTo(-9, 12); g.lineTo(0, 7); g.fill(); g.stroke();
+  if (k === 'paura'){ g.fillStyle = '#e83a2e'; g.fillRect(-2, -8, 4, 8); g.fillRect(-2, 2, 4, 3); }
+  else { g.fillStyle = '#f5c518'; g.strokeStyle = '#a06a00'; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 10; i++){ const r = i % 2 ? 3 : 7, an = -Math.PI/2 + i*Math.PI/5; g.lineTo(Math.cos(an)*r, -2 + Math.sin(an)*r); } g.closePath(); g.fill(); g.stroke(); }
+  g.restore(); }
 function render(T = performance.now()/1000){
   if (!attivo) return; consiglioRupe();
   g.setTransform(dpr, 0, 0, dpr, 0, 0); g.imageSmoothingEnabled = false;
@@ -7782,7 +7797,7 @@ addEventListener('resize', () => { punti.clear(); tr = null; dP = 0; mP = null; 
 el('tbZp').onclick = () => zoomA(1.4, SW/2, SH/2); el('tbZm').onclick = () => zoomA(1/1.4, SW/2, SH/2);
 let hintT = 0; function suggerisci(t){ const h = el('tbHint'); h.textContent = t; h.classList.add('on'); clearTimeout(hintT); hintT = setTimeout(() => h.classList.remove('on'), Math.max(1600, t.length*60)); }
 cvt.addEventListener('wheel', e => { e.preventDefault(); const [x,y] = rel([e.clientX, e.clientY]); zoomA(e.deltaY < 0 ? 1.12 : 1/1.12, x, y); }, {passive:false});
-el('tbAiuto').onclick = () => aiuto(); // senza freccia il clic arrivava come 'mossa' e il tasto Aiuto andava in errore el('tbUndo').onclick = annulla; el('tbFine').onclick = fineTurno; el('tbShop').onclick = () => { if (!ev && S && !S.esito && !V) bottega(); }; el('tbMenu').onclick = () => { if (!ev) menuPausa(); };
+el('tbAiuto').onclick = () => aiuto(); /* senza freccia il clic arrivava come 'mossa' e il tasto Aiuto andava in errore */ el('tbUndo').onclick = annulla; el('tbFine').onclick = fineTurno; el('tbShop').onclick = () => { if (!ev && S && !S.esito && !V) bottega(); }; el('tbMenu').onclick = () => { if (!ev) menuPausa(); };
 el('tbCentra').onclick = fitCam; el('tbCentra').innerHTML = ico('centra', 3); el('tbUndo').innerHTML = ico('annulla') + ' Annulla'; el('tbFine').innerHTML = 'Fine turno ' + ico('play');
 new ResizeObserver(() => { if (attivo){ const s0 = sc/fitS; fitCam(); sc = fitS*s0; limitaCam(); } }).observe(stage);
 
