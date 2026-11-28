@@ -7733,7 +7733,7 @@ addEventListener('resize', () => { punti.clear(); tr = null; dP = 0; mP = null; 
 el('tbZp').onclick = () => zoomA(1.4, SW/2, SH/2); el('tbZm').onclick = () => zoomA(1/1.4, SW/2, SH/2);
 let hintT = 0; function suggerisci(t){ const h = el('tbHint'); h.textContent = t; h.classList.add('on'); clearTimeout(hintT); hintT = setTimeout(() => h.classList.remove('on'), Math.max(1600, t.length*60)); }
 cvt.addEventListener('wheel', e => { e.preventDefault(); const [x,y] = rel([e.clientX, e.clientY]); zoomA(e.deltaY < 0 ? 1.12 : 1/1.12, x, y); }, {passive:false});
-el('tbAiuto').onclick = aiuto; el('tbUndo').onclick = annulla; el('tbFine').onclick = fineTurno; el('tbShop').onclick = () => { if (!ev && S && !S.esito && !V) bottega(); }; el('tbMenu').onclick = () => { if (!ev) menuPausa(); };
+el('tbAiuto').onclick = () => aiuto(); // senza freccia il clic arrivava come 'mossa' e il tasto Aiuto andava in errore el('tbUndo').onclick = annulla; el('tbFine').onclick = fineTurno; el('tbShop').onclick = () => { if (!ev && S && !S.esito && !V) bottega(); }; el('tbMenu').onclick = () => { if (!ev) menuPausa(); };
 el('tbCentra').onclick = fitCam; el('tbCentra').innerHTML = ico('centra', 3); el('tbUndo').innerHTML = ico('annulla') + ' Annulla'; el('tbFine').innerHTML = 'Fine turno ' + ico('play');
 new ResizeObserver(() => { if (attivo){ const s0 = sc/fitS; fitCam(); sc = fitS*s0; limitaCam(); } }).observe(stage);
 
