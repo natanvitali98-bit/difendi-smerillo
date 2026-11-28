@@ -891,6 +891,19 @@ details.regole summary{font-family:var(--f-big);font-weight:400;font-size:17px;c
 .fx-ban.boss b{color:#ff4d4d;text-shadow:0 4px 0 #141433;font-size:clamp(28px,8vw,46px)}
 @keyframes fxBanEntra{0%{transform:translateX(-110%) skewX(-12deg)}18%{transform:translateX(4%) skewX(-4deg)}26%{transform:none}78%{transform:none;opacity:1}100%{transform:translateX(110%) skewX(-12deg);opacity:0}}
 @keyframes fxBanSfondo{0%,100%{background:transparent}20%,80%{background:rgba(0,0,0,.25)}}
+/* annuncio del capo (missioni a turni): velo, bande da cinema, il capo che sbatte giù, nome in due colpi */
+.capo{position:absolute;inset:0;z-index:61;pointer-events:none;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;--cc:#ff4d4d;--cd:#3a0a0a}
+.capo-velo{position:absolute;inset:0;background:radial-gradient(circle at 50% 44%,color-mix(in srgb,var(--cc) 34%,transparent) 0,rgba(8,8,26,.55) 38%,rgba(8,8,26,.88) 78%)}
+.capo-bar{position:absolute;left:0;right:0;height:11%;background:#08081a}
+.capo-bar.su{top:0;border-bottom:4px solid var(--cc)}.capo-bar.giu{bottom:0;border-top:4px solid var(--cc)}
+.capo-raggi{position:absolute;left:50%;top:40%;width:900px;height:900px;margin:-450px 0 0 -450px;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--cc) 40%,transparent) 0 8deg,transparent 8deg 22deg);-webkit-mask:radial-gradient(circle,#000 0,#000 10%,transparent 52%);mask:radial-gradient(circle,#000 0,#000 10%,transparent 52%);animation:fxGira 9s linear infinite;opacity:0}
+.capo-pg{position:relative;width:min(44vw,210px);height:auto;image-rendering:pixelated;filter:drop-shadow(0 8px 0 rgba(0,0,0,.55)) drop-shadow(0 0 22px color-mix(in srgb,var(--cc) 70%,transparent));margin-bottom:6px}
+.capo-ombra{width:min(40vw,190px);height:16px;border-radius:50%;background:rgba(0,0,0,.5);filter:blur(2px);margin-top:-14px;position:relative}
+.capo-k{position:relative;margin-top:14px;font-family:var(--f-big),sans-serif;font-size:clamp(20px,6vw,28px);letter-spacing:6px;color:#fff;text-shadow:0 3px 0 #000}
+.capo-n{position:relative;font-family:var(--f-big),sans-serif;font-size:clamp(34px,11vw,58px);line-height:.95;text-align:center;color:var(--cc);-webkit-text-stroke:2px #141433;text-shadow:0 5px 0 var(--cd),0 9px 0 #000;padding:0 14px}
+.capo-s{position:relative;margin-top:12px;max-width:min(86%,420px);text-align:center;background:rgba(8,8,26,.85);border:2px solid var(--cc);color:#fff;font-weight:700;font-size:15px;line-height:1.3;padding:8px 14px;border-radius:12px}
+.capo-fl{position:absolute;inset:0;background:#fff;opacity:0}
+.capo i.pz{position:absolute;width:8px;height:8px;left:50%;top:50%}
 .tbscr{position:relative;overflow:hidden}
 .tbscr > *:not(.fx-luce){position:relative;z-index:1}
 .fx-luce{position:absolute;left:50%;top:190px;width:520px;height:520px;margin:-260px 0 0 -260px;z-index:0;pointer-events:none;background:radial-gradient(circle,rgba(255,208,58,.55) 0,rgba(255,208,58,.15) 35%,transparent 62%);animation:fxPulsa 1.4s ease-in-out infinite}
@@ -6070,7 +6083,36 @@ const EPICO = (() => {
   // un banner grande che attraversa lo schermo
   function banner(titolo, sotto = '', tipo = ''){ const b = document.createElement('div'); b.className = 'fx-ban ' + tipo; b.innerHTML = `<div class="fx-ban-in"><b>${titolo}</b>${sotto ? '<small>' + sotto + '</small>' : ''}</div>`;
     (document.getElementById('tb') || document.body).append(b); setTimeout(() => b.remove(), calma() ? 1400 : 1900); }
-  return {coriandoli, banner};
+  // annuncio di un capo: il capo in pixel art sbatte giù sul colpo, poi "ARRIVA" e il nome, poi esce veloce (circa 2,2 s, non blocca la partita)
+  function capo(img, nome, sotto = '', col = '#ff4d4d', scuro = '#3a0a0a'){
+    const host = document.getElementById('tb') || document.body; host.querySelectorAll('.capo').forEach(x => x.remove());
+    const b = document.createElement('div'); b.className = 'capo'; b.style.setProperty('--cc', col); b.style.setProperty('--cd', scuro);
+    b.innerHTML = `<div class="capo-velo"></div><div class="capo-raggi"></div><div class="capo-bar su"></div><div class="capo-bar giu"></div><div class="capo-corpo" style="position:relative;display:flex;flex-direction:column;align-items:center"><div class="capo-ombra"></div><span class="capo-k">ARRIVA</span><b class="capo-n">${nome}</b>${sotto ? '<span class="capo-s">' + sotto + '</span>' : ''}</div><div class="capo-fl"></div>`;
+    const corpo = b.querySelector('.capo-corpo');
+    if (img){ const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; c.getContext('2d').drawImage(img, 0, 0); c.className = 'capo-pg'; corpo.prepend(c); }
+    host.append(b);
+    const $ = q => b.querySelector(q), pg = $('.capo-pg'), D = 2200;
+    if (calma()){ b.animate([{opacity:0}, {opacity:1, offset:.12}, {opacity:1, offset:.85}, {opacity:0}], {duration:1800, fill:'both'}).onfinish = () => b.remove(); return; }
+    const O = {duration:D, fill:'both'};
+    $('.capo-velo').animate([{opacity:0}, {opacity:1, offset:.08}, {opacity:1, offset:.84}, {opacity:0}], O);
+    $('.capo-raggi').animate([{opacity:0}, {opacity:0, offset:.14}, {opacity:.9, offset:.2}, {opacity:.9, offset:.84}, {opacity:0, offset:.92}, {opacity:0}], O);
+    $('.capo-bar.su').animate([{transform:'translateY(-100%)'}, {transform:'none', offset:.08, easing:'ease-in'}, {transform:'none', offset:.86}, {transform:'translateY(-100%)'}], O);
+    $('.capo-bar.giu').animate([{transform:'translateY(100%)'}, {transform:'none', offset:.08, easing:'ease-in'}, {transform:'none', offset:.86}, {transform:'translateY(100%)'}], O);
+    // il capo cade dall'alto e sbatte a 0,32 s (schiacciato, poi rimbalza)
+    if (pg) pg.animate([{transform:'translateY(-70vh) scale(1.5)', opacity:1, easing:'cubic-bezier(.55,0,.9,.4)'}, {transform:'translateY(0) scale(1.25,.72)', opacity:1, offset:.145, easing:'cubic-bezier(.2,.9,.3,1)'}, {transform:'translateY(-14px) scale(.94,1.08)', opacity:1, offset:.2}, {transform:'none', opacity:1, offset:.25}, {transform:'translateY(-4px)', opacity:1, offset:.55}, {transform:'none', opacity:1, offset:.84, easing:'ease-in'}, {transform:'translateY(-40px) scale(.9)', opacity:0, offset:.92}, {transform:'translateY(-40px) scale(.9)', opacity:0}], O);
+    $('.capo-ombra').animate([{transform:'scale(.2)', opacity:0}, {transform:'scale(.3)', opacity:.3, offset:.1}, {transform:'scale(1.15)', opacity:1, offset:.15}, {transform:'scale(1)', opacity:1, offset:.84}, {transform:'scale(1)', opacity:0, offset:.9}, {transform:'scale(1)', opacity:0}], O);
+    $('.capo-k').animate([{opacity:0, transform:'scale(2.6)'}, {opacity:0, transform:'scale(2.6)', offset:.17, easing:'cubic-bezier(.2,.9,.3,1.4)'}, {opacity:1, transform:'scale(1)', offset:.23}, {opacity:1, transform:'none', offset:.84, easing:'ease-in'}, {opacity:0, transform:'translateY(-30px)', offset:.92}, {opacity:0, transform:'translateY(-30px)'}], O);
+    $('.capo-n').animate([{opacity:0, transform:'scale(3) rotate(-6deg)'}, {opacity:0, transform:'scale(3) rotate(-6deg)', offset:.25, easing:'cubic-bezier(.2,.9,.3,1.3)'}, {opacity:1, transform:'scale(1) rotate(-2deg)', offset:.32}, {opacity:1, transform:'scale(1.04) rotate(-2deg)', offset:.36}, {opacity:1, transform:'rotate(-2deg)', offset:.42}, {opacity:1, transform:'rotate(-2deg)', offset:.84, easing:'ease-in'}, {opacity:0, transform:'translateY(-30px) rotate(-2deg)', offset:.92}, {opacity:0, transform:'translateY(-30px) rotate(-2deg)'}], O);
+    const ss = $('.capo-s'); if (ss) ss.animate([{opacity:0, transform:'translateY(14px)'}, {opacity:0, transform:'translateY(14px)', offset:.38, easing:'ease-out'}, {opacity:1, transform:'none', offset:.46}, {opacity:1, transform:'none', offset:.84}, {opacity:0, transform:'none', offset:.9}, {opacity:0, transform:'none'}], O);
+    // colpo: lampo, scossa, polvere a pixel
+    $('.capo-fl').animate([{opacity:0}, {opacity:0, offset:.145}, {opacity:.75, offset:.15}, {opacity:0, offset:.22}, {opacity:0, offset:.32}, {opacity:.35, offset:.325}, {opacity:0, offset:.37}, {opacity:0}], O);
+    corpo.animate([{transform:'none'}, {transform:'none', offset:.15}, {transform:'translate(-10px,4px)', offset:.165}, {transform:'translate(9px,-3px)', offset:.18}, {transform:'translate(-6px,2px)', offset:.195}, {transform:'translate(3px,0)', offset:.21}, {transform:'none', offset:.23}, {transform:'none', offset:.32}, {transform:'translate(5px,-2px)', offset:.335}, {transform:'translate(-4px,1px)', offset:.35}, {transform:'none', offset:.37}, {transform:'none'}], O);
+    setTimeout(() => { if (!b.isConnected || !pg) return; const r = pg.getBoundingClientRect(), h = b.getBoundingClientRect(), x0 = r.left - h.left + r.width/2, y0 = r.bottom - h.top - 6;
+      for (let i = 0; i < 16; i++){ const q = document.createElement('i'); q.className = 'pz'; q.style.left = x0 + 'px'; q.style.top = y0 + 'px'; q.style.background = i % 3 ? col : '#e8dcc8'; b.append(q);
+        const a = Math.PI + Math.random()*Math.PI, v = 60 + Math.random()*90; q.animate([{transform:'translate(-50%,-50%)', opacity:1}, {transform:`translate(calc(-50% + ${Math.cos(a)*v*1.6}px), calc(-50% + ${Math.sin(a)*v*.7}px)) scale(.4)`, opacity:0}], {duration:520 + Math.random()*260, easing:'cubic-bezier(.1,.7,.3,1)', fill:'forwards'}); } }, 320);
+    setTimeout(() => b.remove(), D + 50);
+  }
+  return {coriandoli, banner, capo};
 })();
 let ARRIVO = new Set(), M = MISSIONI[0], MI = 0, NODI = {}, ARCHI = [], ADJ = {}, VIA = {}, DISTP = {}, NEXT = {}, META = 'porta';
 function caricaMissione(i){
@@ -6760,7 +6802,7 @@ function applica(e){ // aggiorna la copia che si vede durante l'animazione
   else if (e.k === 'cade'){ effettoCaduta(e);
     suona('cade'); V.dif = V.dif.filter(q => q.id !== e.id); V.nem = V.nem.filter(q => q.id !== e.id); V.bar = V.bar.filter(q => q.id !== e.id); scintille(e.nodo, e.chi === 'dif' ? ['#e04830','#f8d048'] : ['#c8a060','#5c3818']); }
   else if (e.k === 'cura'){ suona('cura'); const u = V.dif.find(q => q.id === e.id); if (u) u.hp++; testo(e.nodo, '+1', '#7ee070'); }
-  else if (e.k === 'arriva'){ const boss = e.x.tipo === 'nero' || e.x.tipo === 'mammone'; suona(boss ? 'boss' : 'arriva'); V.nem.push(clona(e.x)); testo(e.x.nodo, 'Arriva!', '#f8b8a8', -16); if (boss){ scossa = 10; EPICO.banner('Arriva ' + (e.x.tipo === 'nero' ? 'il Cavaliere Nero!' : 'il Gatto Mammone!'), TIPI[e.x.tipo].corto, 'boss'); } }
+  else if (e.k === 'arriva'){ const boss = e.x.tipo === 'nero' || e.x.tipo === 'mammone'; suona(boss ? 'boss' : 'arriva'); V.nem.push(clona(e.x)); testo(e.x.nodo, 'Arriva!', '#f8b8a8', -16); if (boss){ scossa = 10; const nero = e.x.tipo === 'nero'; EPICO.capo(nero ? SPR.cavaliere_nero : SPR.gatto_mammone, nero ? 'Il Cavaliere Nero' : 'Il Gatto Mammone', TIPI[e.x.tipo].corto, nero ? '#ff4d4d' : '#ff9a3a', nero ? '#3a0a0a' : '#4a2200'); } }
   else if (e.k === 'bloccato'){} // ingresso occupato: il nemico aspetta (niente scritta, era solo confusione)
   else if (e.k === 'boom'){ suona('boom'); scossa = 7; testo(e.nodo, 'BOOM!', '#ff9a4a', -16); scintille(e.nodo, ['#ff9a4a','#f8d048','#4a4a58']); }
   else if (e.k === 'masso'){ suona('boom'); scossa = 9; testo(e.nodo, 'Masso!', '#d8c8a8', -16); for (const n of [e.nodo, ...ADJ[e.nodo]]) scintille(n, ['#a8a090','#d8c8a8','#4a4a58']); }
